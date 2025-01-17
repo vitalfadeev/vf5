@@ -1,0 +1,13 @@
+{
+	"name": "vf5",
+	"authors": [
+		"vf"
+	],
+	"description": "A minimal D application.",
+	"copyright": "Copyright © 2025, vf",
+	"license": "proprietary",
+	"dependencies" : {
+		"bindbc-sdl"   : "~>1.2.3"
+	},
+	"dflags"       : [ "-mixin=mixins.d" ],
+}
