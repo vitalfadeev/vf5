@@ -47,7 +47,7 @@ hidden
  hidden 1
 
 border
- borders 8 solid #ccc
+ borders 2 solid #ccc
 
 e popup file-popup hidden
  e open
