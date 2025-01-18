@@ -48,12 +48,13 @@ hidden
 
 border
  borders 8 solid #ccc
+
+e popup file-popup hidden
+ e open
+ e open-url
+ e quit
 ";
 
-//e popup file-popup hidden
-// e open
-// e open-url
-// e quit
 
 void
 go (Doc* doc, string s) {

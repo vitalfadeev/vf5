@@ -40,21 +40,26 @@ tree_functions () {
 
 // in depth
 auto 
-WalkTree (Tree) (Tree* t) {
-    return _WalkTree!Tree (t);
+WalkTree (Tree,Skip) (Tree* t, Skip skip) {
+    return _WalkTree!(Tree,Skip) (t,skip);
 }
 
 struct
-_WalkTree (Tree) {
+_WalkTree (Tree,Skip) {
     Tree* t;
+    Skip  skip;
 
     int
     opApply (int delegate (Tree* t) dg) {
         Tree*  next = t;
         Tree* _next = next;
+        int    result;
 
         loop:
-            int result = dg (next);
+            if (skip (next))
+                goto go_up;
+
+            result = dg (next);
             if (result)
                 return result;
 

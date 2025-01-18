@@ -6,7 +6,6 @@ import doc;
 import events;
 import draw;
 import etree;
-import vf.tree;
 
 
 struct 

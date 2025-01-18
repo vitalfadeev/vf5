@@ -1,7 +1,6 @@
 import std.stdio;
 import e;
 import etree;
-import vf.tree;
 import klass;
 import pix;
 import txt_reader;
