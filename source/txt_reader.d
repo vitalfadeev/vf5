@@ -33,11 +33,12 @@ file
  text File
  popup file-popup
  pos.x 0
-
+ on click popup file-popup
 
 play
  text Play
  pos.x 100
+ on click player.play_pause
 
 list
  text List

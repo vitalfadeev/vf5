@@ -2,6 +2,8 @@ module doc;
 
 import etree;
 import klass;
+import e;
+import types;
 
 
 struct
@@ -33,4 +35,20 @@ Doc {
             kls = create_klass (s);
         return kls;
     }
+
+    E*
+    find_e_at_pos (Pos pos) {
+        foreach (t; WalkTree (tree))
+            if (t.e !is null )
+            if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
+            if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
+                return t.e;
+
+        return null;
+    }
+
+    //int
+    //event (Event* ev) {
+    //    //
+    //}
 }
