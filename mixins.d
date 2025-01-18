@@ -1,3 +1,54 @@
+// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
+
+                asm pure nothrow @nogc @trusted
+                {
+                    mov DL, value;
+                    mov AL, compare;
+
+                    mov RCX, dest;
+                    lock; cmpxchg [RCX], DL;
+
+                    setz success;
+                }
+
+
+// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
+
+                asm pure nothrow @nogc @trusted
+                {
+                    mov DX, value;
+                    mov AX, compare;
+
+                    mov RCX, dest;
+                    lock; cmpxchg [RCX], DX;
+
+                    setz success;
+                }
+
+
+// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
+
+                asm pure nothrow @nogc @trusted
+                {
+                    mov RDX, value;
+                    mov RAX, compare;
+
+                    mov RCX, dest;
+                    lock; cmpxchg [RCX], RDX;
+
+                    setz success;
+                }
+
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
 // expansion at ../../.dub/packages/bindbc-sdl/1.2.4/bindbc-sdl/source/bindbc/sdl/bind/sdlassert.d(19,1)
 alias SDL_ASSERTION_RETRY = SDL_assert_state.SDL_ASSERTION_RETRY;alias SDL_ASSERTION_BREAK = SDL_assert_state.SDL_ASSERTION_BREAK;alias SDL_ASSERTION_ABORT = SDL_assert_state.SDL_ASSERTION_ABORT;alias SDL_ASSERTION_IGNORE = SDL_assert_state.SDL_ASSERTION_IGNORE;alias SDL_ASSERTION_ALWAYS_IGNORE = SDL_assert_state.SDL_ASSERTION_ALWAYS_IGNORE;
 
@@ -100,48 +151,6 @@ alias SDL_THREAD_PRIORITY_LOW = SDL_ThreadPriority.SDL_THREAD_PRIORITY_LOW;alias
 // expansion at /usr/include/dmd/phobos/std/functional.d(452,16)
 cast(T)a < cast(T) b
 
-// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
-
-                asm pure nothrow @nogc @trusted
-                {
-                    mov DL, value;
-                    mov AL, compare;
-
-                    mov RCX, dest;
-                    lock; cmpxchg [RCX], DL;
-
-                    setz success;
-                }
-
-
-// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
-
-                asm pure nothrow @nogc @trusted
-                {
-                    mov DX, value;
-                    mov AX, compare;
-
-                    mov RCX, dest;
-                    lock; cmpxchg [RCX], DX;
-
-                    setz success;
-                }
-
-
-// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(502,13)
-
-                asm pure nothrow @nogc @trusted
-                {
-                    mov RDX, value;
-                    mov RAX, compare;
-
-                    mov RCX, dest;
-                    lock; cmpxchg [RCX], RDX;
-
-                    setz success;
-                }
-
-
 // expansion at /usr/include/dmd/phobos/std/format/spec.d(170,13)
 private ubyte _flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf;@property bool flDash() @safe pure nothrow @nogc const { return (_flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf & 1U) != 0;}
 @property void flDash(bool v) @safe pure nothrow @nogc { if (v) _flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf |= 1U;else _flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf &= cast(typeof(_flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf))(-1-cast(typeof(_flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf))1U);}
@@ -160,15 +169,6 @@ private ubyte _flDash_flZero_flSpace_flPlus_flHash_flEqual_flSeparator__bf;@prop
 
 // expansion at /usr/include/dmd/phobos/std/functional.d(452,16)
 cast(T)a < cast(T) b
-
-// expansion at
-.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
-
-// expansion at
-.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
-
-// expansion at
-.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
 // expansion at /usr/include/dmd/phobos/std/functional.d(222,13)
 alias a = __a ;
@@ -256,6 +256,21 @@ lhs < rhs
 
 // expansion at
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(222,13)
+alias a = __a ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(223,13)
+alias b = __b ;
+
+// expansion at /usr/include/dmd/phobos/std/functional.d(224,20)
+a == b
 
 // expansion at
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;

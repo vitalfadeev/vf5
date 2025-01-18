@@ -16,32 +16,24 @@ import klass;
 // input-check
 // input-radio
 
-
 string text = "
 e menubar
- e menubar-item file
- e menubar-item play
- e menubar-item list
+ e menubar-item file border
+ e menubar-item play border
+ e menubar-item list border
 
 menubar
- size.w auto
- size.h auto
- size auto
+ size 640 32
 
 menubar-item
  size.w 100
  size.h 32
- size 100 32
 
 file
  text File
  popup file-popup
  pos.x 0
 
-e popup file-popup hidden
- e open
- e open-url
- e quit
 
 play
  text Play
@@ -53,8 +45,15 @@ list
 
 hidden
  hidden 1
+
+border
+ borders 8 solid #ccc
 ";
 
+//e popup file-popup hidden
+// e open
+// e open-url
+// e quit
 
 void
 go (Doc* doc, string s) {
@@ -119,37 +118,11 @@ go (Doc* doc, string s) {
             // find parent classs
             //   create sub property
             if (current_klass !is null) {
-                // if (match (
-                //  t(spaces), t(string,"pos_x"), ...
-                //  t(spaces), t(string,"pos_x"), t(spaces), t(string)), ...
-                // )
-                switch (t_line[1].s) {
-                    case "pos.x": {
-                        if (t_line[2].type == Token.Type.spaces) {
-                            if (t_line[3].type == Token.Type.string) {
-                                string[] values;
-                                foreach (tt; t_line[3..$])
-                                    if (tt.type == Token.Type.string)
-                                        values ~= tt.s;
-                                current_klass.klasse ~= KlassE ("pos.x", values);
-                            }
-                        }
-                        break;
-                    }
-                    case "pos.y": {
-                        if (t_line[2].type == Token.Type.spaces) {
-                            if (t_line[3].type == Token.Type.string) {
-                                string[] values;
-                                foreach (tt; t_line[3..$])
-                                    if (tt.type == Token.Type.string)
-                                        values ~= tt.s;
-                                current_klass.klasse ~= KlassE ("pos.y", values);
-                            }
-                        }
-                        break;
-                    }
-                    default:
-                }
+                string[] values;
+                foreach (tt; t_line[2..$])
+                    if (tt.type == Token.Type.string)
+                        values ~= tt.s;
+                current_klass.klasse ~= KlassE (t_line[1].s, values);
             }
         }
     }

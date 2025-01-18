@@ -1,5 +1,6 @@
 module draw;
 
+import std.stdio;
 import bindbc.sdl;
 import e;
 import types;
@@ -122,7 +123,13 @@ draw8 (SDL_Renderer* renderer, X x, Y y, W w, H h, W t, W r, W b, W l) {
 
 void
 draw_borders (SDL_Renderer* renderer, E* e) {
-    SDL_SetRenderDrawColor (renderer, 0xCC, 0xCC, 0xCC, 0xFF);
+    SDL_SetRenderDrawColor (
+        renderer, 
+        e.borders.t.color.r,
+        e.borders.t.color.g,
+        e.borders.t.color.b,
+        e.borders.t.color.a,
+    );
     draw8 (
         renderer, 
         e.pos.x, 
@@ -143,8 +150,8 @@ draw_content (SDL_Renderer* renderer, E* e) {
         renderer, 
         cast(X)(e.pos.x+e.borders.l.w), 
         cast(Y)(e.pos.y+e.borders.t.w), 
-        cast(X)(e.pos.x+e.borders.l.w + e.image.size.w - e.borders.l.w - e.borders.r.w), 
-        cast(Y)(e.pos.y+e.borders.t.w + e.image.size.h - e.borders.t.w - e.borders.b.w)
+        cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
+        cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
     );
     //image (
     //    renderer, 
