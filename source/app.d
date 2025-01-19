@@ -17,7 +17,7 @@ main() {
 	tree_apply_klasses (doc.tree);
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);
-	pix.go (doc);
+	pix_go (doc);
 }
 
 void

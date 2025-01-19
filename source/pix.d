@@ -25,7 +25,7 @@ pix_init () {
 
 
 int 
-go (Doc* doc) {
+pix_go (Doc* doc) {
     // Window, Surface
     SDL_Window* window = new_window ();
 
@@ -129,14 +129,16 @@ init_sdl () {
         throw new Exception ("The SDL init failed: " ~ SDL_GetError ().to!string);
 
     // IMG
-    auto sdlimage_ret = loadSDLImage ();
-    writeln ("SDL_Image: ", sdlimage_ret);
-    if (sdlimage_ret < sdlImageSupport) // 2.6.3
-        throw new Exception ("The SDL_Image shared library failed to load");
-    
-    auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
-    if (IMG_Init (flags) != flags)
-        throw new Exception ("The SDL_Image init failed");
+    version (SDL_Image) {    
+        auto sdlimage_ret = loadSDLImage ();
+        writeln ("SDL_Image: ", sdlimage_ret);
+        if (sdlimage_ret < sdlImageSupport) // 2.6.3
+            throw new Exception ("The SDL_Image shared library failed to load");
+        
+        auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
+        if (IMG_Init (flags) != flags)
+            throw new Exception ("The SDL_Image init failed");
+    }
 }
 
 /**
