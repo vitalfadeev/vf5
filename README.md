@@ -56,3 +56,7 @@ struct e {
       right     -1/0/1
 }
 
+
+# Deps
+
+sdl2, sdl2_image, freeimage

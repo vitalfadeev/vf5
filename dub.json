@@ -7,7 +7,9 @@
 	"copyright": "Copyright © 2025, vf",
 	"license": "proprietary",
 	"dependencies" : {
-		"bindbc-sdl"   : "~>1.2.3"
+		"bindbc-sdl"   : "~>1.2.3",
+		"bindbc-freeimage": "~>1.1.0",
 	},
 	"dflags"       : [ "-mixin=mixins.d" ],
+	"versions"     : ["SDL_2022", "SDL_Image"]
 }

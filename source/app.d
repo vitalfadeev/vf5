@@ -10,6 +10,7 @@ import events;
 
 void 
 main() {
+	pix_init ();
 	Doc* doc = new Doc ();
 	doc.tree = new ETree ();
 	setup (doc);

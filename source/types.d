@@ -34,10 +34,7 @@ Pad {
     X l;
 }
 
-struct
-Color {
-    SDL_Color color;
-    alias color this;
-}
+
+alias Color = SDL_Color;
 
 alias Color BG;

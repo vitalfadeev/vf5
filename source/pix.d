@@ -1,7 +1,10 @@
 import std.conv;
 import std.format;
 import std.stdio;
+import bindbc.loader;
 import bindbc.sdl;
+import bindbc.sdl.image;
+import bindbc.freeimage;;
 import doc;
 import events;
 import draw;
@@ -14,12 +17,16 @@ pix {
     //
 }
 
+// Init
+void
+pix_init () {
+    init_sdl ();
+}
+
+
 
 int 
 go (Doc* doc) {
-    // Init
-    init_sdl ();
-
     // Window, Surface
     SDL_Window* window = new_window ();
 
@@ -87,6 +94,13 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                         ev.window.windowID, ev.window.event);
             }
             break;
+        case SDL_USEREVENT:
+            string us;
+            switch (us) {
+                case "player.play_pause": break;
+                default:
+            }
+            break;
         default:
     }
 
@@ -96,7 +110,9 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
 //
 void 
 init_sdl () {
-    SDLSupport ret = loadSDL();
+    // SDL
+    SDLSupport ret = loadSDL(); // 2.6.5
+    writeln ("SDL: ", ret);
 
     if (ret != sdlSupport) {
         if (ret == SDLSupport.noLibrary) 
@@ -106,8 +122,57 @@ init_sdl () {
             throw new Exception ("One or more symbols failed to load. The likely cause is that the shared library is for a lower version than bindbc-sdl was configured to load (via SDL_204, GLFW_2010 etc.)");
     }
 
-    loadSDL ("sdl2.dll");
+    version (Windows)
+        loadSDL ("sdl2.dll");
+
+    if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
+        throw new Exception ("The SDL init failed: " ~ SDL_GetError ().to!string);
+
+    // IMG
+    auto sdlimage_ret = loadSDLImage ();
+    writeln ("SDL_Image: ", sdlimage_ret);
+    if (sdlimage_ret < sdlImageSupport) // 2.6.3
+        throw new Exception ("The SDL_Image shared library failed to load");
+    
+    auto flags = IMG_INIT_PNG | IMG_INIT_JPG;
+    if (IMG_Init (flags) != flags)
+        throw new Exception ("The SDL_Image init failed");
+
+    // FreeImage
+    FISupport fi_ret = loadFreeImage ();
+    writeln ("FreeImage: ", fi_ret);
+    if (fi_ret != fiSupport) {
+        // Handle error. For most use cases, its reasonable to use the the error handling API in
+        // bindbc-loader to retrieve error messages for logging and then abort. If necessary, it's
+        // possible to determine the root cause via the return value:
+
+        if (fi_ret == FISupport.noLibrary) {
+            throw new Exception ("FreeImage shared library failed to load");
+        }
+        else if (FISupport.badLibrary) {
+            // One or more symbols failed to load. The likely cause is that the
+            // shared library is for a lower version than bindbc-freeimage was configured
+            // to load.
+            throw new Exception ("FreeImage: One or more symbols failed to load");
+        }
+    }    
+
+    FreeImage_Initialise ();
+    //FreeImage_SetOutputMessage (&FreeImageErrorHandler);
 }
+
+/**
+FreeImage error handler
+@param fif Format / Plugin responsible for the error 
+@param message Error message
+*/
+void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message) {
+    printf("\n*** "); 
+    printf("%s Format\n", FreeImage_GetFormatFromFIF(fif));
+    printf(message);
+    printf(" ***\n");
+}
+
 
 
 //

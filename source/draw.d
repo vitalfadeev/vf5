@@ -2,6 +2,7 @@ module draw;
 
 import std.stdio;
 import bindbc.sdl;
+import bindbc.sdl.image;
 import e;
 import types;
 
@@ -28,7 +29,16 @@ fill_rect (SDL_Renderer* renderer, X x1, Y y1, X x2, Y y2) {
 
 void
 image (SDL_Renderer* renderer, void* ptr, X x1, Y y1, X x2, Y y2) {
+    SDL_Surface* surface = cast (SDL_Surface*) ptr;
+    SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
+
     //
+    SDL_Rect dstrect = SDL_Rect (x1, y1, x2-x1, y2-y1);
+    SDL_RenderCopy (renderer, texture, null, &dstrect);
+    //SDL_RenderCopy (renderer, texture, null, null);
+
+    //
+    SDL_DestroyTexture (texture);
 }
 
 void
@@ -153,14 +163,15 @@ draw_content (SDL_Renderer* renderer, E* e) {
         cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
         cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
     );
-    //image (
-    //    renderer, 
-    //    null, 
-    //    cast(X)(e.pos.x), 
-    //    cast(X)(e.pos.y), 
-    //    cast(X)(e.pos.x+e.size.w), 
-    //    cast(X)(e.pos.y+e.size.h)
-    //);
+    if (e.content.image.ptr !is null)
+        image (
+            renderer, 
+            e.content.image.ptr, 
+            cast(X)(e.pos.x+e.borders.l.w), 
+            cast(Y)(e.pos.y+e.borders.t.w), 
+            cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
+            cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
+        );
 }
 
 // size = border + pad + image

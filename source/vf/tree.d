@@ -85,6 +85,54 @@ _WalkTree (Tree,Skip) {
 }
 
 
+//
+auto 
+FindDeepest (Tree,Skip,Cond) (Tree* t, Skip skip, Cond cond) {
+    return _FindDeepest!(Tree,Skip,Cond) (t,skip,cond);
+}
+
+struct
+_FindDeepest (Tree,Skip,Cond) {
+    Tree* t;
+    Skip  skip;
+    Cond  cond;
+
+    int
+    opApply (int delegate (Tree* t) dg) {
+        Tree*  next = t;
+        Tree* _next = next;
+        int    result;
+
+        loop:
+            if (skip (next))
+                goto go_up;
+
+            result = dg (next);
+            if (result)
+                return result;
+
+            _next = next;
+
+            go_down:   // v
+                next = _next.childs.l;
+                if (next !is null)
+                    goto loop;  // go_down
+            go_right:  // >
+                next = _next.r;
+                if (next !is null)
+                    goto loop;  // go_down
+            go_up:     // ^
+                next = _next.parent;
+                if (next !is null) {
+                    _next = next;
+                    goto go_right;
+                }
+
+        return 0;
+    }
+}
+
+
 mixin template
 childs_op_apply () {
     int

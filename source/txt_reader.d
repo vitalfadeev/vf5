@@ -9,12 +9,15 @@ import e;
 import etree;
 import klass;
 
-// reserved
+// RESERVED
 // e
 // import
 // input-text
 // input-check
+// input-check-checked
 // input-radio
+// input-radio-checked
+// focused
 
 string text = "
 e menubar
@@ -30,30 +33,37 @@ menubar-item
  size.h 32
 
 file
- text File
  popup file-popup
  pos.x 0
- on click popup file-popup
+ text  File
+ image /home/vf/src/vf5/img/file.png
 
 play
  text Play
  pos.x 100
+ image /home/vf/src/vf5/img/play.png
  on click player.play_pause
 
 list
  text List
+ image /home/vf/src/vf5/img/list.png
  pos.x 200
 
 hidden
  hidden 1
 
 border
- borders 2 solid #ccc
+ borders 2 solid #cfc
 
 e popup file-popup hidden
  e open
  e open-url
  e quit
+
+input-radio
+ input.type radio
+ input.radio.group 1
+ input.radio.checkd 0
 ";
 
 
