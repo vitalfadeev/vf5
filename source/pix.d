@@ -4,7 +4,6 @@ import std.stdio;
 import bindbc.loader;
 import bindbc.sdl;
 import bindbc.sdl.image;
-import bindbc.freeimage;;
 import doc;
 import events;
 import draw;
@@ -125,7 +124,8 @@ init_sdl () {
     version (Windows)
         loadSDL ("sdl2.dll");
 
-    if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
+    //if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
+    if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
         throw new Exception ("The SDL init failed: " ~ SDL_GetError ().to!string);
 
     // IMG
@@ -134,31 +134,9 @@ init_sdl () {
     if (sdlimage_ret < sdlImageSupport) // 2.6.3
         throw new Exception ("The SDL_Image shared library failed to load");
     
-    auto flags = IMG_INIT_PNG | IMG_INIT_JPG;
+    auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
     if (IMG_Init (flags) != flags)
         throw new Exception ("The SDL_Image init failed");
-
-    // FreeImage
-    FISupport fi_ret = loadFreeImage ();
-    writeln ("FreeImage: ", fi_ret);
-    if (fi_ret != fiSupport) {
-        // Handle error. For most use cases, its reasonable to use the the error handling API in
-        // bindbc-loader to retrieve error messages for logging and then abort. If necessary, it's
-        // possible to determine the root cause via the return value:
-
-        if (fi_ret == FISupport.noLibrary) {
-            throw new Exception ("FreeImage shared library failed to load");
-        }
-        else if (FISupport.badLibrary) {
-            // One or more symbols failed to load. The likely cause is that the
-            // shared library is for a lower version than bindbc-freeimage was configured
-            // to load.
-            throw new Exception ("FreeImage: One or more symbols failed to load");
-        }
-    }    
-
-    FreeImage_Initialise ();
-    //FreeImage_SetOutputMessage (&FreeImageErrorHandler);
 }
 
 /**
@@ -166,12 +144,14 @@ FreeImage error handler
 @param fif Format / Plugin responsible for the error 
 @param message Error message
 */
+/*
 void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message) {
     printf("\n*** "); 
     printf("%s Format\n", FreeImage_GetFormatFromFIF(fif));
     printf(message);
     printf(" ***\n");
 }
+*/
 
 
 

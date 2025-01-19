@@ -59,4 +59,5 @@ struct e {
 
 # Deps
 
-sdl2, sdl2_image, freeimage
+sdl2, sdl2_image, 
+[freeimage]
