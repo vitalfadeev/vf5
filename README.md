@@ -57,7 +57,62 @@ struct e {
 }
 
 
+## events
+e
+ e input-text
+
+input-text
+ on key ctrl+a select all
+
+global
+ on key ctrl+a select all
+
+
 # Deps
 
 sdl2, sdl2_image, 
 [freeimage]
+
+
+## Size priority
+
+### size = auto
+e.size = auto                // 120 32
+e.content.image.size = 120 32
+
+### image = auto
+e.size = 120 32
+e.content.image.size = auto  // 120 32
+
+### size = auto, has borders 
+e.size = auto                // 120+10 32+10
+e.content.image.size = 120 32
+e.borders.w = 10
+
+### image = auto, has borders
+e.size = 120 32
+e.content.image.size = auto  // 120-10 32-10
+e.borders.w = 10
+
+### size and image fixed, has borders
+e.size = 120 32                // 120 32
+e.content.image.size = 120 32  // 120 32
+e.borders.w = 10
+
+
+# Target
+Top Panel
+Dock
+
+Application selector
+File Browser
+Music player
+Video player
+Image viewer
+PDF reader
+Context menu
+Context menu customize
+
+Piano app
+YouTube app + downloader
+Telegram app

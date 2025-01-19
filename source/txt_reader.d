@@ -12,11 +12,12 @@ import klass;
 // RESERVED
 // e
 // import
+
+// RESERVED CLASSES
 // input-text
 // input-check
-// input-check-checked
 // input-radio
-// input-radio-checked
+// checked
 // focused
 
 string text = "
