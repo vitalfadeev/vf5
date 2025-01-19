@@ -308,14 +308,10 @@ set_content_image (E* e, string[] values) {
     if (values.length) {
         e.content.image.src = values[0];    
 
-        if (e.content.image.src.length) {
-            auto fname = e.content.image.src.toStringz;
-            auto img_surface = IMG_Load (fname);
-            e.content.image.ptr = img_surface;
-        }
-        else {
+        if (e.content.image.src.length)
+            e.content.image.ptr = IMG_Load (e.content.image.src.toStringz);
+        else
             e.content.image.ptr = null;
-        }
     }
 }
 

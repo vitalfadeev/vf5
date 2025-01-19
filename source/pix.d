@@ -110,7 +110,10 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
 void 
 init_sdl () {
     // SDL
-    SDLSupport ret = loadSDL(); // 2.6.5
+    version (Windows)
+        SDLSupport ret = loadSDL ("sdl2.dll");
+    else
+        SDLSupport ret = loadSDL();
     writeln ("SDL: ", ret);
 
     if (ret != sdlSupport) {
@@ -120,9 +123,6 @@ init_sdl () {
         if (ret == SDLSupport.badLibrary) 
             throw new Exception ("One or more symbols failed to load. The likely cause is that the shared library is for a lower version than bindbc-sdl was configured to load (via SDL_204, GLFW_2010 etc.)");
     }
-
-    version (Windows)
-        loadSDL ("sdl2.dll");
 
     //if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
     if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
