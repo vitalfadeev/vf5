@@ -158,6 +158,10 @@ apply_klass (E* e, Klass* k) {
             case "hidden"        : set_hidden        (e, ke.values); break;
             case "popup"         : set_popup         (e, ke.values); break;
             case "borders"       : set_borders       (e, ke.values); break;
+            case "borders.t"     : set_border_t      (e, ke.values); break;
+            case "borders.r"     : set_border_r      (e, ke.values); break;
+            case "borders.b"     : set_border_b      (e, ke.values); break;
+            case "borders.l"     : set_border_l      (e, ke.values); break;
             case "content.image" : set_content_image (e, ke.values); break;
             case "content.text"  : set_content_text  (e, ke.values); break;
             case "content"       : set_content       (e, ke.values); break;
@@ -309,6 +313,34 @@ set_borders (E* e, string[] values) {
         set_border (e, &e.borders.t, values[0..$]);
         set_border (e, &e.borders.r, values[0..$]);
         set_border (e, &e.borders.b, values[0..$]);
+        set_border (e, &e.borders.l, values[0..$]);
+    }
+}
+
+void
+set_border_t (E* e, string[] values) {
+    if (values.length >= 3) {
+        set_border (e, &e.borders.t, values[0..$]);
+    }
+}
+
+void
+set_border_r (E* e, string[] values) {
+    if (values.length >= 3) {
+        set_border (e, &e.borders.r, values[0..$]);
+    }
+}
+
+void
+set_border_b (E* e, string[] values) {
+    if (values.length >= 3) {
+        set_border (e, &e.borders.b, values[0..$]);
+    }
+}
+
+void
+set_border_l (E* e, string[] values) {
+    if (values.length >= 3) {
         set_border (e, &e.borders.l, values[0..$]);
     }
 }

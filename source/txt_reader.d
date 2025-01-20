@@ -64,7 +64,7 @@ border
  borders 2 solid #cfc
 
 focused
- borders 2 solid #f22
+ borders 2 solid #0F0DBF
 
 e popup file-popup hidden
  e open
