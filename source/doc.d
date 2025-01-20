@@ -157,6 +157,14 @@ pos_9 (ETree* t) {
                 //e.pos.y = prev.e.pos.y;
             }
         }
+        else {
+            X parent_x;
+            if (t.parent !is null)
+            if (t.parent.e !is null)
+                parent_x = t.parent.e.pos.x;
+
+            e.pos.x = parent_x;
+        }
     }
 }
 
