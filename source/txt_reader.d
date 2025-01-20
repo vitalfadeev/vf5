@@ -22,9 +22,9 @@ import klass;
 
 string text = "
 e menubar
- e menubar-item file border
- e menubar-item play border
- e menubar-item list border
+ e menubar-item file border t9-top-left
+ e menubar-item play border t9-top-left
+ e menubar-item list border t9-top-left
 
 menubar
  size 640 32
@@ -38,22 +38,19 @@ file
  popup file-popup
  text  File
  image /home/vf/src/vf5/img/file.png
- pos.algo  9
- pos.group 1
- pos.dir   r
 
 play
  text Play
  image /home/vf/src/vf5/img/play.png
- pos.algo  9
- pos.group 1
- pos.dir   r
  on click player.play_pause
+ on click exec audacious --play-pause
 
 list
  text List
  image /home/vf/src/vf5/img/list.png
- pos.algo  9
+
+t9-top-left
+ pos.type  9
  pos.group 1
  pos.dir   r
 
@@ -84,7 +81,20 @@ window
  pos 10 10
  pos center
  fullscreen 1
- ";
+
+e
+ e file-browser
+  e file-browser-item
+  e file-browser-item
+  e file-browser-item
+  e file-browser-item
+
+file-browser-item
+ pos.type grid
+ pos.dir  r
+ size 32 32
+ borders 2 solid #cfc
+";
 
 void
 go (Doc* doc, string s) {

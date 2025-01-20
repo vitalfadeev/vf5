@@ -157,13 +157,16 @@ update_pos (ETree* t) {
        return;
 
    //
-   if (e.pos_algo == 9)
-      pos_9 (t);
+   switch (e.pos_type) {
+    case E.PosType.t9   : pos_type_t9 (t); break;
+    case E.PosType.grid : pos_type_grid (t); break;
+    default:
+   }      
 }
 
 
 void
-pos_9 (ETree* t) {
+pos_type_t9 (ETree* t) {
     // 1 2 3 
     // 8 9 4 
     // 7 6 5 
@@ -187,6 +190,13 @@ pos_9 (ETree* t) {
             e.pos.x = parent_x;
         }
     }
+}
+
+void
+pos_type_grid (ETree* t) {
+    // e e
+    // e e 
+    // e e
 }
 
 ETree*

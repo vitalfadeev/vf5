@@ -93,9 +93,9 @@ struct E {
     Magnet_ magnet;
     bool    hidden;
 
-    ubyte  pos_algo;
-    ubyte  pos_group;
-    PosDir pos_dir;
+    PosType pos_type;
+    ubyte   pos_group;
+    PosDir  pos_dir;
 
     enum
     PosDir : ubyte {
@@ -103,6 +103,12 @@ struct E {
         l,
         t,
         b,
+    }
+    enum
+    PosType : ubyte {
+        none,
+        t9,
+        grid
     }
 
     struct
@@ -149,7 +155,7 @@ apply_klass (E* e, Klass* k) {
             case "pos.x"         : set_pos_x         (e, ke.values); break;
             case "pos.y"         : set_pos_y         (e, ke.values); break;
             case "pos"           : set_pos           (e, ke.values); break;
-            case "pos.algo"      : set_pos_algo      (e, ke.values); break;
+            case "pos.type"      : set_pos_type      (e, ke.values); break;
             case "pos.group"     : set_pos_group     (e, ke.values); break;
             case "pos.dir"       : set_pos_dir       (e, ke.values); break;
             case "size.w"        : set_size_w        (e, ke.values); break;
@@ -186,12 +192,15 @@ set_pos (E* e, string[] values) {
 }
 
 void
-set_pos_algo (E* e, string[] values) {
+set_pos_type (E* e, string[] values) {
     if (values.length >= 1) {
-        if (values[0] == "9")
-            e.pos_algo = 9;
-        else
-            e.pos_algo = 0;
+        switch (values[0]) {
+            case "9"    : e.pos_type = E.PosType.t9; break;
+            case "t9"   : e.pos_type = E.PosType.t9; break;
+            case "grid" : e.pos_type = E.PosType.grid; break;
+            default:
+                e.pos_type = E.PosType.none;
+        }
     }
 }
 
