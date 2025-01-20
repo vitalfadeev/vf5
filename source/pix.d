@@ -71,7 +71,8 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                 import app : tree_apply_klasses;
                 tree_apply_klasses (doc.tree);
                 writeln (ev.type, ": e: ", *clicked_e);
-                SDL_UpdateWindowSurface (window);
+                //SDL_UpdateWindowSurface (window);
+                draw_doc (renderer,doc);
             }
             break;
         case SDL_WINDOWEVENT:
