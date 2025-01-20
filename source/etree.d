@@ -13,3 +13,8 @@ bool
 skip_hidden (ETree* t) {
     return t.e !is null && t.e.hidden;
 }
+
+auto 
+FindDeepest (Tree,Cond) (Tree* t, Cond cond) {
+    return vf.tree.FindDeepest (t,&skip_hidden,cond);
+}

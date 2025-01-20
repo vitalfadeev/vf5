@@ -56,8 +56,10 @@ _WalkTree (Tree,Skip) {
         int    result;
 
         loop:
-            if (skip (next))
-                goto go_up;
+            if (skip (next)) {
+                _next = next;
+                goto go_right;
+            }
 
             result = dg (next);
             if (result)
@@ -104,12 +106,16 @@ _FindDeepest (Tree,Skip,Cond) {
         int    result;
 
         loop:
-            if (skip (next))
-                goto go_up;
+            if (skip (next)) {
+                _next = next;
+                goto go_right;
+            }
 
-            result = dg (next);
-            if (result)
-                return result;
+            if (cond (next)) {
+                result = dg (next);
+                if (result)
+                    return result;
+            }
 
             _next = next;
 
@@ -121,6 +127,8 @@ _FindDeepest (Tree,Skip,Cond) {
                 next = _next.r;
                 if (next !is null)
                     goto loop;  // go_down
+                else
+                    return 0;   // exit
             go_up:     // ^
                 next = _next.parent;
                 if (next !is null) {

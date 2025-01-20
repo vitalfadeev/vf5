@@ -64,10 +64,14 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             // doc.tree.event (ev);
             // tree_apply_klasses (doc.tree);
             // update_pos_size ();
-            writeln (ev.type);
             auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
             if (clicked_e !is null) {
-                writeln (clicked_e);
+                writeln (ev.type, ": e: ", *clicked_e);
+                add_class (doc, clicked_e, "hidden");
+                import app : tree_apply_klasses;
+                tree_apply_klasses (doc.tree);
+                writeln (ev.type, ": e: ", *clicked_e);
+                SDL_UpdateWindowSurface (window);
             }
             break;
         case SDL_WINDOWEVENT:
@@ -167,7 +171,7 @@ new_window () {
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
             640, 480,
-            0
+            SDL_WINDOW_RESIZABLE
         );
 
     if (!window)

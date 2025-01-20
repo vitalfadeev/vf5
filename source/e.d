@@ -333,4 +333,3 @@ set_content (E* e, string[] values) {
         //
     }
 }
-

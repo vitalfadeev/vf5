@@ -38,17 +38,36 @@ Doc {
 
     E*
     find_e_at_pos (Pos pos) {
-        foreach (t; WalkTree (tree))
+        E* found;
+
+        bool 
+        valid_e (ETree* t) {
             if (t.e !is null )
             if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
             if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
-                return t.e;
+                return true;
 
-        return null;
+            return false;
+        }
+
+        foreach (t; FindDeepest (tree,&valid_e))
+            found = t.e;
+
+        return found;
     }
 
     //int
     //event (Event* ev) {
     //    //
     //}
+}
+
+void
+add_class (Doc* doc, E* e, string kls_name) {
+    Klass* kls = doc.find_klass_or_create (kls_name);
+    foreach (_kls; e.klasses) 
+        if (_kls == kls)
+            return;
+
+    e.klasses ~= kls;
 }
