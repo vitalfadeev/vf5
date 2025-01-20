@@ -87,6 +87,44 @@ _WalkTree (Tree,Skip) {
 }
 
 
+// ito left
+auto 
+WalkLeft (Tree,Skip) (Tree* t, Skip skip) {
+    return _WalkLeft!(Tree,Skip) (t,skip);
+}
+
+struct
+_WalkLeft (Tree,Skip) {
+    Tree* t;
+    Skip  skip;
+
+    int
+    opApply (int delegate (Tree* t) dg) {
+        Tree*  next = t.l;
+        int    result;
+
+        if (next is null)
+            return 0;
+
+        loop:
+            if (skip (next)) {
+                goto go_left;
+            }
+
+            result = dg (next);
+            if (result)
+                return result;
+
+            go_left:  // >
+                next = next.l;
+                if (next !is null)
+                    goto loop;  // go_down
+
+        return 0;
+    }
+}
+
+
 //
 auto 
 FindDeepest (Tree,Skip,Cond) (Tree* t, Skip skip, Cond cond) {

@@ -18,3 +18,8 @@ auto
 FindDeepest (Tree,Cond) (Tree* t, Cond cond) {
     return vf.tree.FindDeepest (t,&skip_hidden,cond);
 }
+
+auto 
+WalkLeft (Tree) (Tree* t) {
+    return vf.tree.WalkLeft (t, &skip_hidden);
+}

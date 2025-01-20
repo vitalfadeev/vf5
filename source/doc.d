@@ -162,10 +162,11 @@ pos_9 (ETree* t) {
 
 ETree*
 find_last_in_group (ETree* t, ubyte pos_group) {
-    for (ETree* _t = t.l; _t !is null; _t = _t.l)
-        if (t.e !is null)
-        if (t.e.pos_group == pos_group)
+    foreach (ETree* _t; WalkLeft (t))
+        if (_t.e !is null)
+        if (_t.e.pos_group == pos_group)
             return _t;
+
     return null;
 }
 
