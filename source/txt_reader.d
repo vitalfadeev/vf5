@@ -30,7 +30,7 @@ menubar
  size 640 32
 
 menubar-item
- size.w 100
+ size.w auto
  size.h 32
 
 file
@@ -41,14 +41,14 @@ file
 
 play
  text Play
- pos.x 100
+ pos.x 65
  image /home/vf/src/vf5/img/play.png
  on click player.play_pause
 
 list
  text List
  image /home/vf/src/vf5/img/list.png
- pos.x 200
+ pos.x 230
 
 hidden
  hidden 1
@@ -67,6 +67,14 @@ input-radio
  input.radio.checkd 0
 ";
 
+string txt2 = "
+window
+ title App
+ size 640 480
+ pos 10 10
+ pos center
+ fullscreen 1
+ ";
 
 void
 go (Doc* doc, string s) {

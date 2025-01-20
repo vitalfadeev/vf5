@@ -16,6 +16,8 @@ struct E {
     bool pos_y_auto;
     bool size_w_auto;
     bool size_h_auto;
+    bool content_image_size_w_auto;
+    bool content_image_size_h_auto;
     Pad  pad;
     BG   bg;
 

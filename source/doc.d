@@ -71,3 +71,55 @@ add_class (Doc* doc, E* e, string kls_name) {
 
     e.klasses ~= kls;
 }
+
+void
+update_pos_size (Doc* doc) {
+    foreach (ETree* t; WalkTree (doc.tree))
+        if (t.e !is null)
+            update_e_size (t.e);
+}
+
+void
+update_e_size (E* e) {
+    // size = auto
+    if (e.size_w_auto) {
+        if (!e.content_image_size_w_auto)
+            e.size.w = e.content.image.size.w;
+    }
+
+    // image = auto
+    if (!e.size_w_auto) {
+        if (e.content_image_size_w_auto)
+            e.content.image.size.w = e.size.w;
+    }
+
+    // size = auto, has borders 
+    if (e.size_w_auto) {
+        if (!e.content_image_size_w_auto)  {
+            e.size.w = e.content.image.size.w;
+            if (e.borders.l.w)
+                e.size.w += e.borders.l.w;
+            if (e.borders.r.w)
+                e.size.w += e.borders.r.w;
+        }
+    }
+
+    // image = auto, has borders
+    if (!e.size_w_auto) {
+        if (e.content_image_size_w_auto)  {
+            e.content.image.size.w = e.size.w;
+            if (e.borders.l.w)
+                e.content.image.size.w -= e.borders.l.w;
+            if (e.borders.r.w)
+                e.content.image.size.w -= e.borders.r.w;
+        }
+    }
+
+    // size and image fixed, has borders
+    if (!e.size_w_auto) {
+        if (!e.content_image_size_w_auto)  {
+            // keep
+        }
+    }
+}
+

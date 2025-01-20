@@ -15,6 +15,7 @@ main() {
 	doc.tree = new ETree ();
 	setup (doc);
 	tree_apply_klasses (doc.tree);
+	doc.update_pos_size ();
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);
 	pix_go (doc);
@@ -57,3 +58,4 @@ tree_apply_klasses (Tree) (Tree* tree) {
 //   pos.x = value
 //   on_pos_x_changed ()
 //   on_[ID.pos_x]_changed ()
+

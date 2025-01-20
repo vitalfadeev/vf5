@@ -63,7 +63,6 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
             // tree_apply_klasses (doc.tree);
-            // update_pos_size ();
             auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
             if (clicked_e !is null) {
                 writeln (ev.type, ": e: ", *clicked_e);
@@ -71,6 +70,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                 import app : tree_apply_klasses;
                 tree_apply_klasses (doc.tree);
                 writeln (ev.type, ": e: ", *clicked_e);
+                doc.update_pos_size ();
                 //SDL_UpdateWindowSurface (window);
                 draw_doc (renderer,doc);
             }
