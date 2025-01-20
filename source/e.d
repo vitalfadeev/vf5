@@ -93,6 +93,7 @@ struct E {
     Magnet_ magnet;
     bool    hidden;
 
+    ubyte  pos_algo;
     ubyte  pos_group;
     PosDir pos_dir;
 
@@ -148,6 +149,7 @@ apply_klass (E* e, Klass* k) {
             case "pos.x"         : set_pos_x         (e, ke.values); break;
             case "pos.y"         : set_pos_y         (e, ke.values); break;
             case "pos"           : set_pos           (e, ke.values); break;
+            case "pos.algo"      : set_pos_algo      (e, ke.values); break;
             case "pos.group"     : set_pos_group     (e, ke.values); break;
             case "pos.dir"       : set_pos_dir       (e, ke.values); break;
             case "size.w"        : set_size_w        (e, ke.values); break;
@@ -176,6 +178,16 @@ set_pos (E* e, string[] values) {
     if (values.length == 1) {
         set_pos_x (e, values[0..1]);
         set_pos_y (e, values[0..1]);
+    }
+}
+
+void
+set_pos_algo (E* e, string[] values) {
+    if (values.length >= 1) {
+        if (values[0] == "9")
+            e.pos_algo = 9;
+        else
+            e.pos_algo = 0;
     }
 }
 

@@ -137,7 +137,8 @@ update_pos (ETree* t) {
        return;
 
    //
-   pos_9 (t);
+   if (e.pos_algo == 9)
+      pos_9 (t);
 }
 
 

@@ -37,6 +37,7 @@ file
  popup file-popup
  text  File
  image /home/vf/src/vf5/img/file.png
+ pos.algo  9
  pos.group 1
  pos.dir   r
 
@@ -44,12 +45,14 @@ play
  text Play
  image /home/vf/src/vf5/img/play.png
  on click player.play_pause
+ pos.algo  9
  pos.group 1
  pos.dir   r
 
 list
  text List
  image /home/vf/src/vf5/img/list.png
+ pos.algo  9
  pos.group 1
  pos.dir   r
 
