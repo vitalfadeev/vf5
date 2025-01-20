@@ -66,7 +66,9 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
             if (clicked_e !is null) {
                 writeln (ev.type, ": e: ", *clicked_e);
-                add_class (doc, clicked_e, "hidden");
+                //add_class (doc, clicked_e, "hidden");
+                remove_class (doc, "focused");
+                add_class (doc, clicked_e, "focused");
                 import app : tree_apply_klasses;
                 tree_apply_klasses (doc.tree);
                 writeln (ev.type, ": e: ", *clicked_e);

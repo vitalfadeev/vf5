@@ -63,13 +63,33 @@ Doc {
 }
 
 void
-add_class (Doc* doc, E* e, string kls_name) {
-    Klass* kls = doc.find_klass_or_create (kls_name);
+add_class (Doc* doc, E* e, string s) {
+    Klass* kls = doc.find_klass_or_create (s);
     foreach (_kls; e.klasses) 
         if (_kls == kls)
             return;
 
     e.klasses ~= kls;
+}
+
+void
+remove_class (Doc* doc, string s) {
+    auto kls = doc.find_klass (s);
+    import std.stdio;
+    if (kls !is null)
+    foreach (t; WalkTree (doc.tree))
+        if (t.e !is null)
+            remove_class (t.e, kls);
+}
+
+void
+remove_class (E* e, Klass* kls) {
+    import std.algorithm.searching : countUntil;
+    import std.algorithm : remove;
+
+    auto i = e.klasses.countUntil (kls);
+    if (i != -1)
+        e.klasses = e.klasses.remove (i);
 }
 
 void

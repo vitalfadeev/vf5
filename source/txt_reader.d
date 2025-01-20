@@ -28,6 +28,7 @@ e menubar
 
 menubar
  size 640 32
+ borders 0 none #ccc
 
 menubar-item
  size.w auto
@@ -44,10 +45,10 @@ file
 play
  text Play
  image /home/vf/src/vf5/img/play.png
- on click player.play_pause
  pos.algo  9
  pos.group 1
  pos.dir   r
+ on click player.play_pause
 
 list
  text List
@@ -61,6 +62,9 @@ hidden
 
 border
  borders 2 solid #cfc
+
+focused
+ borders 2 solid #f22
 
 e popup file-popup hidden
  e open
