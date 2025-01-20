@@ -35,20 +35,23 @@ menubar-item
 
 file
  popup file-popup
- pos.x 0
  text  File
  image /home/vf/src/vf5/img/file.png
+ pos.group 1
+ pos.dir   r
 
 play
  text Play
- pos.x 65
  image /home/vf/src/vf5/img/play.png
  on click player.play_pause
+ pos.group 1
+ pos.dir   r
 
 list
  text List
  image /home/vf/src/vf5/img/list.png
- pos.x 230
+ pos.group 1
+ pos.dir   r
 
 hidden
  hidden 1

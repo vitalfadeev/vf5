@@ -75,12 +75,18 @@ add_class (Doc* doc, E* e, string kls_name) {
 void
 update_pos_size (Doc* doc) {
     foreach (ETree* t; WalkTree (doc.tree))
-        if (t.e !is null)
-            update_e_size (t.e);
+        update_size (t);
+    foreach (ETree* t; WalkTree (doc.tree))
+        update_pos (t);
 }
 
 void
-update_e_size (E* e) {
+update_size (ETree* t) {
+    E* e = t.e;
+
+    if (t.e is null)
+        return;
+
     // size = auto
     if (e.size_w_auto) {
         if (!e.content_image_size_w_auto)
@@ -121,5 +127,45 @@ update_e_size (E* e) {
             // keep
         }
     }
+}
+
+void
+update_pos (ETree* t) {
+   E* e = t.e;
+
+   if (t.e is null)
+       return;
+
+   //
+   pos_9 (t);
+}
+
+
+void
+pos_9 (ETree* t) {
+    // 1 2 3 
+    // 8 9 4 
+    // 7 6 5 
+
+    E* e = t.e;
+
+    if (e.pos_group == 1) {
+        ETree* prev = find_last_in_group (t, e.pos_group);
+        if (prev !is null) {
+            if (e.pos_dir == E.PosDir.r) {
+                e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
+                //e.pos.y = prev.e.pos.y;
+            }
+        }
+    }
+}
+
+ETree*
+find_last_in_group (ETree* t, ubyte pos_group) {
+    for (ETree* _t = t.l; _t !is null; _t = _t.l)
+        if (t.e !is null)
+        if (t.e.pos_group == pos_group)
+            return _t;
+    return null;
 }
 

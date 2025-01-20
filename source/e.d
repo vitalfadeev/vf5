@@ -92,6 +92,18 @@ struct E {
     }
     Magnet_ magnet;
     bool    hidden;
+
+    ubyte  pos_group;
+    PosDir pos_dir;
+
+    enum
+    PosDir : ubyte {
+        r,
+        l,
+        t,
+        b,
+    }
+
     struct
     On {
         string event;
@@ -136,6 +148,8 @@ apply_klass (E* e, Klass* k) {
             case "pos.x"         : set_pos_x         (e, ke.values); break;
             case "pos.y"         : set_pos_y         (e, ke.values); break;
             case "pos"           : set_pos           (e, ke.values); break;
+            case "pos.group"     : set_pos_group     (e, ke.values); break;
+            case "pos.dir"       : set_pos_dir       (e, ke.values); break;
             case "size.w"        : set_size_w        (e, ke.values); break;
             case "size.h"        : set_size_h        (e, ke.values); break;
             case "size"          : set_size          (e, ke.values); break;
@@ -162,6 +176,26 @@ set_pos (E* e, string[] values) {
     if (values.length == 1) {
         set_pos_x (e, values[0..1]);
         set_pos_y (e, values[0..1]);
+    }
+}
+
+void
+set_pos_group (E* e, string[] values) {
+    if (values.length >= 1) {
+        e.pos_group = values[0].to!ubyte;
+    }
+}
+
+void
+set_pos_dir (E* e, string[] values) {
+    if (values.length >= 1) {
+        switch (values[0]) {
+            case "r": e.pos_dir = E.PosDir.r; break;
+            case "l": e.pos_dir = E.PosDir.l; break;
+            case "t": e.pos_dir = E.PosDir.b; break;
+            case "b": e.pos_dir = E.PosDir.l; break;
+            default:
+        }
     }
 }
 
