@@ -213,25 +213,27 @@ find_last_in_group (ETree* t, ubyte pos_group) {
 
 void
 go_event_action (E* e, string[] action) {
+    exec_action (action);
+}
+
+void
+exec_action (string[] action) {
+    import std.process;
+    
     if (action.length) {
         writeln (action);
-        if (action[0] == "exec") {
-            // on click exec audacious --play-pause
-            //          exec audacious --play-pause
-            //               audacious --play-pause
-            import std.process;
-
+        if (action[0] == "exec" || action[0] == "exec-wait") {
             if (action.length >= 2) {
                 writeln ("  EXEC: ", action[1..$]);
                 auto ret = execute (action[1..$]);  // (int status, string output)
-                if (ret.status == 0) {
-                    // OK
-                }
-                else {
-                    // may be FAIL
-                }
             }
         }
-    }
+        else
+        if (action[0] == "exec-nowait") {
+            if (action.length >= 2) {
+                writeln ("  EXEC: ", action[1..$]);
+                auto pid = spawnProcess (action[1..$]);
+            }
+        }    
+    }    
 }
-

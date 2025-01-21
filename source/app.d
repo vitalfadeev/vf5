@@ -18,6 +18,7 @@ main() {
 	doc.update_pos_size ();
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);
+	on_start (doc);
 	pix_go (doc);
 }
 
@@ -26,6 +27,7 @@ setup (Doc* doc) {
 	txt_reader.go (doc, txt_reader.text);
 }
 
+
 //
 void
 tree_apply_klasses (Tree) (Tree* tree) {
@@ -33,6 +35,23 @@ tree_apply_klasses (Tree) (Tree* tree) {
 	    if (t.e !is null )
 	        apply_klasses (t.e);
 }
+
+void
+on_start (Doc* doc) {
+    foreach (t; WalkTree (doc.tree))
+        if (t.e !is null )
+            _on_start (t.e);
+}
+
+void
+_on_start (E* e) {
+    foreach (_on; e.on) {
+        if (_on.event == "start") {
+        	exec_action (_on.action);
+        }
+    }
+}
+
 
 
 //e

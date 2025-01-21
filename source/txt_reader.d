@@ -22,7 +22,7 @@ import klass;
 // focused
 
 string text = "
-e menubar
+e menubar main
  e menubar-item file border t9-top-left
  e menubar-item play border t9-top-left
  e menubar-item list border t9-top-left
@@ -74,6 +74,9 @@ input-radio
  input.type radio
  input.radio.group 1
  input.radio.checkd 0
+
+main
+ on start exec-nowait audacious
 ";
 
 string txt2 = "
