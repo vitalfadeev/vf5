@@ -62,27 +62,31 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             break;
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
-            // tree_apply_klasses (doc.tree);
-            auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
-            if (clicked_e !is null) {
-                writeln (ev.type, ": e: ", *clicked_e);
-                // on
-                foreach (_on; clicked_e.on) {
-                    if (ev.type.to!string == _on.event) {
-                        go_event_action (clicked_e, _on.action);
+            if (ev.button.button == SDL_BUTTON_LEFT)
+            if (ev.button.state == SDL_PRESSED) 
+            if (ev.button.clicks == 1) {
+                // tree_apply_klasses (doc.tree);
+                auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
+                if (clicked_e !is null) {
+                    writeln (ev.type, ": e: ", *clicked_e);
+                    // on
+                    foreach (_on; clicked_e.on) {
+                        if (ev.type.to!string == _on.event) {
+                            go_event_action (clicked_e, _on.action);
+                        }
                     }
-                }
 
-                // focused
-                //add_class (doc, clicked_e, "hidden");
-                remove_class (doc, "focused");
-                add_class (doc, clicked_e, "focused");
-                import app : tree_apply_klasses;
-                tree_apply_klasses (doc.tree);
-                writeln (ev.type, ": e: ", *clicked_e);
-                doc.update_pos_size ();
-                //SDL_UpdateWindowSurface (window);
-                draw_doc (renderer,doc);
+                    // focused
+                    //add_class (doc, clicked_e, "hidden");
+                    remove_class (doc, "focused");
+                    add_class (doc, clicked_e, "focused");
+                    import app : tree_apply_klasses;
+                    tree_apply_klasses (doc.tree);
+                    writeln (ev.type, ": e: ", *clicked_e);
+                    doc.update_pos_size ();
+                    //SDL_UpdateWindowSurface (window);
+                    draw_doc (renderer,doc);
+                }
             }
             break;
         case SDL_WINDOWEVENT:

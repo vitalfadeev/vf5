@@ -3,18 +3,7 @@ module events;
 import bindbc.sdl;
 
 
-struct
-Event {
-    SDL_Event _e;
-    alias _e this;
-    //Type type;
-    //enum
-    //Type {
-    //    none,
-    //    click,
-    //    draw,
-    //}
-}
+alias Event = SDL_Event;
 
 void
 go (Event* event) {
@@ -35,7 +24,7 @@ Events {
     int
     opApply (int delegate (Event* ev) dg) {
         while (_go) {
-            while (SDL_WaitEvent (&ev._e) > 0) {
+            while (SDL_WaitEvent (&ev) > 0) {
                 int result = dg (&ev);
                 if (result)
                     return result;

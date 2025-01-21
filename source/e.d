@@ -144,6 +144,7 @@ Magnet {
 //
 void
 apply_klasses (E* e) {
+    e.on.length = 0;
     foreach (Klass* kls; e.klasses)
         e.apply_klass (e,kls);
 }
