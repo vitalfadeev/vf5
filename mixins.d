@@ -308,6 +308,113 @@ alias b = __b ;
 // expansion at /usr/include/dmd/phobos/std/functional.d(224,20)
 a == b
 
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/internal/atomic.d(264,13)
+
+                asm pure nothrow @nogc @trusted
+                {
+                    naked;
+                    lock; xadd[RSI], EDI;
+                    mov EAX, EDI;
+                    ret;
+                }
+
+
+// expansion at /usr/include/dmd/phobos/std/stdio.d(5251,38)
+core.stdc.stdio.stdin
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val-=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/phobos/std/stdio.d(5251,38)
+core.stdc.stdio.stdout
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val-=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/phobos/std/stdio.d(5251,38)
+core.stdc.stdio.stderr
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val+=mod
+
+// expansion at /usr/include/dmd/druntime/import/core/atomic.d(542,9)
+*cast(T*)&val-=mod
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(467,13)
+enum int status = 0;
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(467,13)
+enum int output = 0;
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(654,9)
+alias _0LU = Identity!(field[0LU]);alias status = _0LU;alias _1LU = Identity!(field[1LU]);alias output = _1LU;
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(654,9)
+alias _0LU = Identity!(field[0LU]);alias _1LU = Identity!(field[1LU]);
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs < rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs < rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs == rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs < rhs
+
+// expansion at /usr/include/dmd/phobos/std/typecons.d(539,31)
+lhs < rhs
+
 // expansion at
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
@@ -337,6 +444,9 @@ alias b = __b ;
 
 // expansion at /usr/include/dmd/phobos/std/functional.d(224,20)
 a == b
+
+// expansion at
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
 // expansion at
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;

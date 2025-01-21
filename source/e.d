@@ -113,8 +113,8 @@ struct E {
 
     struct
     On {
-        string event;
-        string[] action;
+        string   event;  // click
+        string[] action; // exec audacious --play-pause
     }
     On[] on;
     
@@ -173,6 +173,7 @@ apply_klass (E* e, Klass* k) {
             case "content"       : set_content       (e, ke.values); break;
             case "image"         : set_content_image (e, ke.values); break;
             case "text"          : set_content_text  (e, ke.values); break;
+            case "on"            : set_on            (e, ke.values); break;
             default:
         }
     }
@@ -422,3 +423,18 @@ set_content (E* e, string[] values) {
         //
     }
 }
+
+void
+set_on (E* e, string[] values) {
+    if (values.length) {
+        string event  = values[0];
+        if (values.length == 1) {
+            // no action
+        }
+        else
+        if (values.length >= 2) {
+            e.on ~= E.On (event,values[1..$]);
+        }
+    }
+}
+

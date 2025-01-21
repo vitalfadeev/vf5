@@ -12,6 +12,7 @@ import klass;
 // RESERVED
 // e
 // import
+// klass
 
 // RESERVED CLASSES
 // input-text
@@ -44,6 +45,7 @@ play
  image /home/vf/src/vf5/img/play.png
  on click player.play_pause
  on click exec audacious --play-pause
+ on SDL_MOUSEBUTTONDOWN exec audacious --play-pause
 
 list
  text List
@@ -94,6 +96,12 @@ file-browser-item
  pos.dir  r
  size 32 32
  borders 2 solid #cfc
+
+klass text image                         on
+ File File /home/vf/src/vf5/img/file.png 
+ Play Play /home/vf/src/vf5/img/play.png click player.play_pause
+ List List /home/vf/src/vf5/img/list.png
+
 ";
 
 void

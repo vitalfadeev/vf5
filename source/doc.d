@@ -4,6 +4,7 @@ import etree;
 import klass;
 import e;
 import types;
+import std.stdio : writeln;
 
 
 struct
@@ -207,5 +208,30 @@ find_last_in_group (ETree* t, ubyte pos_group) {
             return _t;
 
     return null;
+}
+
+
+void
+go_event_action (E* e, string[] action) {
+    if (action.length) {
+        writeln (action);
+        if (action[0] == "exec") {
+            // on click exec audacious --play-pause
+            //          exec audacious --play-pause
+            //               audacious --play-pause
+            import std.process;
+
+            if (action.length >= 2) {
+                writeln ("  EXEC: ", action[1..$]);
+                auto ret = execute (action[1..$]);  // (int status, string output)
+                if (ret.status == 0) {
+                    // OK
+                }
+                else {
+                    // may be FAIL
+                }
+            }
+        }
+    }
 }
 

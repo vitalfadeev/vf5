@@ -66,6 +66,14 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
             if (clicked_e !is null) {
                 writeln (ev.type, ": e: ", *clicked_e);
+                // on
+                foreach (_on; clicked_e.on) {
+                    if (ev.type.to!string == _on.event) {
+                        go_event_action (clicked_e, _on.action);
+                    }
+                }
+
+                // focused
                 //add_class (doc, clicked_e, "hidden");
                 remove_class (doc, "focused");
                 add_class (doc, clicked_e, "focused");
@@ -112,6 +120,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
 
     return 0;
 }
+
 
 //
 void 
