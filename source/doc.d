@@ -43,7 +43,6 @@ Doc {
 
         bool 
         valid_e (ETree* t) {
-            if (t.e !is null )
             if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
             if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
                 return true;
@@ -79,8 +78,7 @@ remove_class (Doc* doc, string s) {
     import std.stdio;
     if (kls !is null)
     foreach (t; WalkTree (doc.tree))
-        if (t.e !is null)
-            remove_class (t.e, kls);
+        remove_class (t.e, kls);
 }
 
 void
@@ -185,7 +183,6 @@ pos_type_t9 (ETree* t) {
         else {
             X parent_x;
             if (t.parent !is null)
-            if (t.parent.e !is null)
                 parent_x = t.parent.e.pos.x;
 
             e.pos.x = parent_x;
@@ -203,7 +200,6 @@ pos_type_grid (ETree* t) {
 ETree*
 find_last_in_group (ETree* t, ubyte pos_group) {
     foreach (ETree* _t; WalkLeft (t))
-        if (_t.e !is null)
         if (_t.e.pos_group == pos_group)
             return _t;
 

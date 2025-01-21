@@ -22,10 +22,19 @@ import klass;
 // focused
 
 string text = "
-e menubar main
- e menubar-item file border t9-top-left
- e menubar-item play border t9-top-left
- e menubar-item list border t9-top-left
+e root
+ e menubar main
+  e menubar-item file border t9-top-left
+  e menubar-item play border t9-top-left
+  e menubar-item list border t9-top-left
+
+ e popup file-popup hidden
+  e open
+  e open-url
+  e quit
+
+root
+ bg #000
 
 menubar
  size 640 32
@@ -64,11 +73,6 @@ border
 
 focused
  borders 2 solid #0F0DBF
-
-e popup file-popup hidden
- e open
- e open-url
- e quit
 
 input-radio
  input.type radio
@@ -122,14 +126,20 @@ go (Doc* doc, string s) {
             // create e
             // add classes
 
-            auto t = new ETree (new E ());
-            doc.tree.add_child (t);
-            current_t = t;
-            current_klass = null;
+            // only first e
+            if (doc.tree is null) {
+                auto t = new ETree (new E ());
+                doc.tree = t;
+                current_t = t;
+                current_klass = null;
 
-            foreach (tt; t_line[1..$])
-                if (tt.type == Token.Type.string)
-                    current_t.e.klasses ~= doc.find_klass_or_create (tt.s);
+                foreach (tt; t_line[1..$])
+                    if (tt.type == Token.Type.string)
+                        current_t.e.klasses ~= doc.find_klass_or_create (tt.s);
+            }
+            else {
+                // skip 2, 3... e
+            }
         }
 
         if (t_line[0].type == Token.Type.string)

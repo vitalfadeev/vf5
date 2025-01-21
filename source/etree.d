@@ -11,7 +11,7 @@ WalkTree (Tree) (Tree* t) {
 
 bool 
 skip_hidden (ETree* t) {
-    return t.e !is null && t.e.hidden;
+    return t.e.hidden;
 }
 
 auto 

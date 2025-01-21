@@ -47,9 +47,8 @@ draw_doc (SDL_Renderer* renderer, Doc* doc) {
     SDL_RenderClear (renderer);
     // draw
     foreach (t; WalkTree (doc.tree))
-        if (t.e !is null)
-            if (!t.e.hidden)
-                draw_e (renderer, t.e);
+        if (!t.e.hidden)
+            draw_e (renderer, t.e);
     // rasterize
     SDL_RenderPresent (renderer);
 }

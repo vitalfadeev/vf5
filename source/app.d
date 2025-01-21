@@ -12,7 +12,6 @@ void
 main() {
 	pix_init ();
 	Doc* doc = new Doc ();
-	doc.tree = new ETree ();
 	setup (doc);
 	tree_apply_klasses (doc.tree);
 	doc.update_pos_size ();
@@ -32,15 +31,13 @@ setup (Doc* doc) {
 void
 tree_apply_klasses (Tree) (Tree* tree) {
 	foreach (t; WalkTree (tree))
-	    if (t.e !is null )
-	        apply_klasses (t.e);
+        apply_klasses (t.e);
 }
 
 void
 on_start (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
-        if (t.e !is null )
-            _on_start (t.e);
+        _on_start (t.e);
 }
 
 void

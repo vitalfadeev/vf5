@@ -10,8 +10,8 @@ import txt_parser;
 
 struct E {
     Klass*[] klasses;    // box green rounded
-    Pos  pos  = Pos (10,10);
-    Size size = Size (100,100);
+    Pos  pos;
+    Size size;
     bool pos_x_auto;
     bool pos_y_auto;
     bool size_w_auto;
