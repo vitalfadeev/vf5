@@ -11,6 +11,7 @@ struct
 Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
+    Klass*   colors;
 
     Klass*
     find_klass (string s) {

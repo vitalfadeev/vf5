@@ -1,10 +1,12 @@
 module draw;
 
 import std.stdio;
+import std.string;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import e;
 import types;
+import pix : SDLException, TTFException, global_font;
 
 
 void
@@ -39,6 +41,73 @@ image (SDL_Renderer* renderer, void* ptr, X x1, Y y1, X x2, Y y2) {
 
     //
     SDL_DestroyTexture (texture);
+}
+
+
+void
+one_char (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
+    auto image = _one_char (renderer, s, x, y, font);
+
+    //
+    int SCREEN_WIDTH  = 640;
+    int SCREEN_HEIGHT = 480;
+
+    int iW, iH;
+    SDL_QueryTexture (image, null, null, &iW, &iH);
+    int cx = SCREEN_WIDTH / 2 - iW / 2;
+    int cy = SCREEN_HEIGHT / 2 - iH / 2;
+
+    //
+    renderTexture (renderer, image, x, y);
+}
+
+SDL_Texture*
+_one_char (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
+    // e.text.s = s
+    // each c; s
+    //   e.rects = Rect (c)
+    // one_char (e.rects[0].s)
+
+    SDL_Color color = SDL_Color (0xFF,0xFF,0xFF,0xFF);
+    SDL_Surface* surf = TTF_RenderText_Blended (font, s.toStringz, color);
+    if (surf is null)
+        throw new TTFException ("TTF_RenderText");
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
+    if (texture is null)
+        throw new SDLException ("CreateTexture");
+
+    SDL_FreeSurface (surf);
+
+    return texture;
+}
+
+void 
+renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst, SDL_Rect* clip = null) {
+    SDL_RenderCopy (renderer, tex, clip, &dst);
+}
+void 
+renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect* clip = null) {
+    SDL_Rect dst;
+    dst.x = x;
+    dst.y = y;
+    if (clip !is null) {
+        dst.w = clip.w;
+        dst.h = clip.h;
+    }
+    else {
+        SDL_QueryTexture (tex, null, null, &dst.w, &dst.h);
+    }
+    renderTexture (renderer, tex, dst, clip);
+}
+
+TTF_Font*
+open_font (string file_name, int font_size) {
+    TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
+    if (font !is null)
+        return font;
+
+    throw new TTFException ("TTF_OpenFont");
 }
 
 void
@@ -163,6 +232,7 @@ draw_content (SDL_Renderer* renderer, E* e) {
         cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
         cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
     );
+
     if (e.content.image.ptr !is null)
         image (
             renderer, 
@@ -171,6 +241,17 @@ draw_content (SDL_Renderer* renderer, E* e) {
             cast(Y)(e.pos.y+e.borders.t.w), 
             cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
             cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
+        );
+
+    if (e.content.text.s.length)
+        one_char (
+            renderer, 
+            e.content.text.s, 
+            cast(X)(e.pos.x+e.borders.l.w), 
+            cast(Y)(e.pos.y+e.borders.t.w), 
+            global_font
+            //cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
+            //cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
         );
 }
 

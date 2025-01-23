@@ -61,7 +61,7 @@ struct E {
     Content {
         struct
         Text {
-          string chars;     // "abc"
+          string s;     // "abc"
           struct 
           Font {
             string family;  // "abc"
@@ -71,6 +71,13 @@ struct E {
           }
           Font font;
           Magnet magnet;  // left / center / right
+          struct
+          TextRect {
+              Pos    pos;
+              Size   size;
+              string s;  // chars[a..b]
+          }
+          TextRect[] rects;
         }
         Text text;
 
@@ -414,7 +421,7 @@ set_content_image (E* e, string[] values) {
 void
 set_content_text (E* e, string[] values) {
     if (values.length) {
-        e.content.text.chars = values[0];
+        e.content.text.s = values[0];
     }
 }
 

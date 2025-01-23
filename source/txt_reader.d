@@ -20,10 +20,11 @@ import klass;
 // input-radio
 // checked
 // focused
+// colors
 
 string text = "
 e root
- e menubar main
+ e menubar
   e menubar-item file border t9-top-left
   e menubar-item play border t9-top-left
   e menubar-item list border t9-top-left
@@ -35,6 +36,7 @@ e root
 
 root
  bg #000
+ on start exec-nowait audacious
 
 menubar
  size 640 32
@@ -47,18 +49,15 @@ menubar-item
 file
  popup file-popup
  text  File
- image /home/vf/src/vf5/img/file.png
 
 play
  text Play
- image /home/vf/src/vf5/img/play.png
  on click player.play_pause
- on click exec audacious --play-pause
- on SDL_MOUSEBUTTONDOWN exec audacious --play-pause
+ on click exec audtool playback-playpause
+ on SDL_MOUSEBUTTONDOWN exec audtool playback-playpause
 
 list
  text List
- image /home/vf/src/vf5/img/list.png
 
 t9-top-left
  pos.type  9
@@ -78,12 +77,13 @@ input-radio
  input.type radio
  input.radio.group 1
  input.radio.checkd 0
-
-main
- on start exec-nowait audacious
 ";
 
 string txt2 = "
+image /home/vf/src/vf5/img/file.png
+image /home/vf/src/vf5/img/play.png
+image /home/vf/src/vf5/img/list.png
+
 window
  title App
  size 640 480
@@ -109,6 +109,32 @@ klass text image                         on
  Play Play /home/vf/src/vf5/img/play.png click player.play_pause
  List List /home/vf/src/vf5/img/list.png
 
+colors
+ primary
+ secondary
+ info
+ warn
+ error
+
+// a extend b extend c
+a b c
+ fg primary
+ bg secondary
+
+b c
+ fg #ccc
+ bg #222
+
+c
+ fg #fff
+ bg #000
+
+song-name
+ text pipe audtool current-song
+
+play
+ enabled pipe audtool status 
+ # == plaing
 ";
 
 void

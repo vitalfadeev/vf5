@@ -4,11 +4,14 @@ import std.stdio;
 import bindbc.loader;
 import bindbc.sdl;
 import bindbc.sdl.image;
+import bindbc.sdl.ttf;
 import doc;
 import events;
 import draw;
 import etree;
 import types;
+import std.string : fromStringz; 
+import std.algorithm.searching : canFind;
 
 
 struct 
@@ -62,8 +65,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
             if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_PRESSED) 
-            if (ev.button.clicks == 1) {
+            if (ev.button.state == SDL_PRESSED) {
                 // tree_apply_klasses (doc.tree);
                 auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
                 if (clicked_e !is null) {
@@ -145,10 +147,10 @@ init_sdl () {
 
     //if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
     if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
-        throw new Exception ("The SDL init failed: " ~ SDL_GetError ().to!string);
+        throw new SDLException ("The SDL init failed");
 
     // IMG
-    version (SDL_Image) {    
+    //version (SDL_Image) {    
         auto sdlimage_ret = loadSDLImage ();
         writeln ("SDL_Image: ", sdlimage_ret);
         if (sdlimage_ret < sdlImageSupport) // 2.6.3
@@ -157,7 +159,28 @@ init_sdl () {
         auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
         if (IMG_Init (flags) != flags)
             throw new Exception ("The SDL_Image init failed");
-    }
+    //}
+
+    // TTF
+    //version (SDL_TTF) {
+        auto sdlttf_ret = loadSDLTTF (); // SDLTTFSupport
+        writeln ("SDL_TTF: ", sdlttf_ret);
+        if (sdlttf_ret < sdlTTFSupport) // 2.0.12
+            throw new TTFException ("The SDL_TTF shared library failed to load:");
+        
+        if (TTF_Init () == -1)
+            throw new TTFException ("Failed to initialise SDL_TTF");
+
+        ttf_open_font ();
+    //}
+}
+
+static
+TTF_Font* global_font;
+
+void
+ttf_open_font () {
+    global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 16);
 }
 
 /**
@@ -211,5 +234,14 @@ class
 SDLException : Exception {
     this (string msg) {
         super (format!"%s: %s" (SDL_GetError().to!string, msg));
+    }
+}
+
+class 
+TTFException : Exception{
+    this (string s) {
+        super (
+            format!"%s: %s"(s, fromStringz(TTF_GetError()))
+        );
     }
 }
