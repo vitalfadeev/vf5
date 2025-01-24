@@ -129,12 +129,24 @@ c
  fg #fff
  bg #000
 
-song-name
- text pipe audtool current-song
+e
+ e title
+ e button status
+ e button status.plaing
 
-play
- enabled pipe audtool status 
- # == plaing
+title
+  text ? audtool current-song
+  text `audtool current-song`
+
+status
+  ? audtool playback-status
+  `audtool playback-status`
+    plaing
+      fg green
+    paused
+      fg yellow
+    stopped
+      fg red
 ";
 
 void

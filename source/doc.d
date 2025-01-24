@@ -234,3 +234,50 @@ exec_action (string[] action) {
         }    
     }    
 }
+
+//status
+//  ? audtool playback-status
+//    plaing
+//      fg green
+//    paused
+//      fg yellow
+//    stopped
+//      fg red
+version (question_)
+void
+go_question_subclass (string[] s) {
+    import std.process;
+
+    if (action.length) {
+        if (s[0] == "?") {
+            if (s.length >= 2) {
+                auto ret = execute (action[1..$]);  // (int status, string output)
+                writeln (ret.status);
+                writeln (ret.output);
+                foreach (c; childs)
+                    if (c.name == ret.output) {
+                        // ...
+                    }
+            }
+        }
+    }
+}
+
+//title
+//  text ? audtool current-song
+version (question_)
+void
+go_question_value (string[] s) {
+    import std.process;
+
+    if (action.length) {
+        if (s[0] == "?") {
+            if (s.length >= 2) {
+                auto ret = execute (action[1..$]);  // (int status, string output)
+                writeln (ret.status);
+                writeln (ret.output);
+            }
+        }
+    }
+}
+

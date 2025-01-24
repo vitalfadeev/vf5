@@ -20,22 +20,22 @@ arc (Pos pos, Pos pos2, W wid) {
 }
 
 void
-fill_rect (SDL_Renderer* renderer, X x1, Y y1, X x2, Y y2) {
+fill_rect (SDL_Renderer* renderer, X x, Y y, W w, H h) {
     SDL_Rect rect;
-    rect.x = x1;
-    rect.y = y1;
-    rect.w = x2 - x1;
-    rect.h = y2 - y1;
+    rect.x = x;
+    rect.y = y;
+    rect.w = w;
+    rect.h = h;
     SDL_RenderFillRect (renderer, &rect);
 }
 
 void
-image (SDL_Renderer* renderer, void* ptr, X x1, Y y1, X x2, Y y2) {
+image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
     SDL_Surface* surface = cast (SDL_Surface*) ptr;
     SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
 
     //
-    SDL_Rect dstrect = SDL_Rect (x1, y1, x2-x1, y2-y1);
+    SDL_Rect dstrect = SDL_Rect (x, y, w, h);
     SDL_RenderCopy (renderer, texture, null, &dstrect);
     //SDL_RenderCopy (renderer, texture, null, null);
 
@@ -45,7 +45,7 @@ image (SDL_Renderer* renderer, void* ptr, X x1, Y y1, X x2, Y y2) {
 
 
 void
-one_char (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
+one_char (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) {
     auto image = _one_char (renderer, s, x, y, font);
 
     //
@@ -99,6 +99,22 @@ renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect*
         SDL_QueryTexture (tex, null, null, &dst.w, &dst.h);
     }
     renderTexture (renderer, tex, dst, clip);
+}
+
+Pos
+content_pos (E* e) {
+    return Pos (
+        cast(X)(e.pos.x+e.borders.l.w), 
+        cast(Y)(e.pos.y+e.borders.t.w), 
+    );
+}
+
+Size
+content_size (E* e) {
+    return Size (
+        cast(W)(e.size.w - e.borders.l.w - e.borders.r.w), 
+        cast(H)(e.size.h - e.borders.t.w - e.borders.b.w)
+    );
 }
 
 TTF_Font*
@@ -189,15 +205,17 @@ draw () {
 
 void
 draw8 (SDL_Renderer* renderer, X x, Y y, W w, H h, W t, W r, W b, W l) {
-    //        x1     y1     x2       y2
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y),     cast(X)(x+l),     cast(Y)(y+t)); // 1
-    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y),     cast(X)(x+w-r),   cast(Y)(y+t)); // 2
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y),     cast(X)(x+w),     cast(Y)(y+t)); // 3
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+t),   cast(X)(x+w),     cast(Y)(y+h-b)); // 4
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+h-b), cast(X)(x+w),     cast(Y)(y+h)); // 5
-    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y+h-b), cast(X)(x+w-r),   cast(Y)(y+h)); // 6
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y+h-b), cast(X)(x+l),     cast(Y)(y+h)); // 7
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y+t),   cast(X)(x+l),     cast(Y)(y+h-b)); // 8
+    // 1 2 3
+    // 8   4
+    // 7 6 5
+    fill_rect (renderer, cast(X)(x),     cast(Y)(y),     cast(X)(l),     cast(Y)(t)); // 1
+    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y),     cast(X)(w-l-r), cast(Y)(t)); // 2
+    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y),     cast(X)(r),     cast(Y)(t)); // 3
+    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+t),   cast(X)(r),     cast(Y)(h-t-b)); // 4
+    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+h-b), cast(X)(r),     cast(Y)(b)); // 5
+    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y+h-b), cast(X)(w-l-r), cast(Y)(b)); // 6
+    fill_rect (renderer, cast(X)(x),     cast(Y)(y+h-b), cast(X)(l),     cast(Y)(b)); // 7
+    fill_rect (renderer, cast(X)(x),     cast(Y)(y+t),   cast(X)(l),     cast(Y)(h-t-b)); // 8
 }
 
 void
@@ -225,34 +243,15 @@ draw_borders (SDL_Renderer* renderer, E* e) {
 void
 draw_content (SDL_Renderer* renderer, E* e) {
     SDL_SetRenderDrawColor (renderer, 0x88, 0x88, 0x88, 0xFF);
-    fill_rect (
-        renderer, 
-        cast(X)(e.pos.x+e.borders.l.w), 
-        cast(Y)(e.pos.y+e.borders.t.w), 
-        cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
-        cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
-    );
+    auto cp = content_pos (e);
+    auto cs = content_size (e);
+    fill_rect (renderer, cp.x, cp.y, cs.w, cs.h);
 
     if (e.content.image.ptr !is null)
-        image (
-            renderer, 
-            e.content.image.ptr, 
-            cast(X)(e.pos.x+e.borders.l.w), 
-            cast(Y)(e.pos.y+e.borders.t.w), 
-            cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
-            cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
-        );
+        image (renderer, e.content.image.ptr, cp.x, cp.y, cs.w, cs.h);
 
     if (e.content.text.s.length)
-        one_char (
-            renderer, 
-            e.content.text.s, 
-            cast(X)(e.pos.x+e.borders.l.w), 
-            cast(Y)(e.pos.y+e.borders.t.w), 
-            global_font
-            //cast(X)(e.pos.x+e.size.w - e.borders.r.w), 
-            //cast(Y)(e.pos.y+e.size.h - e.borders.b.w)
-        );
+        one_char (renderer, e.content.text.s, global_font, cp.x, cp.y, cs.w, cs.h);
 }
 
 // size = border + pad + image
