@@ -69,8 +69,9 @@ struct E {
             bool   bold;    // 0/1
             bool   italic;  // 0/1
           }
-          Font font;
+          Font   font;
           Magnet magnet;  // left / center / right
+          Color  color;
           struct
           TextRect {
               Pos    pos;
@@ -181,6 +182,7 @@ apply_klass (E* e, Klass* k) {
             case "content"       : set_content       (e, ke.values); break;
             case "image"         : set_content_image (e, ke.values); break;
             case "text"          : set_content_text  (e, ke.values); break;
+            case "text.color"    : set_text_color    (e, ke.values); break;
             case "on"            : set_on            (e, ke.values); break;
             default:
         }
@@ -422,6 +424,15 @@ void
 set_content_text (E* e, string[] values) {
     if (values.length) {
         e.content.text.s = values[0];
+    }
+}
+
+void
+set_text_color (E* e, string[] values) {
+    if (values.length) {
+        Color c;
+        if (parse_color (values[0], &c))
+            e.content.text.color = c;
     }
 }
 

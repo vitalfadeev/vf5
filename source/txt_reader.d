@@ -45,6 +45,7 @@ menubar
 menubar-item
  size.w auto
  size.h 32
+ text.color #000
 
 file
  popup file-popup
@@ -112,6 +113,10 @@ klass text image                         on
 colors
  primary
  secondary
+ primary+1
+ primary-1
+ secondary+1
+ secondary-1
  info
  warn
  error
