@@ -45,7 +45,8 @@ menubar
 menubar-item
  size.w auto
  size.h 32
- text.color #000
+ text.color #eee
+ bg #222
 
 file
  popup file-popup

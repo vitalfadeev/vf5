@@ -183,6 +183,7 @@ apply_klass (E* e, Klass* k) {
             case "image"         : set_content_image (e, ke.values); break;
             case "text"          : set_content_text  (e, ke.values); break;
             case "text.color"    : set_text_color    (e, ke.values); break;
+            case "bg"            : set_bg            (e, ke.values); break;
             case "on"            : set_on            (e, ke.values); break;
             default:
         }
@@ -433,6 +434,15 @@ set_text_color (E* e, string[] values) {
         Color c;
         if (parse_color (values[0], &c))
             e.content.text.color = c;
+    }
+}
+
+void
+set_bg (E* e, string[] values) {
+    if (values.length) {
+        Color c;
+        if (parse_color (values[0], &c))
+            e.bg = c;
     }
 }
 

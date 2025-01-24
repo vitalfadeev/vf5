@@ -2,6 +2,7 @@ module draw;
 
 import std.stdio;
 import std.string;
+import std.conv;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import e;
@@ -45,12 +46,19 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 
 void
-text (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, Y y, W w, H h) {
+text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font *font, Color color, X x, Y y, W w, H h) {
+    // from text.rects
     int outw, outh;
     X _x = x;
-    foreach (dchar c; s) {
-        one_char (renderer, c, font, color, _x, y, w, h, &outw, &outh);
-        _x += outw;
+    foreach (ref rec; rects) {
+        if (rec.s.length) {
+            one_string (renderer, rec.s, font, color, _x, y, w, h, &outw, &outh);
+            rec.pos.x = _x;
+            rec.pos.y =  y;
+            rec.size.w = cast(W)!outw;
+            rec.size.h = cast(H)!outh;
+            _x += outw;
+        }
     }
 }
 
@@ -70,7 +78,8 @@ one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y y
     int cy = SCREEN_HEIGHT / 2 - iH / 2;
 
     //
-    renderTexture (renderer, image, x, y);
+    //render_texture (renderer, image, cx, cy);
+    render_texture (renderer, image, x, y);
 }
 
 SDL_Texture*
@@ -94,8 +103,8 @@ _one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y 
 }
 
 void
-text_string (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) {
-    auto image = _text_string (renderer, s, x, y, font);
+one_string (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
+    auto image = _one_string (renderer, s, font, color, x, y);
 
     //
     int SCREEN_WIDTH  = 640;
@@ -103,21 +112,22 @@ text_string (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H 
 
     int iW, iH;
     SDL_QueryTexture (image, null, null, &iW, &iH);
+    *outw = iW;
+    *outh = iH;
     int cx = SCREEN_WIDTH / 2 - iW / 2;
     int cy = SCREEN_HEIGHT / 2 - iH / 2;
 
     //
-    renderTexture (renderer, image, x, y);
+    render_texture (renderer, image, x, y);
 }
 
 SDL_Texture*
-_text_string (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
+_one_string (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, Y y) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
     // one_char (e.rects[0].s)
 
-    SDL_Color color = SDL_Color (0xFF,0xFF,0xFF,0xFF);
     SDL_Surface* surf = TTF_RenderUTF8_Blended (font, s.toStringz, color);
     if (surf is null)
         throw new TTFException ("TTF_RenderText");
@@ -132,11 +142,11 @@ _text_string (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
 }
 
 void 
-renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst, SDL_Rect* clip = null) {
+render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst, SDL_Rect* clip = null) {
     SDL_RenderCopy (renderer, tex, clip, &dst);
 }
 void 
-renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect* clip = null) {
+render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect* clip = null) {
     SDL_Rect dst;
     dst.x = x;
     dst.y = y;
@@ -147,7 +157,7 @@ renderTexture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect*
     else {
         SDL_QueryTexture (tex, null, null, &dst.w, &dst.h);
     }
-    renderTexture (renderer, tex, dst, clip);
+    render_texture (renderer, tex, dst, clip);
 }
 
 Pos
@@ -292,7 +302,8 @@ draw_borders (SDL_Renderer* renderer, E* e) {
 
 void
 draw_content (SDL_Renderer* renderer, E* e) {
-    SDL_SetRenderDrawColor (renderer, 0x88, 0x88, 0x88, 0xFF);
+    auto color = e.bg;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     auto cp = content_pos (e);
     auto cs = content_size (e);
     fill_rect (renderer, cp.x, cp.y, cs.w, cs.h);
@@ -301,8 +312,26 @@ draw_content (SDL_Renderer* renderer, E* e) {
         image (renderer, e.content.image.ptr, cp.x, cp.y, cs.w, cs.h);
 
     if (e.content.text.s.length)
-        text (renderer, e.content.text.s, global_font, e.content.text.color, cp.x, cp.y, cs.w, cs.h);
+        draw_text (renderer, e, cp, cs);
 }
+
+
+void
+draw_text (SDL_Renderer* renderer, E* e, Pos cp, Size cs) {
+    // fill rects
+    //   e.content.text.rects
+    //   rect.pos = pos;
+    // draw rects
+    //   foreach rect rects
+    //   one_char
+    e.content.text.rects.length = e.content.text.s.length;
+    foreach (dchar c; e.content.text.s) {
+        e.content.text.rects ~= E.Content.Text.TextRect (Pos(), Size(), c.to!string);
+    }
+
+    text (renderer, e.content.text.rects, global_font, e.content.text.color, cp.x, cp.y, cs.w, cs.h);
+}
+
 
 // size = border + pad + image
 
