@@ -183,7 +183,8 @@ TTF_Font* global_font;
 
 void
 ttf_open_font () {
-    global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 16);
+    global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
+    //global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Bold.ttf", 12);
 }
 
 /**

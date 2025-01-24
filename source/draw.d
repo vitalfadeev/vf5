@@ -168,7 +168,8 @@ content_size (E* e) {
 
 TTF_Font*
 open_font (string file_name, int font_size) {
-    TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
+    //TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
+    TTF_Font* font = TTF_OpenFontDPI (file_name.toStringz, font_size, 102, 102);
     if (font !is null)
         return font;
 
