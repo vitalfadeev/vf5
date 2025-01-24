@@ -25,9 +25,12 @@ import klass;
 string text = "
 e root
  e menubar
-  e menubar-item file border t9-top-left
-  e menubar-item play border t9-top-left
-  e menubar-item list border t9-top-left
+  e menubar-item border t9-top-left file
+  e menubar-item border t9-top-left play
+  e menubar-item border t9-top-left list
+  e menubar-item border t9-top-left services
+  e menubar-item border t9-top-left output
+  e menubar-item border t9-top-left view
 
  e popup file-popup hidden
   e open
@@ -49,17 +52,26 @@ menubar-item
  bg #222
 
 file
+ text  Файл
  popup file-popup
- text  File
 
 play
- text Play
+ text Воспроизведение
  on click player.play_pause
  on click exec audtool playback-playpause
  on SDL_MOUSEBUTTONDOWN exec audtool playback-playpause
 
 list
- text List
+ text Список
+
+services
+ text Службы
+
+output
+ text Вывод
+
+view
+ text Вид
 
 t9-top-left
  pos.type  9
