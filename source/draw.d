@@ -45,8 +45,58 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 
 void
-one_char (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) {
-    auto image = _one_char (renderer, s, x, y, font);
+text (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) {
+    int outw, outh;
+    X _x = x;
+    foreach (dchar c; s) {
+        one_char (renderer, c, font, _x, y, w, h, &outw, &outh);
+        _x += outw;
+    }
+}
+
+void
+one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, X x, Y y, W w, H h, int* outw, int* outh) {
+    auto image = _one_char (renderer, c, x, y, font);
+
+    //
+    int SCREEN_WIDTH  = 640;
+    int SCREEN_HEIGHT = 480;
+
+    int iW, iH;
+    SDL_QueryTexture (image, null, null, &iW, &iH);
+    *outw = iW;
+    *outh = iH;
+    int cx = SCREEN_WIDTH / 2 - iW / 2;
+    int cy = SCREEN_HEIGHT / 2 - iH / 2;
+
+    //
+    renderTexture (renderer, image, x, y);
+}
+
+SDL_Texture*
+_one_char (SDL_Renderer* renderer, dchar c, X x, Y y, TTF_Font *font) {
+    // e.text.s = s
+    // each c; s
+    //   e.rects = Rect (c)
+    // one_char (e.rects[0].s)
+
+    SDL_Color color = SDL_Color (0xFF,0xFF,0xFF,0xFF);
+    SDL_Surface* surf = TTF_RenderGlyph32_Blended (font, c, color);
+    if (surf is null)
+        throw new TTFException ("TTF_RenderText");
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
+    if (texture is null)
+        throw new SDLException ("CreateTexture");
+
+    SDL_FreeSurface (surf);
+
+    return texture;
+}
+
+void
+text_string (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) {
+    auto image = _text_string (renderer, s, x, y, font);
 
     //
     int SCREEN_WIDTH  = 640;
@@ -62,14 +112,14 @@ one_char (SDL_Renderer* renderer, string s, TTF_Font *font, X x, Y y, W w, H h) 
 }
 
 SDL_Texture*
-_one_char (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
+_text_string (SDL_Renderer* renderer, string s, X x, Y y, TTF_Font *font) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
     // one_char (e.rects[0].s)
 
     SDL_Color color = SDL_Color (0xFF,0xFF,0xFF,0xFF);
-    SDL_Surface* surf = TTF_RenderText_Blended (font, s.toStringz, color);
+    SDL_Surface* surf = TTF_RenderUTF8_Blended (font, s.toStringz, color);
     if (surf is null)
         throw new TTFException ("TTF_RenderText");
 
@@ -251,7 +301,7 @@ draw_content (SDL_Renderer* renderer, E* e) {
         image (renderer, e.content.image.ptr, cp.x, cp.y, cs.w, cs.h);
 
     if (e.content.text.s.length)
-        one_char (renderer, e.content.text.s, global_font, cp.x, cp.y, cs.w, cs.h);
+        text (renderer, e.content.text.s, global_font, cp.x, cp.y, cs.w, cs.h);
 }
 
 // size = border + pad + image

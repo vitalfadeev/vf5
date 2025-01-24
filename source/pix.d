@@ -1,7 +1,7 @@
 import std.conv;
 import std.format;
 import std.stdio;
-import bindbc.loader;
+//import bindbc.loader;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
@@ -135,8 +135,7 @@ init_sdl () {
         SDLSupport ret = loadSDL ("sdl2.dll");
     else
         SDLSupport ret = loadSDL();
-    writeln ("SDL: ", ret);
-
+    
     if (ret != sdlSupport) {
         if (ret == SDLSupport.noLibrary) 
             throw new Exception ("The SDL shared library failed to load");
@@ -148,6 +147,10 @@ init_sdl () {
     //if (SDL_Init (SDL_INIT_EVERYTHING) < 0)
     if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
         throw new SDLException ("The SDL init failed");
+
+    SDL_version sdl_ver;
+    SDL_GetVersion (&sdl_ver);
+    writeln ("SDL bindbc: ", ret, " lib: ", sdl_ver);
 
     // IMG
     //version (SDL_Image) {    
@@ -165,7 +168,7 @@ init_sdl () {
     //version (SDL_TTF) {
         auto sdlttf_ret = loadSDLTTF (); // SDLTTFSupport
         writeln ("SDL_TTF: ", sdlttf_ret);
-        if (sdlttf_ret < sdlTTFSupport) // 2.0.12
+        if (sdlttf_ret < sdlTTFSupport) // 2.0.20
             throw new TTFException ("The SDL_TTF shared library failed to load:");
         
         if (TTF_Init () == -1)
