@@ -189,6 +189,20 @@ pos_type_t9 (ETree* t) {
             e.pos.x = parent_x;
         }
     }
+    if (e.pos_group == 9) {
+        // Pass 1
+        //   pos = Pos (0,0)
+        //   _x += w
+        //   _w += w
+        //   _h = max (_h,h)
+        //   pos = Pos (_x,0)
+        // Pass 2
+        //   dx = (content.w - _w) / 2
+        //   dy = (content.h - _h) / 2
+        //   each (c; WalkLeft)
+        //     c.pos.x += dx
+        //     c.pos.y += dy
+    }
 }
 
 void
@@ -279,5 +293,69 @@ go_question_value (string[] s) {
             }
         }
     }
+}
+
+
+Size
+e_size (E* e) {
+    // ### e border content image text
+    // e.size               = by_content | fixed 120 32 | parent parent.content.size
+    // by_content           = by_image | by_text | fixed 120 32 | max (content.image, content.text) | parent
+    // e.content.image.size = by_image | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
+    // e.content.text.size  = by_text  | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
+
+    final
+    switch (e.size_type) {
+        case E.SizeType.content : break;
+        case E.SizeType.fixed   : break;
+        case E.SizeType.parent  : break;
+    }
+
+    return Size ();
+}
+
+Size
+e_content_size (E* e) {
+    final
+    switch (e.content_size_type) {
+        case E.ContentSizeType.max_image_text : return e_content_size_max    (e); break;
+        case E.ContentSizeType.image          : return e_content_size_image  (e); break;
+        case E.ContentSizeType.text           : return e_content_size_text   (e); break;
+        case E.ContentSizeType.fixed          : return e_content_size_fixed  (e); break;
+        case E.ContentSizeType.parent         : return e_content_size_parent (e); break;
+    }
+}
+
+Size
+e_content_size_max (E* e) {
+    return max (e.content.image.size, e.content.text.size);
+}
+
+Size
+e_content_size_image (E* e) {
+    return e.content.image.size;
+}
+
+Size
+e_content_size_text (E* e) {
+    return e.content.text.size;
+}
+
+Size
+e_content_size_fixed (E* e) {
+    return e.content.size;
+}
+
+Size
+e_content_size_parent (E* e) {
+    auto e_parent_content_size = e.parent.content.size;
+    auto e_borders_size = 0;
+    auto e_pad_size = 0;
+    if (e.parent !is null)
+        return e_parent_content_size - e_borders_size - e_pad_size;
+    else
+        return doc.size;
+        //return Screen.size;
+        //return Window.size;
 }
 

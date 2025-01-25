@@ -2,7 +2,6 @@ import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
-//import bindbc.freeimage;;
 import klass;
 import types;
 import txt_parser;
@@ -59,6 +58,16 @@ struct E {
 
     struct
     Content {
+        Size size;
+        enum 
+        SizeType {
+            max_image_text, // default
+            image,
+            text,
+            fixed,
+            parent
+        }
+        SizeType size_type;
         struct
         Text {
           string s;     // "abc"
@@ -70,8 +79,9 @@ struct E {
             bool   italic;  // 0/1
           }
           Font   font;
-          Magnet magnet;  // left / center / right
+          Size   size;
           Color  color;
+          Magnet magnet;  // left / center / right
           struct
           TextRect {
               Pos    pos;
@@ -116,7 +126,16 @@ struct E {
     PosType : ubyte {
         none,
         t9,
-        grid
+        grid,
+    }
+
+    SizeType        size_type;
+
+    enum 
+    SizeType {
+        content, // default
+        fixed,
+        parent
     }
 
     struct

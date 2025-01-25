@@ -76,11 +76,11 @@ sdl2, sdl2_image,
 
 ## Size priority
 
-### size = auto
+### e.size = auto
 e.size = auto                // 120 32
 e.content.image.size = 120 32
 
-### image = auto
+### e.content.image.size = auto
 e.size = 120 32
 e.content.image.size = auto  // 120 32
 
@@ -98,6 +98,15 @@ e.borders.w = 10
 e.size = 120 32                // 120 32
 e.content.image.size = 120 32  // 120 32
 e.borders.w = 10
+
+
+
+### e border content image text
+e.size               = by_content | fixed 120 32 | parent parent.content.size
+by_content           = by_image | by_text | fixed 120 32 | max (content.image, content.text)
+e.content.image.size = by_image | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
+e.content.text.size  = by_text  | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
+
 
 
 # Target

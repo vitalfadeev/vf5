@@ -35,9 +35,10 @@ Token {
     enum
     Type {
         none,
-        string,
-        quoted,
-        spaces,
+        string,   // abc
+        quoted,   // `text`
+        spaces,   // a b
+        comment,  // // comment
         cr
     }
 }

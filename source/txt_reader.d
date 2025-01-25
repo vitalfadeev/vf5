@@ -12,7 +12,10 @@ import klass;
 // RESERVED
 // e
 // import
-// klass
+// map
+// colors
+// hotkeys
+// commands
 
 // RESERVED CLASSES
 // input-text
@@ -20,17 +23,43 @@ import klass;
 // input-radio
 // checked
 // focused
-// colors
+
+// `external program` -> os.execute (["external","program"], NO_WAIT)
+// internal.command   -> send       ("internal.command")
+
+// plugin
+//  on player.prev ...
 
 string text = "
 e root
- e menubar
+ e vbox menubar
   e menubar-item border t9-top-left file
   e menubar-item border t9-top-left play
   e menubar-item border t9-top-left list
   e menubar-item border t9-top-left services
   e menubar-item border t9-top-left output
   e menubar-item border t9-top-left view
+
+ e vbox toolbar
+  e toolbar-item t9-top-left  tb-search
+  e toolbar-item t9-top-left  tb-open
+  e toolbar-item t9-top-left  tb-add
+  e toolbar-item t9-top-left  tb-prev
+  e toolbar-item t9-top-left  tb-play-pause
+  e toolbar-item t9-top-left  tb-stio
+  e toolbar-item t9-top-left  tb-next
+  e toolbar-item t9-top-left  tb-position
+  e toolbar-item t9-top-right tb-time
+  e toolbar-item t9-top-right tb-loop
+  e toolbar-item t9-top-right tb-random
+  e toolbar-item t9-top-right tb-volume
+
+ e vbox playlist
+ e vbox info
+
+ e vbox statusbar
+  e t9-bottom-left  song-file-format
+  e t9-bottom-right song-time
 
  e popup file-popup hidden
   e open
@@ -39,17 +68,30 @@ e root
 
 root
  bg #000
- on start exec-nowait audacious
+ on start player.start
 
 menubar
- size 640 32
- borders 0 none #ccc
+ size    640 32
+ borders 0 none fg+1
 
 menubar-item
- size.w auto
- size.h 32
- text.color #eee
- bg #222
+ size.w     auto
+ size.h     32
+ text.color fg
+ bg         bg
+
+toolbar
+ size    640 32
+ borders 0 none fg+1
+
+toolbar-item
+ size.w        auto
+ size.h        32
+ text.pos.type 9
+ text.group    9
+ text.dir      r
+ text.color    fg+1
+ bg            bg-1
 
 file
  text  Файл
@@ -58,8 +100,6 @@ file
 play
  text Воспроизведение
  on click player.play_pause
- on click exec audtool playback-playpause
- on SDL_MOUSEBUTTONDOWN exec audtool playback-playpause
 
 list
  text Список
@@ -78,19 +118,67 @@ t9-top-left
  pos.group 1
  pos.dir   r
 
+t9-top-right
+ pos.type  9
+ pos.group 3
+ pos.dir   r
+
+t9-center-left
+ pos.type  9
+ pos.group 8
+ pos.dir   r
+
+t9-bottom-left
+ pos.type  9
+ pos.group 7
+ pos.dir   r
+
+t9-bottom-right
+ pos.type  9
+ pos.group 4
+ pos.dir   r
+
+vbox
+ pos.type  grid 1 auto
+
 hidden
  hidden 1
 
 border
- borders 2 solid #cfc
+ borders 2 solid fg+1
 
 focused
- borders 2 solid #0F0DBF
+ borders 2 solid info
 
 input-radio
- input.type radio
- input.radio.group 1
+ input.type         radio
+ input.radio.group  1
  input.radio.checkd 0
+
+colors
+  fg       #eee
+  bg       #222
+  fg+1     #e8e8e8
+  fg-1     #d8d8d8
+  bg+1     #282828
+  bg-1     #181818
+  focused  #0F0DBF
+  info     #0c0
+  warn     #cc0
+  error    #c00
+
+commands
+  player.start      `audacious`
+  player.prev       `audtool playlist-reverse`
+  player.play_pause `audtool playback-playpause`
+  player.stop       `audtool playback-stop`
+  player.next       `audtool playlist-advance`
+
+hotkeys
+  x player.prev
+  c player.play_pause
+  v player.stop
+  b player.next
 ";
 
 string txt2 = "
@@ -118,26 +206,27 @@ file-browser-item
  size 32 32
  borders 2 solid #cfc
 
-klass text image                         on
- File File /home/vf/src/vf5/img/file.png 
- Play Play /home/vf/src/vf5/img/play.png click player.play_pause
- List List /home/vf/src/vf5/img/list.png
+map
+       text image                         on
+ File  File /home/vf/src/vf5/img/file.png 
+ Play  Play /home/vf/src/vf5/img/play.png click player.play_pause
+ List  List /home/vf/src/vf5/img/list.png
 
 colors
- primary
- secondary
- primary+1
- primary-1
- secondary+1
- secondary-1
- info
- warn
- error
+  primary
+  secondary
+  primary+1
+  primary-1
+  secondary+1
+  secondary-1
+  info
+  warn
+  error
 
 // a extend b extend c
 a b c
  fg primary
- bg secondary
+ bg bg
 
 b c
  fg #ccc
@@ -153,11 +242,9 @@ e
  e button status.plaing
 
 title
-  text ? audtool current-song
   text `audtool current-song`
 
 status
-  ? audtool playback-status
   `audtool playback-status`
     plaing
       fg green
@@ -165,6 +252,21 @@ status
       fg yellow
     stopped
       fg red
+
+Play
+  pos      t9 1 r
+  text     play
+  text.pos t9 1 r  // comment. type t9, group 1, dir r
+
+input-text
+  hotkey ctr-+a select.all
+  hotkey ctrl-alt-x player.prev
+  hotkey ctrl-alt-c `audtool playback-playpause`
+  hotkey ctrl-alt-v player.stop
+  hotkey ctrl-alt-b player.next
+
+import ./other_colors
+import ./other_commands
 ";
 
 void
