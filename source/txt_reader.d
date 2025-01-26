@@ -238,20 +238,19 @@ c
 
 e
  e title
- e button status
- e button status.plaing
+ e button status-`audtool playback-status`
 
 title
   text `audtool current-song`
 
-status
-  `audtool playback-status`
-    plaing
-      fg green
-    paused
-      fg yellow
-    stopped
-      fg red
+status-plaing  
+  fg green
+
+status-paused
+  fg yellow
+
+status-stopped
+  fg red
 
 Play
   pos      t9 1 r

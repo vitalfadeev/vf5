@@ -76,6 +76,7 @@ Start_reader : Reader {
             case '"'  : return new QuatedString_reader (dg).go (c);
             case ' '  : return new Spaces_reader (dg).go (c);
             case '\\' : return new Escaped_reader (dg).go (c);
+            case '/'  : return new Comment_reader (dg).go (c);
             case '\n' : return new CR_reader (dg).go (c);
             default   : return new String_reader (dg).go (c);
         }
@@ -148,12 +149,44 @@ Escaped_reader : Reader {
     override
     Reader
     go (dchar c) {
-        if (c == '\\') {
+        if (c == '\\')
             return this;
-        }
-        else {
+        else
             return new Start_reader (dg).go (c);
+    }
+}
+
+class
+Comment_reader : Reader {
+    string s;
+    bool first_slash = true;
+
+    this (int delegate (Token* t) dg) {
+        super (dg);
+    }
+
+    override
+    Reader
+    go (dchar c) {
+        if (c == '/') {
+            if (first_slash) {
+                first_slash = false;
+                s ~= c; // /
+                return this;
+            }
+            else {
+                s ~= c; // //
+                return this; // rest is comment
+            }
         }
+        else
+            if (first_slash) {
+                return new Start_reader (dg).go (c); // /a
+            }
+            else {
+                s ~= c; // //abc
+                return this; // rest is comment
+            }
     }
 }
 

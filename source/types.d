@@ -24,6 +24,16 @@ struct
 Size {
     W w;         // 0..16385 
     H h;         // 0..16385
+
+    Size
+    opBinary (string op : "+") (Size b) {
+        return Size (cast(W)(w+b.w), cast(H)(h+b.h));
+    }
+
+    Size
+    opBinary (string op : "-") (Size b) {
+        return Size (cast(W)(w-b.w), cast(H)(h-b.h));
+    }
 }
 
 struct

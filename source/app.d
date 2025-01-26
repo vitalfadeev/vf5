@@ -13,7 +13,7 @@ main() {
 	pix_init ();
 	Doc* doc = new Doc ();
 	setup (doc);
-	tree_apply_klasses (doc.tree);
+	doc_apply_klasses (doc);
 	doc.update_pos_size ();
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);
@@ -28,12 +28,6 @@ setup (Doc* doc) {
 
 
 //
-void
-tree_apply_klasses (Tree) (Tree* tree) {
-	foreach (t; WalkTree (tree))
-        apply_klasses (t.e);
-}
-
 void
 on_start (Doc* doc) {
     foreach (t; WalkTree (doc.tree))

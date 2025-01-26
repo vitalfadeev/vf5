@@ -12,6 +12,7 @@ Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
     Klass*   colors;
+    Size     size;
 
     Klass*
     find_klass (string s) {
@@ -91,6 +92,20 @@ remove_class (E* e, Klass* kls) {
     if (i != -1)
         e.klasses = e.klasses.remove (i);
 }
+
+void
+doc_apply_klasses (Doc* doc) {
+    foreach (t; WalkTree (doc.tree))
+        doc_apply_e_klasses (doc,t.e);
+}
+
+void
+doc_apply_e_klasses (Doc* doc, E* e) {
+    e.on.length = 0;
+    foreach (Klass* kls; e.klasses)
+        e.apply_klass (doc,e,kls);
+}
+
 
 void
 update_pos_size (Doc* doc) {
@@ -315,43 +330,58 @@ e_size (E* e) {
 }
 
 Size
-e_content_size (E* e) {
+e_content_size (Doc* doc, ETree* t) {
+    auto e = t.e;
     final
-    switch (e.content_size_type) {
-        case E.ContentSizeType.max_image_text : return e_content_size_max    (e); break;
-        case E.ContentSizeType.image          : return e_content_size_image  (e); break;
-        case E.ContentSizeType.text           : return e_content_size_text   (e); break;
-        case E.ContentSizeType.fixed          : return e_content_size_fixed  (e); break;
-        case E.ContentSizeType.parent         : return e_content_size_parent (e); break;
+    switch (e.content.size_type) {
+        case E.Content.SizeType.max_image_text : return e_content_size_max    (doc,t); break;
+        case E.Content.SizeType.image          : return e_content_size_image  (doc,t); break;
+        case E.Content.SizeType.text           : return e_content_size_text   (doc,t); break;
+        case E.Content.SizeType.fixed          : return e_content_size_fixed  (doc,t); break;
+        case E.Content.SizeType.parent         : return e_content_size_parent (doc,t); break;
     }
 }
 
 Size
-e_content_size_max (E* e) {
-    return max (e.content.image.size, e.content.text.size);
+e_content_size_max (Doc* doc, ETree* t) {
+    auto e = t.e;
+    return Size (
+        max (e.content.image.size.w, e.content.text.size.w),
+        max (e.content.image.size.h, e.content.text.size.h)
+    );
 }
 
 Size
-e_content_size_image (E* e) {
+e_content_size_image (Doc* doc, ETree* t) {
+    auto e = t.e;
     return e.content.image.size;
 }
 
 Size
-e_content_size_text (E* e) {
+e_content_size_text (Doc* doc, ETree* t) {
+    auto e = t.e;
     return e.content.text.size;
 }
 
 Size
-e_content_size_fixed (E* e) {
+e_content_size_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
     return e.content.size;
 }
 
 Size
-e_content_size_parent (E* e) {
-    auto e_parent_content_size = e.parent.content.size;
-    auto e_borders_size = 0;
-    auto e_pad_size = 0;
-    if (e.parent !is null)
+e_content_size_parent (Doc* doc, ETree* t) {
+    auto e = t.e;
+    auto e_parent_content_size = t.parent.e.content.size;
+    auto e_borders_size = Size (
+            cast(W)(e.borders.l.w+e.borders.r.w), 
+            cast(H)(e.borders.t.w+e.borders.b.w)
+        );
+    auto e_pad_size = Size (
+            cast(W)(e.pad.l+e.pad.r), 
+            cast(H)(e.pad.t+e.pad.b)
+        );
+    if (t.parent !is null)
         return e_parent_content_size - e_borders_size - e_pad_size;
     else
         return doc.size;
@@ -359,3 +389,10 @@ e_content_size_parent (E* e) {
         //return Window.size;
 }
 
+auto
+max (A,B) (A a, B b) {
+    if (a >= b)
+        return a;
+    else
+        return b;
+}

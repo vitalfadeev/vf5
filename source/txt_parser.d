@@ -1,19 +1,27 @@
 module txt_parser;
 
 import types;
+import klass;
 
 
 bool 
-parse_color (string s, Color* color) {
+parse_color (string s, Klass* colors, Color* color) {
     import std.string : startsWith;
 
     if (s.startsWith ("#"))
         return parse_color_hex (s, color);
     else
-    if (s.startsWith ("rgb"))
-        {}
-    else
-        assert (0, "error: usupported color: " ~ s);
+    if (s.startsWith ("rgb")) {
+        //
+    }
+    else {
+        string[] color_values;
+        if (colors.find (s, color_values)) {
+            return parse_color_hex (color_values[0], color);
+        }
+        else 
+            assert (0, "error: usupported color: " ~ s);
+    }
 
     return false;
 }

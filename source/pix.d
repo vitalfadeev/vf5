@@ -81,8 +81,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     //add_class (doc, clicked_e, "hidden");
                     remove_class (doc, "focused");
                     add_class (doc, clicked_e, "focused");
-                    import app : tree_apply_klasses;
-                    tree_apply_klasses (doc.tree);
+                    doc_apply_klasses (doc);
                     writeln (ev.type, ": e: ", *clicked_e);
                     doc.update_pos_size ();
                     //SDL_UpdateWindowSurface (window);

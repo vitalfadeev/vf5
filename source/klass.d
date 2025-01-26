@@ -14,6 +14,17 @@ struct
 Klass {
     string   name;
     KlassE[] klasse;
+
+    bool
+    find (string s, ref string[] values) {
+        foreach (ke; klasse)
+            if (ke.id == s) {
+                values = ke.values;
+                return true;
+            }
+
+        return false;
+    }
 }
 
 struct
