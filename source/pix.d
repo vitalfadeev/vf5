@@ -73,7 +73,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     // on
                     foreach (_on; clicked_e.on) {
                         if (ev.type.to!string == _on.event) {
-                            go_event_action (clicked_e, _on.action);
+                            go_event_action (doc, clicked_e, _on.action);
                         }
                     }
 

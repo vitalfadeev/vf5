@@ -159,7 +159,6 @@ Escaped_reader : Reader {
 class
 Comment_reader : Reader {
     string s;
-    bool first_slash = true;
 
     this (int delegate (Token* t) dg) {
         super (dg);
@@ -168,25 +167,37 @@ Comment_reader : Reader {
     override
     Reader
     go (dchar c) {
-        if (c == '/') {
-            if (first_slash) {
-                first_slash = false;
-                s ~= c; // /
-                return this;
+        switch (s.length) {
+            case 0: { // /
+                if (c == '/') {
+                    s ~= c;
+                    return this;
+                } 
+                else
+                    return new Start_reader (dg).go (c);
+                break;
             }
-            else {
-                s ~= c; // //
-                return this; // rest is comment
+            case 1: { // //
+                if (c == '/') {
+                    s ~= c;
+                    return this;
+                } 
+                else // /a
+                    return new String_reader (dg,s).go (c);
+                break;
+            }
+            default: { //abc
+                if (c == '\n') {
+                    emit (new Token (Token.Type.comment, s));
+                    return new CR_reader (dg).go (c);
+                }
+                else {                    
+                    s ~= c;
+                    return this;
+                }
             }
         }
-        else
-            if (first_slash) {
-                return new Start_reader (dg).go (c); // /a
-            }
-            else {
-                s ~= c; // //abc
-                return this; // rest is comment
-            }
+
     }
 }
 
@@ -218,6 +229,11 @@ String_reader : Reader {
 
     this (int delegate (Token* t) dg) {
         super (dg);
+    }
+
+    this (int delegate (Token* t) dg, string s) {
+        super (dg);
+        this.s = s;
     }
 
     override

@@ -23,6 +23,9 @@ main() {
 
 void
 setup (Doc* doc) {
+	doc.colors   = doc.find_klass_or_create ("colors");
+	doc.hotkeys  = doc.find_klass_or_create ("hotkeys");
+	doc.commands = doc.find_klass_or_create ("commands");
 	txt_reader.go (doc, txt_reader.text);
 }
 
@@ -31,14 +34,14 @@ setup (Doc* doc) {
 void
 on_start (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
-        _on_start (t.e);
+        _on_start (doc, t.e);
 }
 
 void
-_on_start (E* e) {
+_on_start (Doc* doc, E* e) {
     foreach (_on; e.on) {
         if (_on.event == "start") {
-        	exec_action (_on.action);
+        	exec_action (doc, _on.action);
         }
     }
 }

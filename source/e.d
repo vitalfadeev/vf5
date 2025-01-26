@@ -172,6 +172,7 @@ Magnet {
 //
 void
 apply_klasses (Doc* doc, E* e) {
+    writeln (*e, " ", e.apply_klass);
     e.on.length = 0;
     foreach (Klass* kls; e.klasses)
         e.apply_klass (doc,e,kls);
@@ -179,7 +180,9 @@ apply_klasses (Doc* doc, E* e) {
 
 void
 apply_klass (Doc* doc, E* e, Klass* k) {
+    writeln (" ", k.name);
     foreach (ke; k.klasse) {
+        writeln ("  ", ke.id);
         switch (ke.id) {
             case "pos.x"         : set_pos_x         (doc,e,ke.values); break;
             case "pos.y"         : set_pos_y         (doc,e,ke.values); break;

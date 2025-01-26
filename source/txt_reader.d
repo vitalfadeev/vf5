@@ -168,17 +168,20 @@ colors
   error    #c00
 
 commands
-  player.start      `audacious`
-  player.prev       `audtool playlist-reverse`
-  player.play_pause `audtool playback-playpause`
-  player.stop       `audtool playback-stop`
-  player.next       `audtool playlist-advance`
+  player.start      audacious
+  player.prev       audtool playlist-reverse
+  player.play_pause audtool playback-playpause
+  player.stop       audtool playback-stop
+  player.next       audtool playlist-advance
 
 hotkeys
   x player.prev
   c player.play_pause
   v player.stop
   b player.next
+
+// comment 1
+// comment 2
 ";
 
 string txt2 = "

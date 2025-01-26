@@ -1,5 +1,7 @@
 module doc;
 
+import std.conv;
+import std.string : startsWith;
 import etree;
 import klass;
 import e;
@@ -12,6 +14,8 @@ Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
     Klass*   colors;
+    Klass*   hotkeys;
+    Klass*   commands;
     Size     size;
 
     Klass*
@@ -96,14 +100,7 @@ remove_class (E* e, Klass* kls) {
 void
 doc_apply_klasses (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
-        doc_apply_e_klasses (doc,t.e);
-}
-
-void
-doc_apply_e_klasses (Doc* doc, E* e) {
-    e.on.length = 0;
-    foreach (Klass* kls; e.klasses)
-        e.apply_klass (doc,e,kls);
+        e.apply_klasses (doc,t.e);
 }
 
 
@@ -238,29 +235,50 @@ find_last_in_group (ETree* t, ubyte pos_group) {
 
 
 void
-go_event_action (E* e, string[] action) {
-    exec_action (action);
+go_event_action (Doc* doc, E* e, string[] action) {
+    exec_action (doc, action);
 }
 
 void
-exec_action (string[] action) {
+exec_action (Doc* doc, string[] action) {
     import std.process;
     
     if (action.length) {
         writeln (action);
-        if (action[0] == "exec" || action[0] == "exec-wait") {
-            if (action.length >= 2) {
-                writeln ("  EXEC: ", action[1..$]);
-                auto ret = execute (action[1..$]);  // (int status, string output)
-            }
+        if (action[0].startsWith ("`")) { // `audacious`
+            // exec `audacious`
+            writeln ("  EXEC: ", action);
+            auto pid = spawnProcess (action);
         }
-        else
-        if (action[0] == "exec-nowait") {
-            if (action.length >= 2) {
-                writeln ("  EXEC: ", action[1..$]);
-                auto pid = spawnProcess (action[1..$]);
+        else {
+            string[] vs;            
+            if (doc.commands.find (action[0], vs)) { // player.start
+                // exec commands player.start
+                writeln ("  EXEC: ", vs);
+                auto pid = spawnProcess (vs);
             }
-        }    
+            else 
+                assert (0, "unsupported command: " ~ action.to!string);
+        }
+        
+
+
+
+
+
+        //if (action[0] == "exec" || action[0] == "exec-wait") {
+        //    if (action.length >= 2) {
+        //        writeln ("  EXEC: ", action[1..$]);
+        //        auto ret = execute (action[1..$]);  // (int status, string output)
+        //    }
+        //}
+        //else
+        //if (action[0] == "exec-nowait") {
+        //    if (action.length >= 2) {
+        //        writeln ("  EXEC: ", action[1..$]);
+        //        auto pid = spawnProcess (action[1..$]);
+        //    }
+        //}    
     }    
 }
 
