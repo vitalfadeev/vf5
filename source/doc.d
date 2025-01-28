@@ -1,7 +1,13 @@
 module doc;
 
 import std.conv;
+import std.string;
 import std.string : startsWith;
+import std.string : fromStringz, toStringz; 
+import std.algorithm.searching : canFind;
+import bindbc.sdl;
+import bindbc.sdl.image;
+import bindbc.sdl.ttf;
 import etree;
 import klass;
 import e;
@@ -10,6 +16,7 @@ import draw : get_text_size;
 import pix : global_font;
 import std.stdio : writeln;
 import pix : open_font;
+import pix : IMGException;
 
 
 struct
@@ -112,7 +119,7 @@ load_fonts (Doc* doc) {
 
 void
 load_colors (Doc* doc) {
-    //
+    // after load all classes, because able color 'class.field'
 }
 
 void
@@ -127,7 +134,7 @@ load_e_image (E* e) {
     if (e.cached.content_image_ptr is null) {
         auto img_surface = IMG_Load (e.content.image.src.toStringz);
         if (img_surface)
-            throw new IMGException (IMG_Load);
+            throw new IMGException ("IMG_Load");
         e.cached.content_image_ptr = img_surface;
         e.cached.content_image_size = Size (
             cast(ushort)img_surface.w,
@@ -145,7 +152,7 @@ load_texts (Doc* doc) {
 
 void
 load_e_text (E* e) {
-    e.content.text.rects.capacity = e.content.text.s.length;
+    e.content.text.rects.reserve (e.content.text.s.length);
 
     foreach (dchar c; e.content.text.s) {
         e.content.text.rects ~= E.Content.Text.TextRect (
@@ -176,9 +183,9 @@ update_e_text_size (E* e) {
 void
 update_pos_size (Doc* doc) {
     foreach (ETree* t; WalkTree (doc.tree))
-        update_size (t);
+        update_size (doc,t);
     foreach (ETree* t; WalkTree (doc.tree))
-        update_pos (t);
+        update_pos (doc,t);
 }
 
 // e size
@@ -201,7 +208,7 @@ update_pos_size (Doc* doc) {
 //     image
 //     content
 void
-update_size (ETree* t) {
+update_size (Doc* doc, ETree* t) {
     E* e = t.e;
 
     if (t.e is null)
@@ -253,7 +260,7 @@ update_size (ETree* t) {
     switch (e.size_type) {
         case E.SizeType.fixed   : e_size_fixed   (doc,t); break;
         case E.SizeType.content : e_size_content (doc,t); break;
-        case E.SizeType.parent  : e_size_parent (doc,t); break;
+        case E.SizeType.parent  : e_size_parent  (doc,t); break;
     }
 }
 
@@ -273,7 +280,7 @@ e_size_content (Doc* doc, ETree* t) {
 void
 e_size_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.size = e.parent.content.size;
+    e.cached.size = t.parent.e.content.size;
 }
 
 void
@@ -309,7 +316,7 @@ e_content_size_text (Doc* doc, ETree* t) {
 }
 
 void
-e_content_size_parent (Doc* doc, ETree* t) {
+e_content_size_e (Doc* doc, ETree* t) {
     auto e = t.e;
     if (t.parent !is null)
         e.cached.content_size = t.parent.e.content.size;
@@ -333,7 +340,7 @@ e_content_image_size (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
-    switch (e.content.size_type) {
+    switch (e.content.image.size_type) {
         case E.Content.Image.SizeType.fixed   : e_content_image_size_fixed   (doc,t); break;
         case E.Content.Image.SizeType.image   : e_content_image_size_image   (doc,t); break;
         case E.Content.Image.SizeType.text    : e_content_image_size_text    (doc,t); break;
@@ -381,7 +388,7 @@ e_content_text_size (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
-    switch (e.content.size_type) {
+    switch (e.content.text.size_type) {
         case E.Content.Text.SizeType.fixed   : e_content_text_size_fixed   (doc,t); break;
         case E.Content.Text.SizeType.text    : e_content_text_size_text    (doc,t); break;
         case E.Content.Text.SizeType.image   : e_content_text_size_image   (doc,t); break;
@@ -421,7 +428,7 @@ e_content_text_size_content (Doc* doc, ETree* t) {
 
 
 void
-update_pos (ETree* t) {
+update_pos (Doc* doc, ETree* t) {
     E* e = t.e;
 
     if (t.e is null)
@@ -435,16 +442,17 @@ update_pos (ETree* t) {
    }
 
    // text pos
-   update_text_rects_pos (E* e);
+   update_text_rects_pos (e);
 }
 
 void
-update_text_rects_pos () {
+update_text_rects_pos (E* e) {
     int outw, outh;
-    X _x = x;
-    foreach (ref rec; rects) {
+    X _x = e.content.text.pos.x;
+    Y  y = e.content.text.pos.y;
+    foreach (ref rec; e.content.text.rects) {
         if (rec.s.length) {
-            SDL_QueryTexture (image, null, null, &outw, &outh);
+            SDL_QueryTexture (rec.ptr, null, null, &outw, &outh);
 
             rec.pos.x = _x;
             rec.pos.y =  y;
@@ -524,41 +532,39 @@ exec_action (Doc* doc, string[] action) {
     
     if (action.length) {
         writeln (action);
-        if (action[0].startsWith ("`")) { // `audacious`
-            // exec `audacious`
-            writeln ("  EXEC: ", action);
-            auto pid = spawnProcess (action);
-        }
-        else {
-            string[] vs;            
-            if (doc.commands.find (action[0], vs)) { // player.start
-                // exec commands player.start
-                writeln ("  EXEC: ", vs);
-                auto pid = spawnProcess (vs);
-            }
-            else 
-                assert (0, "unsupported command: " ~ action.to!string);
-        }
+        string[] cmd = doc_get_klass_field_value (doc,action[0]);
+        if (cmd.length)
+            goto exec;
+        else
+            cmd = action;
         
+        //
+    exec:
+        if (cmd.length) {
+            // raw exec
+            writeln ("  EXEC: ", cmd);
+            auto pid = spawnProcess (cmd);
+        }    
+    }
+}
 
+string[]
+doc_get_klass_field_value (Doc* doc, string s) {
+    auto dot = s.indexOf ('.');
+    if (dot != -1) {
+        // class field
+        auto klass_name  = s[0..dot];
+        auto klass_field = s[dot+1..$];
+        auto kls = doc.find_klass (klass_name);
+        if (kls !is null) {
+            string[] values;
+            if (kls.find (klass_field, values)) {
+                return values;// OK
+            }
+        }
+    }
 
-
-
-
-        //if (action[0] == "exec" || action[0] == "exec-wait") {
-        //    if (action.length >= 2) {
-        //        writeln ("  EXEC: ", action[1..$]);
-        //        auto ret = execute (action[1..$]);  // (int status, string output)
-        //    }
-        //}
-        //else
-        //if (action[0] == "exec-nowait") {
-        //    if (action.length >= 2) {
-        //        writeln ("  EXEC: ", action[1..$]);
-        //        auto pid = spawnProcess (action[1..$]);
-        //    }
-        //}    
-    }    
+    return [];
 }
 
 //status

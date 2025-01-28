@@ -84,11 +84,21 @@ struct E {
           Size   size;
           Color  color;
           Magnet magnet;  // left / center / right
+          Pos    pos;
+          enum
+          SizeType {
+            fixed,
+            image,
+            text,
+            content,
+          }
+          SizeType size_type;
           struct
           TextRect {
               Pos    pos;
               Size   size;
               string s;  // chars[a..b]
+              SDL_Texture* ptr;
           }
           TextRect[] rects;
         }
@@ -107,6 +117,7 @@ struct E {
             text,
             content,
           }
+          SizeType size_type;
         }
         Image image;
     }
@@ -445,9 +456,30 @@ void
 set_border_color (Doc* doc, E* e, E.Border* border, string[] values) {
     if (values.length) {
         Color c;
-        if (parse_color (values[0], doc.colors, &c))
+        if (doc_parse_color (doc, values[0], &c))
             border.color = c;
+        else
+            throw new Exception ("unsupported color: " ~ values.to!string);
     }
+}
+
+bool
+doc_parse_color (Doc* doc, string s, Color* color) {
+    import std.string : startsWith;
+
+    if (s.startsWith ("#"))
+        return parse_color_hex (s, color);
+    else
+    if (s.startsWith ("rgb")) {
+        //
+    }
+    else {
+        string[] color_s = doc_get_klass_field_value (doc,s);
+        if (color_s.length)
+            return parse_color (color_s[0], color); 
+    }
+
+    return false;
 }
 
 void
@@ -469,8 +501,10 @@ void
 set_text_color (Doc* doc, E* e, string[] values) {
     if (values.length) {
         Color c;
-        if (parse_color (values[0], doc.colors, &c))
+        if (doc_parse_color (doc, values[0], &c))
             e.content.text.color = c;
+        else
+            throw new Exception ("unsupported color: " ~ values.to!string);
     }
 }
 
@@ -478,8 +512,10 @@ void
 set_bg (Doc* doc, E* e, string[] values) {
     if (values.length) {
         Color c;
-        if (parse_color (values[0], doc.colors, &c))
+        if (doc_parse_color (doc,values[0], &c))
             e.bg = c;
+        else
+            throw new Exception ("unsupported color: " ~ values.to!string);
     }
 }
 

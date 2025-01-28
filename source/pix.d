@@ -11,6 +11,7 @@ import draw;
 import etree;
 import types;
 import std.string : fromStringz; 
+import std.string : toStringz;
 import std.algorithm.searching : canFind;
 
 

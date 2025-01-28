@@ -51,7 +51,7 @@ _text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, 
     // from text.rects
     foreach (ref rec; rects)
         if (rec.s.length)
-            one_string (renderer, rec.s, font, color, rec.x, rec.y, rec.w, rec.h);
+            one_string (renderer, rec.s, font, color, rec.pos.x, rec.pos.y, rec.size.w, rec.size.h);
 }
 
 Size

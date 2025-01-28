@@ -12,6 +12,7 @@ void
 main() {
 	pix_init ();
 	Doc* doc = new Doc ();
+	// load e and classes
 	doc.setup ();
 	// 1
 	doc.doc_apply_klasses ();

@@ -6,7 +6,7 @@ import std.stdio : writeln;
 
 
 bool 
-parse_color (string s, Klass* colors, Color* color) {
+parse_color (string s, Color* color) {
     import std.string : startsWith;
 
     if (s.startsWith ("#"))
@@ -16,12 +16,7 @@ parse_color (string s, Klass* colors, Color* color) {
         //
     }
     else {
-        writeln ("PARSE_COLOR: ", s);
-        string[] color_values;
-        if (colors.find (s, color_values))
-            return parse_color (color_values[0], colors, color);
-        else 
-            assert (0, "error: usupported color: " ~ s);
+        assert (0, "error: usupported color: " ~ s);
     }
 
     return false;
