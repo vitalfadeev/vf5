@@ -82,9 +82,24 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     //add_class (doc, clicked_e, "hidden");
                     remove_class (doc, "focused");
                     add_class (doc, clicked_e, "focused");
-                    doc_apply_klasses (doc);
                     writeln (ev.type, ": e: ", *clicked_e);
+
+                    // 1
+                    doc.doc_apply_klasses ();
+                    // 2
+                    doc.load_images ();
+                    // 3
+                    doc.load_fonts ();
+                    // 4
+                    doc.load_colors ();
+                    // 5
+                    doc.load_texts ();
+                    // 6
+                    doc.update_text_size ();
+                    // ...
+                    // 7
                     doc.update_pos_size ();
+
                     //SDL_UpdateWindowSurface (window);
                     draw_doc (renderer,doc);
                 }

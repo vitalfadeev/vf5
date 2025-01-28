@@ -121,8 +121,8 @@ content_size (E* e) {
 
 void
 draw_e (SDL_Renderer* renderer, E* e) {
-    draw_borders (renderer, e);
-    draw_content (renderer, e);
+    draw_borders (renderer,e);
+    draw_content (renderer,e);
 /*
     // pad
     if (e.pad.t)
@@ -220,6 +220,8 @@ draw_borders (SDL_Renderer* renderer, E* e) {
         e.borders.t.color.b,
         e.borders.t.color.a,
     );
+    SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    writeln (e.size);
     draw8 (
         renderer, 
         e.pos.x, 
