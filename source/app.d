@@ -23,7 +23,6 @@ main() {
 	doc.load_colors ();
 	// 5
 	doc.load_texts ();
-	// ...
 	// 6
 	doc.update_text_size ();
 	// ...

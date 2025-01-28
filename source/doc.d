@@ -9,6 +9,7 @@ import types;
 import draw : get_text_size;
 import pix : global_font;
 import std.stdio : writeln;
+import pix : open_font;
 
 
 struct
@@ -104,6 +105,17 @@ doc_apply_klasses (Doc* doc) {
 }
 
 void
+load_fonts (Doc* doc) {
+    if (global_font is null)
+        global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
+}
+
+void
+load_colors (Doc* doc) {
+    //
+}
+
+void
 load_images (Doc* doc) {
     foreach (ETree* t; WalkTree (doc.tree))
         if (t.e.content.image.src.length)
@@ -112,12 +124,36 @@ load_images (Doc* doc) {
 
 void
 load_e_image (E* e) {
-    auto img_surface = IMG_Load (e.content.image.src.toStringz);
-    e.cached.content_image_ptr = img_surface;
-    e.cached.content_image_size = Size (
-        cast(ushort)img_surface.w,
-        cast(ushort)img_surface.h
-    );
+    if (e.cached.content_image_ptr is null) {
+        auto img_surface = IMG_Load (e.content.image.src.toStringz);
+        if (img_surface)
+            throw new IMGException (IMG_Load);
+        e.cached.content_image_ptr = img_surface;
+        e.cached.content_image_size = Size (
+            cast(ushort)img_surface.w,
+            cast(ushort)img_surface.h
+        );
+    }
+}
+
+void
+load_texts (Doc* doc) {
+    foreach (ETree* t; WalkTree (doc.tree))
+        if (t.e.content.text.s.length)
+            load_e_text (t.e);
+}
+
+void
+load_e_text (E* e) {
+    e.content.text.rects.capacity = e.content.text.s.length;
+
+    foreach (dchar c; e.content.text.s) {
+        e.content.text.rects ~= E.Content.Text.TextRect (
+            Pos(), 
+            Size(), 
+            c.to!string
+        );
+    }
 }
 
 void
@@ -129,11 +165,12 @@ update_text_size (Doc* doc) {
 
 void
 update_e_text_size (E* e) {
-    e.content.text.size = get_text_size (
-        e.content.text.s, 
-        global_font, //e.content.text.font.ptr, 
-        e.content.text.color, 
-    );
+    foreach (ref rec; e.content.text.rects)
+        rec.size = get_text_size (
+            e.content.text.s, 
+            global_font, //e.content.text.font.ptr, 
+            e.content.text.color, 
+        );
 }
 
 void
@@ -385,17 +422,37 @@ e_content_text_size_content (Doc* doc, ETree* t) {
 
 void
 update_pos (ETree* t) {
-   E* e = t.e;
+    E* e = t.e;
 
-   if (t.e is null)
-       return;
+    if (t.e is null)
+        return;
 
-   //
-   switch (e.pos_type) {
-    case E.PosType.t9   : pos_type_t9 (t); break;
-    case E.PosType.grid : pos_type_grid (t); break;
-    default:
-   }      
+    //
+    switch (e.pos_type) {
+        case E.PosType.t9   : pos_type_t9 (t); break;
+        case E.PosType.grid : pos_type_grid (t); break;
+        default:
+   }
+
+   // text pos
+   update_text_rects_pos (E* e);
+}
+
+void
+update_text_rects_pos () {
+    int outw, outh;
+    X _x = x;
+    foreach (ref rec; rects) {
+        if (rec.s.length) {
+            SDL_QueryTexture (image, null, null, &outw, &outh);
+
+            rec.pos.x = _x;
+            rec.pos.y =  y;
+            rec.size.w = cast(W)!outw;
+            rec.size.h = cast(H)!outh;
+            _x += outw;
+        }
+    }
 }
 
 

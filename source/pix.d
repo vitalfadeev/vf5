@@ -182,7 +182,7 @@ TTF_Font* global_font;
 
 void
 ttf_open_font () {
-    global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
+    //global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
     //global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Bold.ttf", 12);
 }
 
@@ -232,6 +232,18 @@ new_renderer (SDL_Window* window) {
 }
 
 
+TTF_Font*
+open_font (string file_name, int font_size) {
+    //TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
+    TTF_Font* font = TTF_OpenFontDPI (file_name.toStringz, font_size, 102, 102);
+    if (font !is null)
+        return font;
+
+    throw new TTFException ("TTF_OpenFont");
+}
+
+
+
 //
 class 
 SDLException : Exception {
@@ -245,6 +257,15 @@ TTFException : Exception{
     this (string s) {
         super (
             format!"%s: %s"(s, fromStringz(TTF_GetError()))
+        );
+    }
+}
+
+class 
+IMGException : Exception{
+    this (string s) {
+        super (
+            format!"%s: %s"(s, fromStringz(IMG_GetError()))
         );
     }
 }

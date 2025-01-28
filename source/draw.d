@@ -47,20 +47,11 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 
 void
-text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, Color color, X x, Y y, W w, H h) {
+_text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, Color color, X x, Y y, W w, H h) {
     // from text.rects
-    int outw, outh;
-    X _x = x;
-    foreach (ref rec; rects) {
-        if (rec.s.length) {
-            one_string (renderer, rec.s, font, color, _x, y, w, h, &outw, &outh);
-            rec.pos.x = _x;
-            rec.pos.y =  y;
-            rec.size.w = cast(W)!outw;
-            rec.size.h = cast(H)!outh;
-            _x += outw;
-        }
-    }
+    foreach (ref rec; rects)
+        if (rec.s.length)
+            one_string (renderer, rec.s, font, color, rec.x, rec.y, rec.w, rec.h);
 }
 
 Size
@@ -71,63 +62,11 @@ get_text_size (string s, TTF_Font* font, Color color) {
     return Size (cast(W)w,cast(H)h);
 }
 
-void
-one_char (SDL_Renderer* renderer, dchar c, TTF_Font* font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
-    auto image = _one_char (renderer, c, font, color, x, y);
-
-    //
-    int SCREEN_WIDTH  = 640;
-    int SCREEN_HEIGHT = 480;
-
-    int iW, iH;
-    SDL_QueryTexture (image, null, null, &iW, &iH);
-    *outw = iW;
-    *outh = iH;
-    int cx = SCREEN_WIDTH / 2 - iW / 2;
-    int cy = SCREEN_HEIGHT / 2 - iH / 2;
-
-    //
-    //render_texture (renderer, image, cx, cy);
-    render_texture (renderer, image, x, y);
-}
-
-SDL_Texture*
-_one_char (SDL_Renderer* renderer, dchar c, TTF_Font* font, Color color, X x, Y y) {
-    // e.text.s = s
-    // each c; s
-    //   e.rects = Rect (c)
-    // one_char (e.rects[0].s)
-
-    SDL_Surface* surf = TTF_RenderGlyph32_Blended (font, c, color);
-    if (surf is null)
-        throw new TTFException ("TTF_RenderText");
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
-    if (texture is null)
-        throw new SDLException ("CreateTexture");
-
-    SDL_FreeSurface (surf);
-
-    return texture;
-}
 
 void
-one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
+one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y, W w, H h) {
     auto image = _one_string (renderer, s, font, color, x, y);
-
-    //
-    int SCREEN_WIDTH  = 640;
-    int SCREEN_HEIGHT = 480;
-
-    int iW, iH;
-    SDL_QueryTexture (image, null, null, &iW, &iH);
-    *outw = iW;
-    *outh = iH;
-    int cx = SCREEN_WIDTH / 2 - iW / 2;
-    int cy = SCREEN_HEIGHT / 2 - iH / 2;
-
-    //
-    render_texture (renderer, image, x, y);
+    render_texture (renderer, image, x, y, w, h);
 }
 
 SDL_Texture*
@@ -151,22 +90,17 @@ _one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x,
 }
 
 void 
-render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst, SDL_Rect* clip = null) {
-    SDL_RenderCopy (renderer, tex, clip, &dst);
+render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst) {
+    SDL_RenderCopy (renderer, tex, null, &dst);
 }
 void 
-render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, SDL_Rect* clip = null) {
+render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, int h) {
     SDL_Rect dst;
     dst.x = x;
     dst.y = y;
-    if (clip !is null) {
-        dst.w = clip.w;
-        dst.h = clip.h;
-    }
-    else {
-        SDL_QueryTexture (tex, null, null, &dst.w, &dst.h);
-    }
-    render_texture (renderer, tex, dst, clip);
+    dst.w = w;
+    dst.h = h;
+    render_texture (renderer, tex, dst);
 }
 
 Pos
@@ -183,16 +117,6 @@ content_size (E* e) {
         cast(W)(e.size.w - e.borders.l.w - e.borders.r.w), 
         cast(H)(e.size.h - e.borders.t.w - e.borders.b.w)
     );
-}
-
-TTF_Font*
-open_font (string file_name, int font_size) {
-    //TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
-    TTF_Font* font = TTF_OpenFontDPI (file_name.toStringz, font_size, 102, 102);
-    if (font !is null)
-        return font;
-
-    throw new TTFException ("TTF_OpenFont");
 }
 
 void
@@ -333,12 +257,7 @@ draw_text (SDL_Renderer* renderer, E* e, Pos cp, Size cs) {
     // draw rects
     //   foreach rect rects
     //   one_char
-    e.content.text.rects.length = e.content.text.s.length;
-    foreach (dchar c; e.content.text.s) {
-        e.content.text.rects ~= E.Content.Text.TextRect (Pos(), Size(), c.to!string);
-    }
-
-    text (renderer, e.content.text.rects, global_font, e.content.text.color, cp.x, cp.y, cs.w, cs.h);
+    _text (renderer, e.content.text.rects, global_font, e.content.text.color, cp.x, cp.y, cs.w, cs.h);
 }
 
 
