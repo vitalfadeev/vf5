@@ -62,11 +62,11 @@ struct E {
         Size size;
         enum 
         SizeType {
-            max_image_text, // default
+            fixed, // default
             image,
             text,
-            fixed,
-            parent
+            max,   // max (image,text)
+            e,
         }
         SizeType size_type;
         struct
@@ -78,6 +78,7 @@ struct E {
             ubyte  size;    // 0..256
             bool   bold;    // 0/1
             bool   italic;  // 0/1
+            void*  ptr;  // 0/1
           }
           Font   font;
           Size   size;
@@ -99,6 +100,13 @@ struct E {
           Size   size = Size (100,100);
           BG     bg;
           void*  ptr;
+          enum
+          SizeType {
+            fixed,
+            image,
+            text,
+            content,
+          }
         }
         Image image;
     }
@@ -128,6 +136,8 @@ struct E {
         none,
         t9,
         grid,
+        vbox,
+        hbox,
     }
 
     SizeType        size_type;
@@ -145,6 +155,17 @@ struct E {
         string[] action; // exec audacious --play-pause
     }
     On[] on;
+
+    //
+    struct 
+    Cached {
+        Size         size;
+        Size         content_size;
+        Size         content_image_size;
+        SDL_Surface* content_image_ptr;
+        Size         content_text_size;
+    }
+    Cached cached;
     
     //
     void function (SDL_Renderer* renderer, E* e) draw; // simple, bordered, bordered-titled, custom
@@ -233,6 +254,8 @@ set_pos_type (Doc* doc, E* e, string[] values) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
             case "grid" : e.pos_type = E.PosType.grid; break;
+            case "vbox" : e.pos_type = E.PosType.vbox; break;
+            case "hbox" : e.pos_type = E.PosType.hbox; break;
             default:
                 e.pos_type = E.PosType.none;
         }
@@ -430,16 +453,7 @@ set_border_color (Doc* doc, E* e, E.Border* border, string[] values) {
 void
 set_content_image (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        e.content.image.src = values[0];    
-
-        if (e.content.image.src.length) {
-            auto img_surface = IMG_Load (e.content.image.src.toStringz);
-            e.content.image.ptr = img_surface;
-            e.content.image.size.w = cast(ushort)img_surface.w;
-            e.content.image.size.h = cast(ushort)img_surface.h;
-        }
-        else
-            e.content.image.ptr = null;
+        e.content.image.src = values[0];
     }
 }
 

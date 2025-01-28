@@ -7,6 +7,7 @@ import bindbc.sdl;
 import bindbc.sdl.image;
 import e;
 import types;
+import doc : max;
 import pix : SDLException, TTFException, global_font;
 
 
@@ -46,7 +47,7 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 
 void
-text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font *font, Color color, X x, Y y, W w, H h) {
+text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, Color color, X x, Y y, W w, H h) {
     // from text.rects
     int outw, outh;
     X _x = x;
@@ -62,8 +63,16 @@ text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font *font, C
     }
 }
 
+Size
+get_text_size (string s, TTF_Font* font, Color color) {
+    int w, h;
+    auto ret = TTF_SizeUTF8 (font, s.toStringz, &w, &h);
+    
+    return Size (cast(W)w,cast(H)h);
+}
+
 void
-one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
+one_char (SDL_Renderer* renderer, dchar c, TTF_Font* font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
     auto image = _one_char (renderer, c, font, color, x, y);
 
     //
@@ -83,7 +92,7 @@ one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y y
 }
 
 SDL_Texture*
-_one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y y) {
+_one_char (SDL_Renderer* renderer, dchar c, TTF_Font* font, Color color, X x, Y y) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
@@ -103,7 +112,7 @@ _one_char (SDL_Renderer* renderer, dchar c, TTF_Font *font, Color color, X x, Y 
 }
 
 void
-one_string (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
+one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y, W w, H h, int* outw, int* outh) {
     auto image = _one_string (renderer, s, font, color, x, y);
 
     //
@@ -122,7 +131,7 @@ one_string (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, 
 }
 
 SDL_Texture*
-_one_string (SDL_Renderer* renderer, string s, TTF_Font *font, Color color, X x, Y y) {
+_one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)

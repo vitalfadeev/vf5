@@ -12,9 +12,24 @@ void
 main() {
 	pix_init ();
 	Doc* doc = new Doc ();
-	setup (doc);
-	doc_apply_klasses (doc);
+	doc.setup ();
+	// 1
+	doc.doc_apply_klasses ();
+	// 2
+	doc.load_images ();
+	// 3
+	doc.load_fonts ();
+	// 4
+	doc.load_colors ();
+	// 5
+	doc.load_texts ();
+	// ...
+	// 6
+	doc.update_text_size ();
+	// ...
+	// 7
 	doc.update_pos_size ();
+	//
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);
 	on_start (doc);
@@ -23,9 +38,6 @@ main() {
 
 void
 setup (Doc* doc) {
-	doc.colors   = doc.find_klass_or_create ("colors");
-	doc.hotkeys  = doc.find_klass_or_create ("hotkeys");
-	doc.commands = doc.find_klass_or_create ("commands");
 	txt_reader.go (doc, txt_reader.text);
 }
 

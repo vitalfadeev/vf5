@@ -6,6 +6,8 @@ import etree;
 import klass;
 import e;
 import types;
+import draw : get_text_size;
+import pix : global_font;
 import std.stdio : writeln;
 
 
@@ -13,9 +15,7 @@ struct
 Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
-    Klass*   colors;
     Klass*   hotkeys;
-    Klass*   commands;
     Size     size;
 
     Klass*
@@ -103,6 +103,38 @@ doc_apply_klasses (Doc* doc) {
         e.apply_klasses (doc,t.e);
 }
 
+void
+load_images (Doc* doc) {
+    foreach (ETree* t; WalkTree (doc.tree))
+        if (t.e.content.image.src.length)
+            load_e_image (t.e);
+}
+
+void
+load_e_image (E* e) {
+    auto img_surface = IMG_Load (e.content.image.src.toStringz);
+    e.cached.content_image_ptr = img_surface;
+    e.cached.content_image_size = Size (
+        cast(ushort)img_surface.w,
+        cast(ushort)img_surface.h
+    );
+}
+
+void
+update_text_size (Doc* doc) {
+    foreach (ETree* t; WalkTree (doc.tree))
+        if (t.e.content.text.s.length)
+            update_e_text_size (t.e);
+}
+
+void
+update_e_text_size (E* e) {
+    e.content.text.size = get_text_size (
+        e.content.text.s, 
+        global_font, //e.content.text.font.ptr, 
+        e.content.text.color, 
+    );
+}
 
 void
 update_pos_size (Doc* doc) {
@@ -112,6 +144,25 @@ update_pos_size (Doc* doc) {
         update_pos (t);
 }
 
+// e size
+//   fixed
+//   content
+//   parent
+// content size
+//   fixed
+//   image
+//   text
+//   e
+//   image size
+//     fixed
+//     image
+//     text
+//     content
+//   text size
+//     fixed
+//     text
+//     image
+//     content
 void
 update_size (ETree* t) {
     E* e = t.e;
@@ -159,7 +210,178 @@ update_size (ETree* t) {
             // keep
         }
     }
+
+    //
+    final
+    switch (e.size_type) {
+        case E.SizeType.fixed   : e_size_fixed   (doc,t); break;
+        case E.SizeType.content : e_size_content (doc,t); break;
+        case E.SizeType.parent  : e_size_parent (doc,t); break;
+    }
 }
+
+void
+e_size_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.size = e.size;
+}
+
+void
+e_size_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e_content_size (doc,t);
+    e.cached.size = e.content.size;
+}
+
+void
+e_size_parent (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.size = e.parent.content.size;
+}
+
+void
+e_content_size (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.size_type) {
+        case E.Content.SizeType.fixed : e_content_size_fixed  (doc,t); break;
+        case E.Content.SizeType.max   : e_content_size_max    (doc,t); break;
+        case E.Content.SizeType.image : e_content_size_image  (doc,t); break;
+        case E.Content.SizeType.text  : e_content_size_text   (doc,t); break;
+        case E.Content.SizeType.e     : e_content_size_e      (doc,t); break;
+    }
+}
+
+void
+e_content_size_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_size = e.content.size;
+}
+
+void
+e_content_size_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_size = e.content.image.size;
+}
+
+void
+e_content_size_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_size = e.content.text.size;
+}
+
+void
+e_content_size_parent (Doc* doc, ETree* t) {
+    auto e = t.e;
+    if (t.parent !is null)
+        e.cached.content_size = t.parent.e.content.size;
+    else
+        e.cached.content_size = doc.size;
+        //return Screen.size;
+        //return Window.size;
+}
+
+void
+e_content_size_max (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_size = Size (
+        max (e.content.image.size.w, e.content.text.size.w),
+        max (e.content.image.size.h, e.content.text.size.h)
+    );
+}
+
+void
+e_content_image_size (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.size_type) {
+        case E.Content.Image.SizeType.fixed   : e_content_image_size_fixed   (doc,t); break;
+        case E.Content.Image.SizeType.image   : e_content_image_size_image   (doc,t); break;
+        case E.Content.Image.SizeType.text    : e_content_image_size_text    (doc,t); break;
+        case E.Content.Image.SizeType.content : e_content_image_size_content (doc,t); break;
+    }
+}
+
+void 
+e_content_image_size_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_image_size = e.content.image.size;
+}
+
+void 
+e_content_image_size_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    if (e.cached.content_image_ptr !is null) {
+        auto img_surface = e.cached.content_image_ptr;
+
+        e.cached.content_image_size = Size (
+            cast(ushort)img_surface.w,
+            cast(ushort)img_surface.h
+        );
+    }
+    else {
+        //e.cached.content_image_size = e.cached.content_image_size;
+        assert (0, "Image ptr is null");
+    }
+}
+
+void 
+e_content_image_size_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_image_size = e.content.text.size;
+}
+
+void 
+e_content_image_size_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_image_size = e.content.size;
+}
+
+void
+e_content_text_size (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.size_type) {
+        case E.Content.Text.SizeType.fixed   : e_content_text_size_fixed   (doc,t); break;
+        case E.Content.Text.SizeType.text    : e_content_text_size_text    (doc,t); break;
+        case E.Content.Text.SizeType.image   : e_content_text_size_image   (doc,t); break;
+        case E.Content.Text.SizeType.content : e_content_text_size_content (doc,t); break;
+    }
+}
+
+void 
+e_content_text_size_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_text_size = e.content.text.size;
+}
+
+void 
+e_content_text_size_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_text_size = e.content.image.size;
+}
+
+void 
+e_content_text_size_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_text_size = get_text_size (
+        e.content.text.s, 
+        global_font, 
+        e.content.text.color
+    );
+}
+
+void 
+e_content_text_size_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.cached.content_text_size = e.content.size;
+}
+
+
+
 
 void
 update_pos (ETree* t) {
@@ -328,84 +550,6 @@ go_question_value (string[] s) {
     }
 }
 
-
-Size
-e_size (E* e) {
-    // ### e border content image text
-    // e.size               = by_content | fixed 120 32 | parent parent.content.size
-    // by_content           = by_image | by_text | fixed 120 32 | max (content.image, content.text) | parent
-    // e.content.image.size = by_image | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
-    // e.content.text.size  = by_text  | fixed 120 32 | parent e.parent.content.size - e.border - e.pad
-
-    final
-    switch (e.size_type) {
-        case E.SizeType.content : break;
-        case E.SizeType.fixed   : break;
-        case E.SizeType.parent  : break;
-    }
-
-    return Size ();
-}
-
-Size
-e_content_size (Doc* doc, ETree* t) {
-    auto e = t.e;
-    final
-    switch (e.content.size_type) {
-        case E.Content.SizeType.max_image_text : return e_content_size_max    (doc,t); break;
-        case E.Content.SizeType.image          : return e_content_size_image  (doc,t); break;
-        case E.Content.SizeType.text           : return e_content_size_text   (doc,t); break;
-        case E.Content.SizeType.fixed          : return e_content_size_fixed  (doc,t); break;
-        case E.Content.SizeType.parent         : return e_content_size_parent (doc,t); break;
-    }
-}
-
-Size
-e_content_size_max (Doc* doc, ETree* t) {
-    auto e = t.e;
-    return Size (
-        max (e.content.image.size.w, e.content.text.size.w),
-        max (e.content.image.size.h, e.content.text.size.h)
-    );
-}
-
-Size
-e_content_size_image (Doc* doc, ETree* t) {
-    auto e = t.e;
-    return e.content.image.size;
-}
-
-Size
-e_content_size_text (Doc* doc, ETree* t) {
-    auto e = t.e;
-    return e.content.text.size;
-}
-
-Size
-e_content_size_fixed (Doc* doc, ETree* t) {
-    auto e = t.e;
-    return e.content.size;
-}
-
-Size
-e_content_size_parent (Doc* doc, ETree* t) {
-    auto e = t.e;
-    auto e_parent_content_size = t.parent.e.content.size;
-    auto e_borders_size = Size (
-            cast(W)(e.borders.l.w+e.borders.r.w), 
-            cast(H)(e.borders.t.w+e.borders.b.w)
-        );
-    auto e_pad_size = Size (
-            cast(W)(e.pad.l+e.pad.r), 
-            cast(H)(e.pad.t+e.pad.b)
-        );
-    if (t.parent !is null)
-        return e_parent_content_size - e_borders_size - e_pad_size;
-    else
-        return doc.size;
-        //return Screen.size;
-        //return Window.size;
-}
 
 auto
 max (A,B) (A a, B b) {

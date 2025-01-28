@@ -13,9 +13,6 @@ import klass;
 // e
 // import
 // map
-// colors
-// hotkeys
-// commands
 
 // RESERVED CLASSES
 // input-text
@@ -23,6 +20,9 @@ import klass;
 // input-radio
 // checked
 // focused
+// hotkeys
+// colors
+// commands
 
 // `external program` -> os.execute (["external","program"], NO_WAIT)
 // internal.command   -> send       ("internal.command")
@@ -68,21 +68,21 @@ e root
 
 root
  bg #000
- on start player.start
+ on start commands.player.start
 
 menubar
  size    640 32
- borders 0 none fg+1
+ borders 0 none colors.fg+1
 
 menubar-item
  size.w     auto
  size.h     32
- text.color fg
- bg         bg
+ text.color colors.fg
+ bg         colors.bg
 
 toolbar
  size    640 32
- borders 0 none fg+1
+ borders 0 none colors.fg+1
 
 toolbar-item
  size.w        auto
@@ -90,8 +90,8 @@ toolbar-item
  text.pos.type 9
  text.group    9
  text.dir      r
- text.color    fg+1
- bg            bg-1
+ text.color    colors.fg+1
+ bg            colors.bg-1
 
 file
  text  Файл
@@ -99,7 +99,7 @@ file
 
 play
  text Воспроизведение
- on click player.play_pause
+ on click commands.player.play_pause
 
 list
  text Список
@@ -139,16 +139,16 @@ t9-bottom-right
  pos.dir   r
 
 vbox
- pos.type  grid 1 auto
+ pos.type  vbox d
 
 hidden
  hidden 1
 
 border
- borders 2 solid fg+1
+ borders 2 solid colors.fg+1
 
 focused
- borders 2 solid info
+ borders 2 solid colors.info
 
 input-radio
  input.type         radio
@@ -175,10 +175,10 @@ commands
   player.next       audtool playlist-advance
 
 hotkeys
-  x player.prev
-  c player.play_pause
-  v player.stop
-  b player.next
+  x commands.player.prev
+  c commands.player.play_pause
+  v commands.player.stop
+  b commands.player.next
 
 // comment 1
 // comment 2
@@ -241,10 +241,13 @@ c
 
 e
  e title
- e button status-`audtool playback-status`
+ e button status
 
 title
   text `audtool current-song`
+
+status
+  inherit_from status-`audtool playback-status`
 
 status-plaing  
   fg green
