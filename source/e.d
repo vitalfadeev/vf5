@@ -85,7 +85,8 @@ struct E {
           Font    font;
           Pos     pos;
           Size    size;
-          Color   color;
+          Color   fg;
+          Color   bg;
           Magnet  magnet;  // left / center / right
           PosType pos_type;
           enum
@@ -112,7 +113,7 @@ struct E {
         Image {
           string src;       // "abc"
           Size   size = Size (100,100);
-          BG     bg;
+          Color  bg;
           SDL_Surface* ptr;
           enum
           SizeType {
@@ -244,7 +245,9 @@ apply_klass (Doc* doc, E* e, Klass* k) {
             case "content"        : set_content        (doc,e,ke.values); break;
             case "image"          : set_content_image  (doc,e,ke.values); break;
             case "text"           : set_content_text   (doc,e,ke.values); break;
-            case "text.color"     : set_text_color     (doc,e,ke.values); break;
+            case "text.color"     : set_text_fg        (doc,e,ke.values); break;
+            case "text.fg"        : set_text_fg        (doc,e,ke.values); break;
+            case "text.bg"        : set_text_bg        (doc,e,ke.values); break;
             case "text.pos.type"  : set_text_pos_type  (doc,e,ke.values); break;
             case "content.size.w" : set_content_size_w (doc,e,ke.values); break;
             case "content.size.h" : set_content_size_h (doc,e,ke.values); break;
@@ -568,11 +571,22 @@ set_content_text (Doc* doc, E* e, string[] values) {
 }
 
 void
-set_text_color (Doc* doc, E* e, string[] values) {
+set_text_fg (Doc* doc, E* e, string[] values) {
     if (values.length) {
         Color c;
         if (doc_parse_color (doc, values[0], &c))
-            e.content.text.color = c;
+            e.content.text.fg = c;
+        else
+            throw new Exception ("unsupported color: " ~ values.to!string);
+    }
+}
+
+void
+set_text_bg (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        Color c;
+        if (doc_parse_color (doc, values[0], &c))
+            e.content.text.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }

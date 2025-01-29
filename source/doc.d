@@ -539,7 +539,7 @@ e_content_text_size_w_text (Doc* doc, ETree* t) {
     e.content.text.size.w = get_text_size (
         e.content.text.s, 
         global_font, 
-        e.content.text.color
+        e.content.text.fg
     ).w;
 }
 
@@ -580,7 +580,7 @@ e_content_text_size_h_text (Doc* doc, ETree* t) {
     e.content.text.size.h = get_text_size (
         e.content.text.s, 
         global_font, 
-        e.content.text.color
+        e.content.text.fg
     ).h;
 }
 

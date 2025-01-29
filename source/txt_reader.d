@@ -80,8 +80,8 @@ menubar-item
  content.size   text
  pad            20 5
  pad.bg         colors.pad_bg
- text.color     colors.fg
- bg             colors.bg
+ text.fg        colors.fg
+ text.bg        colors.bg
 
 toolbar
  size    640 32
@@ -152,7 +152,7 @@ border
  borders 2 solid colors.fg+1
 
 focused
- borders 2 solid colors.info
+ borders 2 solid colors.focused
 
 input-radio
  input.type         radio

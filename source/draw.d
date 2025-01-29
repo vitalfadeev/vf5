@@ -321,15 +321,31 @@ draw_pad (SDL_Renderer* renderer, E* e, Pos _pad_pos, Size _pad_size) {
 
 void
 draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
-    auto color = e.bg;
-    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
+    if (e.content.image.ptr !is null)
+        draw_image_bg (renderer,e,content_pos,content_size);
+    
+    if (e.content.text.s.length)
+        draw_text_bg  (renderer,e,content_pos,content_size);
 
     if (e.content.image.ptr !is null)
         image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
     if (e.content.text.s.length)
         draw_text (renderer, e, content_pos, content_size);
+}
+
+void
+draw_text_bg (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
+    auto color = e.content.text.bg;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
+}
+
+void
+draw_image_bg (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
+    auto color = e.content.image.bg;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
 }
 
 
@@ -341,7 +357,7 @@ draw_text (SDL_Renderer* renderer, E* e, Pos cp, Size cs) {
     // draw rects
     //   foreach rect rects
     //   one_char
-    _text (renderer, e.content.text.rects, global_font, e.content.text.color, cp.x, cp.y, cs.w, cs.h);
+    _text (renderer, e.content.text.rects, global_font, e.content.text.fg, cp.x, cp.y, cs.w, cs.h);
 }
 
 
