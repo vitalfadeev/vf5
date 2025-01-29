@@ -112,6 +112,11 @@ render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, i
 // e.pos  = border + pad + content
 // e.size = border + pad + content
 Pos
+e_pos (E* e) {
+    return e.pos;
+}
+
+Pos
 borders_pos (E* e) {
     return e.pos;
 }

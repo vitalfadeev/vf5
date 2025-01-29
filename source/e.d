@@ -422,28 +422,28 @@ set_borders (Doc* doc, E* e, string[] values) {
 void
 set_border_t (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
-        set_border (doc, e, &e.borders.t, values[0..$]);
+        set_border (doc, e, &e.borders.t, values);
     }
 }
 
 void
 set_border_r (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
-        set_border (doc, e, &e.borders.r, values[0..$]);
+        set_border (doc, e, &e.borders.r, values);
     }
 }
 
 void
 set_border_b (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
-        set_border (doc, e, &e.borders.b, values[0..$]);
+        set_border (doc, e, &e.borders.b, values);
     }
 }
 
 void
 set_border_l (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
-        set_border (doc, e, &e.borders.l, values[0..$]);
+        set_border (doc, e, &e.borders.l, values);
     }
 }
 

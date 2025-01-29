@@ -17,6 +17,7 @@ import pix : global_font;
 import std.stdio : writeln;
 import pix : open_font;
 import pix : IMGException;
+import draw : e_pos, e_size, content_pos;
 
 
 struct
@@ -628,7 +629,6 @@ pos_type_t9 (ETree* t) {
     // 1 2 3 
     // 8 9 4 
     // 7 6 5 
-
     E* e = t.e;
 
     if (e.pos_group == 1) {
@@ -680,12 +680,42 @@ pos_type_vbox (ETree* t) {
 void
 pos_type_hbox (ETree* t) {
     // e e e
+    E* e = t.e;
+
+    ETree* prev = find_last_with_type (t, e.pos_type);
+    if (prev !is null) {
+        if (e.pos_dir == E.PosDir.r) {
+            auto prev_pos  = e_pos  (prev.e);
+            auto prev_size = e_size (prev.e);
+            e.pos.x = (prev_pos.x + prev_size.w).to!X;
+            //e.pos.y = prev.e.pos.y;
+        }
+    }
+    else {
+        if (t.parent !is null) {
+            auto parent_content_pos = content_pos (t.parent.e);
+            e.pos.x = parent_content_pos.x;
+        }
+        else {
+            e.pos.x = 0;
+        }
+    }
 }
 
 ETree*
 find_last_in_group (ETree* t, ubyte pos_group) {
     foreach (ETree* _t; WalkLeft (t))
         if (_t.e.pos_group == pos_group)
+            return _t;
+
+    return null;
+}
+
+
+ETree*
+find_last_with_type (ETree* t, E.PosType pos_type) {
+    foreach (ETree* _t; WalkLeft (t))
+        if (_t.e.pos_type == pos_type)
             return _t;
 
     return null;

@@ -33,22 +33,22 @@ import klass;
 string text = "
 e root
  e vbox menubar
-  e menubar-item border t9-top-left file
-  e menubar-item border t9-top-left play
-  e menubar-item border t9-top-left list
-  e menubar-item border t9-top-left services
-  e menubar-item border t9-top-left output
-  e menubar-item border t9-top-left view
+  e menubar-item border hbox file
+  e menubar-item border hbox play
+  e menubar-item border hbox list
+  e menubar-item border hbox services
+  e menubar-item border hbox output
+  e menubar-item border hbox view
 
  e vbox toolbar hidden
-  e toolbar-item t9-top-left  tb-search
-  e toolbar-item t9-top-left  tb-open
-  e toolbar-item t9-top-left  tb-add
-  e toolbar-item t9-top-left  tb-prev
-  e toolbar-item t9-top-left  tb-play-pause
-  e toolbar-item t9-top-left  tb-stio
-  e toolbar-item t9-top-left  tb-next
-  e toolbar-item t9-top-left  tb-position
+  e toolbar-item hbox tb-search
+  e toolbar-item hbox tb-open
+  e toolbar-item hbox tb-add
+  e toolbar-item hbox tb-prev
+  e toolbar-item hbox tb-play-pause
+  e toolbar-item hbox tb-stio
+  e toolbar-item hbox tb-next
+  e toolbar-item hbox tb-position
   e toolbar-item t9-top-right tb-time
   e toolbar-item t9-top-right tb-loop
   e toolbar-item t9-top-right tb-random
@@ -144,6 +144,9 @@ t9-bottom-right
 
 vbox
  pos.type  vbox d
+
+hbox
+ pos.type  hbox
 
 hidden
  hidden 1
