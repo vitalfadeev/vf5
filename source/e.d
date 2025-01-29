@@ -237,6 +237,7 @@ apply_klass (Doc* doc, E* e, Klass* k) {
             case "borders.r"      : set_border_r      (doc,e,ke.values); break;
             case "borders.b"      : set_border_b      (doc,e,ke.values); break;
             case "borders.l"      : set_border_l      (doc,e,ke.values); break;
+            case "pad"            : set_pad           (doc,e,ke.values); break;
             case "content.image"  : set_content_image (doc,e,ke.values); break;
             case "content.text"   : set_content_text  (doc,e,ke.values); break;
             case "content"        : set_content       (doc,e,ke.values); break;
@@ -439,6 +440,29 @@ void
 set_border_l (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
         set_border (doc, e, &e.borders.l, values[0..$]);
+    }
+}
+
+void
+set_pad (Doc* doc, E* e, string[] values) {
+    if (values.length >= 3) {
+        //
+    }
+    else
+    if (values.length >= 2) {
+        if (values[0].isNumeric) {
+            e.pad.r = e.pad.l = values[0].to!X;
+        }
+        if (values[1].isNumeric) {
+            e.pad.t = e.pad.b = values[1].to!Y;
+        }
+    }
+    else
+    if (values.length == 1) {
+        if (values[0].isNumeric) {
+            e.pad.r = e.pad.l = values[0].to!X;
+            e.pad.t = e.pad.b = values[0].to!Y;
+        }
     }
 }
 

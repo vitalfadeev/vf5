@@ -152,6 +152,7 @@ load_texts (Doc* doc) {
 
 void
 load_e_text (E* e) {
+    e.content.text.rects.length = 0;
     e.content.text.rects.reserve (e.content.text.s.length);
 
     int w, h, max_h;
@@ -171,26 +172,22 @@ load_e_text (E* e) {
         max_h = max (max_h,h);
     }
 
-    e.content.text.size.w = _x.to!W;
+    e.content.text.size.w = _x;
     e.content.text.size.h = max_h.to!H;
 }
 
 void
 update_text_size (Doc* doc) {
-    //foreach (ETree* t; WalkTree (doc.tree))
-    //    if (t.e.content.text.s.length)
-    //        update_e_text_size (t.e);
+    foreach (ETree* t; WalkTree (doc.tree))
+        if (t.e.content.text.s.length)
+            update_e_text_size (t.e);
 }
 
-//void
-//update_e_text_size (E* e) {
-//    foreach (ref rec; e.content.text.rects)
-//        rec.size = get_text_size (
-//            rec.s, 
-//            global_font, //e.content.text.font.ptr, 
-//            Color (0xFF,0xFF,0xFF,0xFF) // e.content.text.color, 
-//        );
-//}
+void
+update_e_text_size (E* e) {
+    //foreach (ref rec; e.content.text.rects)
+    //    rec.pos
+}
 
 void
 update_pos_size (Doc* doc) {
@@ -291,7 +288,7 @@ void
 e_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_w (doc,t);
-    e.size.w = e.content.size.w;
+    e.size.w = (e.content.size.w + e.pad.l + e.pad.r).to!W;
 //    e.cached.size = e.content.size;
 }
 
@@ -313,7 +310,7 @@ void
 e_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_h (doc,t);
-    e.size.h = e.content.size.h;
+    e.size.h = (e.content.size.h + e.pad.t + e.pad.b).to!W;
 }
 
 void

@@ -109,8 +109,8 @@ render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, i
 Pos
 content_pos (E* e) {
     return Pos (
-        cast(X)(e.pos.x+e.borders.l.w), 
-        cast(Y)(e.pos.y+e.borders.t.w), 
+        (e.pos.x + e.borders.l.w + e.pad.l).to!X, 
+        (e.pos.y + e.borders.t.w + e.pad.t).to!Y, 
     );
 }
 

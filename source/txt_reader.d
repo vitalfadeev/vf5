@@ -40,7 +40,7 @@ e root
   e menubar-item border t9-top-left output
   e menubar-item border t9-top-left view
 
- e vbox toolbar
+ e vbox toolbar hidden
   e toolbar-item t9-top-left  tb-search
   e toolbar-item t9-top-left  tb-open
   e toolbar-item t9-top-left  tb-add
@@ -76,8 +76,9 @@ menubar
 
 menubar-item
  size.w         content
- size.h         32
+ size.h         content
  content.size   text
+ pad            20 5
  text.color     colors.fg
  bg             colors.bg
 
