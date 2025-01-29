@@ -12,10 +12,10 @@ struct E {
     Klass*[] klasses;    // box green rounded
     Pos  pos;
     Size size;
-    bool pos_x_auto;
-    bool pos_y_auto;
-    bool size_w_auto;
-    bool size_h_auto;
+    //bool pos_x_auto;
+    //bool pos_y_auto;
+    //bool size_w_auto;
+    //bool size_h_auto;
     bool content_image_size_w_auto;
     bool content_image_size_h_auto;
     Pad  pad;
@@ -59,6 +59,7 @@ struct E {
 
     struct
     Content {
+        Pos  pos;
         Size size;
         enum 
         SizeType {
@@ -68,7 +69,8 @@ struct E {
             max,   // max (image,text)
             e,
         }
-        SizeType size_type;
+        SizeType size_w_type;
+        SizeType size_h_type;
         struct
         Text {
           string s;     // "abc"
@@ -80,11 +82,12 @@ struct E {
             bool   italic;  // 0/1
             void*  ptr;  // 0/1
           }
-          Font   font;
-          Size   size;
-          Color  color;
-          Magnet magnet;  // left / center / right
-          Pos    pos;
+          Font    font;
+          Pos     pos;
+          Size    size;
+          Color   color;
+          Magnet  magnet;  // left / center / right
+          PosType pos_type;
           enum
           SizeType {
             fixed,
@@ -92,7 +95,8 @@ struct E {
             text,
             content,
           }
-          SizeType size_type;
+          SizeType size_w_type;
+          SizeType size_h_type;
           struct
           TextRect {
               Pos    pos;
@@ -109,7 +113,7 @@ struct E {
           string src;       // "abc"
           Size   size = Size (100,100);
           BG     bg;
-          void*  ptr;
+          SDL_Surface* ptr;
           enum
           SizeType {
             fixed,
@@ -117,7 +121,8 @@ struct E {
             text,
             content,
           }
-          SizeType size_type;
+          SizeType size_w_type;
+          SizeType size_h_type;
         }
         Image image;
     }
@@ -151,14 +156,14 @@ struct E {
         hbox,
     }
 
-    SizeType        size_type;
-
     enum 
     SizeType {
         content, // default
         fixed,
         parent
     }
+    SizeType  size_w_type;
+    SizeType  size_h_type;
 
     struct
     On {
@@ -168,15 +173,15 @@ struct E {
     On[] on;
 
     //
-    struct 
-    Cached {
-        Size         size;
-        Size         content_size;
-        Size         content_image_size;
-        SDL_Surface* content_image_ptr;
-        Size         content_text_size;
-    }
-    Cached cached;
+    //struct 
+    //Cached {
+    //    Size         size;
+    //    Size         content_size;
+    //    Size         content_image_size;
+    //    SDL_Surface* content_image_ptr;
+    //    Size         content_text_size;
+    //}
+    //Cached cached;
     
     //
     void function (SDL_Renderer* renderer, E* e) draw; // simple, bordered, bordered-titled, custom
@@ -216,30 +221,34 @@ apply_klass (Doc* doc, E* e, Klass* k) {
     foreach (ke; k.klasse) {
         writeln ("  ", ke.id);
         switch (ke.id) {
-            case "pos.x"         : set_pos_x         (doc,e,ke.values); break;
-            case "pos.y"         : set_pos_y         (doc,e,ke.values); break;
-            case "pos"           : set_pos           (doc,e,ke.values); break;
-            case "pos.type"      : set_pos_type      (doc,e,ke.values); break;
-            case "pos.group"     : set_pos_group     (doc,e,ke.values); break;
-            case "pos.dir"       : set_pos_dir       (doc,e,ke.values); break;
-            case "size.w"        : set_size_w        (doc,e,ke.values); break;
-            case "size.h"        : set_size_h        (doc,e,ke.values); break;
-            case "size"          : set_size          (doc,e,ke.values); break;
-            case "hidden"        : set_hidden        (doc,e,ke.values); break;
-            case "popup"         : set_popup         (doc,e,ke.values); break;
-            case "borders"       : set_borders       (doc,e,ke.values); break;
-            case "borders.t"     : set_border_t      (doc,e,ke.values); break;
-            case "borders.r"     : set_border_r      (doc,e,ke.values); break;
-            case "borders.b"     : set_border_b      (doc,e,ke.values); break;
-            case "borders.l"     : set_border_l      (doc,e,ke.values); break;
-            case "content.image" : set_content_image (doc,e,ke.values); break;
-            case "content.text"  : set_content_text  (doc,e,ke.values); break;
-            case "content"       : set_content       (doc,e,ke.values); break;
-            case "image"         : set_content_image (doc,e,ke.values); break;
-            case "text"          : set_content_text  (doc,e,ke.values); break;
-            case "text.color"    : set_text_color    (doc,e,ke.values); break;
-            case "bg"            : set_bg            (doc,e,ke.values); break;
-            case "on"            : set_on            (doc,e,ke.values); break;
+            case "pos.x"          : set_pos_x         (doc,e,ke.values); break;
+            case "pos.y"          : set_pos_y         (doc,e,ke.values); break;
+            case "pos"            : set_pos           (doc,e,ke.values); break;
+            case "pos.type"       : set_pos_type      (doc,e,ke.values); break;
+            case "pos.group"      : set_pos_group     (doc,e,ke.values); break;
+            case "pos.dir"        : set_pos_dir       (doc,e,ke.values); break;
+            case "size.w"         : set_size_w        (doc,e,ke.values); break;
+            case "size.h"         : set_size_h        (doc,e,ke.values); break;
+            case "size"           : set_size          (doc,e,ke.values); break;
+            case "hidden"         : set_hidden        (doc,e,ke.values); break;
+            case "popup"          : set_popup         (doc,e,ke.values); break;
+            case "borders"        : set_borders       (doc,e,ke.values); break;
+            case "borders.t"      : set_border_t      (doc,e,ke.values); break;
+            case "borders.r"      : set_border_r      (doc,e,ke.values); break;
+            case "borders.b"      : set_border_b      (doc,e,ke.values); break;
+            case "borders.l"      : set_border_l      (doc,e,ke.values); break;
+            case "content.image"  : set_content_image (doc,e,ke.values); break;
+            case "content.text"   : set_content_text  (doc,e,ke.values); break;
+            case "content"        : set_content       (doc,e,ke.values); break;
+            case "image"          : set_content_image (doc,e,ke.values); break;
+            case "text"           : set_content_text  (doc,e,ke.values); break;
+            case "text.color"     : set_text_color    (doc,e,ke.values); break;
+            case "text.pos.type"  : set_text_pos_type (doc,e,ke.values); break;
+            case "content.size.w" : set_content_size_w (doc,e,ke.values); break;
+            case "content.size.h" : set_content_size_h (doc,e,ke.values); break;
+            case "content.size"   : set_content_size   (doc,e,ke.values); break;
+            case "bg"             : set_bg            (doc,e,ke.values); break;
+            case "on"             : set_on            (doc,e,ke.values); break;
             default:
         }
     }
@@ -296,11 +305,11 @@ set_pos_dir (Doc* doc, E* e, string[] values) {
 void
 set_pos_x (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        if (values[0] == "auto")
-            e.pos_x_auto = true;
+        //if (values[0] == "auto")
+        //    e.pos_x_auto = true;
         if (values[0].isNumeric ()) {
             e.pos.x = values[0].to!X;
-            e.pos_x_auto = false;
+            //e.pos_x_auto = false;
         }
     }
 }
@@ -308,11 +317,11 @@ set_pos_x (Doc* doc, E* e, string[] values) {
 void
 set_pos_y (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        if (values[0] == "auto")
-            e.pos_y_auto = true;
+        //if (values[0] == "auto")
+        //    e.pos_y_auto = true;
         if (values[0].isNumeric ()) {
             e.pos.y = values[0].to!Y;
-            e.pos_y_auto = false;
+            //e.pos_y_auto = false;
         }
     }
 }
@@ -333,15 +342,18 @@ set_size (Doc* doc, E* e, string[] values) {
 void
 set_size_w (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        if (values[0] == "auto")
-            e.size_w_auto = true;
-        if (values[0] == "max") {
-            e.size.w = 640;
-            e.size_w_auto = false;
-        }
-        if (values[0].isNumeric ()) {
-            e.size.w = values[0].to!W;
-            e.size_w_auto = false;
+        switch (values[0]) {
+            case "fixed"   : e.size_w_type = E.SizeType.fixed;  break;
+            case "content" : e.size_w_type = E.SizeType.content; break;
+            case "parent"  : e.size_w_type = E.SizeType.parent;  break;
+            default : 
+                if (values[0].isNumeric ()) {
+                    e.size.w = values[0].to!W;
+                    e.size_w_type = E.SizeType.fixed;
+                }
+                else {
+                    throw new Exception ("unsupported size.w: " ~ values[0]);
+                }
         }
     }
 }
@@ -349,11 +361,18 @@ set_size_w (Doc* doc, E* e, string[] values) {
 void
 set_size_h (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        if (values[0] == "auto")
-            e.size_h_auto = true;
-        if (values[0].isNumeric ()) {
-            e.size.h = values[0].to!H;
-            e.size_h_auto = false;
+        switch (values[0]) {
+            case "fixed"   : e.size_h_type = E.SizeType.fixed;  break;
+            case "content" : e.size_h_type = E.SizeType.content; break;
+            case "parent"  : e.size_h_type = E.SizeType.parent;  break;
+            default : 
+                if (values[0].isNumeric ()) {
+                    e.size.h = values[0].to!H;
+                    e.size_h_type = E.SizeType.fixed;
+                }
+                else {
+                    throw new Exception ("unsupported size.h: " ~ values[0]);
+                }
         }
     }
 }
@@ -505,6 +524,64 @@ set_text_color (Doc* doc, E* e, string[] values) {
             e.content.text.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
+    }
+}
+
+void
+set_text_pos_type (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        switch (values[0]) {
+            case "9"    : e.content.text.pos_type = E.PosType.t9; break;
+            case "t9"   : e.content.text.pos_type = E.PosType.t9; break;
+            case "grid" : e.content.text.pos_type = E.PosType.grid; break;
+            case "vbox" : e.content.text.pos_type = E.PosType.vbox; break;
+            case "hbox" : e.content.text.pos_type = E.PosType.hbox; break;
+            default:
+                e.content.text.pos_type = E.PosType.none;
+        }
+    }
+}
+
+void
+set_content_size_w (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        switch (values[0]) {
+            case "fixed" : e.content.size_w_type = E.Content.SizeType.fixed; break;
+            case "max"   : e.content.size_w_type = E.Content.SizeType.max; break;
+            case "image" : e.content.size_w_type = E.Content.SizeType.image; break;
+            case "text"  : e.content.size_w_type = E.Content.SizeType.text; break;
+            case "e"     : e.content.size_w_type = E.Content.SizeType.e; break;
+            default:
+                e.content.size_w_type = E.Content.SizeType.max;
+        }
+    }
+}
+
+void
+set_content_size_h (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        switch (values[0]) {
+            case "fixed" : e.content.size_h_type = E.Content.SizeType.fixed; break;
+            case "max"   : e.content.size_h_type = E.Content.SizeType.max; break;
+            case "image" : e.content.size_h_type = E.Content.SizeType.image; break;
+            case "text"  : e.content.size_h_type = E.Content.SizeType.text; break;
+            case "e"     : e.content.size_h_type = E.Content.SizeType.e; break;
+            default:
+                e.content.size_h_type = E.Content.SizeType.max;
+        }
+    }
+}
+
+void
+set_content_size (Doc* doc, E* e, string[] values) {
+    if (values.length >= 2) {
+        set_content_size_w (doc, e, values[0..1]);
+        set_content_size_h (doc, e, values[1..$]);
+    }
+    else
+    if (values.length == 1) {
+        set_content_size_w (doc, e, values[0..1]);
+        set_content_size_h (doc, e, values[0..1]);
     }
 }
 

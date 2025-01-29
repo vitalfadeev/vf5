@@ -75,17 +75,19 @@ menubar
  borders 0 none colors.fg+1
 
 menubar-item
- size.w     auto
- size.h     32
- text.color colors.fg
- bg         colors.bg
+ size.w         content
+ size.h         32
+ content.size   text
+ text.color     colors.fg
+ bg             colors.bg
 
 toolbar
  size    640 32
+ pos     0 32
  borders 0 none colors.fg+1
 
 toolbar-item
- size.w        auto
+ size.w        32
  size.h        32
  text.pos.type 9
  text.group    9

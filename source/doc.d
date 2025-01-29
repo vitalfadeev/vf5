@@ -24,7 +24,7 @@ Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
     Klass*   hotkeys;
-    Size     size;
+    Size     size = Size (640,480);
 
     Klass*
     find_klass (string s) {
@@ -131,15 +131,15 @@ load_images (Doc* doc) {
 
 void
 load_e_image (E* e) {
-    if (e.cached.content_image_ptr is null) {
+    if (e.content.image.ptr is null) {
         auto img_surface = IMG_Load (e.content.image.src.toStringz);
         if (img_surface)
             throw new IMGException ("IMG_Load");
-        e.cached.content_image_ptr = img_surface;
-        e.cached.content_image_size = Size (
-            cast(ushort)img_surface.w,
-            cast(ushort)img_surface.h
-        );
+        e.content.image.ptr = img_surface;
+        e.content.image.size = Size (
+                cast(ushort)img_surface.w,
+                cast(ushort)img_surface.h
+            );
     }
 }
 
@@ -154,31 +154,43 @@ void
 load_e_text (E* e) {
     e.content.text.rects.reserve (e.content.text.s.length);
 
+    int w, h, max_h;
+    X _x = 0;
+    Y _y = 0;
+
     foreach (dchar c; e.content.text.s) {
+        auto ret = TTF_SizeUTF8 (global_font, c.to!string.toStringz, &w, &h);
+
         e.content.text.rects ~= E.Content.Text.TextRect (
-            Pos(), 
-            Size(), 
+            Pos  (_x,_y), 
+            Size (w.to!W,h.to!H), 
             c.to!string
         );
+
+        _x += w;
+        max_h = max (max_h,h);
     }
+
+    e.content.text.size.w = _x.to!W;
+    e.content.text.size.h = max_h.to!H;
 }
 
 void
 update_text_size (Doc* doc) {
-    foreach (ETree* t; WalkTree (doc.tree))
-        if (t.e.content.text.s.length)
-            update_e_text_size (t.e);
+    //foreach (ETree* t; WalkTree (doc.tree))
+    //    if (t.e.content.text.s.length)
+    //        update_e_text_size (t.e);
 }
 
-void
-update_e_text_size (E* e) {
-    foreach (ref rec; e.content.text.rects)
-        rec.size = get_text_size (
-            e.content.text.s, 
-            global_font, //e.content.text.font.ptr, 
-            e.content.text.color, 
-        );
-}
+//void
+//update_e_text_size (E* e) {
+//    foreach (ref rec; e.content.text.rects)
+//        rec.size = get_text_size (
+//            rec.s, 
+//            global_font, //e.content.text.font.ptr, 
+//            Color (0xFF,0xFF,0xFF,0xFF) // e.content.text.color, 
+//        );
+//}
 
 void
 update_pos_size (Doc* doc) {
@@ -211,159 +223,230 @@ void
 update_size (Doc* doc, ETree* t) {
     E* e = t.e;
 
-    if (t.e is null)
-        return;
+    //// size = auto
+    //if (e.size_w_auto) {
+    //    if (!e.content_image_size_w_auto)
+    //        e.size.w = e.content.image.size.w;
+    //}
 
-    // size = auto
-    if (e.size_w_auto) {
-        if (!e.content_image_size_w_auto)
-            e.size.w = e.content.image.size.w;
-    }
+    //// image = auto
+    //if (!e.size_w_auto) {
+    //    if (e.content_image_size_w_auto)
+    //        e.content.image.size.w = e.size.w;
+    //}
 
-    // image = auto
-    if (!e.size_w_auto) {
-        if (e.content_image_size_w_auto)
-            e.content.image.size.w = e.size.w;
-    }
+    //// size = auto, has borders 
+    //if (e.size_w_auto) {
+    //    if (!e.content_image_size_w_auto)  {
+    //        e.size.w = e.content.image.size.w;
+    //        if (e.borders.l.w)
+    //            e.size.w += e.borders.l.w;
+    //        if (e.borders.r.w)
+    //            e.size.w += e.borders.r.w;
+    //    }
+    //}
 
-    // size = auto, has borders 
-    if (e.size_w_auto) {
-        if (!e.content_image_size_w_auto)  {
-            e.size.w = e.content.image.size.w;
-            if (e.borders.l.w)
-                e.size.w += e.borders.l.w;
-            if (e.borders.r.w)
-                e.size.w += e.borders.r.w;
-        }
-    }
+    //// image = auto, has borders
+    //if (!e.size_w_auto) {
+    //    if (e.content_image_size_w_auto)  {
+    //        e.content.image.size.w = e.size.w;
+    //        if (e.borders.l.w)
+    //            e.content.image.size.w -= e.borders.l.w;
+    //        if (e.borders.r.w)
+    //            e.content.image.size.w -= e.borders.r.w;
+    //    }
+    //}
 
-    // image = auto, has borders
-    if (!e.size_w_auto) {
-        if (e.content_image_size_w_auto)  {
-            e.content.image.size.w = e.size.w;
-            if (e.borders.l.w)
-                e.content.image.size.w -= e.borders.l.w;
-            if (e.borders.r.w)
-                e.content.image.size.w -= e.borders.r.w;
-        }
-    }
-
-    // size and image fixed, has borders
-    if (!e.size_w_auto) {
-        if (!e.content_image_size_w_auto)  {
-            // keep
-        }
-    }
+    //// size and image fixed, has borders
+    //if (!e.size_w_auto) {
+    //    if (!e.content_image_size_w_auto)  {
+    //        // keep
+    //    }
+    //}
 
     //
     final
-    switch (e.size_type) {
-        case E.SizeType.fixed   : e_size_fixed   (doc,t); break;
-        case E.SizeType.content : e_size_content (doc,t); break;
-        case E.SizeType.parent  : e_size_parent  (doc,t); break;
+    switch (e.size_w_type) {
+        case E.SizeType.fixed   : e_size_w_fixed   (doc,t); break;
+        case E.SizeType.content : e_size_w_content (doc,t); break;
+        case E.SizeType.parent  : e_size_w_parent  (doc,t); break;
+    }
+
+    final
+    switch (e.size_h_type) {
+        case E.SizeType.fixed   : e_size_h_fixed   (doc,t); break;
+        case E.SizeType.content : e_size_h_content (doc,t); break;
+        case E.SizeType.parent  : e_size_h_parent  (doc,t); break;
     }
 }
 
 void
-e_size_fixed (Doc* doc, ETree* t) {
+e_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.size = e.size;
+    e.content.size.w = e.content.text.size.w;
+//    e.cached.size = e.size;
 }
 
 void
-e_size_content (Doc* doc, ETree* t) {
+e_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
-    e_content_size (doc,t);
-    e.cached.size = e.content.size;
+    e_content_size_w (doc,t);
+    e.size.w = e.content.size.w;
+//    e.cached.size = e.content.size;
 }
 
 void
-e_size_parent (Doc* doc, ETree* t) {
+e_size_w_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.size = t.parent.e.content.size;
+    e.size.w = t.parent.e.content.size.w;
+//    e.cached.size = t.parent.e.content.size;
 }
 
 void
-e_content_size (Doc* doc, ETree* t) {
+e_size_h_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.size.h = e.content.text.size.h;
+    //e.cached.size = e.size;
+}
+
+void
+e_size_h_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e_content_size_h (doc,t);
+    e.size.h = e.content.size.h;
+}
+
+void
+e_size_h_parent (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.size.h = t.parent.e.content.size.h;
+}
+
+void
+e_content_size_w (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
-    switch (e.content.size_type) {
-        case E.Content.SizeType.fixed : e_content_size_fixed  (doc,t); break;
-        case E.Content.SizeType.max   : e_content_size_max    (doc,t); break;
-        case E.Content.SizeType.image : e_content_size_image  (doc,t); break;
-        case E.Content.SizeType.text  : e_content_size_text   (doc,t); break;
-        case E.Content.SizeType.e     : e_content_size_e      (doc,t); break;
+    switch (e.content.size_w_type) {
+        case E.Content.SizeType.fixed : e_content_size_w_fixed  (doc,t); break;
+        case E.Content.SizeType.max   : e_content_size_w_max    (doc,t); break;
+        case E.Content.SizeType.image : e_content_size_w_image  (doc,t); break;
+        case E.Content.SizeType.text  : e_content_size_w_text   (doc,t); break;
+        case E.Content.SizeType.e     : e_content_size_w_e      (doc,t); break;
     }
 }
 
 void
-e_content_size_fixed (Doc* doc, ETree* t) {
+e_content_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_size = e.content.size;
+    //e.content.size.w = e.content.size.w;
+    //e.cached.content_size = e.content.size;
 }
 
 void
-e_content_size_image (Doc* doc, ETree* t) {
+e_content_size_w_image (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_size = e.content.image.size;
+    e.content.size.w = e.content.image.size.w;
 }
 
 void
-e_content_size_text (Doc* doc, ETree* t) {
+e_content_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_size = e.content.text.size;
+    e.content.size.w = e.content.text.size.w;
 }
 
 void
-e_content_size_e (Doc* doc, ETree* t) {
+e_content_size_w_e (Doc* doc, ETree* t) {
     auto e = t.e;
     if (t.parent !is null)
-        e.cached.content_size = t.parent.e.content.size;
+        e.content.size.w = t.parent.e.content.size.w;
     else
-        e.cached.content_size = doc.size;
+        e.content.size.w = doc.size.w;
         //return Screen.size;
         //return Window.size;
 }
 
 void
-e_content_size_max (Doc* doc, ETree* t) {
+e_content_size_w_max (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_size = Size (
-        max (e.content.image.size.w, e.content.text.size.w),
-        max (e.content.image.size.h, e.content.text.size.h)
-    );
+    e.content.size.w = max (e.content.image.size.w, e.content.text.size.w);
 }
 
 void
-e_content_image_size (Doc* doc, ETree* t) {
+e_content_size_h (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
-    switch (e.content.image.size_type) {
-        case E.Content.Image.SizeType.fixed   : e_content_image_size_fixed   (doc,t); break;
-        case E.Content.Image.SizeType.image   : e_content_image_size_image   (doc,t); break;
-        case E.Content.Image.SizeType.text    : e_content_image_size_text    (doc,t); break;
-        case E.Content.Image.SizeType.content : e_content_image_size_content (doc,t); break;
+    switch (e.content.size_h_type) {
+        case E.Content.SizeType.fixed : e_content_size_h_fixed  (doc,t); break;
+        case E.Content.SizeType.max   : e_content_size_h_max    (doc,t); break;
+        case E.Content.SizeType.image : e_content_size_h_image  (doc,t); break;
+        case E.Content.SizeType.text  : e_content_size_h_text   (doc,t); break;
+        case E.Content.SizeType.e     : e_content_size_h_e      (doc,t); break;
+    }
+}
+
+void
+e_content_size_h_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    //e.content.size.w = e.content.size.w;
+    //e.cached.content_size = e.content.size;
+}
+
+void
+e_content_size_h_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.size.h = e.content.image.size.h;
+}
+
+void
+e_content_size_h_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.size.h = e.content.text.size.h;
+}
+
+void
+e_content_size_h_e (Doc* doc, ETree* t) {
+    auto e = t.e;
+    if (t.parent !is null)
+        e.content.size.h = t.parent.e.content.size.h;
+    else
+        e.content.size.h = doc.size.h;
+        //return Screen.size;
+        //return Window.size;
+}
+
+void
+e_content_size_h_max (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.size.h = max (e.content.image.size.h, e.content.text.size.h);
+}
+
+void
+e_content_image_size_w (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.image.size_w_type) {
+        case E.Content.Image.SizeType.fixed   : e_content_image_size_w_fixed   (doc,t); break;
+        case E.Content.Image.SizeType.image   : e_content_image_size_w_image   (doc,t); break;
+        case E.Content.Image.SizeType.text    : e_content_image_size_w_text    (doc,t); break;
+        case E.Content.Image.SizeType.content : e_content_image_size_w_content (doc,t); break;
     }
 }
 
 void 
-e_content_image_size_fixed (Doc* doc, ETree* t) {
+e_content_image_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_image_size = e.content.image.size;
+    e.content.image.size.w = e.content.image.size.w;
 }
 
 void 
-e_content_image_size_image (Doc* doc, ETree* t) {
+e_content_image_size_w_image (Doc* doc, ETree* t) {
     auto e = t.e;
-    if (e.cached.content_image_ptr !is null) {
-        auto img_surface = e.cached.content_image_ptr;
-
-        e.cached.content_image_size = Size (
-            cast(ushort)img_surface.w,
-            cast(ushort)img_surface.h
-        );
+    if (e.content.image.ptr !is null) {
+        auto img_surface = e.content.image.ptr;
+        e.content.image.size.w = cast(ushort)img_surface.w;
     }
     else {
         //e.cached.content_image_size = e.cached.content_image_size;
@@ -372,56 +455,142 @@ e_content_image_size_image (Doc* doc, ETree* t) {
 }
 
 void 
-e_content_image_size_text (Doc* doc, ETree* t) {
+e_content_image_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_image_size = e.content.text.size;
+    e.content.image.size.w = e.content.text.size.w;
 }
 
 void 
-e_content_image_size_content (Doc* doc, ETree* t) {
+e_content_image_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_image_size = e.content.size;
+    e.content.image.size.w = e.content.size.w;
 }
 
 void
-e_content_text_size (Doc* doc, ETree* t) {
+e_content_image_size_h (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
-    switch (e.content.text.size_type) {
-        case E.Content.Text.SizeType.fixed   : e_content_text_size_fixed   (doc,t); break;
-        case E.Content.Text.SizeType.text    : e_content_text_size_text    (doc,t); break;
-        case E.Content.Text.SizeType.image   : e_content_text_size_image   (doc,t); break;
-        case E.Content.Text.SizeType.content : e_content_text_size_content (doc,t); break;
+    switch (e.content.image.size_h_type) {
+        case E.Content.Image.SizeType.fixed   : e_content_image_size_h_fixed   (doc,t); break;
+        case E.Content.Image.SizeType.image   : e_content_image_size_h_image   (doc,t); break;
+        case E.Content.Image.SizeType.text    : e_content_image_size_h_text    (doc,t); break;
+        case E.Content.Image.SizeType.content : e_content_image_size_h_content (doc,t); break;
     }
 }
 
 void 
-e_content_text_size_fixed (Doc* doc, ETree* t) {
+e_content_image_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_text_size = e.content.text.size;
+    e.content.image.size.h = e.content.image.size.h;
 }
 
 void 
-e_content_text_size_image (Doc* doc, ETree* t) {
+e_content_image_size_h_image (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_text_size = e.content.image.size;
+    if (e.content.image.ptr !is null) {
+        auto img_surface = e.content.image.ptr;
+        e.content.image.size.h = cast(ushort)img_surface.h;
+    }
+    else {
+        //e.cached.content_image_size = e.cached.content_image_size;
+        assert (0, "Image ptr is null");
+    }
 }
 
 void 
-e_content_text_size_text (Doc* doc, ETree* t) {
+e_content_image_size_h_text (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_text_size = get_text_size (
+    e.content.image.size.h = e.content.text.size.h;
+}
+
+void 
+e_content_image_size_h_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.image.size.h = e.content.size.h;
+}
+
+
+void
+e_content_text_size_w (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.text.size_w_type) {
+        case E.Content.Text.SizeType.fixed   : e_content_text_size_w_fixed   (doc,t); break;
+        case E.Content.Text.SizeType.text    : e_content_text_size_w_text    (doc,t); break;
+        case E.Content.Text.SizeType.image   : e_content_text_size_w_image   (doc,t); break;
+        case E.Content.Text.SizeType.content : e_content_text_size_w_content (doc,t); break;
+    }
+}
+
+void 
+e_content_text_size_w_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    //e.content.text.size.w = e.content.text.size.w;
+}
+
+void 
+e_content_text_size_w_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.text.size.w = e.content.image.size.w;
+}
+
+void 
+e_content_text_size_w_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.text.size.w = get_text_size (
         e.content.text.s, 
         global_font, 
         e.content.text.color
-    );
+    ).w;
 }
 
 void 
-e_content_text_size_content (Doc* doc, ETree* t) {
+e_content_text_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.cached.content_text_size = e.content.size;
+    e.content.text.size.w = e.content.size.w;
+}
+
+void
+e_content_text_size_h (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    final
+    switch (e.content.text.size_h_type) {
+        case E.Content.Text.SizeType.fixed   : e_content_text_size_h_fixed   (doc,t); break;
+        case E.Content.Text.SizeType.text    : e_content_text_size_h_text    (doc,t); break;
+        case E.Content.Text.SizeType.image   : e_content_text_size_h_image   (doc,t); break;
+        case E.Content.Text.SizeType.content : e_content_text_size_h_content (doc,t); break;
+    }
+}
+
+void 
+e_content_text_size_h_fixed (Doc* doc, ETree* t) {
+    auto e = t.e;
+    //e.content.text.size.w = e.content.text.size.w;
+}
+
+void 
+e_content_text_size_h_image (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.text.size.h = e.content.image.size.h;
+}
+
+void 
+e_content_text_size_h_text (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.text.size.h = get_text_size (
+        e.content.text.s, 
+        global_font, 
+        e.content.text.color
+    ).h;
+}
+
+void 
+e_content_text_size_h_content (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.content.text.size.h = e.content.size.h;
 }
 
 
@@ -435,10 +604,13 @@ update_pos (Doc* doc, ETree* t) {
         return;
 
     //
+    final
     switch (e.pos_type) {
         case E.PosType.t9   : pos_type_t9 (t); break;
         case E.PosType.grid : pos_type_grid (t); break;
-        default:
+        case E.PosType.vbox : pos_type_vbox (t); break;
+        case E.PosType.hbox : pos_type_hbox (t); break;
+        case E.PosType.none : break;
    }
 
    // text pos
@@ -447,19 +619,9 @@ update_pos (Doc* doc, ETree* t) {
 
 void
 update_text_rects_pos (E* e) {
-    int outw, outh;
-    X _x = e.content.text.pos.x;
-    Y  y = e.content.text.pos.y;
     foreach (ref rec; e.content.text.rects) {
-        if (rec.s.length) {
-            SDL_QueryTexture (rec.ptr, null, null, &outw, &outh);
-
-            rec.pos.x = _x;
-            rec.pos.y =  y;
-            rec.size.w = cast(W)!outw;
-            rec.size.h = cast(H)!outh;
-            _x += outw;
-        }
+        if (rec.s.length)
+            rec.pos += e.pos;
     }
 }
 
@@ -509,6 +671,18 @@ pos_type_grid (ETree* t) {
     // e e
     // e e 
     // e e
+}
+
+void
+pos_type_vbox (ETree* t) {
+    // e
+    // e 
+    // e
+}
+
+void
+pos_type_hbox (ETree* t) {
+    // e e e
 }
 
 ETree*

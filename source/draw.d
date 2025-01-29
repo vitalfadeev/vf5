@@ -59,18 +59,21 @@ get_text_size (string s, TTF_Font* font, Color color) {
     int w, h;
     auto ret = TTF_SizeUTF8 (font, s.toStringz, &w, &h);
     
-    return Size (cast(W)w,cast(H)h);
+    return Size (w.to!W,h.to!W);
 }
 
 
 void
 one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y, W w, H h) {
-    auto image = _one_string (renderer, s, font, color, x, y);
+    font = global_font;
+    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    writeln ("string: x,y: ", x, " ", y, " w,h: ", w, " ", h);
+    auto image = _one_string (renderer, s, font, color);
     render_texture (renderer, image, x, y, w, h);
 }
 
 SDL_Texture*
-_one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y) {
+_one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
@@ -113,10 +116,14 @@ content_pos (E* e) {
 
 Size
 content_size (E* e) {
-    return Size (
-        cast(W)(e.size.w - e.borders.l.w - e.borders.r.w), 
-        cast(H)(e.size.h - e.borders.t.w - e.borders.b.w)
-    );
+    if ((e.size.w >= e.borders.l.w + e.borders.r.w) &&
+        (e.size.h >= e.borders.l.w + e.borders.r.w))
+        return Size (
+            (e.size.w - e.borders.l.w - e.borders.r.w).to!W, 
+            (e.size.h - e.borders.t.w - e.borders.b.w).to!H
+        );
+    else
+        return Size (0,0);
 }
 
 void
@@ -220,8 +227,12 @@ draw_borders (SDL_Renderer* renderer, E* e) {
         e.borders.t.color.b,
         e.borders.t.color.a,
     );
-    SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    writeln (e.size);
+    //SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    writeln (e.pos, " ", e.size, 
+        " ", e.borders.t.w, ",", e.borders.r.w,
+        " ", e.borders.b.w, ",", e.borders.l.w);
+
+    if (e.size.w > 0 && e.size.h > 0)
     draw8 (
         renderer, 
         e.pos.x, 
@@ -239,13 +250,19 @@ void
 draw_content (SDL_Renderer* renderer, E* e) {
     auto color = e.bg;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     auto cp = content_pos (e);
     auto cs = content_size (e);
-    fill_rect (renderer, cp.x, cp.y, cs.w, cs.h);
+    //writeln ("cp,cs: ", cp, " ", cs);
+    writeln ("p,s  : ", e.pos, " ", e.size);
+    writeln ("cp,cs: ", e.content.pos, " ", e.content.size);
+    writeln ("tp,ts: ", e.content.text.pos, " ", e.content.text.size);
+    //fill_rect (renderer, cp.x, cp.y, cs.w, cs.h);
 
     if (e.content.image.ptr !is null)
         image (renderer, e.content.image.ptr, cp.x, cp.y, cs.w, cs.h);
 
+    writeln ("e.content.text.s: ", e.content.text.s);
     if (e.content.text.s.length)
         draw_text (renderer, e, cp, cs);
 }

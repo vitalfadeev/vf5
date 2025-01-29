@@ -1,5 +1,6 @@
 module types;
 
+import std.conv;
 import bindbc.sdl;
 
 
@@ -18,6 +19,28 @@ Pos {
     opBinary (string op : "+") (Size size) {
         return Pos (cast(X)(x+size.w), cast(Y)(y+size.h));
     }
+
+    Pos
+    opBinary (string op : "+") (Pos b) {
+        return Pos ((x+b.x).to!W, (y+b.y).to!H);
+    }
+
+    Pos
+    opBinary (string op : "-") (Pos b) {
+        return Pos ((x-b.x).to!W, (y-b.y).to!H);
+    }
+
+    void
+    opOpAssign (string op : "+") (Pos b) {
+        x += b.x;
+        y += b.y;
+    }
+
+    void
+    opOpAssign (string op : "-") (Pos b) {
+        x -= b.x;
+        y -= b.y;
+    }
 }
 
 struct
@@ -27,12 +50,12 @@ Size {
 
     Size
     opBinary (string op : "+") (Size b) {
-        return Size (cast(W)(w+b.w), cast(H)(h+b.h));
+        return Size ((w+b.w).to!W, (h+b.h).to!H);
     }
 
     Size
     opBinary (string op : "-") (Size b) {
-        return Size (cast(W)(w-b.w), cast(H)(h-b.h));
+        return Size ((w-b.w).to!W, (h-b.h).to!H);
     }
 }
 
