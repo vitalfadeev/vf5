@@ -65,6 +65,7 @@ Pad {
     X r;
     Y b;
     X l;
+    Color bg;
 }
 
 

@@ -22,7 +22,7 @@ arc (Pos pos, Pos pos2, W wid) {
 }
 
 void
-fill_rect (SDL_Renderer* renderer, X x, Y y, W w, H h) {
+fill_rect (SDL_Renderer* renderer, int x, int y, int w, int h) {
     SDL_Rect rect;
     rect.x = x;
     rect.y = y;
@@ -48,10 +48,14 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 void
 _text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, Color color, X x, Y y, W w, H h) {
+    // clip w h
     // from text.rects
     foreach (ref rec; rects)
-        if (rec.s.length)
-            one_string (renderer, rec.s, font, color, rec.pos.x, rec.pos.y, rec.size.w, rec.size.h);
+        if (rec.s.length) {
+            auto char_x = rec.pos.x + x;
+            auto char_y = rec.pos.y + y;
+            one_string (renderer, rec.s, font, color, char_x, char_y, rec.size.w, rec.size.h);
+        }
 }
 
 Size
@@ -64,10 +68,9 @@ get_text_size (string s, TTF_Font* font, Color color) {
 
 
 void
-one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, X x, Y y, W w, H h) {
+one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, int x, int y, int w, int h) {
     font = global_font;
     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    writeln ("string: x,y: ", x, " ", y, " w,h: ", w, " ", h);
     auto image = _one_string (renderer, s, font, color);
     render_texture (renderer, image, x, y, w, h);
 }
@@ -106,30 +109,59 @@ render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, i
     render_texture (renderer, tex, dst);
 }
 
+// e.pos  = border + pad + content
+// e.size = border + pad + content
 Pos
-content_pos (E* e) {
+borders_pos (E* e) {
+    return e.pos;
+}
+
+Pos
+pad_pos (E* e) {
+    auto b_pos = borders_pos (e);
     return Pos (
-        (e.pos.x + e.borders.l.w + e.pad.l).to!X, 
-        (e.pos.y + e.borders.t.w + e.pad.t).to!Y, 
+        (b_pos.x + e.borders.l.w).to!X, 
+        (b_pos.y + e.borders.t.w).to!Y, 
     );
 }
 
+Pos
+content_pos (E* e) {
+    auto p_pos = pad_pos (e);
+    return Pos (
+        (p_pos.x + e.pad.l).to!X, 
+        (p_pos.y + e.pad.t).to!Y, 
+    );
+}
+
+Pos
+text_pos (E* e) {
+    return content_pos (e);
+}
+
+Pos
+image_pos (E* e) {
+    return content_pos (e);
+}
+
+
 Size
 content_size (E* e) {
-    if ((e.size.w >= e.borders.l.w + e.borders.r.w) &&
-        (e.size.h >= e.borders.l.w + e.borders.r.w))
-        return Size (
-            (e.size.w - e.borders.l.w - e.borders.r.w).to!W, 
-            (e.size.h - e.borders.t.w - e.borders.b.w).to!H
-        );
-    else
-        return Size (0,0);
+    return e.content.size;
+    //if ((e.size.w >= e.borders.l.w + e.borders.r.w) &&
+    //    (e.size.h >= e.borders.l.w + e.borders.r.w))
+    //    return Size (
+    //        (e.size.w - e.borders.l.w - e.borders.r.w).to!W, 
+    //        (e.size.h - e.borders.t.w - e.borders.b.w).to!H
+    //    );
+    //else
+    //    return Size (0,0);
 }
 
 void
 draw_e (SDL_Renderer* renderer, E* e) {
     draw_borders (renderer,e);
-    draw_content (renderer,e);
+    draw_content_with_pad (renderer,e);
 /*
     // pad
     if (e.pad.t)
@@ -204,18 +236,18 @@ draw () {
 
 
 void
-draw8 (SDL_Renderer* renderer, X x, Y y, W w, H h, W t, W r, W b, W l) {
+draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
     // 1 2 3
     // 8   4
     // 7 6 5
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y),     cast(X)(l),     cast(Y)(t)); // 1
-    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y),     cast(X)(w-l-r), cast(Y)(t)); // 2
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y),     cast(X)(r),     cast(Y)(t)); // 3
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+t),   cast(X)(r),     cast(Y)(h-t-b)); // 4
-    fill_rect (renderer, cast(X)(x+w-r), cast(Y)(y+h-b), cast(X)(r),     cast(Y)(b)); // 5
-    fill_rect (renderer, cast(X)(x+l),   cast(Y)(y+h-b), cast(X)(w-l-r), cast(Y)(b)); // 6
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y+h-b), cast(X)(l),     cast(Y)(b)); // 7
-    fill_rect (renderer, cast(X)(x),     cast(Y)(y+t),   cast(X)(l),     cast(Y)(h-t-b)); // 8
+    fill_rect (renderer, x,     y,     l,     t); // 1
+    fill_rect (renderer, x+l,   y,     w-l-r, t); // 2
+    fill_rect (renderer, x+w-r, y,     r,     t); // 3
+    fill_rect (renderer, x+w-r, y+t,   r,     h-t-b); // 4
+    fill_rect (renderer, x+w-r, y+h-b, r,     b); // 5
+    fill_rect (renderer, x+l,   y+h-b, w-l-r, b); // 6
+    fill_rect (renderer, x,     y+h-b, l,     b); // 7
+    fill_rect (renderer, x,     y+t,   l,     h-t-b); // 8
 }
 
 void
@@ -227,16 +259,14 @@ draw_borders (SDL_Renderer* renderer, E* e) {
         e.borders.t.color.b,
         e.borders.t.color.a,
     );
-    //SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    writeln (e.pos, " ", e.size, 
-        " ", e.borders.t.w, ",", e.borders.r.w,
-        " ", e.borders.b.w, ",", e.borders.l.w);
+
+    auto pos = borders_pos (e);
 
     if (e.size.w > 0 && e.size.h > 0)
     draw8 (
         renderer, 
-        e.pos.x, 
-        e.pos.y, 
+        pos.x, 
+        pos.y, 
         e.size.w, 
         e.size.h, 
         e.borders.t.w,
@@ -247,24 +277,33 @@ draw_borders (SDL_Renderer* renderer, E* e) {
 }
 
 void
-draw_content (SDL_Renderer* renderer, E* e) {
+draw_content_with_pad (SDL_Renderer* renderer, E* e) {
+    auto pad_pos      = pad_pos (e);
+    auto content_pos  = content_pos (e);
+    auto content_size = content_size (e);
+
+    auto color = e.pad.bg;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    fill_rect (renderer, 
+        pad_pos.x, pad_pos.y, 
+        content_size.w+e.pad.l+e.pad.r - e.borders.l.w - e.borders.r.w, 
+        content_size.h+e.pad.t+e.pad.b - e.borders.t.w - e.borders.b.w
+        );
+
+    draw_content (renderer,e,content_pos,content_size);
+}
+
+void
+draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
     auto color = e.bg;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    SDL_SetRenderDrawColor (renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    auto cp = content_pos (e);
-    auto cs = content_size (e);
-    //writeln ("cp,cs: ", cp, " ", cs);
-    writeln ("p,s  : ", e.pos, " ", e.size);
-    writeln ("cp,cs: ", e.content.pos, " ", e.content.size);
-    writeln ("tp,ts: ", e.content.text.pos, " ", e.content.text.size);
-    //fill_rect (renderer, cp.x, cp.y, cs.w, cs.h);
+    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
     if (e.content.image.ptr !is null)
-        image (renderer, e.content.image.ptr, cp.x, cp.y, cs.w, cs.h);
+        image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
-    writeln ("e.content.text.s: ", e.content.text.s);
     if (e.content.text.s.length)
-        draw_text (renderer, e, cp, cs);
+        draw_text (renderer, e, content_pos, content_size);
 }
 
 

@@ -221,35 +221,36 @@ apply_klass (Doc* doc, E* e, Klass* k) {
     foreach (ke; k.klasse) {
         writeln ("  ", ke.id);
         switch (ke.id) {
-            case "pos.x"          : set_pos_x         (doc,e,ke.values); break;
-            case "pos.y"          : set_pos_y         (doc,e,ke.values); break;
-            case "pos"            : set_pos           (doc,e,ke.values); break;
-            case "pos.type"       : set_pos_type      (doc,e,ke.values); break;
-            case "pos.group"      : set_pos_group     (doc,e,ke.values); break;
-            case "pos.dir"        : set_pos_dir       (doc,e,ke.values); break;
-            case "size.w"         : set_size_w        (doc,e,ke.values); break;
-            case "size.h"         : set_size_h        (doc,e,ke.values); break;
-            case "size"           : set_size          (doc,e,ke.values); break;
-            case "hidden"         : set_hidden        (doc,e,ke.values); break;
-            case "popup"          : set_popup         (doc,e,ke.values); break;
-            case "borders"        : set_borders       (doc,e,ke.values); break;
-            case "borders.t"      : set_border_t      (doc,e,ke.values); break;
-            case "borders.r"      : set_border_r      (doc,e,ke.values); break;
-            case "borders.b"      : set_border_b      (doc,e,ke.values); break;
-            case "borders.l"      : set_border_l      (doc,e,ke.values); break;
-            case "pad"            : set_pad           (doc,e,ke.values); break;
-            case "content.image"  : set_content_image (doc,e,ke.values); break;
-            case "content.text"   : set_content_text  (doc,e,ke.values); break;
-            case "content"        : set_content       (doc,e,ke.values); break;
-            case "image"          : set_content_image (doc,e,ke.values); break;
-            case "text"           : set_content_text  (doc,e,ke.values); break;
-            case "text.color"     : set_text_color    (doc,e,ke.values); break;
-            case "text.pos.type"  : set_text_pos_type (doc,e,ke.values); break;
+            case "pos.x"          : set_pos_x          (doc,e,ke.values); break;
+            case "pos.y"          : set_pos_y          (doc,e,ke.values); break;
+            case "pos"            : set_pos            (doc,e,ke.values); break;
+            case "pos.type"       : set_pos_type       (doc,e,ke.values); break;
+            case "pos.group"      : set_pos_group      (doc,e,ke.values); break;
+            case "pos.dir"        : set_pos_dir        (doc,e,ke.values); break;
+            case "size.w"         : set_size_w         (doc,e,ke.values); break;
+            case "size.h"         : set_size_h         (doc,e,ke.values); break;
+            case "size"           : set_size           (doc,e,ke.values); break;
+            case "hidden"         : set_hidden         (doc,e,ke.values); break;
+            case "popup"          : set_popup          (doc,e,ke.values); break;
+            case "borders"        : set_borders        (doc,e,ke.values); break;
+            case "borders.t"      : set_border_t       (doc,e,ke.values); break;
+            case "borders.r"      : set_border_r       (doc,e,ke.values); break;
+            case "borders.b"      : set_border_b       (doc,e,ke.values); break;
+            case "borders.l"      : set_border_l       (doc,e,ke.values); break;
+            case "pad"            : set_pad            (doc,e,ke.values); break;
+            case "pad.bg"         : set_pad_bg         (doc,e,ke.values); break;
+            case "content.image"  : set_content_image  (doc,e,ke.values); break;
+            case "content.text"   : set_content_text   (doc,e,ke.values); break;
+            case "content"        : set_content        (doc,e,ke.values); break;
+            case "image"          : set_content_image  (doc,e,ke.values); break;
+            case "text"           : set_content_text   (doc,e,ke.values); break;
+            case "text.color"     : set_text_color     (doc,e,ke.values); break;
+            case "text.pos.type"  : set_text_pos_type  (doc,e,ke.values); break;
             case "content.size.w" : set_content_size_w (doc,e,ke.values); break;
             case "content.size.h" : set_content_size_h (doc,e,ke.values); break;
             case "content.size"   : set_content_size   (doc,e,ke.values); break;
-            case "bg"             : set_bg            (doc,e,ke.values); break;
-            case "on"             : set_on            (doc,e,ke.values); break;
+            case "bg"             : set_bg             (doc,e,ke.values); break;
+            case "on"             : set_on             (doc,e,ke.values); break;
             default:
         }
     }
@@ -445,6 +446,21 @@ set_border_l (Doc* doc, E* e, string[] values) {
 
 void
 set_pad (Doc* doc, E* e, string[] values) {
+    if (values.length >= 4) {
+        if (values[0].isNumeric) {
+            e.pad.t = values[0].to!Y;
+        }
+        if (values[1].isNumeric) {
+            e.pad.r = values[1].to!X;
+        }
+        if (values[2].isNumeric) {
+            e.pad.b = values[1].to!Y;
+        }
+        if (values[3].isNumeric) {
+            e.pad.l = values[1].to!X;
+        }
+    }
+    else
     if (values.length >= 3) {
         //
     }
@@ -463,6 +479,17 @@ set_pad (Doc* doc, E* e, string[] values) {
             e.pad.r = e.pad.l = values[0].to!X;
             e.pad.t = e.pad.b = values[0].to!Y;
         }
+    }
+}
+
+void
+set_pad_bg (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        Color c;
+        if (doc_parse_color (doc, values[0], &c))
+            e.pad.bg = c;
+        else
+            throw new Exception ("unsupported color: " ~ values.to!string);
     }
 }
 

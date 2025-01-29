@@ -178,16 +178,16 @@ load_e_text (E* e) {
 
 void
 update_text_size (Doc* doc) {
-    foreach (ETree* t; WalkTree (doc.tree))
-        if (t.e.content.text.s.length)
-            update_e_text_size (t.e);
+    //foreach (ETree* t; WalkTree (doc.tree))
+    //    if (t.e.content.text.s.length)
+    //        update_e_text_size (t.e);
 }
 
-void
-update_e_text_size (E* e) {
-    //foreach (ref rec; e.content.text.rects)
-    //    rec.pos
-}
+//void
+//update_e_text_size (E* e) {
+//    foreach (ref rec; e.content.text.rects)
+//        rec.pos
+//}
 
 void
 update_pos_size (Doc* doc) {
@@ -310,7 +310,7 @@ void
 e_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_h (doc,t);
-    e.size.h = (e.content.size.h + e.pad.t + e.pad.b).to!W;
+    e.size.h = (e.content.size.h + e.pad.t + e.pad.b).to!H;
 }
 
 void
@@ -611,16 +611,16 @@ update_pos (Doc* doc, ETree* t) {
    }
 
    // text pos
-   update_text_rects_pos (e);
+   //update_text_rects_pos (e);
 }
 
-void
-update_text_rects_pos (E* e) {
-    foreach (ref rec; e.content.text.rects) {
-        if (rec.s.length)
-            rec.pos += e.pos;
-    }
-}
+//void
+//update_text_rects_pos (E* e) {
+//    foreach (ref rec; e.content.text.rects) {
+//        if (rec.s.length)
+//            rec.pos += e.pos;
+//    }
+//}
 
 
 void

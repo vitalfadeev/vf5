@@ -71,7 +71,7 @@ root
  on start commands.player.start
 
 menubar
- size    640 32
+ size    640 content
  borders 0 none colors.fg+1
 
 menubar-item
@@ -79,6 +79,7 @@ menubar-item
  size.h         content
  content.size   text
  pad            20 5
+ pad.bg         colors.pad_bg
  text.color     colors.fg
  bg             colors.bg
 
@@ -160,11 +161,12 @@ input-radio
 
 colors
   fg       #eee
-  bg       #222
   fg+1     #e8e8e8
   fg-1     #d8d8d8
+  bg       #222
   bg+1     #282828
   bg-1     #181818
+  pad_bg   #282
   focused  #0F0DBF
   info     #0c0
   warn     #cc0
