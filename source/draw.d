@@ -130,6 +130,15 @@ pad_pos (E* e) {
     );
 }
 
+Size
+pad_size (E* e) {
+    auto _content_size = content_size (e);
+    return Size (
+        (_content_size.w + e.pad.l + e.pad.r).to!W, 
+        (_content_size.h + e.pad.t + e.pad.b).to!H, 
+    );
+}
+
 Pos
 content_pos (E* e) {
     auto p_pos = pad_pos (e);
@@ -294,19 +303,20 @@ draw_borders (SDL_Renderer* renderer, E* e) {
 
 void
 draw_content_with_pad (SDL_Renderer* renderer, E* e) {
-    auto pad_pos      = pad_pos (e);
-    auto content_pos  = content_pos (e);
-    auto content_size = content_size (e);
+    auto _pad_pos      = pad_pos (e);
+    auto _pad_size     = pad_size (e);
+    auto _content_pos  = content_pos (e);
+    auto _content_size = content_size (e);
 
+    draw_pad (renderer,e,_pad_pos,_pad_size);
+    draw_content (renderer,e,_content_pos,_content_size);
+}
+
+void
+draw_pad (SDL_Renderer* renderer, E* e, Pos _pad_pos, Size _pad_size) {
     auto color = e.pad.bg;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, 
-        pad_pos.x, pad_pos.y, 
-        content_size.w+e.pad.l+e.pad.r - e.borders.l.w - e.borders.r.w, 
-        content_size.h+e.pad.t+e.pad.b - e.borders.t.w - e.borders.b.w
-        );
-
-    draw_content (renderer,e,content_pos,content_size);
+    fill_rect (renderer, _pad_pos.x, _pad_pos.y, _pad_size.w, _pad_size.h);
 }
 
 void
