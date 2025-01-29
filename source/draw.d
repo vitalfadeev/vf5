@@ -116,6 +116,11 @@ borders_pos (E* e) {
     return e.pos;
 }
 
+Size
+borders_size (E* e) {
+    return e_size (e);
+}
+
 Pos
 pad_pos (E* e) {
     auto b_pos = borders_pos (e);
@@ -144,6 +149,16 @@ image_pos (E* e) {
     return content_pos (e);
 }
 
+
+Size
+e_size (E* e) {
+    // borders + pads + content
+    auto _content_size = content_size (e);
+    return Size (
+        (e.borders.l.w + e.pad.l + _content_size.w + e.pad.r + e.borders.r.w).to!W,
+        (e.borders.t.w + e.pad.t + _content_size.h + e.pad.b + e.borders.b.w).to!H
+    );
+}
 
 Size
 content_size (E* e) {
@@ -260,15 +275,16 @@ draw_borders (SDL_Renderer* renderer, E* e) {
         e.borders.t.color.a,
     );
 
-    auto pos = borders_pos (e);
+    auto pos  = borders_pos  (e);
+    auto size = borders_size (e);
 
-    if (e.size.w > 0 && e.size.h > 0)
+    if (size.w > 0 && size.h > 0)
     draw8 (
         renderer, 
         pos.x, 
         pos.y, 
-        e.size.w, 
-        e.size.h, 
+        size.w, 
+        size.h, 
         e.borders.t.w,
         e.borders.r.w,
         e.borders.b.w,
