@@ -98,7 +98,11 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     doc.update_text_size ();
                     // ...
                     // 7
-                    doc.update_pos_size ();
+                    doc.update_sizes ();
+                    // 8
+                    doc.update_childs_sizes ();
+                    // 9
+                    doc.update_poses ();
 
                     //SDL_UpdateWindowSurface (window);
                     draw_doc (renderer,doc);

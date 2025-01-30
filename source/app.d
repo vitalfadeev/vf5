@@ -28,7 +28,11 @@ main() {
 	doc.update_text_size ();
 	// ...
 	// 7
-	doc.update_pos_size ();
+	doc.update_sizes ();
+	// 8
+	doc.update_childs_sizes ();
+	// 9
+	doc.update_poses ();
 	//
 	dump_tree (doc.tree);
 	dump_klasses (doc.klasses);

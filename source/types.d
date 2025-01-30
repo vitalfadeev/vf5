@@ -57,6 +57,18 @@ Size {
     opBinary (string op : "-") (Size b) {
         return Size ((w-b.w).to!W, (h-b.h).to!H);
     }
+
+    void
+    opOpAssign (string op : "+") (Size b) {
+        w += b.w;
+        h += b.h;
+    }
+
+    void
+    opOpAssign (string op : "-") (Size b) {
+        w -= b.w;
+        h -= b.h;
+    }
 }
 
 struct

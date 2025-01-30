@@ -33,12 +33,12 @@ import klass;
 string text = "
 e root
  e vbox menubar
-  e menubar-item border hbox file
-  e menubar-item border hbox play
-  e menubar-item border hbox list
-  e menubar-item border hbox services
-  e menubar-item border hbox output
-  e menubar-item border hbox view
+  e menubar-item border hbox file  
+  e menubar-item border hbox play hidden
+  e menubar-item border hbox list hidden
+  e menubar-item border hbox services hidden
+  e menubar-item border hbox output hidden
+  e menubar-item border hbox view hidden
 
  e vbox toolbar hidden
   e toolbar-item hbox tb-search
@@ -49,10 +49,10 @@ e root
   e toolbar-item hbox tb-stio
   e toolbar-item hbox tb-next
   e toolbar-item hbox tb-position
-  e toolbar-item t9-top-right tb-time
-  e toolbar-item t9-top-right tb-loop
-  e toolbar-item t9-top-right tb-random
-  e toolbar-item t9-top-right tb-volume
+  e toolbar-item t9-top-right tb-time hidden
+  e toolbar-item t9-top-right tb-loop hidden
+  e toolbar-item t9-top-right tb-random hidden
+  e toolbar-item t9-top-right tb-volume hidden
 
  e vbox playlist
  e vbox info
@@ -71,8 +71,9 @@ root
  on start commands.player.start
 
 menubar
- size    640 content
- borders 0 none colors.fg+1
+ size         640 content
+ content.size childs
+ borders      10 solid colors.warn
 
 menubar-item
  size.w         content
@@ -84,18 +85,18 @@ menubar-item
  text.bg        colors.bg
 
 toolbar
- size    640 32
- pos     0 32
- borders 0 none colors.fg+1
+ size         640 content
+ content.size childs
+ borders      1 solid colors.fg+1
 
 toolbar-item
- size.w        32
- size.h        32
- text.pos.type 9
- text.group    9
- text.dir      r
- text.color    colors.fg+1
- bg            colors.bg-1
+ size.w         32
+ size.h         32
+ content.size   32 32
+ content.size.type fixed
+ pad            20 5
+ pad.bg         colors.pad_bg
+ borders 1 solid colors.fg+1
 
 file
  text  Файл
@@ -143,7 +144,7 @@ t9-bottom-right
  pos.dir   r
 
 vbox
- pos.type  vbox d
+ pos.type  vbox
 
 hbox
  pos.type  hbox

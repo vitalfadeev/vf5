@@ -176,7 +176,31 @@ e_size (E* e) {
 
 Size
 content_size (E* e) {
-    return e.content.size;
+    W _w;
+    H _h;
+
+    final
+    switch (e.content.size_w_type) {
+        case E.Content.SizeType.fixed  : _w = e.content.size.w; break;
+        case E.Content.SizeType.image  : _w = e.content.size.w; break; //.image.
+        case E.Content.SizeType.text   : _w = e.content.size.w; break; //.text.
+        case E.Content.SizeType.childs : _w = e.content.childs_size.w; break;
+        case E.Content.SizeType.max    : _w = e.content.size.w; break; //max .image. .text.
+        case E.Content.SizeType.e      : _w = e.content.size.w; break;
+    }
+
+    final
+    switch (e.content.size_h_type) {
+        case E.Content.SizeType.fixed  : _h = e.content.size.h; break;
+        case E.Content.SizeType.image  : _h = e.content.size.h; break; //.image.
+        case E.Content.SizeType.text   : _h = e.content.size.h; break; //.text.
+        case E.Content.SizeType.childs : _h = e.content.childs_size.h; break;
+        case E.Content.SizeType.max    : _h = e.content.size.h; break; //max .image. .text.
+        case E.Content.SizeType.e      : _h = e.content.size.h; break;
+    }
+
+    return Size (_w,_h);
+    
     //if ((e.size.w >= e.borders.l.w + e.borders.r.w) &&
     //    (e.size.h >= e.borders.l.w + e.borders.r.w))
     //    return Size (
