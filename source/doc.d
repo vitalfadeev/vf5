@@ -367,7 +367,11 @@ e_content_childs_size (Doc* doc, ETree* t) {
         max_sz.h = max (max_sz.h, tc.e.pos.y + tc.e.size.h).to!H;
     }
 
-    e.content.childs_size.w = (max_sz.w - e.content.pos.x).to!W;
+    if (max_sz.w > e.content.pos.x)
+        e.content.childs_size.w = (max_sz.w - e.content.pos.x).to!W;
+    else
+        e.content.childs_size.w = 0;
+
     if (max_sz.h > e.content.pos.y)
         e.content.childs_size.h = (max_sz.h - e.content.pos.y).to!H;
     else

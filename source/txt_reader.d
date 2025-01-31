@@ -35,8 +35,8 @@ e root
  e vbox menubar
   e menubar-item border hbox file  
   e menubar-item border hbox play 
-  e menubar-item border hbox list
-  e menubar-item border hbox services
+  e menubar-item border hbox list hidden
+  e menubar-item border hbox services hidden
   e menubar-item border hbox output hidden
   e menubar-item border hbox view hidden
 
@@ -73,13 +73,12 @@ root
  on start     commands.player.start
 
 menubar
- size         content content
+ size         content
  content.size childs
  borders      10 solid colors.warn
 
 menubar-item
- size.w         content
- size.h         content
+ size           content
  content.size   text
  pad            20 5
  pad.bg         colors.pad_bg
@@ -87,18 +86,16 @@ menubar-item
  text.bg        colors.bg
 
 toolbar
- size         content content
+ size         content
  content.size childs
- content.size childs
- borders      1 solid colors.fg+1
+ borders      10 solid colors.error
 
 toolbar-item
- size.w         32
- size.h         32
+ size           content
  content.size   32 32
- pad            20 5
+ pad            5 5
  pad.bg         colors.pad_bg
- borders 1 solid colors.fg+1
+ borders        1 solid colors.fg+1
 
 file
  text  Файл
