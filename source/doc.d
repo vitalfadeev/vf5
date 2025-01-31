@@ -215,6 +215,8 @@ dump_size (Doc* doc, ETree* t, int level=0) {
     writeln (*e);
 
     for (auto i=0; i<level; i++) write ("  ");
+    writeln ("  pos                 : ", e.pos);
+    for (auto i=0; i<level; i++) write ("  ");
     writeln ("  size                : ", e.size);
     for (auto i=0; i<level; i++) write ("  ");
     writeln ("  content.size        : ", e.content.size);
@@ -285,6 +287,7 @@ void
 e_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_w (doc,t);
+    update_pos (doc,t);
     e.size.w = (e.borders.l.w + e.pad.l + e.content.size.w + e.pad.r + e.borders.r.w).to!W;
 }
 
@@ -304,6 +307,7 @@ void
 e_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_h (doc,t);
+    update_pos (doc,t);
     e.size.h = (e.borders.t.w + e.pad.t + e.content.size.h + e.pad.b + e.borders.b.w).to!H;
 }
 
@@ -363,7 +367,8 @@ e_content_childs_size (Doc* doc, ETree* t) {
         max_sz.h = max (max_sz.h, tc.e.pos.y + tc.e.size.h).to!H;
     }
 
-    e.content.childs_size = max_sz;
+    e.content.childs_size.w = (max_sz.w - e.content.pos.x).to!W;
+    e.content.childs_size.h = (max_sz.h - e.content.pos.y).to!H;
 }
 
 
@@ -604,7 +609,7 @@ update_pos (Doc* doc, ETree* t) {
     //
     final
     switch (e.pos_type) {
-        case E.PosType.t9   : pos_type_t9 (t); break;
+        case E.PosType.t9   : pos_type_t9   (t); break;
         case E.PosType.grid : pos_type_grid (t); break;
         case E.PosType.vbox : pos_type_vbox (t); break;
         case E.PosType.hbox : pos_type_hbox (t); break;
@@ -638,15 +643,19 @@ pos_type_t9 (ETree* t) {
         if (prev !is null) {
             if (e.pos_dir == E.PosDir.r) {
                 e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
-                //e.pos.y = prev.e.pos.y;
+                e.pos.y = prev.e.pos.y;
             }
         }
         else {
             X parent_x;
-            if (t.parent !is null)
-                parent_x = t.parent.e.pos.x;
+            Y parent_y;
+            if (t.parent !is null) {
+                parent_x = t.parent.e.content.pos.x;
+                parent_y = t.parent.e.content.pos.y;
+            }
 
             e.pos.x = parent_x;
+            e.pos.y = parent_y;
         }
     }
     if (e.pos_group == 9) {
@@ -667,9 +676,9 @@ pos_type_t9 (ETree* t) {
 
 void
 pos_type_grid (ETree* t) {
-    // e e
-    // e e 
-    // e e
+    // e e e
+    // e e e
+    // e e e
 }
 
 void
@@ -680,17 +689,19 @@ pos_type_vbox (ETree* t) {
     E* e = t.e;
 
     ETree* prev = find_last_with_type (t, e.pos_type);
+    writeln ("vbox: e.pos_type: ", e.pos_type);
+    writeln ("vbox: prev: ", prev);
     if (prev !is null) {
         final
         switch (e.pos_dir) {
-            case E.PosDir.r:
+            case E.PosDir.r: break;
+            case E.PosDir.l: break;
+            case E.PosDir.b: 
                 auto prev_pos  = e_pos  (prev.e);
                 auto prev_size = e_size (prev.e);
-                e.pos.x = 0;
+                e.pos.x = prev_pos.x;
                 e.pos.y = (prev_pos.y + prev_size.h).to!Y;
                 break;
-            case E.PosDir.l: break;
-            case E.PosDir.b: break;
             case E.PosDir.t: break;
         }
     }
@@ -759,9 +770,11 @@ find_last_in_group (ETree* t, ubyte pos_group) {
 
 ETree*
 find_last_with_type (ETree* t, E.PosType pos_type) {
-    foreach (ETree* _t; WalkLeft (t))
+    foreach (ETree* _t; WalkLeft (t)) {
+        writeln ("find_last_with_type: ",_t.e.pos_type);
         if (_t.e.pos_type == pos_type)
             return _t;
+    }
 
     return null;
 }
@@ -863,6 +876,14 @@ go_question_value (string[] s) {
 auto
 max (A,B) (A a, B b) {
     if (a >= b)
+        return a;
+    else
+        return b;
+}
+
+auto
+min (A,B) (A a, B b) {
+    if (a <= b)
         return a;
     else
         return b;

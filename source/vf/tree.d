@@ -103,10 +103,10 @@ _WalkLeft (Tree,Skip) {
         Tree*  next = t.l;
         int    result;
 
-        if (next is null)
-            return 0;
-
         loop:
+            if (next is null)
+                return 0;
+
             if (skip (next)) {
                 goto go_left;
             }
@@ -115,10 +115,9 @@ _WalkLeft (Tree,Skip) {
             if (result)
                 return result;
 
-            go_left:  // >
+            go_left: 
                 next = next.l;
-                if (next !is null)
-                    goto loop;  // go_left
+                goto loop;  // go_left
 
         return 0;
     }
@@ -141,10 +140,10 @@ _WalkChilds (Tree,Skip) {
         Tree*  next = t.childs.l;
         int    result;
 
-        if (next is null)
-            return 0;
-
         loop:
+            if (next is null)
+                return 0;
+
             if (skip (next)) {
                 goto go_right;
             }
@@ -155,8 +154,7 @@ _WalkChilds (Tree,Skip) {
 
             go_right:  // >
                 next = next.r;
-                if (next !is null)
-                    goto loop;  // go_right
+                goto loop;  // go_right
 
         return 0;
     }

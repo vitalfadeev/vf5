@@ -278,13 +278,33 @@ set_pos (Doc* doc, E* e, string[] values) {
 
 void
 set_pos_type (Doc* doc, E* e, string[] values) {
-    if (values.length >= 1) {
+    if (values.length >= 2) {
         switch (values[0]) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
             case "grid" : e.pos_type = E.PosType.grid; break;
             case "vbox" : e.pos_type = E.PosType.vbox; break;
             case "hbox" : e.pos_type = E.PosType.hbox; break;
+            default:
+                e.pos_type = E.PosType.none;
+        }
+        switch (values[1]) {
+            case "b" : e.pos_dir = E.PosDir.b; break;
+            case "r" : e.pos_dir = E.PosDir.r; break;
+            case "l" : e.pos_dir = E.PosDir.l; break;
+            case "t" : e.pos_dir = E.PosDir.t; break;
+            default:
+                e.pos_dir = E.PosDir.r;
+        }
+    }
+    else
+    if (values.length >= 1) {
+        switch (values[0]) {
+            case "9"    : e.pos_type = E.PosType.t9; break;
+            case "t9"   : e.pos_type = E.PosType.t9; break;
+            case "grid" : e.pos_type = E.PosType.grid; break;
+            case "vbox" : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
+            case "hbox" : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
             default:
                 e.pos_type = E.PosType.none;
         }
