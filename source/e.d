@@ -40,6 +40,7 @@ struct E {
         Border r = Border (1, Border.Type.solid);
         Border b = Border (1, Border.Type.solid);
         Border l = Border (1, Border.Type.solid);
+        Pos pos;
     }
     Borders borders;
 
@@ -69,7 +70,6 @@ struct E {
             text,
             childs,
             max,   // max (image,text)
-            e,
         }
         SizeType size_w_type;
         SizeType size_h_type;
@@ -114,6 +114,7 @@ struct E {
         struct
         Image {
           string src;       // "abc"
+          Pos    pos;
           Size   size = Size (100,100);
           Color  bg;
           SDL_Surface* ptr;
@@ -144,19 +145,19 @@ struct E {
     PosDir  pos_dir;
 
     enum
-    PosDir : ubyte {
-        r,
-        l,
-        t,
-        b,
-    }
-    enum
     PosType : ubyte {
         none,
         t9,
         grid,
         vbox,
         hbox,
+    }
+    enum
+    PosDir : ubyte {
+        r,
+        l,
+        t,
+        b,
     }
 
     enum 
@@ -338,7 +339,7 @@ void
 set_size (Doc* doc, E* e, string[] values) {
     if (values.length >= 2) {
         set_size_w (doc, e, values[0..1]);
-        set_size_h (doc, e, values[1..$]);
+        set_size_h (doc, e, values[1..2]);
     }
     else
     if (values.length == 1) {
@@ -619,7 +620,6 @@ set_content_size_w (Doc* doc, E* e, string[] values) {
             case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
             case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
-            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             default: {
                 if (isNumeric (values[0])) {
                     e.content.size.w      = values[0].to!W;
@@ -641,7 +641,6 @@ set_content_size_h (Doc* doc, E* e, string[] values) {
             case "image"  : e.content.size_h_type = E.Content.SizeType.image; break;
             case "text"   : e.content.size_h_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
-            case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
             default:
             if (isNumeric (values[0])) {
                 e.content.size.h      = values[0].to!H;
@@ -675,7 +674,6 @@ set_content_size_type (Doc* doc, E* e, string[] values) {
             case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
             case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
-            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             default:
                 e.content.size_w_type = E.Content.SizeType.fixed;
         }

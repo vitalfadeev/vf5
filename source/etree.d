@@ -23,3 +23,8 @@ auto
 WalkLeft (Tree) (Tree* t) {
     return vf.tree.WalkLeft (t, &skip_hidden);
 }
+
+auto 
+WalkChilds (Tree) (Tree* t) {
+    return vf.tree.WalkChilds (t, &skip_hidden);
+}

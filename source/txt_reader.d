@@ -54,10 +54,10 @@ e root
   e toolbar-item t9-top-right tb-random hidden
   e toolbar-item t9-top-right tb-volume hidden
 
- e vbox playlist
- e vbox info
+ e vbox playlist hidden
+ e vbox info hidden
 
- e vbox statusbar
+ e vbox statusbar hidden
   e t9-bottom-left  song-file-format
   e t9-bottom-right song-time
 
@@ -68,10 +68,12 @@ e root
 
 root
  bg #000
- on start commands.player.start
+ size         content
+ content.size childs
+ on start     commands.player.start
 
 menubar
- size         640 content
+ size         content content
  content.size childs
  borders      10 solid colors.warn
 

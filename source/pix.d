@@ -95,12 +95,10 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     // 5
                     doc.load_texts ();
                     // 6
-                    doc.update_text_size ();
-                    // ...
                     // 7
                     doc.update_sizes ();
+                    // ...
                     // 8
-                    doc.update_childs_sizes ();
                     // 9
                     doc.update_poses ();
 

@@ -78,6 +78,7 @@ Pad {
     Y b;
     X l;
     Color bg;
+    Pos   pos;
 }
 
 

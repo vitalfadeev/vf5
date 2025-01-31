@@ -25,17 +25,16 @@ main() {
 	// 5
 	doc.load_texts ();
 	// 6
-	doc.update_text_size ();
-	// ...
 	// 7
 	doc.update_sizes ();
+	doc.dump_sizes ();
+	// ...
 	// 8
-	doc.update_childs_sizes ();
 	// 9
 	doc.update_poses ();
 	//
-	dump_tree (doc.tree);
-	dump_klasses (doc.klasses);
+	//dump_tree (doc.tree);
+	//dump_klasses (doc.klasses);
 	on_start (doc);
 	pix_go (doc);
 }

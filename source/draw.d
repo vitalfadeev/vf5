@@ -146,11 +146,7 @@ pad_size (E* e) {
 
 Pos
 content_pos (E* e) {
-    auto p_pos = pad_pos (e);
-    return Pos (
-        (p_pos.x + e.pad.l).to!X, 
-        (p_pos.y + e.pad.t).to!Y, 
-    );
+    return e.content.pos;
 }
 
 Pos
@@ -166,55 +162,18 @@ image_pos (E* e) {
 
 Size
 e_size (E* e) {
-    // borders + pads + content
-    auto _content_size = content_size (e);
-    return Size (
-        (e.borders.l.w + e.pad.l + _content_size.w + e.pad.r + e.borders.r.w).to!W,
-        (e.borders.t.w + e.pad.t + _content_size.h + e.pad.b + e.borders.b.w).to!H
-    );
+    return e.size;
 }
 
 Size
 content_size (E* e) {
-    W _w;
-    H _h;
-
-    final
-    switch (e.content.size_w_type) {
-        case E.Content.SizeType.fixed  : _w = e.content.size.w; break;
-        case E.Content.SizeType.image  : _w = e.content.size.w; break; //.image.
-        case E.Content.SizeType.text   : _w = e.content.size.w; break; //.text.
-        case E.Content.SizeType.childs : _w = e.content.childs_size.w; break;
-        case E.Content.SizeType.max    : _w = e.content.size.w; break; //max .image. .text.
-        case E.Content.SizeType.e      : _w = e.content.size.w; break;
-    }
-
-    final
-    switch (e.content.size_h_type) {
-        case E.Content.SizeType.fixed  : _h = e.content.size.h; break;
-        case E.Content.SizeType.image  : _h = e.content.size.h; break; //.image.
-        case E.Content.SizeType.text   : _h = e.content.size.h; break; //.text.
-        case E.Content.SizeType.childs : _h = e.content.childs_size.h; break;
-        case E.Content.SizeType.max    : _h = e.content.size.h; break; //max .image. .text.
-        case E.Content.SizeType.e      : _h = e.content.size.h; break;
-    }
-
-    return Size (_w,_h);
-    
-    //if ((e.size.w >= e.borders.l.w + e.borders.r.w) &&
-    //    (e.size.h >= e.borders.l.w + e.borders.r.w))
-    //    return Size (
-    //        (e.size.w - e.borders.l.w - e.borders.r.w).to!W, 
-    //        (e.size.h - e.borders.t.w - e.borders.b.w).to!H
-    //    );
-    //else
-    //    return Size (0,0);
+    return e.content_size;
 }
 
 void
 draw_e (SDL_Renderer* renderer, E* e) {
     draw_borders (renderer,e);
-    draw_content_with_pad (renderer,e);
+    //draw_content_with_pad (renderer,e);
 /*
     // pad
     if (e.pad.t)
@@ -315,6 +274,9 @@ draw_borders (SDL_Renderer* renderer, E* e) {
 
     auto pos  = borders_pos  (e);
     auto size = borders_size (e);
+
+    writeln ("borders_pos : ", pos);
+    writeln ("borders_size: ", size);
 
     if (size.w > 0 && size.h > 0)
     draw8 (

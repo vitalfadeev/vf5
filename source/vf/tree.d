@@ -118,7 +118,45 @@ _WalkLeft (Tree,Skip) {
             go_left:  // >
                 next = next.l;
                 if (next !is null)
-                    goto loop;  // go_down
+                    goto loop;  // go_left
+
+        return 0;
+    }
+}
+
+
+// ito left
+auto 
+WalkChilds (Tree,Skip) (Tree* t, Skip skip) {
+    return _WalkChilds!(Tree,Skip) (t,skip);
+}
+
+struct
+_WalkChilds (Tree,Skip) {
+    Tree* t;
+    Skip  skip;
+
+    int
+    opApply (int delegate (Tree* t) dg) {
+        Tree*  next = t.childs.l;
+        int    result;
+
+        if (next is null)
+            return 0;
+
+        loop:
+            if (skip (next)) {
+                goto go_right;
+            }
+
+            result = dg (next);
+            if (result)
+                return result;
+
+            go_right:  // >
+                next = next.r;
+                if (next !is null)
+                    goto loop;  // go_right
 
         return 0;
     }
