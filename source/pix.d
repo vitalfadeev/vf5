@@ -97,6 +97,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     // 6
                     // 7
                     doc.update_sizes ();
+                    doc.dump_sizes ();
                     // ...
                     // 8
                     // 9
