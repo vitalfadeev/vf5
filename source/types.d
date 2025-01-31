@@ -79,6 +79,7 @@ Pad {
     X l;
     Color bg;
     Pos   pos;
+    Size  size;
 }
 
 

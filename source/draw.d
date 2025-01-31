@@ -128,19 +128,14 @@ borders_size (E* e) {
 
 Pos
 pad_pos (E* e) {
-    auto b_pos = borders_pos (e);
-    return Pos (
-        (b_pos.x + e.borders.l.w).to!X, 
-        (b_pos.y + e.borders.t.w).to!Y, 
-    );
+    return e.pad.pos;
 }
 
 Size
 pad_size (E* e) {
-    auto _content_size = content_size (e);
     return Size (
-        (_content_size.w + e.pad.l + e.pad.r).to!W, 
-        (_content_size.h + e.pad.t + e.pad.b).to!H, 
+        (e.pad.l + e.content.size.w + e.pad.r).to!W,
+        (e.pad.t + e.content.size.h + e.pad.b).to!H,
     );
 }
 
@@ -167,13 +162,13 @@ e_size (E* e) {
 
 Size
 content_size (E* e) {
-    return e.content_size;
+    return e.content.size;
 }
 
 void
 draw_e (SDL_Renderer* renderer, E* e) {
     draw_borders (renderer,e);
-    //draw_content_with_pad (renderer,e);
+    draw_content_with_pad (renderer,e);
 /*
     // pad
     if (e.pad.t)

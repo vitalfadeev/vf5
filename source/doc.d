@@ -681,11 +681,17 @@ pos_type_vbox (ETree* t) {
 
     ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
-        if (e.pos_dir == E.PosDir.r) {
-            auto prev_pos  = e_pos  (prev.e);
-            auto prev_size = e_size (prev.e);
-            e.pos.x = 0;
-            e.pos.y = (prev_pos.y + prev_size.h).to!Y;
+        final
+        switch (e.pos_dir) {
+            case E.PosDir.r:
+                auto prev_pos  = e_pos  (prev.e);
+                auto prev_size = e_size (prev.e);
+                e.pos.x = 0;
+                e.pos.y = (prev_pos.y + prev_size.h).to!Y;
+                break;
+            case E.PosDir.l: break;
+            case E.PosDir.b: break;
+            case E.PosDir.t: break;
         }
     }
     else {
@@ -708,11 +714,17 @@ pos_type_hbox (ETree* t) {
 
     ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
-        if (e.pos_dir == E.PosDir.r) {
-            auto prev_pos  = e_pos  (prev.e);
-            auto prev_size = e_size (prev.e);
-            e.pos.x = (prev_pos.x + prev_size.w).to!X;
-            //e.pos.y = prev.e.pos.y;
+        final
+        switch (e.pos_dir) {
+            case E.PosDir.r:
+                auto prev_pos  = e_pos  (prev.e);
+                auto prev_size = e_size (prev.e);
+                e.pos.x = (prev_pos.x + prev_size.w).to!X;
+                e.pos.y =  prev_pos.y;
+                break;
+            case E.PosDir.l: break;
+            case E.PosDir.b: break;
+            case E.PosDir.t: break;
         }
     }
     else {

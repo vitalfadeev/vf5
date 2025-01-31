@@ -34,7 +34,7 @@ string text = "
 e root
  e vbox menubar
   e menubar-item border hbox file  
-  e menubar-item border hbox play hidden
+  e menubar-item border hbox play 
   e menubar-item border hbox list hidden
   e menubar-item border hbox services hidden
   e menubar-item border hbox output hidden
