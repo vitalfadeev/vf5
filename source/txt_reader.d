@@ -303,7 +303,7 @@ go (Doc* doc, string s) {
             // only first e
             if (doc.tree is null) {
                 auto t = new ETree (new E ());
-                doc.tree = t;
+                doc.tree  = t;
                 current_t = t;
                 current_klass = null;
 
@@ -333,7 +333,7 @@ go (Doc* doc, string s) {
             // find parent e  in tree  from last e
             //   create sub e
             //   add classes
-            auto parent_t = find_parent_t (current_t, t_line[0].s.length.to!ubyte);
+            auto parent_t = find_parent_t (current_t, t_line[0].s.length);
             if (parent_t !is null) {
                 auto t = new ETree (new E ());
                 t.indent = t_line[0].s.length.to!ubyte;
@@ -366,7 +366,7 @@ go (Doc* doc, string s) {
 
 
 ETree*
-find_parent_t (ETree* current_t, ubyte for_indent) {
+find_parent_t (ETree* current_t, size_t for_indent) {
     if (current_t is null)
         return null;
 
@@ -376,10 +376,18 @@ find_parent_t (ETree* current_t, ubyte for_indent) {
     if (current_t.indent == for_indent)
         return current_t.parent;
 
-    if (current_t.indent > for_indent)
-        while (current_t.parent !is null && current_t.indent > for_indent)
+    if (current_t.indent > for_indent) {
+        loop:
             current_t = current_t.parent;
+            if (current_t is null) 
+                return null;
+            if (current_t.indent == for_indent)
+                return current_t.parent;
+            if (current_t.indent > for_indent)
+                goto loop;
+
         return current_t;
+    }
 
     return null;
 }

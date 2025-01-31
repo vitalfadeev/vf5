@@ -231,10 +231,10 @@ childs_op_apply () {
 
 
 void
-dump_tree (Tree) (Tree* t) {
+dump_tree (Tree) (Tree* t, int level=0) {
     import std.stdio;
 
-    for (auto i = t.indent; i > 0; i--) 
+    for (auto i = level; i > 0; i--) 
         write (" ");
     if (t.e is null)
         writeln (t, " ", t.indent, " ", t.e);
@@ -243,7 +243,7 @@ dump_tree (Tree) (Tree* t) {
 
     // recursive
     foreach (subt; t.childs) {
-        dump_tree!Tree (subt);
+        dump_tree!Tree (subt, level+1);
     }
 }
 

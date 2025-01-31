@@ -368,7 +368,10 @@ e_content_childs_size (Doc* doc, ETree* t) {
     }
 
     e.content.childs_size.w = (max_sz.w - e.content.pos.x).to!W;
-    e.content.childs_size.h = (max_sz.h - e.content.pos.y).to!H;
+    if (max_sz.h > e.content.pos.y)
+        e.content.childs_size.h = (max_sz.h - e.content.pos.y).to!H;
+    else
+        e.content.childs_size.h = 0;
 }
 
 
@@ -689,8 +692,6 @@ pos_type_vbox (ETree* t) {
     E* e = t.e;
 
     ETree* prev = find_last_with_type (t, e.pos_type);
-    writeln ("vbox: e.pos_type: ", e.pos_type);
-    writeln ("vbox: prev: ", prev);
     if (prev !is null) {
         final
         switch (e.pos_dir) {
