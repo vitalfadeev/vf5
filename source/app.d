@@ -27,7 +27,7 @@ main() {
 	// 6
 	// 7
 	doc.update_sizes ();
-	doc.dump_sizes ();
+	//doc.dump_sizes ();
 	// ...
 	// 8
 	// 9

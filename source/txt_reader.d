@@ -54,7 +54,7 @@ e root
   e toolbar-item t9-top-right tb-random hidden
   e toolbar-item t9-top-right tb-volume hidden
 
- e vbox playlist hidden
+ e vbox playlist
  e vbox info hidden
 
  e vbox statusbar hidden
@@ -91,11 +91,15 @@ toolbar
  borders      10 solid colors.error
 
 toolbar-item
- size           content
- content.size   32 32
- pad            5 5
- pad.bg         colors.pad_bg
- borders        1 solid colors.fg+1
+ size         content
+ content.size 32 32
+ pad          5 5
+ pad.bg       colors.pad_bg
+ borders      1 solid colors.fg+1
+
+playlist
+ size         320 240
+ borders      10 solid #ccc
 
 file
  text  Файл

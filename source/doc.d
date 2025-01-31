@@ -280,7 +280,7 @@ update_size (Doc* doc, ETree* t) {
 void
 e_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.w = e.content.size.w;
+    //e.size.w = e.size.w;
 }
 
 void
@@ -300,7 +300,7 @@ e_size_w_parent (Doc* doc, ETree* t) {
 void
 e_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.h = e.content.size.h;
+    //e.size.h = e.size.h;
 }
 
 void
