@@ -33,7 +33,7 @@ main() {
 	// 9
 	doc.update_poses ();
 	//
-	dump_tree (doc.tree);
+	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
 	on_start (doc);
 	pix_go (doc);

@@ -87,7 +87,8 @@ menubar-item
  text.bg        colors.bg
 
 toolbar
- size         640 content
+ size         content content
+ content.size childs
  content.size childs
  borders      1 solid colors.fg+1
 
@@ -95,7 +96,6 @@ toolbar-item
  size.w         32
  size.h         32
  content.size   32 32
- content.size.type fixed
  pad            20 5
  pad.bg         colors.pad_bg
  borders 1 solid colors.fg+1

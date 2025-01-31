@@ -235,7 +235,7 @@ dump_tree (Tree) (Tree* t, int level=0) {
     import std.stdio;
 
     for (auto i = level; i > 0; i--) 
-        write (" ");
+        write ("  ");
     if (t.e is null)
         writeln (t, " ", t.indent, " ", t.e);
     else

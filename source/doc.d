@@ -771,11 +771,9 @@ find_last_in_group (ETree* t, ubyte pos_group) {
 
 ETree*
 find_last_with_type (ETree* t, E.PosType pos_type) {
-    foreach (ETree* _t; WalkLeft (t)) {
-        writeln ("find_last_with_type: ",_t.e.pos_type);
+    foreach (ETree* _t; WalkLeft (t))
         if (_t.e.pos_type == pos_type)
             return _t;
-    }
 
     return null;
 }

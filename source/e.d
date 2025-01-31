@@ -676,7 +676,7 @@ void
 set_content_size (Doc* doc, E* e, string[] values) {
     if (values.length >= 2) {
         set_content_size_w (doc, e, values[0..1]);
-        set_content_size_h (doc, e, values[1..$]);
+        set_content_size_h (doc, e, values[1..2]);
     }
     else
     if (values.length == 1) {

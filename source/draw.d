@@ -270,9 +270,6 @@ draw_borders (SDL_Renderer* renderer, E* e) {
     auto pos  = borders_pos  (e);
     auto size = borders_size (e);
 
-    writeln ("borders_pos : ", pos);
-    writeln ("borders_size: ", size);
-
     if (size.w > 0 && size.h > 0)
     draw8 (
         renderer, 
