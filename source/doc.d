@@ -669,7 +669,7 @@ pos_type_t9 (ETree* t) {
         ETree* prev = find_last_in_group (t, e.pos_group);
         if (prev !is null) {
             if (e.pos_dir == E.PosDir.r) {
-                e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
+                e.pos.x = (prev.e.pos.x + prev.e.size.w).to!X;
                 e.pos.y = prev.e.pos.y;
             }
         }
@@ -712,7 +712,7 @@ pos_type_t3 (ETree* t) {
             final
             switch (e.pos_dir) {
                 case E.PosDir.r:
-                    e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
+                    e.pos.x = (prev.e.pos.x + prev.e.size.w).to!X;
                     e.pos.y = prev.e.pos.y;
                     break;
                 case E.PosDir.l: break;
@@ -737,38 +737,35 @@ pos_type_t3 (ETree* t) {
     }
     else
     if (e.pos_group == 3) {
-        ETree* prev = find_last_in_group (t, e.pos_group);
-        if (prev !is null) {
-            final
-            switch (e.pos_dir) {
-                case E.PosDir.r:
-                    e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
-                    e.pos.y = prev.e.pos.y;
-                    for (ETree* _t = prev; _t !is null; _t = find_last_in_group (_t, e.pos_group)) {
-                        _t.e.pos.x         -= e.size.w;
-                        _t.e.borders.pos.x -= e.size.w;
-                        _t.e.pad.pos.x     -= e.size.w;
-                        _t.e.content.pos.x -= e.size.w;
-                    }
-                    break;
-                case E.PosDir.l: break;
-                case E.PosDir.t: break;
-                case E.PosDir.b: break;
-            }
-        }
-        else {
-            if (t.parent !is null) {
-                auto parent_e = t.parent.e;
-                e.pos.x = 
-                    (parent_e.content.pos.x + parent_e.content.size.w > e.size.w) ? 
-                        (parent_e.content.pos.x + parent_e.content.size.w - e.size.w).to!X :
-                        0; 
-                e.pos.y = parent_e.content.pos.y;
-            }
-            else {
-                e.pos.x = 0;
-                e.pos.y = 0;
-            }
+        final
+        switch (e.pos_dir) {
+            case E.PosDir.r:
+                if (t.parent !is null) {
+                    auto parent_e = t.parent.e;
+                    e.pos.x = 
+                        (parent_e.content.pos.x + parent_e.content.size.w > e.size.w) ? 
+                            (parent_e.content.pos.x + parent_e.content.size.w - e.size.w).to!X :
+                            0; 
+                    e.pos.y = parent_e.content.pos.y;
+                }
+                else {
+                    e.pos.x = 0;
+                    e.pos.y = 0;
+                }
+                // update prev posed
+                for (ETree* _t = find_last_in_group (t, e.pos_group); 
+                    _t !is null; 
+                    _t = find_last_in_group (_t, e.pos_group)) 
+                {
+                    _t.e.pos.x         -= e.size.w;
+                    _t.e.borders.pos.x -= e.size.w;
+                    _t.e.pad.pos.x     -= e.size.w;
+                    _t.e.content.pos.x -= e.size.w;
+                }
+                break;
+            case E.PosDir.l: break;
+            case E.PosDir.t: break;
+            case E.PosDir.b: break;
         }
     }
 }
