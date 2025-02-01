@@ -48,7 +48,7 @@ e root
   e toolbar-item hbox tb-play-pause
   e toolbar-item hbox tb-stio
   e toolbar-item hbox tb-next
-  e toolbar-item hbox tb-position
+  e toolbar-item hbox tb-position hidden
   e toolbar-item t9-top-right tb-time hidden
   e toolbar-item t9-top-right tb-loop hidden
   e toolbar-item t9-top-right tb-random hidden
@@ -159,7 +159,8 @@ border
  borders 2 solid colors.fg+1
 
 focused
- borders 2 solid colors.focused
+ //borders 2 solid colors.focused
+ borders.color colors.focused
 
 input-radio
  input.type         radio

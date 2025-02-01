@@ -189,26 +189,27 @@ _FindDeepest (Tree,Skip,Cond) {
                 result = dg (next);
                 if (result)
                     return result;
-            }
 
-            _next = next;
+                _next = next;
+                goto go_down;
+            }
+            else {
+                _next = next;
+                goto go_right;
+            }
 
             go_down:   // v
                 next = _next.childs.l;
                 if (next !is null)
                     goto loop;  // go_down
+                else
+                    return 0;   // exit
             go_right:  // >
                 next = _next.r;
                 if (next !is null)
                     goto loop;  // go_down
                 else
                     return 0;   // exit
-            go_up:     // ^
-                next = _next.parent;
-                if (next !is null) {
-                    _next = next;
-                    goto go_right;
-                }
 
         return 0;
     }

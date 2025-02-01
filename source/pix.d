@@ -69,6 +69,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             if (ev.button.state == SDL_PRESSED) {
                 // tree_apply_klasses (doc.tree);
                 auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
+                    writeln (ev.type, ": clicked_e: ", clicked_e);
                 if (clicked_e !is null) {
                     writeln (ev.type, ": e: ", *clicked_e);
                     // on
@@ -97,7 +98,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     // 6
                     // 7
                     doc.update_sizes ();
-                    doc.dump_sizes ();
+                    //doc.dump_sizes ();
                     // ...
                     // 8
                     // 9

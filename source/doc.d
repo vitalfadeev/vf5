@@ -59,6 +59,8 @@ Doc {
 
         bool 
         valid_e (ETree* t) {
+            writeln ("check 1: ",*t.e);
+
             if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
             if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
                 return true;
@@ -66,8 +68,14 @@ Doc {
             return false;
         }
 
-        foreach (t; FindDeepest (tree,&valid_e))
+        foreach (t; FindDeepest (tree,&valid_e)) {
+            writeln ("found: ", *t.e);
+            //writeln ("found: ", *t.childs.l.e);
+            //writeln ("found: ", t.childs.l.e.pos);
+            //writeln ("found: ", t.childs.l.e.size);
+            writeln ("found: ", pos);
             found = t.e;
+        }
 
         return found;
     }
@@ -746,7 +754,7 @@ pos_type_hbox (ETree* t) {
     else {
         if (t.parent !is null) {
             auto parent_content_pos = content_pos (t.parent.e);
-            writeln ("parent_content_pos: ", parent_content_pos);
+            //writeln ("parent_content_pos: ", parent_content_pos);
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
         }

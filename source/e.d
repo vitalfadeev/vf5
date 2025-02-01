@@ -213,7 +213,7 @@ Magnet {
 //
 void
 apply_klasses (Doc* doc, E* e) {
-    writeln (*e, " ", e.apply_klass);
+    //writeln (*e, " ", e.apply_klass);
     e.on.length = 0;
     foreach (Klass* kls; e.klasses)
         e.apply_klass (doc,e,kls);
@@ -221,9 +221,9 @@ apply_klasses (Doc* doc, E* e) {
 
 void
 apply_klass (Doc* doc, E* e, Klass* k) {
-    writeln (" ", k.name);
+    //writeln (" ", k.name);
     foreach (ke; k.klasse) {
-        writeln ("  ", ke.id);
+        //writeln ("  ", ke.id);
         switch (ke.id) {
             case "pos.x"            : set_pos_x             (doc,e,ke.values); break;
             case "pos.y"            : set_pos_y             (doc,e,ke.values); break;
@@ -241,6 +241,7 @@ apply_klass (Doc* doc, E* e, Klass* k) {
             case "borders.r"        : set_border_r          (doc,e,ke.values); break;
             case "borders.b"        : set_border_b          (doc,e,ke.values); break;
             case "borders.l"        : set_border_l          (doc,e,ke.values); break;
+            case "borders.color"    : set_borders_color     (doc,e,ke.values); break;
             case "pad"              : set_pad               (doc,e,ke.values); break;
             case "pad.bg"           : set_pad_bg            (doc,e,ke.values); break;
             case "content.image"    : set_content_image     (doc,e,ke.values); break;
@@ -468,6 +469,16 @@ void
 set_border_l (Doc* doc, E* e, string[] values) {
     if (values.length >= 3) {
         set_border (doc, e, &e.borders.l, values);
+    }
+}
+
+void
+set_borders_color (Doc* doc, E* e, string[] values) {
+    if (values.length >= 1) {
+        set_border_color (doc, e, &e.borders.t, values);
+        set_border_color (doc, e, &e.borders.t, values);
+        set_border_color (doc, e, &e.borders.b, values);
+        set_border_color (doc, e, &e.borders.l, values);
     }
 }
 
