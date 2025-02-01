@@ -238,6 +238,7 @@ dump_size (Doc* doc, ETree* t, int level=0) {
 //   content       |
 //   parent        |
 //   content.size -   <--
+//     e                 |
 //     fixed             |
 //     image             |
 //     text              |
@@ -297,6 +298,7 @@ void
 e_size_w_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     e.size.w = t.parent.e.content.size.w;
+    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
 }
 
 void
@@ -318,6 +320,7 @@ void
 e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     e.size.h = t.parent.e.content.size.h;
+    e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
 }
 
 void
@@ -754,10 +757,6 @@ pos_type_t3 (ETree* t) {
                     (parent_e.content.pos.x + parent_e.content.size.w > e.size.w) ? 
                         (parent_e.content.pos.x + parent_e.content.size.w - e.size.w).to!X :
                         0; 
-                //required parent_e.content.pos;
-                //required parent_e.content.size;
-                //required e.size;
-                //assert (0,"HERE");
                 e.pos.y = parent_e.content.pos.y;
             }
             else {

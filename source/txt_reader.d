@@ -48,11 +48,11 @@ e root
   e toolbar-item hbox tb-play-pause
   e toolbar-item hbox tb-stio
   e toolbar-item hbox tb-next
-  e toolbar-item hbox tb-position hidden
-  e toolbar-item t9-top-right tb-time hidden
-  e toolbar-item t9-top-right tb-loop hidden
-  e toolbar-item t9-top-right tb-random hidden
-  e toolbar-item t9-top-right tb-volume hidden
+  e toolbar-item hbox tb-position
+  e toolbar-item t3-right tb-time 
+  e toolbar-item t3-right tb-loop
+  e toolbar-item t3-right tb-random
+  e toolbar-item t3-right tb-volume
 
  e vbox playlist
  e vbox info
@@ -67,27 +67,27 @@ e root
   e quit
 
 root
- bg #000
- size         content
- content.size childs
+ bg           #000
+ size         600 480
+ content.size e
  on start     commands.player.start
 
 menubar
- size         content
+ size         parent content
  content.size childs
  borders      10 solid colors.warn
 
 menubar-item
- size           content
- content.size   text
- pad            20 5
- pad.bg         colors.pad_bg
- text.fg        colors.fg
- text.bg        colors.bg
+ size         content
+ content.size text
+ pad          20 5
+ pad.bg       colors.pad_bg
+ text.fg      colors.fg
+ text.bg      colors.bg
 
 toolbar
- size         content
- content.size childs
+ size         parent content
+ content.size e childs
  borders      10 solid colors.error
 
 toolbar-item
@@ -98,15 +98,15 @@ toolbar-item
  borders      1 solid colors.fg+1
 
 playlist
- size         480 240
+ size         parent 240
  borders      10 solid #ccc
 
 info
- size         480 64
+ size         parent 64
  borders      1 solid #888
 
 statusbar
- size         480 32
+ size         parent 32
  content.size e
  borders      1 solid #444
 
