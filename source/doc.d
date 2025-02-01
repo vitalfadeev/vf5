@@ -715,9 +715,9 @@ pos_type_t3 (ETree* t) {
                     e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
                     e.pos.y = prev.e.pos.y;
                     break;
-                case E.PosDir.l:
-                case E.PosDir.t:
-                case E.PosDir.b:
+                case E.PosDir.l: break;
+                case E.PosDir.t: break;
+                case E.PosDir.b: break;
             }
         }
         else {
@@ -744,10 +744,16 @@ pos_type_t3 (ETree* t) {
                 case E.PosDir.r:
                     e.pos.x = cast(X)(prev.e.pos.x + prev.e.size.w);
                     e.pos.y = prev.e.pos.y;
+                    for (ETree* _t = prev; _t !is null; _t = find_last_in_group (_t, e.pos_group)) {
+                        _t.e.pos.x         -= e.size.w;
+                        _t.e.borders.pos.x -= e.size.w;
+                        _t.e.pad.pos.x     -= e.size.w;
+                        _t.e.content.pos.x -= e.size.w;
+                    }
                     break;
-                case E.PosDir.l:
-                case E.PosDir.t:
-                case E.PosDir.b:
+                case E.PosDir.l: break;
+                case E.PosDir.t: break;
+                case E.PosDir.b: break;
             }
         }
         else {
