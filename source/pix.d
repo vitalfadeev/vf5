@@ -69,9 +69,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             if (ev.button.state == SDL_PRESSED) {
                 // tree_apply_klasses (doc.tree);
                 auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
-                    writeln (ev.type, ": clicked_e: ", clicked_e);
                 if (clicked_e !is null) {
-                    writeln (ev.type, ": e: ", *clicked_e);
                     // on
                     foreach (_on; clicked_e.on) {
                         if (ev.type.to!string == _on.event) {
@@ -83,7 +81,6 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     //add_class (doc, clicked_e, "hidden");
                     remove_class (doc, "focused");
                     add_class (doc, clicked_e, "focused");
-                    writeln (ev.type, ": e: ", *clicked_e);
 
                     // 1
                     doc.doc_apply_klasses ();

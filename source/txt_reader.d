@@ -55,11 +55,11 @@ e root
   e toolbar-item t9-top-right tb-volume hidden
 
  e vbox playlist
- e vbox info hidden
+ e vbox info
 
- e vbox statusbar hidden
-  e t9-bottom-left  song-file-format
-  e t9-bottom-right song-time
+ e vbox statusbar
+  e t3-left  song-file-format
+  e t3-right song-time
 
  e popup file-popup hidden
   e open
@@ -98,8 +98,27 @@ toolbar-item
  borders      1 solid colors.fg+1
 
 playlist
- size         320 240
+ size         480 240
  borders      10 solid #ccc
+
+info
+ size         480 64
+ borders      1 solid #888
+
+statusbar
+ size         480 32
+ content.size e
+ borders      1 solid #444
+
+song-file-format
+ size         content
+ content.size text
+ text         song-file-format
+
+song-time
+ size         content
+ content.size text
+ text         song-time
 
 file
  text  Файл
@@ -120,6 +139,21 @@ output
 
 view
  text Вид
+
+t3-left
+ pos.type  3
+ pos.group 1
+ pos.dir   r
+
+t3-center
+ pos.type  3
+ pos.group 2
+ pos.dir   r
+
+t3-right
+ pos.type  3
+ pos.group 3
+ pos.dir   r
 
 t9-top-left
  pos.type  9
@@ -159,7 +193,6 @@ border
  borders 2 solid colors.fg+1
 
 focused
- //borders 2 solid colors.focused
  borders.color colors.focused
 
 input-radio

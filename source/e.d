@@ -65,7 +65,8 @@ struct E {
         Size childs_size;
         enum 
         SizeType {
-            fixed, // default
+            e, // default
+            fixed, 
             image,
             text,
             childs,
@@ -148,6 +149,7 @@ struct E {
     PosType : ubyte {
         none,
         t9,
+        t3,
         grid,
         vbox,
         hbox,
@@ -283,6 +285,8 @@ set_pos_type (Doc* doc, E* e, string[] values) {
         switch (values[0]) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
+            case "3"    : e.pos_type = E.PosType.t3; break;
+            case "t3"   : e.pos_type = E.PosType.t3; break;
             case "grid" : e.pos_type = E.PosType.grid; break;
             case "vbox" : e.pos_type = E.PosType.vbox; break;
             case "hbox" : e.pos_type = E.PosType.hbox; break;
@@ -303,6 +307,8 @@ set_pos_type (Doc* doc, E* e, string[] values) {
         switch (values[0]) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
+            case "3"    : e.pos_type = E.PosType.t3; break;
+            case "t3"   : e.pos_type = E.PosType.t3; break;
             case "grid" : e.pos_type = E.PosType.grid; break;
             case "vbox" : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
             case "hbox" : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
@@ -633,6 +639,8 @@ set_text_pos_type (Doc* doc, E* e, string[] values) {
         switch (values[0]) {
             case "9"    : e.content.text.pos_type = E.PosType.t9; break;
             case "t9"   : e.content.text.pos_type = E.PosType.t9; break;
+            case "3"    : e.content.text.pos_type = E.PosType.t3; break;
+            case "t3"   : e.content.text.pos_type = E.PosType.t3; break;
             case "grid" : e.content.text.pos_type = E.PosType.grid; break;
             case "vbox" : e.content.text.pos_type = E.PosType.vbox; break;
             case "hbox" : e.content.text.pos_type = E.PosType.hbox; break;
@@ -646,6 +654,7 @@ void
 set_content_size_w (Doc* doc, E* e, string[] values) {
     if (values.length) {
         switch (values[0]) {
+            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
             case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
             case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
@@ -667,6 +676,7 @@ void
 set_content_size_h (Doc* doc, E* e, string[] values) {
     if (values.length) {
         switch (values[0]) {
+            case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_h_type = E.Content.SizeType.fixed; break;
             case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
             case "image"  : e.content.size_h_type = E.Content.SizeType.image; break;
@@ -700,13 +710,14 @@ void
 set_content_size_type (Doc* doc, E* e, string[] values) {
     if (values.length) {
         switch (values[0]) {
+            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
             case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
             case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
             case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
             default:
-                e.content.size_w_type = E.Content.SizeType.fixed;
+                e.content.size_w_type = E.Content.SizeType.e;
         }
     }
 }
