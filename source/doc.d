@@ -13,7 +13,6 @@ import klass;
 import e;
 import types;
 import draw : get_text_size;
-import pix : global_font;
 import std.stdio : writeln;
 import std.stdio : write;
 import pix : open_font;
@@ -23,6 +22,8 @@ import draw : e_pos, e_size, content_pos;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
+const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
+const DEFAULT_FONT_SIZE = 12;
 
 
 struct
@@ -121,8 +122,34 @@ doc_apply_klasses (Doc* doc) {
 
 void
 load_fonts (Doc* doc) {
-    if (global_font is null)
-        global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
+    alias PTR = TTF_Font*;
+    PTR[string] files;
+    auto default_file = DEFAULT_FONT_FILE;
+    auto default_size = DEFAULT_FONT_SIZE;
+    auto default_ptr  = open_font (default_file,default_size);
+
+    foreach (t; WalkTree (doc.tree)) {
+        if (t.e.content.text.s.length) {
+            string font_file = t.e.content.text.font.file;
+            ubyte  font_size = t.e.content.text.font.size;
+
+            if (font_file.length >= 1 && !(font_file in files)) {
+                PTR ptr = open_font (font_file,font_size);
+                if (ptr is null)
+                    throw new Exception ("open_font");
+
+                files[font_file] = ptr;
+            }
+        }
+    }
+
+    foreach (t; WalkTree (doc.tree))
+        if (t.e.content.text.s.length) {
+            if (t.e.content.text.font.file.length)
+                t.e.content.text.font.ptr = files[t.e.content.text.font.file];
+            else
+                t.e.content.text.font.ptr = default_ptr;
+        }
 }
 
 void
@@ -168,7 +195,7 @@ load_e_text (E* e) {
     Y _y = 0;
 
     foreach (dchar c; e.content.text.s) {
-        auto ret = TTF_SizeUTF8 (global_font, c.to!string.toStringz, &w, &h);
+        auto ret = TTF_SizeUTF8 (e.content.text.font.ptr, c.to!string.toStringz, &w, &h);
 
         e.content.text.rects ~= E.Content.Text.TextRect (
             Pos  (_x,_y), 
@@ -615,7 +642,7 @@ e_content_text_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.w = get_text_size (
         e.content.text.s, 
-        global_font, 
+        e.content.text.font.ptr, 
         e.content.text.fg
     ).w;
 }
@@ -656,7 +683,7 @@ e_content_text_size_h_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.h = get_text_size (
         e.content.text.s, 
-        global_font, 
+        e.content.text.font.ptr, 
         e.content.text.fg
     ).h;
 }

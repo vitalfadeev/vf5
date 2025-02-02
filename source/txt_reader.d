@@ -107,9 +107,7 @@ info
  size         parent 64
  borders      1 solid #888
  text         `commands.player.current-song`
- text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 24
- text.font.file /home/vf/src/vf5/img/PTSansCaption-Regular.ttf
- text.font.size 24
+ text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
 statusbar
  size         parent 32
@@ -286,6 +284,7 @@ commands
   player.stop                       audtool playback-stop
   player.next                       audtool playlist-advance
   player.song                       audtool current-song
+  player.current-song               audtool current-song
   player.current-song-length        audtool current-song-length
   player.current-song-output-length audtool current-song-output-length
   player.current-song-frequency-khz audtool current-song-frequency-khz

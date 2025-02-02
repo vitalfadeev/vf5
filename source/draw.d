@@ -8,7 +8,7 @@ import bindbc.sdl.image;
 import e;
 import types;
 import doc : max;
-import pix : SDLException, TTFException, global_font;
+import pix : SDLException, TTFException;
 
 
 void
@@ -69,7 +69,6 @@ get_text_size (string s, TTF_Font* font, Color color) {
 
 void
 one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, int x, int y, int w, int h) {
-    font = global_font;
     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     auto image = _one_string (renderer, s, font, color);
     render_texture (renderer, image, x, y, w, h);
@@ -340,7 +339,13 @@ draw_text (SDL_Renderer* renderer, E* e, Pos cp, Size cs) {
     // draw rects
     //   foreach rect rects
     //   one_char
-    _text (renderer, e.content.text.rects, global_font, e.content.text.fg, cp.x, cp.y, cs.w, cs.h);
+    _text (
+        renderer, 
+        e.content.text.rects, 
+        e.content.text.font.ptr, 
+        e.content.text.fg, 
+        cp.x, cp.y, 
+        cs.w, cs.h);
 }
 
 

@@ -81,12 +81,12 @@ struct E {
           string s;     // "abc"
           struct 
           Font {
-            string file;    // "abc"
-            string family;  // "abc"
-            ubyte  size;    // 0..256
-            bool   bold;    // 0/1
-            bool   italic;  // 0/1
-            void*  ptr;     // 0/1
+            string    file;    // "abc"
+            string    family;  // "abc"
+            ubyte     size;    // 0..256
+            bool      bold;    // 0/1
+            bool      italic;  // 0/1
+            TTF_Font*  ptr;     // 0/1
           }
           Font    font;
           Pos     pos;

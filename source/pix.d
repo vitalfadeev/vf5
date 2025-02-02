@@ -178,18 +178,7 @@ init_sdl () {
         
         if (TTF_Init () == -1)
             throw new TTFException ("Failed to initialise SDL_TTF");
-
-        ttf_open_font ();
     //}
-}
-
-static
-TTF_Font* global_font;
-
-void
-ttf_open_font () {
-    //global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Regular.ttf", 13);
-    //global_font = open_font ("/home/vf/src/vf5/img/PTSansCaption-Bold.ttf", 12);
 }
 
 /**
