@@ -138,7 +138,7 @@ void
 load_e_image (E* e) {
     if (e.content.image.ptr is null) {
         auto img_surface = IMG_Load (e.content.image.src.toStringz);
-        if (img_surface)
+        if (img_surface is null)
             throw new IMGException ("IMG_Load");
         e.content.image.ptr = img_surface;
         e.content.image.size = Size (

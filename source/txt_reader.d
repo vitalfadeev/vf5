@@ -140,6 +140,44 @@ output
 view
  text Вид
 
+tb-search
+ image /home/vf/src/vf5/img/search.png
+
+tb-open
+ image /home/vf/src/vf5/img/open.png
+
+tb-add
+  image /home/vf/src/vf5/img/add.png
+
+tb-prev
+  image /home/vf/src/vf5/img/prev.png
+
+tb-play-pause
+  image /home/vf/src/vf5/img/play-pause.png
+
+tb-stio
+  image /home/vf/src/vf5/img/stop.png
+
+tb-next
+  image /home/vf/src/vf5/img/next.png
+
+tb-position
+  text position
+  content.size.w text
+
+tb-time 
+  text 2:33:19
+  content.size.w text
+
+tb-loop
+  image /home/vf/src/vf5/img/loop.png
+
+tb-random
+  image /home/vf/src/vf5/img/random.png
+
+tb-volume
+  image /home/vf/src/vf5/img/volume.png
+
 t3-left
  pos.type  3
  pos.group 1
