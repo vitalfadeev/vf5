@@ -116,7 +116,7 @@ remove_class (E* e, Klass* kls) {
 void
 doc_apply_klasses (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
-        e.apply_klasses (doc,t.e);
+        e.apply_klasses (doc,t);
 }
 
 void

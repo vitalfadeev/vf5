@@ -3,6 +3,7 @@ import std.string;
 import std.conv;
 import bindbc.sdl;
 import doc;
+import etree;
 import klass;
 import types;
 import txt_parser;
@@ -141,6 +142,7 @@ struct E {
     Magnet_ magnet;
     bool    hidden;
     bool    widget;
+    Klass*  added_from;
 
     PosType pos_type;
     ubyte   pos_group;
@@ -193,7 +195,7 @@ struct E {
     
     //
     void function (SDL_Renderer* renderer, E* e) draw; // simple, bordered, bordered-titled, custom
-    void function (Doc* doc, E* e, Klass* klass) apply_klass = &.apply_klass;
+    void function (Doc* doc, ETree* t, Klass* klass) apply_klass = &.apply_klass;
 
     string
     toString () {
@@ -216,18 +218,23 @@ Magnet {
 
 //
 void
-apply_klasses (Doc* doc, E* e) {
-    //writeln (*e, " ", e.apply_klass);
+apply_klasses (Doc* doc, ETree* t) {
+    auto e = t.e;
     e.on.length = 0;
+    // clean. remove e added from klass
     foreach (Klass* kls; e.klasses)
-        e.apply_klass (doc,e,kls);
+        if (e.added_from !is null)
+            t.parent.remove_child (t);
+    // set 
+    foreach (Klass* kls; e.klasses)
+        e.apply_klass (doc,t,kls);
 }
 
 void
-apply_klass (Doc* doc, E* e, Klass* k) {
-    //writeln (" ", k.name);
+apply_klass (Doc* doc, ETree* t, Klass* k) {
+    auto e = t.e;
+
     foreach (ke; k.klasse) {
-        //writeln ("  ", ke.id);
         switch (ke.id) {
             case "pos.x"            : set_pos_x             (doc,e,ke.values); break;
             case "pos.y"            : set_pos_y             (doc,e,ke.values); break;
@@ -263,6 +270,7 @@ apply_klass (Doc* doc, E* e, Klass* k) {
             case "content.size.type": set_content_size_type (doc,e,ke.values); break;
             case "bg"               : set_bg                (doc,e,ke.values); break;
             case "on"               : set_on                (doc,e,ke.values); break;
+            case "e"                : set_e                 (doc,t,k,ke.values); break;
             default:
         }
     }
@@ -754,6 +762,23 @@ set_on (Doc* doc, E* e, string[] values) {
         else
         if (values.length >= 2) {
             e.on ~= E.On (event,values[1..$]);
+        }
+    }
+}
+
+void
+set_e (Doc* doc, ETree* t, Klass* kls, string[] values) {
+    auto e = t.e;
+    if (values.length) {
+        // add child to t
+        //   set classes
+        auto _t = new ETree (new E ());
+        t.add_child (_t);
+        _t.e.added_from = kls;
+        if (values.length >= 2) {
+            foreach (kls_name; values[1..$]) {
+                _t.e.klasses ~= doc.find_klass_or_create (kls_name);
+            }
         }
     }
 }

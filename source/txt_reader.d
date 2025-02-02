@@ -20,6 +20,8 @@ import klass;
 // input-radio
 // checked
 // focused
+// widget
+// widget-progress
 // hotkeys
 // colors
 // commands
@@ -166,25 +168,27 @@ tb-position
   text position
   content.size.w text
 
-widget-progress
-  size.w 320
-  //size.h childs
-  //size.h widget
-  e widget-progress-back
-  e widget-progress-fore
-  e widget-progress-mark
+widget
+  widget 1
 
-widget-progress-back
+widget-progress widget
+  size.w 320
+  e hbox widget-progress-passed
+  e hbox widget-progress-current
+  e hbox widget-progress-rest
+  progress.position 50%
+
+widget-progress-passed
   size parent 10
   bg   colors.bg
 
-widget-progress-fore
-  size parent 10
-  bg   colors.fg
-
-widget-progress-mark
+widget-progress-current
   size 10 10
   bg   colors.bg
+
+widget-progress-rest
+  size parent 10
+  bg   colors.fg
 
 tb-time 
   text 2:33:19
