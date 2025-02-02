@@ -812,5 +812,5 @@ extract_value (string bquoted) {
     writeln (ret.status);
     writeln (ret.output);
 
-   return ret.output;
+   return ret.output.stripRight ();
 }
