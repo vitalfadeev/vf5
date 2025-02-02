@@ -259,6 +259,16 @@ open_font (string file_name, int font_size) {
     throw new TTFException ("TTF_OpenFont");
 }
 
+struct
+Window {
+    SDL_Window* _super;
+
+    Size
+    size () {
+        return Size (640,480);
+    }
+}
+
 
 
 //

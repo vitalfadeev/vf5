@@ -166,7 +166,8 @@ struct E {
     SizeType {
         content, // default
         fixed,
-        parent
+        parent,
+        window,
     }
     SizeType  size_w_type;
     SizeType  size_h_type;
@@ -382,6 +383,7 @@ set_size_w (Doc* doc, E* e, string[] values) {
             case "fixed"   : e.size_w_type = E.SizeType.fixed;  break;
             case "content" : e.size_w_type = E.SizeType.content; break;
             case "parent"  : e.size_w_type = E.SizeType.parent;  break;
+            case "window"  : e.size_w_type = E.SizeType.window;  break;
             default : 
                 if (values[0].isNumeric ()) {
                     e.size.w = values[0].to!W;
@@ -401,6 +403,7 @@ set_size_h (Doc* doc, E* e, string[] values) {
             case "fixed"   : e.size_h_type = E.SizeType.fixed;  break;
             case "content" : e.size_h_type = E.SizeType.content; break;
             case "parent"  : e.size_h_type = E.SizeType.parent;  break;
+            case "window"  : e.size_w_type = E.SizeType.window;  break;
             default : 
                 if (values[0].isNumeric ()) {
                     e.size.h = values[0].to!H;

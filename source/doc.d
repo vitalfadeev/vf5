@@ -17,6 +17,7 @@ import pix : global_font;
 import std.stdio : writeln;
 import std.stdio : write;
 import pix : open_font;
+import pix : Window;
 import pix : IMGException;
 import draw : e_pos, e_size, content_pos;
 
@@ -26,6 +27,7 @@ Doc {
     ETree*   tree;
     Klass*[] klasses; // find by name
     Klass*   hotkeys;
+    Window*  window;
     Size     size = Size (640,480);
 
     Klass*
@@ -265,6 +267,7 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.fixed   : e_size_w_fixed   (doc,t); break;
         case E.SizeType.content : e_size_w_content (doc,t); break;
         case E.SizeType.parent  : e_size_w_parent  (doc,t); break;
+        case E.SizeType.window  : e_size_w_window  (doc,t); break;
     }
 
     final
@@ -272,6 +275,7 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.fixed   : e_size_h_fixed   (doc,t); break;
         case E.SizeType.content : e_size_h_content (doc,t); break;
         case E.SizeType.parent  : e_size_h_parent  (doc,t); break;
+        case E.SizeType.window  : e_size_h_window  (doc,t); break;
     }
 
     // recursive
@@ -302,6 +306,13 @@ e_size_w_parent (Doc* doc, ETree* t) {
 }
 
 void
+e_size_w_window (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.size.w = doc.window.size.w;
+    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+}
+
+void
 e_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.h = e.size.h;
@@ -320,6 +331,13 @@ void
 e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     e.size.h = t.parent.e.content.size.h;
+    e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+}
+
+void
+e_size_h_window (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.size.h = doc.window.size.h;
     e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
 }
 

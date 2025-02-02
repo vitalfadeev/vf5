@@ -68,7 +68,7 @@ e root
 
 root
  bg           #000
- size         600 480
+ size         window 480
  content.size e
  on start     commands.player.start
 

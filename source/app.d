@@ -41,6 +41,7 @@ main() {
 
 void
 setup (Doc* doc) {
+	doc.window = new Window ();
 	txt_reader.go (doc, txt_reader.text);
 }
 
