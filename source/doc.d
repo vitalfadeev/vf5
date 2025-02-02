@@ -308,8 +308,14 @@ e_size_w_parent (Doc* doc, ETree* t) {
 void
 e_size_w_window (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.w = doc.window.size.w;
-    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    if (doc.window !is null) {
+        e.size.w = doc.window.size.w;
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    }
+    else {
+        e.size.w = 640;
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    }
 }
 
 void
@@ -337,8 +343,14 @@ e_size_h_parent (Doc* doc, ETree* t) {
 void
 e_size_h_window (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.h = doc.window.size.h;
-    e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    if (doc.window !is null) {
+        e.size.h = doc.window.size.h;
+        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    }
+    else {
+        e.size.h = 480;
+        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    }
 }
 
 void
@@ -980,6 +992,28 @@ go_question_value (string[] s) {
             }
         }
     }
+}
+
+void
+update (Doc* doc) {
+    // 1
+    doc.doc_apply_klasses ();
+    // 2
+    doc.load_images ();
+    // 3
+    doc.load_fonts ();
+    // 4
+    doc.load_colors ();
+    // 5
+    doc.load_texts ();
+    // 6
+    // 7
+    doc.update_sizes ();
+    //doc.dump_sizes ();
+    // ...
+    // 8
+    // 9
+    doc.update_poses ();
 }
 
 

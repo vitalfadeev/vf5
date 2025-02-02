@@ -36,6 +36,9 @@ pix_go (Doc* doc) {
     // Renderer
     SDL_Renderer* renderer = new_renderer (window);
 
+    //
+    doc.window = new Window (window);
+
     // Event Loop
     foreach (Event* ev; Events ())
         if (event (doc, ev, window, renderer) == 1)
@@ -82,24 +85,8 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     remove_class (doc, "focused");
                     add_class (doc, clicked_e, "focused");
 
-                    // 1
-                    doc.doc_apply_klasses ();
-                    // 2
-                    doc.load_images ();
-                    // 3
-                    doc.load_fonts ();
-                    // 4
-                    doc.load_colors ();
-                    // 5
-                    doc.load_texts ();
-                    // 6
-                    // 7
-                    doc.update_sizes ();
-                    //doc.dump_sizes ();
-                    // ...
-                    // 8
-                    // 9
-                    doc.update_poses ();
+                    //
+                    doc.update ();
 
                     //SDL_UpdateWindowSurface (window);
                     draw_doc (renderer,doc);
@@ -112,7 +99,9 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: break;      // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED:             // event.window.windowID event.window.data1 event.window.data2 (width height)
+                    doc.update (); 
+                    break;      
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -265,7 +254,9 @@ Window {
 
     Size
     size () {
-        return Size (640,480);
+        int w,h;
+        SDL_GetWindowSize (_super, &w, &h);
+        return Size (w.to!W,h.to!H);
     }
 }
 

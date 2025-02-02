@@ -14,25 +14,7 @@ main() {
 	Doc* doc = new Doc ();
 	// load e and classes
 	doc.setup ();
-	// 1
-	doc.doc_apply_klasses ();
-	// 2
-	doc.load_images ();
-	// 3
-	doc.load_fonts ();
-	// 4
-	doc.load_colors ();
-	// 5
-	doc.load_texts ();
-	// 6
-	// 7
-	doc.update_sizes ();
-	//doc.dump_sizes ();
-	// ...
-	// 8
-	// 9
-	doc.update_poses ();
-	//
+	doc.update ();
 	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
 	on_start (doc);
@@ -41,12 +23,9 @@ main() {
 
 void
 setup (Doc* doc) {
-	doc.window = new Window ();
 	txt_reader.go (doc, txt_reader.text);
 }
 
-
-//
 void
 on_start (Doc* doc) {
     foreach (t; WalkTree (doc.tree))

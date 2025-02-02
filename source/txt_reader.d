@@ -37,8 +37,8 @@ e root
   e menubar-item border hbox play 
   e menubar-item border hbox list 
   e menubar-item border hbox services 
-  e menubar-item border hbox output hidden
-  e menubar-item border hbox view hidden
+  e menubar-item border hbox output
+  e menubar-item border hbox view
 
  e vbox toolbar
   e toolbar-item hbox tb-search
