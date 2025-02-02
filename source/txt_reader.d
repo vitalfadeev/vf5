@@ -106,8 +106,7 @@ playlist
 info
  size         parent 64
  borders      1 solid #888
- text         `audtool current-song`
- //Music To Calm The Mind And Stop Thinking, Tibetan Healing Flute, Healing Stress, Anxiety, Depression
+ text         `commands.player.current-song`
 
 statusbar
  size         parent 32
@@ -117,12 +116,12 @@ statusbar
 song-file-format
  size         content
  content.size text
- text         `audtool current-song-frequency-khz` kHz `audtool current-song-bitrate-kbps` kbit/sec
+ text         `commands.player.current-song-frequency-khz` kHz `commands.player.current-song-bitrate-kbps` kbit/sec
 
 song-time
  size         content
  content.size text
- text         `audtool current-song-length`
+ text         `commands.player.current-song-length`
 
 file
  text  Файл
@@ -193,7 +192,7 @@ widget-progress-rest
 
 tb-time 
   content.size.w text
-  text `audtool current-song-length` / `audtool current-song-output-length`
+  text `commands.player.current-song-length` / `commands.player.current-song-output-length`
 
 tb-loop
   image /home/vf/src/vf5/img/loop.png
@@ -284,6 +283,10 @@ commands
   player.stop       audtool playback-stop
   player.next       audtool playlist-advance
   player.song       audtool current-song
+  player.current-song-length        audtool current-song-length
+  player.current-song-output-length audtool current-song-output-length
+  player.current-song-frequency-khz audtool current-song-frequency-khz
+  player.current-song-bitrate-kbps  audtool current-song-bitrate-kbps
 
 hotkeys
   x commands.player.prev

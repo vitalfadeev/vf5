@@ -240,7 +240,7 @@ apply_klass (Doc* doc, ETree* t, Klass* k) {
         values.reserve (ke.values.length);
         foreach (v; ke.values) 
             if (v.startsWith ("`")) 
-                values ~= extract_value (v);
+                values ~= extract_value (doc,v);
             else
                 values ~= v;
 
@@ -803,14 +803,25 @@ set_e (Doc* doc, ETree* t, Klass* kls, string[] values) {
 }
 
 string
-extract_value (string bquoted) {
+extract_value (Doc* doc, string bquoted) {
     writeln ("extract_value: ", bquoted);
 
     auto stripped = bquoted.strip ("`");
-    auto ret = executeShell (stripped);  // (int status, string output)
+    auto converted = extract_class_field_value (doc,stripped);
+    auto ret = executeShell (converted);  // (int status, string output)
 
     writeln (ret.status);
     writeln (ret.output);
 
    return ret.output.stripRight ();
+}
+
+
+string
+extract_class_field_value (Doc* doc, string s) {
+    string[] cmd = doc_get_klass_field_value (doc,s);
+    if (cmd.length)
+        return cmd.join (" ");
+    else
+        return s;
 }
