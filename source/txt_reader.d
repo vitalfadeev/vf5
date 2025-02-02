@@ -48,7 +48,7 @@ e root
   e toolbar-item hbox tb-play-pause
   e toolbar-item hbox tb-stio
   e toolbar-item hbox tb-next
-  e toolbar-item hbox tb-position
+  e toolbar-item hbox widget-progress tb-position
   e toolbar-item t3-right tb-time 
   e toolbar-item t3-right tb-loop
   e toolbar-item t3-right tb-random
@@ -68,7 +68,7 @@ e root
 
 root
  bg           #000
- size         window 480
+ size         parent
  content.size e
  on start     commands.player.start
 
@@ -104,6 +104,7 @@ playlist
 info
  size         parent 64
  borders      1 solid #888
+ text         Music To Calm The Mind And Stop Thinking, Tibetan Healing Flute, Healing Stress, Anxiety, Depression
 
 statusbar
  size         parent 32
@@ -164,6 +165,26 @@ tb-next
 tb-position
   text position
   content.size.w text
+
+widget-progress
+  size.w 320
+  //size.h childs
+  //size.h widget
+  e widget-progress-back
+  e widget-progress-fore
+  e widget-progress-mark
+
+widget-progress-back
+  size parent 10
+  bg   colors.bg
+
+widget-progress-fore
+  size parent 10
+  bg   colors.fg
+
+widget-progress-mark
+  size 10 10
+  bg   colors.bg
 
 tb-time 
   text 2:33:19
@@ -401,7 +422,8 @@ go (Doc* doc, string s) {
 
         if (t_line[0].type == Token.Type.spaces)
         if (t_line[1].type == Token.Type.string)
-        if (t_line[1].s    == "e") {
+        if (t_line[1].s    == "e")
+        if (current_t !is null) {
             // sub e
             // find parent e  in tree  from last e
             //   create sub e

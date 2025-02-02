@@ -217,7 +217,7 @@ new_window () {
             __FILE_FULL_PATH__, // "SDL2 Window",
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
-            640, 480,
+            DEFAULT_WINDOW_W, DEFAULT_WINDOW_H,
             SDL_WINDOW_RESIZABLE
         );
 

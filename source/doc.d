@@ -21,6 +21,9 @@ import pix : Window;
 import pix : IMGException;
 import draw : e_pos, e_size, content_pos;
 
+const DEFAULT_WINDOW_W = 1024;
+const DEFAULT_WINDOW_H = 480;
+
 
 struct
 Doc {
@@ -28,7 +31,7 @@ Doc {
     Klass*[] klasses; // find by name
     Klass*   hotkeys;
     Window*  window;
-    Size     size = Size (640,480);
+    Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
 
     Klass*
     find_klass (string s) {
@@ -301,8 +304,14 @@ e_size_w_content (Doc* doc, ETree* t) {
 void
 e_size_w_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.w = t.parent.e.content.size.w;
-    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    if (t.parent !is null) {
+        e.size.w = t.parent.e.content.size.w;
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    }
+    else {
+        e.size.w = doc.size.w;
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    }
 }
 
 void
@@ -313,7 +322,7 @@ e_size_w_window (Doc* doc, ETree* t) {
         e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
     }
     else {
-        e.size.w = 640;
+        e.size.w = DEFAULT_WINDOW_W;
         e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
     }
 }
@@ -336,8 +345,14 @@ e_size_h_content (Doc* doc, ETree* t) {
 void
 e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    e.size.h = t.parent.e.content.size.h;
-    e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    if (t.parent !is null) {
+        e.size.h = t.parent.e.content.size.h;
+        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    }
+    else {
+        e.size.h = doc.size.h;
+        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    }
 }
 
 void
@@ -348,7 +363,7 @@ e_size_h_window (Doc* doc, ETree* t) {
         e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
     }
     else {
-        e.size.h = 480;
+        e.size.h = DEFAULT_WINDOW_H;
         e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
     }
 }
@@ -996,6 +1011,9 @@ go_question_value (string[] s) {
 
 void
 update (Doc* doc) {
+    // 0
+    if (doc.window !is null)
+        doc.size = doc.window.size;
     // 1
     doc.doc_apply_klasses ();
     // 2

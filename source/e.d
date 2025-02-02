@@ -140,6 +140,7 @@ struct E {
     }
     Magnet_ magnet;
     bool    hidden;
+    bool    widget;
 
     PosType pos_type;
     ubyte   pos_group;
@@ -610,7 +611,7 @@ set_content_image (Doc* doc, E* e, string[] values) {
 void
 set_content_text (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        e.content.text.s = values[0];
+        e.content.text.s = values.join (" ");
     }
 }
 
