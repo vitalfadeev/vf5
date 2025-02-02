@@ -277,12 +277,12 @@ colors
   error    #c00
 
 commands
-  player.start      audacious
-  player.prev       audtool playlist-reverse
-  player.play_pause audtool playback-playpause
-  player.stop       audtool playback-stop
-  player.next       audtool playlist-advance
-  player.song       audtool current-song
+  player.start                      audacious
+  player.prev                       audtool playlist-reverse
+  player.play_pause                 audtool playback-playpause
+  player.stop                       audtool playback-stop
+  player.next                       audtool playlist-advance
+  player.song                       audtool current-song
   player.current-song-length        audtool current-song-length
   player.current-song-output-length audtool current-song-output-length
   player.current-song-frequency-khz audtool current-song-frequency-khz
@@ -299,6 +299,12 @@ hotkeys
 ";
 
 string txt2 = "
+image_folder /home/vf/src/vf5/img
+import_folder .
+import_folder `echo $PWD`
+import_folder `pwd`
+import_folder /home/vf/src/vf5
+
 image /home/vf/src/vf5/img/file.png
 image /home/vf/src/vf5/img/play.png
 image /home/vf/src/vf5/img/list.png
