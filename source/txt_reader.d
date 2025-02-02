@@ -107,6 +107,9 @@ info
  size         parent 64
  borders      1 solid #888
  text         `commands.player.current-song`
+ text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 24
+ text.font.file /home/vf/src/vf5/img/PTSansCaption-Regular.ttf
+ text.font.size 24
 
 statusbar
  size         parent 32

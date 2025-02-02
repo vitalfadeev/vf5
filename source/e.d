@@ -81,11 +81,12 @@ struct E {
           string s;     // "abc"
           struct 
           Font {
+            string file;    // "abc"
             string family;  // "abc"
             ubyte  size;    // 0..256
             bool   bold;    // 0/1
             bool   italic;  // 0/1
-            void*  ptr;  // 0/1
+            void*  ptr;     // 0/1
           }
           Font    font;
           Pos     pos;
@@ -277,6 +278,10 @@ apply_klass (Doc* doc, ETree* t, Klass* k) {
             case "content.size.h"   : set_content_size_h    (doc,e,values); break;
             case "content.size"     : set_content_size      (doc,e,values); break;
             case "content.size.type": set_content_size_type (doc,e,values); break;
+            case "text.font"        : set_content_text_font (doc,e,values); break;
+            case "text.font.family" : set_content_text_font_family (doc,e,values); break;
+            case "text.font.size"   : set_content_text_font_size   (doc,e,values); break;
+            case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
             case "bg"               : set_bg                (doc,e,values); break;
             case "on"               : set_on                (doc,e,values); break;
             case "e"                : set_e                 (doc,t,k,values); break;
@@ -750,6 +755,38 @@ set_content_size_type (Doc* doc, E* e, string[] values) {
             default:
                 e.content.size_w_type = E.Content.SizeType.e;
         }
+    }
+}
+
+void
+set_content_text_font (Doc* doc, E* e, string[] values) {
+    if (values.length >= 2) {
+        set_content_text_font_file (doc,e,values[0..1]);
+        set_content_text_font_size (doc,e,values[1..2]);
+    }
+    if (values.length >= 1) {
+        set_content_text_font_file (doc,e,values[0..1]);
+    }
+}
+
+void
+set_content_text_font_file (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        e.content.text.font.file = values[0];
+    }
+}
+
+void
+set_content_text_font_family (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        e.content.text.font.family = values[0];
+    }
+}
+
+void
+set_content_text_font_size (Doc* doc, E* e, string[] values) {
+    if (values.length) {
+        e.content.text.font.size = values[0].to!ubyte;
     }
 }
 
