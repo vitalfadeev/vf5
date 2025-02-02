@@ -106,6 +106,7 @@ playlist
 info
  size         parent 64
  borders      1 solid #888
+ pad          10 5
  text         `commands.player.current-song`
  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
@@ -177,6 +178,7 @@ widget-progress widget
   e hbox widget-progress-passed
   e hbox widget-progress-current
   e hbox widget-progress-rest
+  progress 50%
   progress.position 50%
 
 widget-progress-passed
@@ -193,7 +195,7 @@ widget-progress-rest
 
 tb-time 
   content.size.w text
-  text `commands.player.current-song-length` / `commands.player.current-song-output-length`
+  text `commands.player.current-song-output-length` / `commands.player.current-song-length`
 
 tb-loop
   image /home/vf/src/vf5/img/loop.png
