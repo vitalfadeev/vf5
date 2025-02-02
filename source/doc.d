@@ -120,25 +120,30 @@ doc_apply_klasses (Doc* doc) {
         e.apply_klasses (doc,t);
 }
 
+alias PTR = TTF_Font*;
+static
+PTR[string] global_fonts;
+static
+PTR default_ptr;
+
 void
 load_fonts (Doc* doc) {
-    alias PTR = TTF_Font*;
-    PTR[string] files;
     auto default_file = DEFAULT_FONT_FILE;
     auto default_size = DEFAULT_FONT_SIZE;
-    auto default_ptr  = open_font (default_file,default_size);
+    if (default_ptr is null)
+        default_ptr  = open_font (default_file,default_size);
 
     foreach (t; WalkTree (doc.tree)) {
         if (t.e.content.text.s.length) {
             string font_file = t.e.content.text.font.file;
             ubyte  font_size = t.e.content.text.font.size;
 
-            if (font_file.length >= 1 && !(font_file in files)) {
+            if (font_file.length >= 1 && !(font_file in global_fonts)) {
                 PTR ptr = open_font (font_file,font_size);
                 if (ptr is null)
                     throw new Exception ("open_font");
 
-                files[font_file] = ptr;
+                global_fonts[font_file] = ptr;
             }
         }
     }
@@ -146,7 +151,7 @@ load_fonts (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
         if (t.e.content.text.s.length) {
             if (t.e.content.text.font.file.length)
-                t.e.content.text.font.ptr = files[t.e.content.text.font.file];
+                t.e.content.text.font.ptr = global_fonts[t.e.content.text.font.file];
             else
                 t.e.content.text.font.ptr = default_ptr;
         }
@@ -164,12 +169,25 @@ load_images (Doc* doc) {
             load_e_image (t.e);
 }
 
+alias IMGPTR = SDL_Surface*;
+static
+IMGPTR[string] global_images;
+
 void
 load_e_image (E* e) {
     if (e.content.image.ptr is null) {
-        auto img_surface = IMG_Load (e.content.image.src.toStringz);
-        if (img_surface is null)
-            throw new IMGException ("IMG_Load");
+        IMGPTR img_surface;
+        if (!(e.content.image.src in global_images)) {
+            string img_file = e.content.image.src;
+            img_surface = IMG_Load (img_file.toStringz);
+            if (img_surface is null)
+                throw new IMGException ("IMG_Load");
+            global_images[img_file] = img_surface;
+        }
+        else {
+            img_surface = global_images[e.content.image.src];
+        }
+
         e.content.image.ptr = img_surface;
         e.content.image.size = Size (
                 cast(ushort)img_surface.w,
