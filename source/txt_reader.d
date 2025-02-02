@@ -106,7 +106,8 @@ playlist
 info
  size         parent 64
  borders      1 solid #888
- text         Music To Calm The Mind And Stop Thinking, Tibetan Healing Flute, Healing Stress, Anxiety, Depression
+ text         `audtool current-song`
+ //Music To Calm The Mind And Stop Thinking, Tibetan Healing Flute, Healing Stress, Anxiety, Depression
 
 statusbar
  size         parent 32
@@ -116,12 +117,12 @@ statusbar
 song-file-format
  size         content
  content.size text
- text         song-file-format
+ text         `audtool current-song-frequency-khz` kHz `audtool current-song-bitrate-kbps` kbit/sec
 
 song-time
  size         content
  content.size text
- text         song-time
+ text         `audtool current-song-length`
 
 file
  text  Файл
@@ -191,8 +192,8 @@ widget-progress-rest
   bg   colors.fg
 
 tb-time 
-  text 2:33:19
   content.size.w text
+  text `audtool current-song-length` / `audtool current-song-output-length`
 
 tb-loop
   image /home/vf/src/vf5/img/loop.png
@@ -282,6 +283,7 @@ commands
   player.play_pause audtool playback-playpause
   player.stop       audtool playback-stop
   player.next       audtool playlist-advance
+  player.song       audtool current-song
 
 hotkeys
   x commands.player.prev
@@ -455,8 +457,12 @@ go (Doc* doc, string s) {
             if (current_klass !is null) {
                 string[] values;
                 foreach (tt; t_line[2..$])
-                    if (tt.type == Token.Type.string)
+                    if (tt.type == Token.Type.string || 
+                        tt.type == Token.Type.dquoted || 
+                        tt.type == Token.Type.bquoted) 
+                    {
                         values ~= tt.s;
+                    }
                 current_klass.klasse ~= KlassE (t_line[1].s, values);
             }
         }

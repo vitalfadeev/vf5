@@ -36,7 +36,8 @@ Token {
     Type {
         none,
         string,   // abc
-        quoted,   // `text`
+        dquoted,  // "text"
+        bquoted,  // `text`
         spaces,   // a b
         comment,  // // comment
         cr
@@ -74,6 +75,7 @@ Start_reader : Reader {
     go (dchar c) {
         switch (c) {
             case '"'  : return new QuatedString_reader (dg).go (c);
+            case '`'  : return new BQuatedString_reader (dg).go (c);
             case ' '  : return new Spaces_reader (dg).go (c);
             case '\\' : return new Escaped_reader (dg).go (c);
             case '/'  : return new Comment_reader (dg).go (c);
@@ -105,7 +107,38 @@ QuatedString_reader : Reader {
         else {
             if (c == '\"') {
                 s ~= c;
-                emit (new Token (Token.Type.quoted, s));
+                emit (new Token (Token.Type.dquoted, s));
+                return new Start_reader (dg);
+            }
+            else {
+                s ~= c;
+                return this;
+            }
+        }
+    }
+}
+
+class
+BQuatedString_reader : Reader {
+    string s;
+    bool opened = false;
+
+    this (int delegate (Token* t) dg) {
+        super (dg);
+    }
+
+    override
+    Reader
+    go (dchar c) {
+        if (opened == false) {
+            opened = true;
+            s ~= c;
+            return this;
+        }
+        else {
+            if (c == '`') {
+                s ~= c;
+                emit (new Token (Token.Type.bquoted, s));
                 return new Start_reader (dg);
             }
             else {

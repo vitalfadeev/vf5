@@ -36,6 +36,28 @@ tree_functions () {
         }
         c.parent = &t;
     }
+
+    void
+    remove_child (Tree* c) {
+        alias t = this;
+
+        auto l = c.l;
+        auto r = c.r;
+
+        if (l !is null)
+            l.r = r;
+
+        if (r !is null)
+            r.l = l;
+
+        if (t.childs.l == c)
+            t.childs.l = r;
+
+        if (t.childs.r == c)
+            t.childs.r = l;
+
+        c.parent = null;
+    }
 }
 
 // in depth
