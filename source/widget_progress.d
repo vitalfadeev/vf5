@@ -1,4 +1,4 @@
-module widget.progress;
+module widget_progress;
 
 import std.string;
 import bindbc.sdl;
@@ -7,6 +7,19 @@ import doc;
 import etree;
 import klass;
 import e;
+
+
+struct 
+Widget_Progress {
+    Klass _super = 
+        Klass (
+            "widget-progress", 
+            [], 
+            &.set, 
+            &.event
+        );
+    alias _super this;
+}
 
 
 // WIDGET_SET_FN
@@ -41,11 +54,14 @@ set_progress_position (Doc* doc, ETree* t, E* e, string[] values) {
     }
 }
 
+// WIDGET_EVENT_FN
 void 
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     switch (ev.type) {
-        case SDL_QUIT: break;
         case SDL_MOUSEBUTTONDOWN: break;
+        case SDL_WINDOWEVENT: break;
+        case SDL_USEREVENT: break;
+        case SDL_QUIT: break;
         default:
     }
 }

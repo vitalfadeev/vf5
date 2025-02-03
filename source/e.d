@@ -198,8 +198,6 @@ struct E {
     //
     DRAW_FN         draw; // simple, bordered, bordered-titled, custom
     APPLY_KLASS_FN  apply_klass = &.apply_klass;
-    WIDGET_SET_FN   widget_set_fn;
-    WIDGET_EVENT_FN widget_event_fn;
 
     string
     toString () {
@@ -221,12 +219,6 @@ Magnet {
 
 alias DRAW_FN         = void function (SDL_Renderer* renderer, E* e);
 alias APPLY_KLASS_FN  = void function (Doc* doc, ETree* t, Klass* klass);
-alias WIDGET_SET_FN   = void function (Doc* doc, ETree* t, Klass* kls, string field, string[] values);
-alias WIDGET_EVENT_FN = void function (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
-
-//static
-//WIDGET_SET_FN[] global_widgets;
-
 
 //
 void
@@ -244,10 +236,10 @@ apply_klasses (Doc* doc, ETree* t) {
 }
 
 void
-apply_klass (Doc* doc, ETree* t, Klass* k) {
+apply_klass (Doc* doc, ETree* t, Klass* kls) {
     auto e = t.e;
 
-    foreach (ke; k.klasse) {
+    foreach (ke; kls.klasse) {
         string[] values;
         values.reserve (ke.values.length);
         foreach (v; ke.values) 
@@ -295,10 +287,10 @@ apply_klass (Doc* doc, ETree* t, Klass* k) {
             case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
             case "bg"               : set_bg                (doc,e,values); break;
             case "on"               : set_on                (doc,e,values); break;
-            case "e"                : set_e                 (doc,t,k,values); break;
+            case "e"                : set_e                 (doc,t,kls,values); break;
             default: // widget
-                if (e.widget_set_fn !is null)
-                    e.widget_set_fn (doc,t,k,ke.id,values);
+                if (kls.widget_set_fn !is null)
+                    kls.widget_set_fn (doc,t,kls,ke.id,values);
                 // widget is e ? ...with "widget" klass ?
         }
     }

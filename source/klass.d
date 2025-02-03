@@ -1,3 +1,5 @@
+import widget : WIDGET_SET_FN;
+import widget : WIDGET_EVENT_FN;
 // e green
 // green
 //   bg: green
@@ -10,10 +12,14 @@
 // ClassE (bg, "green")
 // ClassE (bg, "green")
 
+
 struct
 Klass {
     string   name;
     KlassE[] klasse;
+
+    WIDGET_SET_FN   widget_set_fn;
+    WIDGET_EVENT_FN widget_event_fn;
 
     bool
     find (string s, ref string[] values) {

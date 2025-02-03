@@ -63,9 +63,6 @@ draw_doc (SDL_Renderer* renderer, Doc* doc) {
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     switch (ev.type) {
-        case SDL_QUIT:
-            return 1;
-            break;
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
             if (ev.button.button == SDL_BUTTON_LEFT)
@@ -82,8 +79,10 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
 
                     // widget event
                     auto e = clicked_e;
-                    if (e.widget_event_fn !is null)
-                        e.widget_event_fn (doc,ev,window,renderer);
+                    foreach (kls; e.klasses) {
+                        if (kls.widget_event_fn !is null)
+                            kls.widget_event_fn (doc,ev,window,renderer);
+                    }
 
                     // focused
                     //add_class (doc, clicked_e, "hidden");
@@ -129,6 +128,9 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                 case "player.play_pause": break;
                 default:
             }
+            break;
+        case SDL_QUIT:
+            return 1;
             break;
         default:
     }

@@ -21,10 +21,12 @@ import klass;
 // checked
 // focused
 // widget
-// widget-progress
 // hotkeys
 // colors
 // commands
+//
+// WIDGET CLASSES
+// widget-progress
 
 // `external program` -> os.execute (["external","program"], NO_WAIT)
 // internal.command   -> send       ("internal.command")

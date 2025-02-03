@@ -50,6 +50,12 @@ Doc {
         return kls;
     }
 
+    Klass*
+    add_widget_klass (Klass* kls) {
+        klasses ~= kls;
+        return kls;
+    }
+
 
     Klass*
     find_klass_or_create (string s) {

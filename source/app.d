@@ -6,6 +6,7 @@ import pix;
 import txt_reader;
 import doc;
 import events;
+import widget_progress : Widget_Progress;
 
 
 void 
@@ -23,7 +24,13 @@ main() {
 
 void
 setup (Doc* doc) {
+	doc.create_widgets_classes ();
 	txt_reader.go (doc, txt_reader.text);
+}
+
+void
+create_widgets_classes (Doc* doc) {
+	doc.add_widget_klass (cast (Klass*) (new Widget_Progress ()));
 }
 
 void
