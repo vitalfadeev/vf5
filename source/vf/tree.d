@@ -50,13 +50,15 @@ tree_functions () {
         if (r !is null)
             r.l = l;
 
-        if (t.childs.l == c)
+        if (t.childs.l is c)
             t.childs.l = r;
 
-        if (t.childs.r == c)
+        if (t.childs.r is c)
             t.childs.r = l;
 
         c.parent = null;
+        c.l = null;
+        c.r = null;
     }
 }
 

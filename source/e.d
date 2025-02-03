@@ -274,7 +274,7 @@ set (Doc* doc, ETree* t, Klass* kls, string field_id, string[] values) {
         case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
         case "bg"               : set_bg                (doc,e,values); break;
         case "on"               : set_on                (doc,e,values); break;
-        case "e"                : set_e                 (doc,t,kls,values); break;
+        //case "e"                : set_e                 (doc,t,kls,values); break;
         default:
     }
 }
@@ -807,22 +807,22 @@ set_on (Doc* doc, E* e, string[] values) {
     }
 }
 
-void
-set_e (Doc* doc, ETree* t, Klass* kls, string[] values) {
-    auto e = t.e;
-    if (values.length) {
-        // add child to t
-        //   set classes
-        auto _t = new ETree (new E ());
-        t.add_child (_t);
-        _t.e.added_from = kls;
-        if (values.length >= 2) {
-            foreach (kls_name; values[1..$]) {
-                _t.e.klasses ~= doc.find_klass_or_create (kls_name);
-            }
-        }
-    }
-}
+//void
+//set_e (Doc* doc, ETree* t, Klass* kls, string[] values) {
+//    auto e = t.e;
+//    if (values.length) {
+//        // add child to t
+//        //   set classes
+//        auto _t = new ETree (new E ());
+//        t.add_child (_t);
+//        _t.e.added_from = kls;
+//        if (values.length >= 2) {
+//            foreach (kls_name; values[1..$]) {
+//                _t.e.klasses ~= doc.find_klass_or_create (kls_name);
+//            }
+//        }
+//    }
+//}
 
 string
 extract_value (Doc* doc, string bquoted) {

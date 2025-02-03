@@ -133,9 +133,12 @@ apply_klasses (Doc* doc, ETree* t) {
     e.on.length = 0;
     global_font_files.length = 0;
     // remove e added from klass
-    foreach (Klass* kls; e.klasses)
-        if (e.added_from !is null)
-            t.parent.remove_child (t);
+    ETree*[] for_remove;
+    foreach (_t; WalkChilds (t))
+        if (_t.e.added_from !is null)
+            for_remove ~= _t;
+    foreach (_t; for_remove)
+        t.remove_child (_t);
     // set 
     foreach (Klass* kls; e.klasses) {
         apply_klass (doc,t,kls);
@@ -149,15 +152,14 @@ void
 apply_klass (Doc* doc, ETree* t, Klass* kls) {
     auto e = t.e;
 
-    // klass e tree
+    // add e from klass
     ETree* current_t = t;
-    Klass* current_klass = kls;
     Klass* e_klass = doc.find_klass_or_create ("e");
     foreach (ref t_line; kls.tree_tokens) {
-        add_child_e (doc,e_klass,t_line,current_t,current_klass);
+        add_child_e (doc,e_klass,t_line,t.indent,kls,current_t);
     }
 
-    // fields
+    // set fields
     foreach (field; kls.fields) {
         // `command` -> exec command -> output
         string[] values;
@@ -394,7 +396,10 @@ void
 e_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.w = e.size.w;
-    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    if ((-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r) > 0)
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    else
+        e.content.size.w = 0;
 }
 
 void
@@ -435,7 +440,10 @@ void
 e_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.h = e.size.h;
-    e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
+        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+    else
+        e.content.size.h = 0;
 }
 
 void
@@ -451,11 +459,17 @@ e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     if (t.parent !is null) {
         e.size.h = t.parent.e.content.size.h;
-        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+        if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
+            e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+        else
+            e.content.size.h = 0;
     }
     else {
         e.size.h = doc.size.h;
-        e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+        if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
+            e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
+        else
+            e.content.size.h = 0;
     }
 }
 

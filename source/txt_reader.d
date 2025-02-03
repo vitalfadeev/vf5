@@ -169,31 +169,38 @@ tb-next
   image /home/vf/src/vf5/img/next.png
 
 tb-position
-  text position
-  content.size.w text
+  //text position
+  content.size.w childs
 
 widget-progress widget
-  size.w 320
+  //size expand parent
+  size 320 parent
+  progress 50%
+  progress.position 50%
   e hbox widget-progress-passed
   e hbox widget-progress-current
   e hbox widget-progress-rest
-  progress 50%
-  progress.position 50%
 
 widget-progress-passed
-  size    parent 10
-  bg      colors.blue
-  borders 1 solid colors.blue
+  size          content
+  //pad           10 5
+  content.size  50 16
+  bg            colors.blue
+  borders       2 solid colors.blue
 
 widget-progress-current
-  size    10 10
-  bg      colors.blue
-  borders 1 solid colors.blue
+  size          content
+  //pad           10 5
+  content.size  10 16
+  bg            colors.blue
+  borders       2 solid colors.blue
 
 widget-progress-rest
-  size    parent 10
-  bg      colors.blue
-  borders 1 solid colors.blue
+  size          content
+  //pad           10 5
+  content.size  200 16
+  bg            colors.blue
+  borders       2 solid colors.blue
 
 tb-time 
   content.size.w text
@@ -446,15 +453,17 @@ go (Doc* doc, string s) {
         if (t_line[0].type == Token.Type.spaces)
         if (t_line[1].type == Token.Type.string)
         if (t_line[1].s    == "e")
-        if (current_t !is null) {
-            add_child_e (doc,e_klass,t_line,current_t,current_klass);
+        if (current_t !is null)
+        if (current_klass is null) {
+            add_child_e (doc,e_klass,t_line,0,null,current_t);
         }
 
         if (t_line[0].type == Token.Type.spaces)
         if (t_line[1].type == Token.Type.string)
         if (t_line[1].s    == "e")
+        if (current_t is null)
         if (current_klass !is null) {
-            // klass e tree
+            // sub e tree for klass
             current_klass.tree_tokens ~= t_line;
         }
 
@@ -481,18 +490,21 @@ go (Doc* doc, string s) {
 
 
 void
-add_child_e (Doc* doc, Klass* e_klass, Token[] t_line, ref ETree* current_t, ref Klass* current_klass) {
+add_child_e (Doc* doc, Klass* e_klass, Token[] t_line, int parent_offset, Klass* from_klass, ref ETree* current_t) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
     //   add classes
-    auto parent_t = find_parent_t (current_t, t_line[0].s.length);
+    ETree* t;
+    auto parent_t = find_parent_t (current_t, t_line[0].s.length+parent_offset);
     if (parent_t !is null) {
-        auto t = new ETree (new E ());
-        t.indent = t_line[0].s.length.to!ubyte;
+        t = new ETree (new E ());
+        t.indent = (t_line[0].s.length+parent_offset).to!ubyte;
         parent_t.add_child (t);
         current_t = t;
-        current_klass = null;
+        // sub e for klass
+        if (from_klass !is null)
+            t.e.added_from = from_klass;
     }
 
     // e classes
