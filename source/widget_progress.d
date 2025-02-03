@@ -10,7 +10,7 @@ import e;
 
 
 struct 
-Widget_Progress {
+Widget_Progress_Klass {
     Klass _super = 
         Klass (
             "widget-progress", 
