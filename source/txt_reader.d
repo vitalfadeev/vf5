@@ -181,16 +181,19 @@ widget-progress widget
   progress.position 50%
 
 widget-progress-passed
-  size parent 10
-  bg   colors.bg
+  size    parent 10
+  bg      colors.blue
+  borders 1 solid colors.blue
 
 widget-progress-current
-  size 10 10
-  bg   colors.bg
+  size    10 10
+  bg      colors.blue
+  borders 1 solid colors.blue
 
 widget-progress-rest
-  size parent 10
-  bg   colors.fg
+  size    parent 10
+  bg      colors.blue
+  borders 1 solid colors.blue
 
 tb-time 
   content.size.w text
@@ -277,6 +280,9 @@ colors
   info     #0c0
   warn     #cc0
   error    #c00
+  red      #c00 
+  green    #0c0 
+  blue     #00c 
 
 commands
   player.start                      audacious
@@ -338,17 +344,6 @@ map
  File  File /home/vf/src/vf5/img/file.png 
  Play  Play /home/vf/src/vf5/img/play.png click player.play_pause
  List  List /home/vf/src/vf5/img/list.png
-
-colors
-  primary
-  secondary
-  primary+1
-  primary-1
-  secondary+1
-  secondary-1
-  info
-  warn
-  error
 
 // a extend b extend c
 a b c
@@ -452,24 +447,15 @@ go (Doc* doc, string s) {
         if (t_line[1].type == Token.Type.string)
         if (t_line[1].s    == "e")
         if (current_t !is null) {
-            // sub e
-            // find parent e  in tree  from last e
-            //   create sub e
-            //   add classes
-            auto parent_t = find_parent_t (current_t, t_line[0].s.length);
-            if (parent_t !is null) {
-                auto t = new ETree (new E ());
-                t.indent = t_line[0].s.length.to!ubyte;
-                parent_t.add_child (t);
-                current_t = t;
-                current_klass = null;
-            }
+            add_child_e (doc,e_klass,t_line,current_t,current_klass);
+        }
 
-            // e classes
-            current_t.e.klasses ~= e_klass;
-            foreach (tt; t_line[2..$])
-                if (tt.type == Token.Type.string)
-                    current_t.e.klasses ~= doc.find_klass_or_create (tt.s);
+        if (t_line[0].type == Token.Type.spaces)
+        if (t_line[1].type == Token.Type.string)
+        if (t_line[1].s    == "e")
+        if (current_klass !is null) {
+            // klass e tree
+            current_klass.tree_tokens ~= t_line;
         }
 
         if (t_line[0].type == Token.Type.spaces)
@@ -488,10 +474,32 @@ go (Doc* doc, string s) {
                         values ~= tt.s;
                     }
                 current_klass.fields ~= KlassField (t_line[1].s, values);
-                writeln ("CREATE FIELD: ", t_line[1].s, " : ", *current_klass);
             }
         }
     }
+}
+
+
+void
+add_child_e (Doc* doc, Klass* e_klass, Token[] t_line, ref ETree* current_t, ref Klass* current_klass) {
+    // sub e
+    // find parent e  in tree  from last e
+    //   create sub e
+    //   add classes
+    auto parent_t = find_parent_t (current_t, t_line[0].s.length);
+    if (parent_t !is null) {
+        auto t = new ETree (new E ());
+        t.indent = t_line[0].s.length.to!ubyte;
+        parent_t.add_child (t);
+        current_t = t;
+        current_klass = null;
+    }
+
+    // e classes
+    current_t.e.klasses ~= e_klass;
+    foreach (tt; t_line[2..$])
+        if (tt.type == Token.Type.string)
+            current_t.e.klasses ~= doc.find_klass_or_create (tt.s);    
 }
 
 

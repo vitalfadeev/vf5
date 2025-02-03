@@ -19,6 +19,7 @@ import pix : open_font;
 import pix : Window;
 import pix : IMGException;
 import draw : e_pos, e_size, content_pos;
+import txt_reader : add_child_e;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -147,6 +148,14 @@ apply_klasses (Doc* doc, ETree* t) {
 void
 apply_klass (Doc* doc, ETree* t, Klass* kls) {
     auto e = t.e;
+
+    // klass e tree
+    ETree* current_t = t;
+    Klass* current_klass = kls;
+    Klass* e_klass = doc.find_klass_or_create ("e");
+    foreach (ref t_line; kls.tree_tokens) {
+        add_child_e (doc,e_klass,t_line,current_t,current_klass);
+    }
 
     // fields
     foreach (field; kls.fields) {
