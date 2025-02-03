@@ -221,11 +221,11 @@ E_Klass {
     Klass _super = 
         Klass (
             "e", 
-            [], 
-            &.set, 
-            null, // event
-            &.draw_e, // draw
-            &.apply_klass,
+            [],  
+            &.set,         // set
+            null,          // event
+            &.draw_e,      // draw
+            &.apply_klass, // apply_klass
         );
     alias _super this;
 }

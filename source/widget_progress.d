@@ -7,6 +7,7 @@ import doc;
 import etree;
 import klass;
 import e;
+import std.stdio : writeln;
 
 //if (kls.widget_set_fn !is null)
 //    kls.widget_set_fn (doc,t,kls,field,values);
@@ -27,10 +28,10 @@ Widget_Progress_Klass {
 
 // WIDGET_SET_FN
 void
-set (Doc* doc, ETree* t, Klass* kls, string field, string[] values) {
+set (Doc* doc, ETree* t, Klass* kls, string field_id, string[] values) {
     auto e = t.e;
 
-    switch (field) {
+    switch (field_id) {
         case "progress"            : set_progress_position (doc,t,e,values); break;
         case "progress.position"   : set_progress_position (doc,t,e,values); break;
         default:
