@@ -41,7 +41,7 @@ pix_go (Doc* doc) {
 
     // Event Loop
     foreach (Event* ev; Events ())
-        if (event (doc, ev, window, renderer) == 1)
+        if (event (doc,ev,window,renderer) == 1)
             break;
 
     return 0;
@@ -79,6 +79,11 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                             go_event_action (doc, clicked_e, _on.action);
                         }
                     }
+
+                    // widget event
+                    auto e = clicked_e;
+                    if (e.widget_event_fn !is null)
+                        e.widget_event_fn (doc,ev,window,renderer);
 
                     // focused
                     //add_class (doc, clicked_e, "hidden");

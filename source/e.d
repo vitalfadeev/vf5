@@ -8,6 +8,7 @@ import etree;
 import klass;
 import types;
 import txt_parser;
+import events : Event;
 
 
 struct E {
@@ -143,7 +144,6 @@ struct E {
     }
     Magnet_ magnet;
     bool    hidden;
-    bool    widget;
     Klass*  added_from;
 
     PosType pos_type;
@@ -196,8 +196,10 @@ struct E {
     //Cached cached;
     
     //
-    void function (SDL_Renderer* renderer, E* e) draw; // simple, bordered, bordered-titled, custom
-    void function (Doc* doc, ETree* t, Klass* klass) apply_klass = &.apply_klass;
+    DRAW_FN         draw; // simple, bordered, bordered-titled, custom
+    APPLY_KLASS_FN  apply_klass = &.apply_klass;
+    WIDGET_SET_FN   widget_set_fn;
+    WIDGET_EVENT_FN widget_event_fn;
 
     string
     toString () {
@@ -217,12 +219,21 @@ Magnet {
     yes
 }
 
+alias DRAW_FN         = void function (SDL_Renderer* renderer, E* e);
+alias APPLY_KLASS_FN  = void function (Doc* doc, ETree* t, Klass* klass);
+alias WIDGET_SET_FN   = void function (Doc* doc, ETree* t, Klass* kls, string field, string[] values);
+alias WIDGET_EVENT_FN = void function (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
+
+//static
+//WIDGET_SET_FN[] global_widgets;
+
 
 //
 void
 apply_klasses (Doc* doc, ETree* t) {
     auto e = t.e;
     e.on.length = 0;
+    global_font_files.length = 0;
     // clean. remove e added from klass
     foreach (Klass* kls; e.klasses)
         if (e.added_from !is null)
@@ -285,17 +296,10 @@ apply_klass (Doc* doc, ETree* t, Klass* k) {
             case "bg"               : set_bg                (doc,e,values); break;
             case "on"               : set_on                (doc,e,values); break;
             case "e"                : set_e                 (doc,t,k,values); break;
-            default:
-            // widget
-            //   widget["progress"]
-            //   set ()
-            //     case "progress.position": widget_progress_set_position (doc,t,k,ke.values); break;
-            //
-            // widget_progress_set_position ()
-            //   passed.size.w = ...
-            //   current.pos.x = ...
-            //   rest.pos.x    = ...
-            //   rest.size.w   = ...
+            default: // widget
+                if (e.widget_set_fn !is null)
+                    e.widget_set_fn (doc,t,k,ke.id,values);
+                // widget is e ? ...with "widget" klass ?
         }
     }
 }
@@ -769,9 +773,14 @@ set_content_text_font (Doc* doc, E* e, string[] values) {
     }
 }
 
+static 
+string[] global_font_files;
+
 void
 set_content_text_font_file (Doc* doc, E* e, string[] values) {
     if (values.length) {
+        // collect font names
+        global_font_files ~= values[0];
         e.content.text.font.file = values[0];
     }
 }

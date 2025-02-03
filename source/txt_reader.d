@@ -170,9 +170,6 @@ tb-position
   text position
   content.size.w text
 
-widget
-  widget 1
-
 widget-progress widget
   size.w 320
   e hbox widget-progress-passed
@@ -304,6 +301,7 @@ hotkeys
 
 string txt2 = "
 image_folder /home/vf/src/vf5/img
+widget_folder /home/vf/src/vf5/widgets
 import_folder .
 import_folder `echo $PWD`
 import_folder `pwd`
@@ -396,6 +394,12 @@ input-text
 
 import ./other_colors
 import ./other_commands
+
+commands
+  player.prev                       audtool playlist-reverse
+  player.prev.undo                  player.next
+  player.next                       audtool playlist-advance
+  player.next.undo                  player.prev
 ";
 
 void
