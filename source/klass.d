@@ -1,5 +1,7 @@
 import widget : WIDGET_SET_FN;
 import widget : WIDGET_EVENT_FN;
+import widget : WIDGET_DRAW_FN;
+import widget : WIDGET_APPLY_KLASS_FN;
 // e green
 // green
 //   bg: green
@@ -15,17 +17,19 @@ import widget : WIDGET_EVENT_FN;
 
 struct
 Klass {
-    string   name;
-    KlassE[] klasse;
+    string       name;
+    KlassField[] fields;
 
-    WIDGET_SET_FN   widget_set_fn;
-    WIDGET_EVENT_FN widget_event_fn;
+    WIDGET_SET_FN         widget_set_fn;
+    WIDGET_EVENT_FN       widget_event_fn;
+    WIDGET_DRAW_FN        widget_draw_fn; // simple, bordered, bordered-titled, custom
+    WIDGET_APPLY_KLASS_FN widget_apply_klass_fn;
 
     bool
     find (string s, ref string[] values) {
-        foreach (ke; klasse)
-            if (ke.id == s) {
-                values = ke.values;
+        foreach (field; fields)
+            if (field.id == s) {
+                values = field.values;
                 return true;
             }
 
@@ -34,7 +38,7 @@ Klass {
 }
 
 struct
-KlassE {
+KlassField {
     string   id;
     string[] values;
 

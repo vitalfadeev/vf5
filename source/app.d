@@ -6,7 +6,6 @@ import pix;
 import txt_reader;
 import doc;
 import events;
-import widget_progress : Widget_Progress_Klass;
 
 
 void 
@@ -30,6 +29,10 @@ setup (Doc* doc) {
 
 void
 create_widgets_classes (Doc* doc) {
+	import e : E_Klass;
+	import widget_progress : Widget_Progress_Klass;
+
+	doc.add_widget_klass (cast (Klass*) (new E_Klass ()));
 	doc.add_widget_klass (cast (Klass*) (new Widget_Progress_Klass ()));
 }
 

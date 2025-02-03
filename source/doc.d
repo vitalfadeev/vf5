@@ -123,8 +123,52 @@ remove_class (E* e, Klass* kls) {
 void
 doc_apply_klasses (Doc* doc) {
     foreach (t; WalkTree (doc.tree))
-        e.apply_klasses (doc,t);
+        apply_klasses (doc,t);
 }
+
+void
+apply_klasses (Doc* doc, ETree* t) {
+    auto e = t.e;
+    e.on.length = 0;
+    global_font_files.length = 0;
+    // remove e added from klass
+    foreach (Klass* kls; e.klasses)
+        if (e.added_from !is null)
+            t.parent.remove_child (t);
+    // set 
+    foreach (Klass* kls; e.klasses) {
+        apply_klass (doc,t,kls);
+        if (kls.widget_apply_klass_fn !is null)
+            kls.widget_apply_klass_fn (doc,t,kls);
+    }
+}
+
+// WIDGET_APPLY_KLASS_FN
+void
+apply_klass (Doc* doc, ETree* t, Klass* kls) {
+    auto e = t.e;
+
+    // fields
+    foreach (field; kls.fields) {
+        // `command` -> exec command -> output
+        string[] values;
+        values.reserve (field.values.length);
+        foreach (v; field.values) 
+            if (v.startsWith ("`")) 
+                values ~= extract_value (doc,v);
+            else
+                values ~= v;
+
+        // e klass set
+        .set (doc,t,kls,field.id,values);
+
+        // ... klass
+        if (kls.widget_set_fn !is null)
+            kls.widget_set_fn (doc,t,kls,field.id,values);
+    }
+}
+
+
 
 alias PTR = TTF_Font*;
 static

@@ -9,9 +9,11 @@ import klass;
 import types;
 import txt_parser;
 import events : Event;
+import draw : draw_e;
 
 
-struct E {
+struct 
+E {
     Klass*[] klasses;    // box green rounded
     Pos  pos;
     Size size;
@@ -194,10 +196,6 @@ struct E {
     //    Size         content_text_size;
     //}
     //Cached cached;
-    
-    //
-    DRAW_FN         draw; // simple, bordered, bordered-titled, custom
-    APPLY_KLASS_FN  apply_klass = &.apply_klass;
 
     string
     toString () {
@@ -217,84 +215,70 @@ Magnet {
     yes
 }
 
-alias DRAW_FN         = void function (SDL_Renderer* renderer, E* e);
-alias APPLY_KLASS_FN  = void function (Doc* doc, ETree* t, Klass* klass);
-
 //
-void
-apply_klasses (Doc* doc, ETree* t) {
-    auto e = t.e;
-    e.on.length = 0;
-    global_font_files.length = 0;
-    // clean. remove e added from klass
-    foreach (Klass* kls; e.klasses)
-        if (e.added_from !is null)
-            t.parent.remove_child (t);
-    // set 
-    foreach (Klass* kls; e.klasses)
-        e.apply_klass (doc,t,kls);
+struct 
+E_Klass {
+    Klass _super = 
+        Klass (
+            "e", 
+            [], 
+            &.set, 
+            null, // event
+            &.draw_e, // draw
+            &.apply_klass,
+        );
+    alias _super this;
 }
 
+// E WIDGET_SET_FN
 void
-apply_klass (Doc* doc, ETree* t, Klass* kls) {
+set (Doc* doc, ETree* t, Klass* kls, string field_id, string[] values) {
     auto e = t.e;
 
-    foreach (ke; kls.klasse) {
-        string[] values;
-        values.reserve (ke.values.length);
-        foreach (v; ke.values) 
-            if (v.startsWith ("`")) 
-                values ~= extract_value (doc,v);
-            else
-                values ~= v;
-
-        switch (ke.id) {
-            case "pos.x"            : set_pos_x             (doc,e,values); break;
-            case "pos.y"            : set_pos_y             (doc,e,values); break;
-            case "pos"              : set_pos               (doc,e,values); break;
-            case "pos.type"         : set_pos_type          (doc,e,values); break;
-            case "pos.group"        : set_pos_group         (doc,e,values); break;
-            case "pos.dir"          : set_pos_dir           (doc,e,values); break;
-            case "size.w"           : set_size_w            (doc,e,values); break;
-            case "size.h"           : set_size_h            (doc,e,values); break;
-            case "size"             : set_size              (doc,e,values); break;
-            case "hidden"           : set_hidden            (doc,e,values); break;
-            case "popup"            : set_popup             (doc,e,values); break;
-            case "borders"          : set_borders           (doc,e,values); break;
-            case "borders.t"        : set_border_t          (doc,e,values); break;
-            case "borders.r"        : set_border_r          (doc,e,values); break;
-            case "borders.b"        : set_border_b          (doc,e,values); break;
-            case "borders.l"        : set_border_l          (doc,e,values); break;
-            case "borders.color"    : set_borders_color     (doc,e,values); break;
-            case "pad"              : set_pad               (doc,e,values); break;
-            case "pad.bg"           : set_pad_bg            (doc,e,values); break;
-            case "content.image"    : set_content_image     (doc,e,values); break;
-            case "content.text"     : set_content_text      (doc,e,values); break;
-            case "content"          : set_content           (doc,e,values); break;
-            case "image"            : set_content_image     (doc,e,values); break;
-            case "text"             : set_content_text      (doc,e,values); break;
-            case "text.color"       : set_text_fg           (doc,e,values); break;
-            case "text.fg"          : set_text_fg           (doc,e,values); break;
-            case "text.bg"          : set_text_bg           (doc,e,values); break;
-            case "text.pos.type"    : set_text_pos_type     (doc,e,values); break;
-            case "content.size.w"   : set_content_size_w    (doc,e,values); break;
-            case "content.size.h"   : set_content_size_h    (doc,e,values); break;
-            case "content.size"     : set_content_size      (doc,e,values); break;
-            case "content.size.type": set_content_size_type (doc,e,values); break;
-            case "text.font"        : set_content_text_font (doc,e,values); break;
-            case "text.font.family" : set_content_text_font_family (doc,e,values); break;
-            case "text.font.size"   : set_content_text_font_size   (doc,e,values); break;
-            case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
-            case "bg"               : set_bg                (doc,e,values); break;
-            case "on"               : set_on                (doc,e,values); break;
-            case "e"                : set_e                 (doc,t,kls,values); break;
-            default: // widget
-                if (kls.widget_set_fn !is null)
-                    kls.widget_set_fn (doc,t,kls,ke.id,values);
-                // widget is e ? ...with "widget" klass ?
-        }
+    switch (field_id) {
+        case "pos.x"            : set_pos_x             (doc,e,values); break;
+        case "pos.y"            : set_pos_y             (doc,e,values); break;
+        case "pos"              : set_pos               (doc,e,values); break;
+        case "pos.type"         : set_pos_type          (doc,e,values); break;
+        case "pos.group"        : set_pos_group         (doc,e,values); break;
+        case "pos.dir"          : set_pos_dir           (doc,e,values); break;
+        case "size.w"           : set_size_w            (doc,e,values); break;
+        case "size.h"           : set_size_h            (doc,e,values); break;
+        case "size"             : set_size              (doc,e,values); break;
+        case "hidden"           : set_hidden            (doc,e,values); break;
+        case "popup"            : set_popup             (doc,e,values); break;
+        case "borders"          : set_borders           (doc,e,values); break;
+        case "borders.t"        : set_border_t          (doc,e,values); break;
+        case "borders.r"        : set_border_r          (doc,e,values); break;
+        case "borders.b"        : set_border_b          (doc,e,values); break;
+        case "borders.l"        : set_border_l          (doc,e,values); break;
+        case "borders.color"    : set_borders_color     (doc,e,values); break;
+        case "pad"              : set_pad               (doc,e,values); break;
+        case "pad.bg"           : set_pad_bg            (doc,e,values); break;
+        case "content.image"    : set_content_image     (doc,e,values); break;
+        case "content.text"     : set_content_text      (doc,e,values); break;
+        case "content"          : set_content           (doc,e,values); break;
+        case "image"            : set_content_image     (doc,e,values); break;
+        case "text"             : set_content_text      (doc,e,values); break;
+        case "text.color"       : set_text_fg           (doc,e,values); break;
+        case "text.fg"          : set_text_fg           (doc,e,values); break;
+        case "text.bg"          : set_text_bg           (doc,e,values); break;
+        case "text.pos.type"    : set_text_pos_type     (doc,e,values); break;
+        case "content.size.w"   : set_content_size_w    (doc,e,values); break;
+        case "content.size.h"   : set_content_size_h    (doc,e,values); break;
+        case "content.size"     : set_content_size      (doc,e,values); break;
+        case "content.size.type": set_content_size_type (doc,e,values); break;
+        case "text.font"        : set_content_text_font (doc,e,values); break;
+        case "text.font.family" : set_content_text_font_family (doc,e,values); break;
+        case "text.font.size"   : set_content_text_font_size   (doc,e,values); break;
+        case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
+        case "bg"               : set_bg                (doc,e,values); break;
+        case "on"               : set_on                (doc,e,values); break;
+        case "e"                : set_e                 (doc,t,kls,values); break;
+        default:
     }
 }
+
 
 void
 set_pos (Doc* doc, E* e, string[] values) {

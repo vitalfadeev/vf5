@@ -8,6 +8,9 @@ import etree;
 import klass;
 import e;
 
+//if (kls.widget_set_fn !is null)
+//    kls.widget_set_fn (doc,t,kls,field,values);
+// widget is e ? ...with "widget" klass ?
 
 struct 
 Widget_Progress_Klass {

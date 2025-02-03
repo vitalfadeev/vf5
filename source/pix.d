@@ -6,9 +6,10 @@ import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import doc;
+import etree;
+import klass;
 import events;
 import draw;
-import etree;
 import types;
 import std.string : fromStringz; 
 import std.string : toStringz;
@@ -53,12 +54,24 @@ draw_doc (SDL_Renderer* renderer, Doc* doc) {
     SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear (renderer);
     // draw
-    foreach (t; WalkTree (doc.tree))
-        if (!t.e.hidden)
-            draw_e (renderer, t.e);
+    foreach (t; WalkTree (doc.tree)) {
+        if (!t.e.hidden) {
+            foreach (Klass* kls; t.e.klasses) {
+                if (kls.widget_draw_fn !is null)
+                    kls.widget_draw_fn (renderer, t.e);
+            }
+        }
+    }
     // rasterize
     SDL_RenderPresent (renderer);
 }
+
+// foreach (ev; Events)
+//   vf.event (ev)
+//   tree
+//     e
+//      foreach (kls; klasses)  // widget
+//        kls.event (ev)
 
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {

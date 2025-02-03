@@ -409,6 +409,8 @@ go (Doc* doc, string s) {
     ETree* current_t;
     Klass* current_klass;
 
+    Klass* e_klass = doc.find_klass_or_create ("e");
+
     auto reader = Token_line_reader (s);
     foreach (t_line; reader) {
         writeln (t_line);
@@ -422,6 +424,7 @@ go (Doc* doc, string s) {
             // only first e
             if (doc.tree is null) {
                 auto t = new ETree (new E ());
+                t.e.klasses ~= e_klass;
                 doc.tree  = t;
                 current_t = t;
                 current_klass = null;
@@ -462,6 +465,8 @@ go (Doc* doc, string s) {
                 current_klass = null;
             }
 
+            // e classes
+            current_t.e.klasses ~= e_klass;
             foreach (tt; t_line[2..$])
                 if (tt.type == Token.Type.string)
                     current_t.e.klasses ~= doc.find_klass_or_create (tt.s);
@@ -470,9 +475,9 @@ go (Doc* doc, string s) {
         if (t_line[0].type == Token.Type.spaces)
         if (t_line[1].type == Token.Type.string)
         if (t_line[1].s    != "e") {
-            // sub property
-            // find parent classs
-            //   create sub property
+            // klass fields
+            // find parent klasss
+            //   create field
             if (current_klass !is null) {
                 string[] values;
                 foreach (tt; t_line[2..$])
@@ -482,7 +487,8 @@ go (Doc* doc, string s) {
                     {
                         values ~= tt.s;
                     }
-                current_klass.klasse ~= KlassE (t_line[1].s, values);
+                current_klass.fields ~= KlassField (t_line[1].s, values);
+                writeln ("CREATE FIELD: ", t_line[1].s, " : ", *current_klass);
             }
         }
     }

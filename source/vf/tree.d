@@ -276,8 +276,8 @@ dump_klasses (Klass) (Klass*[] klasses) {
 
     foreach (kls; klasses) {
         writeln (kls.name);
-        foreach (ke; kls.klasse) {
-            writeln ("  ", ke);
+        foreach (field; kls.fields) {
+            writeln ("  ", field.id, " ", field.values);
         }
     }
 }
