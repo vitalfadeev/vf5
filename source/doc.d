@@ -122,7 +122,7 @@ Doc {
 }
 
 void
-add_class (Doc* doc, E* e, string s) {
+add_class (E* e, Doc* doc, string s) {
     Klass* kls = doc.find_klass_or_create (s);
     foreach (_kls; e.klasses) 
         if (_kls == kls)
@@ -1195,14 +1195,14 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                         renderer);
 
                     // focused
-                    remove_class (doc, "focused");
-                    add_class (doc, clicked_e, "focused");
+                    doc.remove_class ("focused");
+                    clicked_e.add_class (doc, "focused");
 
                     //
                     doc.update (doc);
 
                     //SDL_UpdateWindowSurface (window);
-                    draw (doc,renderer);
+                    doc.draw (doc,renderer);
                 }
             }
             break;
