@@ -22,6 +22,7 @@ import pix : IMGException;
 import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
 import pix : USER_EVENT;
+import std.algorithm.searching : countUntil;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -124,11 +125,9 @@ Doc {
 void
 add_class (E* e, Doc* doc, string s) {
     Klass* kls = doc.find_klass_or_create (s);
-    foreach (_kls; e.klasses) 
-        if (_kls == kls)
-            return;
-
-    e.klasses ~= kls;
+    auto pos = e.klasses.countUntil (kls);
+    if (pos == -1)
+        e.klasses ~= kls;
 }
 
 void
