@@ -15,6 +15,9 @@ import klass;
 // map
 
 // RESERVED CLASSES
+// e
+// progress
+//
 // input-text
 // input-check
 // input-radio
@@ -23,10 +26,6 @@ import klass;
 // hotkeys
 // colors
 // commands
-//
-// WIDGET CLASSES
-// e_klass
-// progress_klass
 
 // `external program` -> os.execute (["external","program"], NO_WAIT)
 // internal.command   -> send       ("internal.command")

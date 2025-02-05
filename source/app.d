@@ -23,17 +23,17 @@ main() {
 
 void
 setup (Doc* doc) {
-	doc.create_widgets_classes ();
+	doc.create_reserved_classes ();
 	txt_reader.go (doc, txt_reader.text);
 }
 
 void
-create_widgets_classes (Doc* doc) {
+create_reserved_classes (Doc* doc) {
 	import klasses.e        : E_Klass;
-	import klasses.progress : Progress_Klass;
+	import klasses.progress : Progress;
 
 	doc.add_klass (cast (Klass*) (new E_Klass ()));
-	doc.add_klass (cast (Klass*) (new Progress_Klass ()));
+	doc.add_klass (cast (Klass*) (new Progress ()));
 }
 
 void

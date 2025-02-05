@@ -15,10 +15,10 @@ import types : Pos;
 // widget is e ? ...with "widget" klass ?
 
 struct 
-Progress_Klass {
+Progress {
     Klass _super = 
         Klass (
-            "progress_klass", 
+            "progress", 
             [], 
             &.event,
             &.update,
@@ -69,9 +69,9 @@ set_progress_position (Doc* doc, ETree* t, E* e, string[] values) {
             return;
 
         // 50%
-        auto passed  = t.find ("widget-progress-passed");
-        auto current = t.find ("widget-progress-current");
-        auto rest    = t.find ("widget-progress-rest");
+        auto passed  = t.find ("progress-passed");
+        auto current = t.find ("progress-current");
+        auto rest    = t.find ("progress-rest");
         //passed.size.w = ...
         //current.pos.x = ...
         //rest.pos.x    = ...
