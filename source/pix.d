@@ -35,6 +35,7 @@ Pix {
 enum 
 USER_EVENT : Sint32 {
     start = 1,
+    redraw,
 }
 
 
@@ -99,6 +100,12 @@ event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc
                 default:
                     SDL_Log ("Window %d got unknown event %d",
                         ev.window.windowID, ev.window.event);
+            }
+            break;
+        case SDL_USEREVENT:
+            switch (ev.user.code) {
+                case USER_EVENT.redraw : pix.draw (pix,renderer,doc); break;
+                default:
             }
             break;
         case SDL_QUIT: return 1;
@@ -248,6 +255,10 @@ send_user_event (USER_EVENT user_event_id) {
     SDL_PushEvent (&ev);
 }
 
+void
+send_redraw_window (SDL_Window* window) {
+    send_user_event (USER_EVENT.redraw);
+}
 
 struct
 Events {

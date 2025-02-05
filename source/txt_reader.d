@@ -18,9 +18,9 @@ import klass;
 // e
 // progress
 //
-// input-text
-// input-check
-// input-radio
+// edit
+// check
+// radio
 // checked
 // focused
 // hotkeys

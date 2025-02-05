@@ -5,6 +5,8 @@ import std.string;
 import std.string : startsWith;
 import std.string : fromStringz, toStringz; 
 import std.algorithm.searching : canFind;
+import std.algorithm.searching : countUntil;
+import std.algorithm.searching : find;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
@@ -19,10 +21,10 @@ import std.stdio : write;
 import pix : open_font;
 import pix : Window;
 import pix : IMGException;
+import pix : USER_EVENT;
+import pix : send_redraw_window;
 import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
-import pix : USER_EVENT;
-import std.algorithm.searching : countUntil;
 import klasses.e : global_font_files;
 import klasses.e : extract_value;
 
@@ -127,18 +129,16 @@ Doc {
 void
 add_class (E* e, Doc* doc, string s) {
     Klass* kls = doc.find_klass_or_create (s);
-    auto pos = e.klasses.countUntil (kls);
-    if (pos == -1)
+    if (!e.klasses.canFind (kls))
         e.klasses ~= kls;
 }
 
 void
 remove_class (Doc* doc, string s) {
     auto kls = doc.find_klass (s);
-    import std.stdio;
     if (kls !is null)
-    foreach (t; WalkTree (doc.tree))
-        remove_class (t.e, kls);
+        foreach (t; WalkTree (doc.tree))
+            remove_class (t.e, kls);
 }
 
 void
@@ -196,7 +196,7 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
             else
                 values ~= v;
 
-        // klass`es set
+        // klasses set
         foreach (_kls; e.klasses)
             if (_kls.set !is null)
                 _kls.set (_kls,doc,t,field.id,values);
@@ -1164,6 +1164,8 @@ go_question_value (string[] s) {
     }
 }
 
+
+
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     // event
@@ -1197,13 +1199,15 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
 
                     // focused
                     doc.remove_class ("focused");
-                    clicked_e.add_class (doc, "focused");
+                    clicked_e.add_class (doc,"focused");
 
                     //
                     doc.update (doc);
 
+                    //SDL_ShowWindow (window);
                     //SDL_UpdateWindowSurface (window);
-                    doc.draw (doc,renderer);
+                    //doc.draw (doc,renderer);
+                    send_redraw_window (window);
                 }
             }
             break;
@@ -1214,7 +1218,7 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.start: on_start (doc); break;
+                case USER_EVENT.start  : on_start (doc); break;
                 default:
             }
             break;
