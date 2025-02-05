@@ -26,10 +26,8 @@ Pix {
     PIX_DRAW_FN   draw   = &.draw;
     PIX_GO_FN     go     = &.go;
 
-    string window_title;
-
-    this (string window_title) {
-        this.window_title = window_title;
+    void
+    setup () {
         init_sdl ();
     }
 }
@@ -43,7 +41,7 @@ USER_EVENT : Sint32 {
 int 
 go (Pix* pix, Doc* doc) {
     // Window, Surface
-    SDL_Window* window = new_window (pix.window_title);
+    SDL_Window* window = new_window (__FILE_FULL_PATH__);
 
     // Renderer
     SDL_Renderer* renderer = new_renderer (window);
@@ -72,6 +70,9 @@ go (Pix* pix, Doc* doc) {
 
 int
 event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc) {
+    //if (ev.type != SDL_MOUSEMOTION)
+    //    writeln ("PIX.EVENT: ", ev.type);
+
     auto result = doc.event (doc,ev,window,renderer);
     if (result)
         return result;
@@ -151,27 +152,23 @@ init_sdl () {
     writeln ("SDL bindbc: ", ret, " lib: ", sdl_ver);
 
     // IMG
-    //version (SDL_Image) {    
-        auto sdlimage_ret = loadSDLImage ();
-        writeln ("SDL_Image: ", sdlimage_ret);
-        if (sdlimage_ret < sdlImageSupport) // 2.6.3
-            throw new Exception ("The SDL_Image shared library failed to load");
-        
-        auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
-        if (IMG_Init (flags) != flags)
-            throw new Exception ("The SDL_Image init failed");
-    //}
+    auto sdlimage_ret = loadSDLImage ();
+    writeln ("SDL_Image: ", sdlimage_ret);
+    if (sdlimage_ret < sdlImageSupport) // 2.6.3
+        throw new Exception ("The SDL_Image shared library failed to load");
+    
+    auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
+    if (IMG_Init (flags) != flags)
+        throw new IMGException ("The SDL_Image init failed");
 
     // TTF
-    //version (SDL_TTF) {
-        auto sdlttf_ret = loadSDLTTF (); // SDLTTFSupport
-        writeln ("SDL_TTF: ", sdlttf_ret);
-        if (sdlttf_ret < sdlTTFSupport) // 2.0.20
-            throw new TTFException ("The SDL_TTF shared library failed to load:");
-        
-        if (TTF_Init () == -1)
-            throw new TTFException ("Failed to initialise SDL_TTF");
-    //}
+    auto sdlttf_ret = loadSDLTTF (); // SDLTTFSupport
+    writeln ("SDL_TTF: ", sdlttf_ret);
+    if (sdlttf_ret < sdlTTFSupport) // 2.0.20
+        throw new TTFException ("The SDL_TTF shared library failed to load:");
+    
+    if (TTF_Init () == -1)
+        throw new TTFException ("Failed to initialise SDL_TTF");
 }
 
 /**

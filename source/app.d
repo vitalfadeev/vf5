@@ -10,12 +10,18 @@ import events;
 
 void 
 main () {
-	auto pix = new Pix (__FILE_FULL_PATH__);
+	//
+	auto pix = new Pix ();
+	pix.setup ();
+
+	//
 	Doc* doc = new Doc ();
 	doc.setup ();
 	doc.update (doc);
 	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
+
+	//
 	pix.go (pix,doc);
 }
 

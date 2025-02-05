@@ -33,11 +33,11 @@ Klass {
     KLASS_SET_FN    set    = &.set;
     KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
 
-    Token[][]    tree_tokens;
+    Token[][] tree_tokens;
 
     bool
     find (string s, ref string[] values) {
-        foreach (field; fields)
+        foreach (ref field; fields)
             if (field.id == s) {
                 values = field.values;
                 return true;
@@ -79,3 +79,4 @@ void
 draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     //
 }
+

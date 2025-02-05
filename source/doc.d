@@ -23,6 +23,8 @@ import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
 import pix : USER_EVENT;
 import std.algorithm.searching : countUntil;
+import klasses.e : global_font_files;
+import klasses.e : extract_value;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;

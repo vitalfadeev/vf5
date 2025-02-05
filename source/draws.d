@@ -236,12 +236,6 @@ draw_e (SDL_Renderer* renderer, E* e) {
 }
 
 void
-draw () {
-    //
-}
-
-
-void
 draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
     // 1 2 3
     // 8   4
