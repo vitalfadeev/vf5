@@ -9,16 +9,14 @@ import events;
 
 
 void 
-main() {
-	pix_init ();
+main () {
+	auto pix = new Pix (__FILE_FULL_PATH__);
 	Doc* doc = new Doc ();
-	// load e and classes
 	doc.setup ();
 	doc.update (doc);
 	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
-	on_start (doc);
-	pix_go (doc);
+	pix.go (pix,doc);
 }
 
 void
@@ -34,21 +32,6 @@ create_reserved_classes (Doc* doc) {
 
 	doc.add_klass (cast (Klass*) (new E_Klass ()));
 	doc.add_klass (cast (Klass*) (new Progress ()));
-}
-
-void
-on_start (Doc* doc) {
-    foreach (t; WalkTree (doc.tree))
-        _on_start (doc, t.e);
-}
-
-void
-_on_start (Doc* doc, E* e) {
-    foreach (_on; e.on) {
-        if (_on.event == "start") {
-        	exec_action (doc, _on.action);
-        }
-    }
 }
 
 

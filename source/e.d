@@ -771,14 +771,14 @@ set_on (Doc* doc, E* e, string[] values) {
 
 string
 extract_value (Doc* doc, string bquoted) {
-    writeln ("extract_value: ", bquoted);
+    //writeln ("extract_value: ", bquoted);
 
     auto stripped = bquoted.strip ("`");
     auto converted = extract_class_field_value (doc,stripped);
     auto ret = executeShell (converted);  // (int status, string output)
 
-    writeln (ret.status);
-    writeln (ret.output);
+    //writeln (ret.status);
+    //writeln (ret.output);
 
    return ret.output.stripRight ();
 }

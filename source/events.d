@@ -14,24 +14,3 @@ go (Event* event) {
     //       update_pos_size
     //   draw
 }
-
-
-struct
-Events {
-    bool _go = true;
-    Event ev;
-
-    int
-    opApply (int delegate (Event* ev) dg) {
-        while (_go) {
-            while (SDL_WaitEvent (&ev) > 0) {
-                int result = dg (&ev);
-                if (result)
-                    return result;
-            }
-        }        
-
-        return 0;
-    }
-}
-

@@ -21,6 +21,7 @@ import pix : Window;
 import pix : IMGException;
 import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
+import pix : USER_EVENT;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -92,6 +93,25 @@ Doc {
         }
 
         return found;
+    }
+
+    void
+    send_event_in_deep (Event* ev, Doc* doc, ETree* t, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
+        bool 
+        valid_e (ETree* t) {
+            if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
+            if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
+                return true;
+
+            return false;
+        }
+
+        // klass event
+        foreach (_t; FindDeepest (t,&valid_e)) {
+            foreach (kls; _t.e.klasses)
+                if (kls.event !is null)
+                    kls.event (kls,doc,ev,window,renderer,_t);
+        }
     }
 
     //int
@@ -184,6 +204,19 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
     }
 }
 
+
+void
+on_start (Doc* doc) {
+    foreach (t; WalkTree (doc.tree))
+        _on_start (doc, t.e);
+}
+
+void
+_on_start (Doc* doc, E* e) {
+    foreach (_on; e.on)
+        if (_on.event == "start")
+            exec_action (doc, _on.action);
+}
 
 
 alias PTR = TTF_Font*;
@@ -1134,6 +1167,7 @@ go_question_value (string[] s) {
 
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    writeln ("DOC.EVENT: ", ev.type);
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
@@ -1142,22 +1176,21 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                 // tree_apply_klasses (doc.tree);
                 auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
                 if (clicked_e !is null) {
-                    // on
-                    foreach (_on; clicked_e.on) {
-                        if (ev.type.to!string == _on.event) {
-                            go_event_action (doc, clicked_e, _on.action);
-                        }
-                    }
+                    //// on
+                    //foreach (_on; clicked_e.on)
+                    //    if (ev.type.to!string == _on.event)
+                    //        go_event_action (doc, clicked_e, _on.action);
 
-                    // widget event
-                    auto e = clicked_e;
-                    foreach (kls; e.klasses) {
-                        if (kls.event !is null)
-                            kls.event (kls,doc,ev,window,renderer,null);
-                    }
+                    // klass event
+                    doc.send_event_in_deep (
+                        ev, 
+                        doc, 
+                        doc.tree, 
+                        Pos (ev.button.x.to!X, ev.button.y.to!Y),
+                        window,
+                        renderer);
 
                     // focused
-                    //add_class (doc, clicked_e, "hidden");
                     remove_class (doc, "focused");
                     add_class (doc, clicked_e, "focused");
 
@@ -1170,9 +1203,8 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
             }
             break;
         case SDL_USEREVENT:
-            string us;
-            switch (us) {
-                case "player.play_pause": break;
+            switch (ev.user.code) {
+                case USER_EVENT.start: on_start (doc); break;
                 default:
             }
             break;
