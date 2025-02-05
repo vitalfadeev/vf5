@@ -796,7 +796,8 @@ extract_class_field_value (Doc* doc, string s) {
 
 void
 event (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
-    //
+    if (ev.type != SDL_MOUSEMOTION)
+        writeln ("E.EVENT: ", ev.type);
 }
 
 void

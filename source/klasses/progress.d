@@ -48,6 +48,7 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
                 if (t !is null) {
                     precent_from_click (t, ev.button.x, ev.button.y, &precent);
                     writeln ("precent: ", precent);
+                    // exec (`audtool playback-seek %s`, precent_to_time (precent));
                 }
             }
             break;

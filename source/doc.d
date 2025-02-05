@@ -39,6 +39,7 @@ Doc {
     Klass*   hotkeys;
     Window*  window;
     Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    ETree*   focused;
 
     DOC_EVENT_FN  event  = &.event;
     DOC_UPDATE_FN update = &.update;
@@ -194,13 +195,10 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
             else
                 values ~= v;
 
-        // e klass set
-        if (kls !is e_klass)
-            e_klass.set (kls,doc,t,field.id,values);
-
-        // ... klass
-        if (kls.set !is null)
-            kls.set (kls,doc,t,field.id,values);
+        // klass`es set
+        foreach (_kls; e.klasses)
+            if (_kls.set !is null)
+                _kls.set (_kls,doc,t,field.id,values);
     }
 }
 
@@ -1167,7 +1165,13 @@ go_question_value (string[] s) {
 
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
-    writeln ("DOC.EVENT: ", ev.type);
+    // event
+    //   KEYS  --> focused
+    //   CLICK --> all
+    //   *     --> all
+    if (ev.type != SDL_MOUSEMOTION)
+        writeln ("DOC.EVENT: ", ev.type);
+
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN:
             // doc.tree.event (ev);
@@ -1201,6 +1205,11 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                     draw (doc,renderer);
                 }
             }
+            break;
+        case SDL_KEYDOWN: // SDL_KeyboardEvent
+        case SDL_KEYUP:
+            if (doc.focused !is null)
+                doc.focused.e.event (doc.focused.e,doc,ev,window,renderer);
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
