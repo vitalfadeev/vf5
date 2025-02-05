@@ -14,7 +14,7 @@ main() {
 	Doc* doc = new Doc ();
 	// load e and classes
 	doc.setup ();
-	doc.update ();
+	doc.update (doc);
 	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
 	on_start (doc);
@@ -29,11 +29,11 @@ setup (Doc* doc) {
 
 void
 create_widgets_classes (Doc* doc) {
-	import e : E_Klass;
-	import widget_progress : Widget_Progress_Klass;
+	import klasses.e        : E_Klass;
+	import klasses.progress : Progress_Klass;
 
-	doc.add_widget_klass (cast (Klass*) (new E_Klass ()));
-	doc.add_widget_klass (cast (Klass*) (new Widget_Progress_Klass ()));
+	doc.add_klass (cast (Klass*) (new E_Klass ()));
+	doc.add_klass (cast (Klass*) (new Progress_Klass ()));
 }
 
 void

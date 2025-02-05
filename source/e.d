@@ -9,7 +9,12 @@ import klass;
 import types;
 import txt_parser;
 import events : Event;
-import draw : draw_e;
+
+
+alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
+alias E_UPDATE_FN = void function (E* e, Doc* doc);
+alias E_SET_FN    = void function (E* e, Doc* doc, ETree* t, string field_id, string[] values);
+alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 
 
 struct 
@@ -186,6 +191,11 @@ E {
     }
     On[] on;
 
+    E_EVENT_FN  event  = &.event;
+    E_UPDATE_FN update = &.update;
+    E_SET_FN    set    = &.set;
+    E_DRAW_FN   draw   = &.draw;
+
     //
     //struct 
     //Cached {
@@ -214,71 +224,6 @@ Magnet {
     none,
     yes
 }
-
-//
-struct 
-E_Klass {
-    Klass _super = 
-        Klass (
-            "e", 
-            [],  
-            &.set,         // set
-            null,          // event
-            &.draw_e,      // draw
-            &.apply_klass, // apply_klass
-        );
-    alias _super this;
-}
-
-// E WIDGET_SET_FN
-void
-set (Doc* doc, ETree* t, Klass* kls, string field_id, string[] values) {
-    auto e = t.e;
-
-    switch (field_id) {
-        case "pos.x"            : set_pos_x             (doc,e,values); break;
-        case "pos.y"            : set_pos_y             (doc,e,values); break;
-        case "pos"              : set_pos               (doc,e,values); break;
-        case "pos.type"         : set_pos_type          (doc,e,values); break;
-        case "pos.group"        : set_pos_group         (doc,e,values); break;
-        case "pos.dir"          : set_pos_dir           (doc,e,values); break;
-        case "size.w"           : set_size_w            (doc,e,values); break;
-        case "size.h"           : set_size_h            (doc,e,values); break;
-        case "size"             : set_size              (doc,e,values); break;
-        case "hidden"           : set_hidden            (doc,e,values); break;
-        case "popup"            : set_popup             (doc,e,values); break;
-        case "borders"          : set_borders           (doc,e,values); break;
-        case "borders.t"        : set_border_t          (doc,e,values); break;
-        case "borders.r"        : set_border_r          (doc,e,values); break;
-        case "borders.b"        : set_border_b          (doc,e,values); break;
-        case "borders.l"        : set_border_l          (doc,e,values); break;
-        case "borders.color"    : set_borders_color     (doc,e,values); break;
-        case "pad"              : set_pad               (doc,e,values); break;
-        case "pad.bg"           : set_pad_bg            (doc,e,values); break;
-        case "content.image"    : set_content_image     (doc,e,values); break;
-        case "content.text"     : set_content_text      (doc,e,values); break;
-        case "content"          : set_content           (doc,e,values); break;
-        case "image"            : set_content_image     (doc,e,values); break;
-        case "text"             : set_content_text      (doc,e,values); break;
-        case "text.color"       : set_text_fg           (doc,e,values); break;
-        case "text.fg"          : set_text_fg           (doc,e,values); break;
-        case "text.bg"          : set_text_bg           (doc,e,values); break;
-        case "text.pos.type"    : set_text_pos_type     (doc,e,values); break;
-        case "content.size.w"   : set_content_size_w    (doc,e,values); break;
-        case "content.size.h"   : set_content_size_h    (doc,e,values); break;
-        case "content.size"     : set_content_size      (doc,e,values); break;
-        case "content.size.type": set_content_size_type (doc,e,values); break;
-        case "text.font"        : set_content_text_font (doc,e,values); break;
-        case "text.font.family" : set_content_text_font_family (doc,e,values); break;
-        case "text.font.size"   : set_content_text_font_size   (doc,e,values); break;
-        case "text.font.file"   : set_content_text_font_file   (doc,e,values); break;
-        case "bg"               : set_bg                (doc,e,values); break;
-        case "on"               : set_on                (doc,e,values); break;
-        //case "e"                : set_e                 (doc,t,kls,values); break;
-        default:
-    }
-}
-
 
 void
 set_pos (Doc* doc, E* e, string[] values) {
@@ -847,3 +792,25 @@ extract_class_field_value (Doc* doc, string s) {
     else
         return s;
 }
+
+
+void
+event (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    //
+}
+
+void
+update (E* e, Doc* doc) {
+    //
+}
+
+void
+set (E* e, Doc* doc, ETree* t, string field_id, string[] values) {
+    //
+}
+
+void
+draw (E* e, SDL_Renderer* renderer) {
+    //
+}
+

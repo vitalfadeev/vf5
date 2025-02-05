@@ -12,13 +12,14 @@ import etree;
 import klass;
 import e;
 import types;
-import draw : get_text_size;
+import events : Event;
+import draws : get_text_size;
 import std.stdio : writeln;
 import std.stdio : write;
 import pix : open_font;
 import pix : Window;
 import pix : IMGException;
-import draw : e_pos, e_size, content_pos;
+import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
 
 const DEFAULT_WINDOW_W = 1024;
@@ -26,6 +27,9 @@ const DEFAULT_WINDOW_H = 480;
 const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
+alias DOC_EVENT_FN  = int  function (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
+alias DOC_UPDATE_FN = void function (Doc* doc);
+alias DOC_DRAW_FN   = void function (Doc* doc,SDL_Renderer* renderer);
 
 struct
 Doc {
@@ -34,6 +38,10 @@ Doc {
     Klass*   hotkeys;
     Window*  window;
     Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+
+    DOC_EVENT_FN  event  = &.event;
+    DOC_UPDATE_FN update = &.update;
+    DOC_DRAW_FN   draw   = &.draw;
 
     Klass*
     find_klass (string s) {
@@ -52,7 +60,7 @@ Doc {
     }
 
     Klass*
-    add_widget_klass (Klass* kls) {
+    add_klass (Klass* kls) {
         klasses ~= kls;
         return kls;
     }
@@ -140,11 +148,8 @@ apply_klasses (Doc* doc, ETree* t) {
     foreach (_t; for_remove)
         t.remove_child (_t);
     // set 
-    foreach (Klass* kls; e.klasses) {
+    foreach (Klass* kls; e.klasses)
         apply_klass (doc,t,kls);
-        if (kls.widget_apply_klass_fn !is null)
-            kls.widget_apply_klass_fn (doc,t,kls);
-    }
 }
 
 // WIDGET_APPLY_KLASS_FN
@@ -155,9 +160,8 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
     // add e from klass
     ETree* current_t = t;
     Klass* e_klass = doc.find_klass_or_create ("e");
-    foreach (ref t_line; kls.tree_tokens) {
+    foreach (ref t_line; kls.tree_tokens)
         add_child_e (doc,e_klass,t_line,t.indent,kls,current_t);
-    }
 
     // set fields
     foreach (field; kls.fields) {
@@ -171,11 +175,12 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
                 values ~= v;
 
         // e klass set
-        .set (doc,t,kls,field.id,values);
+        if (kls !is e_klass)
+            e_klass.set (kls,doc,t,field.id,values);
 
         // ... klass
-        if (kls.widget_set_fn !is null)
-            kls.widget_set_fn (doc,t,kls,field.id,values);
+        if (kls.set !is null)
+            kls.set (kls,doc,t,field.id,values);
     }
 }
 
@@ -1127,6 +1132,59 @@ go_question_value (string[] s) {
     }
 }
 
+int
+event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    switch (ev.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            // doc.tree.event (ev);
+            if (ev.button.button == SDL_BUTTON_LEFT)
+            if (ev.button.state == SDL_PRESSED) {
+                // tree_apply_klasses (doc.tree);
+                auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
+                if (clicked_e !is null) {
+                    // on
+                    foreach (_on; clicked_e.on) {
+                        if (ev.type.to!string == _on.event) {
+                            go_event_action (doc, clicked_e, _on.action);
+                        }
+                    }
+
+                    // widget event
+                    auto e = clicked_e;
+                    foreach (kls; e.klasses) {
+                        if (kls.event !is null)
+                            kls.event (kls,doc,ev,window,renderer,null);
+                    }
+
+                    // focused
+                    //add_class (doc, clicked_e, "hidden");
+                    remove_class (doc, "focused");
+                    add_class (doc, clicked_e, "focused");
+
+                    //
+                    doc.update (doc);
+
+                    //SDL_UpdateWindowSurface (window);
+                    draw (doc,renderer);
+                }
+            }
+            break;
+        case SDL_USEREVENT:
+            string us;
+            switch (us) {
+                case "player.play_pause": break;
+                default:
+            }
+            break;
+        case SDL_QUIT:
+            return 1;
+            break;
+        default:
+    }
+
+    return 0;
+}
+
 void
 update (Doc* doc) {
     // 0
@@ -1150,6 +1208,18 @@ update (Doc* doc) {
     // 8
     // 9
     doc.update_poses ();
+}
+
+void
+draw (Doc* doc, SDL_Renderer* renderer) {
+    foreach (t; WalkTree (doc.tree)) {
+        foreach (Klass* kls; t.e.klasses) {
+            if (kls.draw !is null)
+                kls.draw (kls,renderer,t);
+        }
+        if (t.e.draw !is null)
+            t.e.draw (t.e,renderer);
+    }
 }
 
 

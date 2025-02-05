@@ -1,4 +1,4 @@
-module draw;
+module draws;
 
 import std.stdio;
 import std.string;

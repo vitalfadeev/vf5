@@ -20,13 +20,13 @@ import klass;
 // input-radio
 // checked
 // focused
-// widget
 // hotkeys
 // colors
 // commands
 //
 // WIDGET CLASSES
-// widget-progress
+// e_klass
+// progress_klass
 
 // `external program` -> os.execute (["external","program"], NO_WAIT)
 // internal.command   -> send       ("internal.command")
@@ -52,7 +52,7 @@ e root
   e toolbar-item hbox tb-play-pause
   e toolbar-item hbox tb-stio
   e toolbar-item hbox tb-next
-  e toolbar-item hbox widget-progress tb-position
+  e toolbar-item hbox progress tb-position
   e toolbar-item t3-right tb-time 
   e toolbar-item t3-right tb-loop
   e toolbar-item t3-right tb-random
@@ -172,30 +172,30 @@ tb-position
   //text position
   content.size.w childs
 
-widget-progress widget
+progress
   //size expand parent
   size 320 parent
   progress 50%
   progress.position 50%
-  e hbox widget-progress-passed
-  e hbox widget-progress-current
-  e hbox widget-progress-rest
+  e hbox progress-passed
+  e hbox progress-current
+  e hbox progress-rest
 
-widget-progress-passed
+progress-passed
   size          content
   //pad           10 5
   content.size  50 16
   bg            colors.blue
   borders       2 solid colors.blue
 
-widget-progress-current
+progress-current
   size          content
   //pad           10 5
   content.size  10 16
   bg            colors.blue
   borders       2 solid colors.blue
 
-widget-progress-rest
+progress-rest
   size          content
   //pad           10 5
   content.size  200 16
@@ -316,7 +316,7 @@ hotkeys
 
 string txt2 = "
 image_folder /home/vf/src/vf5/img
-widget_folder /home/vf/src/vf5/widgets
+klass_folder /home/vf/src/vf5/klasses
 import_folder .
 import_folder `echo $PWD`
 import_folder `pwd`

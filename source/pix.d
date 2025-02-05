@@ -9,7 +9,7 @@ import doc;
 import etree;
 import klass;
 import events;
-import draw;
+import draws;
 import types;
 import std.string : fromStringz; 
 import std.string : toStringz;
@@ -42,28 +42,10 @@ pix_go (Doc* doc) {
 
     // Event Loop
     foreach (Event* ev; Events ())
-        if (event (doc,ev,window,renderer) == 1)
+        if (event (ev,window,renderer,doc) == 1)
             break;
 
     return 0;
-}
-
-void
-draw_doc (SDL_Renderer* renderer, Doc* doc) {
-    // clear
-    SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
-    SDL_RenderClear (renderer);
-    // draw
-    foreach (t; WalkTree (doc.tree)) {
-        if (!t.e.hidden) {
-            foreach (Klass* kls; t.e.klasses) {
-                if (kls.widget_draw_fn !is null)
-                    kls.widget_draw_fn (renderer, t.e);
-            }
-        }
-    }
-    // rasterize
-    SDL_RenderPresent (renderer);
 }
 
 // foreach (ev; Events)
@@ -74,51 +56,19 @@ draw_doc (SDL_Renderer* renderer, Doc* doc) {
 //        kls.event (ev)
 
 int
-event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+event (Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc) {
+    auto result = doc.event (doc,ev,window,renderer);
+    if (result)
+        return result;
+
     switch (ev.type) {
-        case SDL_MOUSEBUTTONDOWN:
-            // doc.tree.event (ev);
-            if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_PRESSED) {
-                // tree_apply_klasses (doc.tree);
-                auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
-                if (clicked_e !is null) {
-                    // on
-                    foreach (_on; clicked_e.on) {
-                        if (ev.type.to!string == _on.event) {
-                            go_event_action (doc, clicked_e, _on.action);
-                        }
-                    }
-
-                    // widget event
-                    auto e = clicked_e;
-                    foreach (kls; e.klasses) {
-                        if (kls.widget_event_fn !is null)
-                            kls.widget_event_fn (doc,ev,window,renderer);
-                    }
-
-                    // focused
-                    //add_class (doc, clicked_e, "hidden");
-                    remove_class (doc, "focused");
-                    add_class (doc, clicked_e, "focused");
-
-                    //
-                    doc.update ();
-
-                    //SDL_UpdateWindowSurface (window);
-                    draw_doc (renderer,doc);
-                }
-            }
-            break;
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: draw_doc (renderer, doc); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: draw (renderer,doc); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED:             // event.window.windowID event.window.data1 event.window.data2 (width height)
-                    doc.update (); 
-                    break;      
+                case SDL_WINDOWEVENT_RESIZED: update (doc); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -135,21 +85,29 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
                         ev.window.windowID, ev.window.event);
             }
             break;
-        case SDL_USEREVENT:
-            string us;
-            switch (us) {
-                case "player.play_pause": break;
-                default:
-            }
-            break;
-        case SDL_QUIT:
-            return 1;
-            break;
+        case SDL_QUIT: return 1;
         default:
     }
 
     return 0;
 }
+
+void
+update (Doc* doc) {
+    doc.update (doc); 
+}
+
+void
+draw (SDL_Renderer* renderer, Doc* doc) {
+    // clear
+    SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderClear (renderer);
+    // draw
+    doc.draw (doc,renderer);
+    // rasterize
+    SDL_RenderPresent (renderer);
+}
+
 
 
 //
