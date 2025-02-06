@@ -49,7 +49,7 @@ e root
   e toolbar-item hbox tb-add
   e toolbar-item hbox tb-prev
   e toolbar-item hbox tb-play-pause
-  e toolbar-item hbox tb-stio
+  e toolbar-item hbox tb-stop
   e toolbar-item hbox tb-next
   e toolbar-item hbox progress tb-position
   e toolbar-item t3-right tb-time 
@@ -154,18 +154,23 @@ tb-open
 
 tb-add
   image /home/vf/src/vf5/img/add.png
+  on click commands.player.filebrowser-show
 
 tb-prev
   image /home/vf/src/vf5/img/prev.png
+  on click commands.player.prev
 
 tb-play-pause
   image /home/vf/src/vf5/img/play-pause.png
+  on click commands.player.play_pause
 
-tb-stio
+tb-stop
   image /home/vf/src/vf5/img/stop.png
+  on click commands.player.stop
 
 tb-next
   image /home/vf/src/vf5/img/next.png
+  on click commands.player.next
 
 tb-position
   //text position
@@ -296,6 +301,7 @@ commands
   player.play_pause                 audtool playback-playpause
   player.stop                       audtool playback-stop
   player.next                       audtool playlist-advance
+  player.filebrowser-show           audtool filebrowser-show
   player.song                       audtool current-song
   player.current-song               audtool current-song
   player.current-song-length        audtool current-song-length

@@ -41,6 +41,31 @@ Pos {
         x -= b.x;
         y -= b.y;
     }
+
+    void*
+    toVoidPtr () {
+        struct
+        VoidPtr {
+            union {
+                Pos   pos;
+                void* ptr;
+            }
+        }
+        return VoidPtr (this).ptr;
+    }
+
+    static
+    Pos
+    from_VoidPtr (void* ptr) {
+        struct
+        VoidPtr {
+            union {
+                void* ptr;
+                Pos   pos;
+            }
+        }
+        return VoidPtr (ptr).pos;
+    }
 }
 
 struct

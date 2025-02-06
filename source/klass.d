@@ -14,13 +14,13 @@ alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, ETree
 // green
 //   bg: green
 // 
-// ClassE.aid   = AID.bg
-// ClassE.value = Value ("green")
+// KlassField.aid   = AID.bg
+// KlassField.value = Value ("green")
 //
-// ClassE (AID.bg, "green")
-// ClassE ("bg", "green")
-// ClassE (bg, "green")
-// ClassE (bg, "green")
+// KlassField (AID.bg, "green")
+// KlassField ("bg", "green")
+// KlassField (bg, "green")
+// KlassField (bg, "green")
 
 
 struct

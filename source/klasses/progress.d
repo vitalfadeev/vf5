@@ -1,5 +1,6 @@
 module klasses.progress;
 
+import std.stdio;
 import std.string;
 import bindbc.sdl;
 import events;
@@ -7,12 +8,8 @@ import doc;
 import etree;
 import klass;
 import e;
-import std.stdio : writeln;
-import types : Pos;
+import types;
 
-//if (kls.widget_set_fn !is null)
-//    kls.widget_set_fn (doc,t,kls,field,values);
-// widget is e ? ...with "widget" klass ?
 
 struct 
 Progress {

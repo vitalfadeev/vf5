@@ -7,6 +7,7 @@ import etree;
 import klass;
 import types;
 import events : Event;
+import pix : USER_EVENT;
 
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
@@ -20,12 +21,6 @@ E {
     Klass*[] klasses;    // box green rounded
     Pos  pos;
     Size size;
-    //bool pos_x_auto;
-    //bool pos_y_auto;
-    //bool size_w_auto;
-    //bool size_h_auto;
-    bool content_image_size_w_auto;
-    bool content_image_size_h_auto;
     Pad  pad;
     BG   bg;
 
@@ -92,14 +87,13 @@ E {
             ubyte     size;    // 0..256
             bool      bold;    // 0/1
             bool      italic;  // 0/1
-            TTF_Font*  ptr;     // 0/1
+            TTF_Font*  ptr;    // ...
           }
           Font    font;
           Pos     pos;
           Size    size;
           Color   fg;
           Color   bg;
-          Magnet  magnet;  // left / center / right
           PosType pos_type;
           enum
           SizeType {
@@ -142,12 +136,6 @@ E {
     }
     Content content;
 
-    struct 
-    Magnet_ {
-      Magnet left;      // -1/0/1
-      Magnet right;     // -1/0/1
-    }
-    Magnet_ magnet;
     bool    hidden;
     Klass*  added_from;
 
@@ -195,16 +183,6 @@ E {
     E_DRAW_FN   draw   = &.draw;
 
     //
-    //struct 
-    //Cached {
-    //    Size         size;
-    //    Size         content_size;
-    //    Size         content_image_size;
-    //    SDL_Surface* content_image_ptr;
-    //    Size         content_text_size;
-    //}
-    //Cached cached;
-
     string
     toString () {
         string ks;
@@ -216,18 +194,10 @@ E {
 }
 
 
-enum
-Magnet {
-    no,
-    none,
-    yes
-}
-
-
 void
 event (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("E.EVENT: ", ev.type);
+        writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 }
 
 void

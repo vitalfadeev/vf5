@@ -87,11 +87,7 @@ Doc {
 
         bool 
         valid_e (ETree* t) {
-            if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
-            if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
-                return true;
-
-            return false;
+            return (pos_in_rect (pos, t.e.pos, t.e.size));
         }
 
         foreach (t; FindDeepest (tree,&valid_e)) {
@@ -100,30 +96,50 @@ Doc {
 
         return found;
     }
+}
 
-    void
-    send_event_in_deep (Event* ev, Doc* doc, ETree* t, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
-        bool 
-        valid_e (ETree* t) {
-            if (t.e.pos.x <= pos.x && t.e.pos.x + t.e.size.w > pos.x)
-            if (t.e.pos.y <= pos.y && t.e.pos.y + t.e.size.h > pos.y)
-                return true;
-
-            return false;
-        }
-
-        // klass event
-        foreach (_t; FindDeepest (t,&valid_e)) {
-            foreach (kls; _t.e.klasses)
-                if (kls.event !is null)
-                    kls.event (kls,doc,ev,window,renderer,_t);
-        }
+void
+send_event_in_deep (Event* ev, Doc* doc, ETree* t, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
+    bool 
+    valid_e (ETree* t) {
+        return (pos_in_rect (pos, t.e.pos, t.e.size));
     }
 
-    //int
-    //event (Event* ev) {
-    //    //
-    //}
+    // klass event
+    foreach (_t; FindDeepest (t,&valid_e)) {
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,doc,ev,window,renderer,_t);
+    }
+}
+
+void
+send_click_in_deep (Event* ev, Doc* doc, ETree* t, Pos down_pos, Pos up_pos, SDL_Window* window, SDL_Renderer* renderer, ref ETree* deepest) {
+    bool 
+    valid_e (ETree* t) {
+        return
+            pos_in_rect (down_pos, t.e.pos, t.e.size) &&
+            pos_in_rect (up_pos,   t.e.pos, t.e.size);
+    }
+
+    // klass event
+    foreach (_t; FindDeepest (t,&valid_e)) {
+        writeln ("deep: ", *_t.e);
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,doc,ev,window,renderer,_t);
+        deepest = _t;
+    }
+}
+
+void
+send_event_in_tree (Event* ev, Doc* doc, ETree* t, SDL_Window* window, SDL_Renderer* renderer) {
+    // klass event
+    foreach (_t; WalkTree (t)) {
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,doc,ev,window,renderer,_t);
+    }
 }
 
 void
@@ -204,18 +220,12 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
 }
 
 
-void
-on_start (Doc* doc) {
-    foreach (t; WalkTree (doc.tree))
-        _on_start (doc, t.e);
-}
-
-void
-_on_start (Doc* doc, E* e) {
-    foreach (_on; e.on)
-        if (_on.event == "start")
-            exec_action (doc, _on.action);
-}
+//void
+//_on_start (Doc* doc, E* e) {
+//    foreach (_on; e.on)
+//        if (_on.event == "start")
+//            exec_action (doc, _on.action);
+//}
 
 
 alias PTR = TTF_Font*;
@@ -1164,6 +1174,53 @@ go_question_value (string[] s) {
     }
 }
 
+void
+on_click (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    _on_click (
+        doc, 
+        Pos.from_VoidPtr (ev.user.data1), 
+        Pos.from_VoidPtr (ev.user.data2),
+        ev,
+        window,
+        renderer
+    );
+}
+
+void
+_on_click (Doc* doc, Pos down_pos, Pos up_pos, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    writeln (down_pos, " ", up_pos);
+
+    //
+    ETree* deepest;
+    send_click_in_deep (
+        ev, 
+        doc, 
+        doc.tree, 
+        down_pos,
+        up_pos,
+        window,
+        renderer,
+        deepest);
+
+    // focused
+    doc.remove_class ("focused");
+    if (deepest !is null)
+        deepest.e.add_class (doc,"focused");
+
+    //
+    doc.update (doc);
+    send_redraw_window (window);
+}
+
+bool
+pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
+    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
+    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
+        return true;
+
+    return false;
+}
+
 
 
 int
@@ -1173,52 +1230,21 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     //   CLICK --> all
     //   *     --> all
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("DOC.EVENT: ", ev.type);
+        writeln ("DOC.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN:
-            // doc.tree.event (ev);
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                // tree_apply_klasses (doc.tree);
-                auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
-                if (clicked_e !is null) {
-                    //// on
-                    //foreach (_on; clicked_e.on)
-                    //    if (ev.type.to!string == _on.event)
-                    //        go_event_action (doc, clicked_e, _on.action);
-
-                    // klass event
-                    doc.send_event_in_deep (
-                        ev, 
-                        doc, 
-                        doc.tree, 
-                        Pos (ev.button.x.to!X, ev.button.y.to!Y),
-                        window,
-                        renderer);
-
-                    // focused
-                    doc.remove_class ("focused");
-                    clicked_e.add_class (doc,"focused");
-
-                    //
-                    doc.update (doc);
-
-                    //SDL_ShowWindow (window);
-                    //SDL_UpdateWindowSurface (window);
-                    //doc.draw (doc,renderer);
-                    send_redraw_window (window);
-                }
+                //
             }
             break;
-        case SDL_KEYDOWN: // SDL_KeyboardEvent
-        case SDL_KEYUP:
-            if (doc.focused !is null)
-                doc.focused.e.event (doc.focused.e,doc,ev,window,renderer);
-            break;
+        case SDL_KEYDOWN: break;// SDL_KeyboardEvent
+        case SDL_KEYUP: break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.start  : on_start (doc); break;
+                case USER_EVENT.start : send_event_in_tree (ev,doc,doc.tree,window,renderer); break;
+                case USER_EVENT.click : on_click (doc,ev,window,renderer); break;
                 default:
             }
             break;

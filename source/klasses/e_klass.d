@@ -12,6 +12,7 @@ import klass;
 import e;
 import types;
 import txt_parser : parse_color_hex, parse_color;
+import pix : USER_EVENT;
 
 
 struct 
@@ -31,7 +32,29 @@ E_Klass {
 // KLASS_EVENT_FN
 void
 event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer, ETree* t) {
-    //
+    auto e = t.e;
+
+    if (ev.type != SDL_MOUSEMOTION)
+        writeln ("KLASS: ", kls.name, ".EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+
+    switch (ev.type) {
+        case SDL_USEREVENT:
+            switch (ev.user.code) {
+                case USER_EVENT.start:
+                    foreach (_on; e.on)
+                        if (_on.event == "start")
+                            exec_action (doc, _on.action);
+                    break;
+                case USER_EVENT.click:
+                    foreach (_on; e.on)
+                        if (_on.event == "click")
+                            exec_action (doc, _on.action);
+                    break;
+                default:
+            }
+            break;
+        default:
+    }
 }
 
 // KLASS_UPDATE_FN

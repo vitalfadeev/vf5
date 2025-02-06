@@ -36,6 +36,7 @@ enum
 USER_EVENT : Sint32 {
     start = 1,
     redraw,
+    click,
 }
 
 
@@ -62,6 +63,35 @@ go (Pix* pix, Doc* doc) {
 }
 
 
+void
+translate (Event* ev) {
+    click_translate (ev);
+}
+
+void
+click_translate (Event* ev) {
+    static Pos down_pos;
+
+    switch (ev.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            if (ev.button.button == SDL_BUTTON_LEFT)
+            if (ev.button.state == SDL_PRESSED) {
+                // save pos down
+                down_pos = Pos (ev.button.x.to!X, ev.button.y.to!Y);
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            // load pos down
+            // get  pos up
+            // send click (down_pos, up_pos)
+            Pos up_pos = Pos (ev.button.x.to!X, ev.button.y.to!Y);
+            send_user_event (USER_EVENT.click, down_pos.toVoidPtr, up_pos.toVoidPtr);
+            down_pos = Pos ();
+            break;
+        default:
+    }
+}
+
 // foreach (ev; Events)
 //   vf.event (ev)
 //   tree
@@ -73,6 +103,7 @@ int
 event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc) {
     //if (ev.type != SDL_MOUSEMOTION)
     //    writeln ("PIX.EVENT: ", ev.type);
+    translate (ev);
 
     auto result = doc.event (doc,ev,window,renderer);
     if (result)
@@ -252,6 +283,16 @@ send_user_event (USER_EVENT user_event_id) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
     ev.user.code = user_event_id;
+    SDL_PushEvent (&ev);
+}
+
+void
+send_user_event (USER_EVENT user_event_id, void* data1, void* data2) {
+    SDL_Event ev;
+    ev.type = SDL_USEREVENT;
+    ev.user.code = user_event_id;
+    ev.user.data1 = data1;
+    ev.user.data2 = data2;
     SDL_PushEvent (&ev);
 }
 
