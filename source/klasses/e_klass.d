@@ -39,19 +39,10 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
 
     switch (ev.type) {
         case SDL_USEREVENT:
-            switch (ev.user.code) {
-                case USER_EVENT.start:
-                    foreach (_on; e.on)
-                        if (_on.event == "start")
-                            exec_action (doc, _on.action);
-                    break;
-                case USER_EVENT.click:
-                    foreach (_on; e.on)
-                        if (_on.event == "click")
-                            exec_action (doc, _on.action);
-                    break;
-                default:
-            }
+            string user_event_name = (cast(USER_EVENT)ev.user.code).to!string;
+            foreach (_on; e.on)
+                if (_on.event == user_event_name) // start, click
+                    exec_action (doc, _on.action);
             break;
         default:
     }

@@ -105,10 +105,6 @@ event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc
     //    writeln ("PIX.EVENT: ", ev.type);
     translate (ev);
 
-    auto result = doc.event (doc,ev,window,renderer);
-    if (result)
-        return result;
-
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
@@ -136,11 +132,11 @@ event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.redraw : pix.draw (pix,renderer,doc); break;
-                default:
+                default: auto result = doc.event (doc,ev,window,renderer); if (result) return result;
             }
             break;
-        case SDL_QUIT: return 1;
-        default:
+        case SDL_QUIT: auto result = doc.event (doc,ev,window,renderer); if (result) return result; else return 1;
+        default: auto result = doc.event (doc,ev,window,renderer); if (result) return result;
     }
 
     return 0;
@@ -281,7 +277,7 @@ Window {
 void
 send_user_event (USER_EVENT user_event_id) {
     SDL_Event ev;
-    ev.type = SDL_USEREVENT;
+    ev.type      = SDL_USEREVENT;
     ev.user.code = user_event_id;
     SDL_PushEvent (&ev);
 }
@@ -289,8 +285,8 @@ send_user_event (USER_EVENT user_event_id) {
 void
 send_user_event (USER_EVENT user_event_id, void* data1, void* data2) {
     SDL_Event ev;
-    ev.type = SDL_USEREVENT;
-    ev.user.code = user_event_id;
+    ev.type       = SDL_USEREVENT;
+    ev.user.code  = user_event_id;
     ev.user.data1 = data1;
     ev.user.data2 = data2;
     SDL_PushEvent (&ev);
