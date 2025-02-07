@@ -168,72 +168,31 @@ void
 draw_e (SDL_Renderer* renderer, E* e) {
     draw_borders (renderer,e);
     draw_content_with_pad (renderer,e);
-/*
-    // pad
-    if (e.pad.t)
-        fill_rect (e.pos, e.size); // 0 t
-    if (e.pad.t)
-    if (e.pad.r)
-        fill_rect (e.pos, e.size); // 1 tr
-    if (e.pad.r)
-        fill_rect (e.pos, e.size); // 2 r
-    if (e.pad.r)
-    if (e.pad.b)
-        fill_rect (e.pos, e.size); // 3 rb
-    if (e.pad.b)
-        fill_rect (e.pos, e.size); // 4 b
-    if (e.pad.b)
-    if (e.pad.l)
-        fill_rect (e.pos, e.size); // 5 bl
-    if (e.pad.l)
-        fill_rect (e.pos, e.size); // 6 l
-    if (e.pad.l)
-    if (e.pad.t)
-        fill_rect (e.pos, e.size); // 7 lt
-    // center bg
-    if (e.bg.color.a)
-        fill_rect (e.pos, e.size); // center
-    // image
-    if (e.image.src.length != 0)
-        image (e.image.ptr);
-*/
-    // border
-/*
-    auto p1 = Pos (cast(X)(e.pos.x + e.border.tl.w), e.pos.y);
-    auto p2 = Pos (cast(X)(e.pos.x + e.size.w - e.border.tr.w), e.pos.y);
-    if (e.border.t_type != e.Border.Type.none)
-        line (p1, p2, 1); // 0 t
-    auto p3 = Pos (cast(X)(e.pos.x + e.size.w), cast(Y)(e.pos.y + e.border.tr.h));
-    if (e.border.tr.w != 0 && e.border.tr.h != 0) {
-        line (p2, p3, 1); // 1
-        arc  (p2, p3, 1); // 1
-    }
-    auto p4 = Pos (cast(X)(e.pos.x + e.size.w), cast(Y)(e.pos.y + e.size.h - e.border.br.h));
-    if (e.border.r_type != e.Border.Type.none)
-        line (p3, p4, 1); // 2 r
-    auto p5 = Pos (cast(X)(e.pos.x + e.size.w - e.border.br.w), cast(Y)(e.pos.y + e.size.h));
-    if (e.border.br.w != 0 && e.border.br.h != 0) {
-        line (p4, p5, 1); // 3
-        arc  (p4, p5, 1); // 3
-    }
-    auto p6 = Pos (cast(X)(e.pos.x + e.border.bl.w), cast(Y)(e.pos.y + e.size.h));
-    if (e.border.b_type != e.Border.Type.none)
-        line (p5, p6, 1); // 4 b
-    auto p7 = Pos (e.pos.x, cast(Y)(e.pos.y + e.size.h - e.border.bl.h));
-    if (e.border.bl.w != 0 && e.border.bl.h != 0) {
-        line (p6, p7, 1); // 5
-        arc  (p6, p7, 1); // 5
-    }
-    auto p8 = Pos (e.pos.x, cast(Y)(e.pos.y + e.border.tl.h));
-    if (e.border.l_type != e.Border.Type.none)
-        line (p7, p8, 1); // 6 l
-
-    if (e.border.tl.w != 0 && e.border.tl.h != 0) {
-        line (p8, p1, 1); // 7
-        arc  (p8, p1, 1); // 7
-    }
-    */
+    draw_click_decoration (renderer,e);
 }
+
+void
+draw_click_decoration (SDL_Renderer* renderer, E* e) {
+    // shade around content, inside borders. in pad or content. shade bg
+}
+
+
+void
+color_decor (Color color, ubyte tome, ubyte contrast, ubyte bright) {
+    // tone +- 
+    // contrast +- 
+    // bright +- 
+    // tcb
+}
+
+void
+color_decor (Color color, Color_tcb tcb) {
+    // tone +- 
+    // contrast +- 
+    // bright +- 
+    // tcb
+}
+
 
 void
 draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {

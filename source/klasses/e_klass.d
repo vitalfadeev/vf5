@@ -39,10 +39,7 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
 
     switch (ev.type) {
         case SDL_USEREVENT:
-            string user_event_name = (cast(USER_EVENT)ev.user.code).to!string;
-            foreach (_on; e.on)
-                if (_on.event == user_event_name) // start, click
-                    exec_action (doc, _on.action);
+            go_on_event (doc,t,(cast(USER_EVENT)ev.user.code).to!string);
             break;
         default:
     }
@@ -376,7 +373,7 @@ set_pad (Doc* doc, E* e, string[] values) {
 void
 set_pad_bg (Doc* doc, E* e, string[] values) {
     if (values.length) {
-        Color c;
+        Color c = e.pad.bg;
         if (doc_parse_color (doc, values[0], &c))
             e.pad.bg = c;
         else
@@ -432,7 +429,13 @@ doc_parse_color (Doc* doc, string s, Color* color) {
         return parse_color_hex (s, color);
     else
     if (s.startsWith ("rgb")) {
-        //
+        // rgb()
+        // rgb 0 0 0
+    }
+    else
+    if (s.startsWith ("tcb")) {
+        // tcb +0 +0 -25
+        // *color = tcb (*color).update (+0, +0, -25)
     }
     else {
         string[] color_s = doc_get_klass_field_value (doc,s);

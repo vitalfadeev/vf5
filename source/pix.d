@@ -52,7 +52,7 @@ go (Pix* pix, Doc* doc) {
     doc.window = new Window (window);
 
     // Event "start"
-    send_user_event (USER_EVENT.start);
+    send_user_event (StartUserEvent ());
 
     // Event Loop
     foreach (Event* ev; Events ())
@@ -275,6 +275,16 @@ Window {
 
 
 void
+send_user_event (StartUserEvent ev) {
+    SDL_PushEvent (cast(SDL_Event*)&ev);
+}
+
+void
+send_user_event (ClickUserEvent ev) {
+    SDL_PushEvent (cast(SDL_Event*)&ev);
+}
+
+void
 send_user_event (USER_EVENT user_event_id) {
     SDL_Event ev;
     ev.type      = SDL_USEREVENT;
@@ -313,6 +323,53 @@ Events {
         }        
 
         return 0;
+    }
+}
+
+struct
+StartUserEvent {
+    SDL_UserEvent _super = {
+        SDL_USEREVENT, 
+        /* timestamp */ 0, 
+        /* WindowId  */ 0, 
+        USER_EVENT.start
+    };
+    alias _super this;
+}
+
+struct
+ClickUserEvent {
+    SDL_UserEvent _super = {
+        SDL_USEREVENT, 
+        /* timestamp */ 0, 
+        /* WindowId  */ 0, 
+        USER_EVENT.click
+    };
+    alias _super this;
+
+    this (SDL_Event* ev) {
+        _super = ev.user;
+    }
+
+    this (SDL_UserEvent ev) {
+        _super = ev;
+    }
+
+    this (Pos down_pos, Pos up_pos) {
+        _super.type  = SDL_USEREVENT;
+        _super.code  = USER_EVENT.click;
+        _super.data1 = down_pos.toVoidPtr;
+        _super.data2 = up_pos.toVoidPtr;
+    }
+
+    Pos
+    down_pos () {
+        return Pos.from_VoidPtr (_super.data1);
+    }
+
+    Pos
+    up_pos () {
+        return Pos.from_VoidPtr (_super.data2);
     }
 }
 

@@ -23,6 +23,8 @@ import klass;
 // radio
 // checked
 // focused
+// button-pressed
+// button-hover
 // hotkeys
 // colors
 // commands
@@ -99,6 +101,16 @@ toolbar-item
  pad          5 5
  pad.bg       colors.pad_bg
  borders      1 solid colors.fg+1
+
+button-pressed
+ pad.bg       tcb +0 +0 -25
+ content.bg   tcb +0 +0 -25
+
+button-hover
+ pad.bg       tcb +0 +0 +25
+ content.bg   tcb +0 +0 +25
+ //content.bg   tcb +0 +0 +25 fast
+ //content.bg   tcb +0 +0 +25 slow
 
 playlist
  size         parent 240
@@ -181,6 +193,11 @@ progress
   size 320 parent
   progress 50%
   progress.position 50%
+  //on position `audtool playback-seek %s` total*position
+  //on position `audtool-playback-seek.sh %s` position
+  //env position = ...
+  //  on position `audtool-playback-seek.sh`
+  on progress.position /home/vf/src/vf5/bin/audtool-playback-seek.sh
   e hbox progress-passed
   e hbox progress-current
   e hbox progress-rest

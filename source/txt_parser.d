@@ -70,3 +70,16 @@ parse_color_hex6 (string s, Color* color) {
 
     return true;
 }
+
+bool 
+parse_color_tcb (string s, Color* color) {
+    // tcb +0 +0 -25
+
+    import std.algorithm : startsWith;
+    import std.string : strip;
+
+    //
+
+    return false;
+}
+

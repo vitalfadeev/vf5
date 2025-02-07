@@ -27,6 +27,7 @@ import draws : e_pos, e_size, content_pos;
 import txt_reader : add_child_e;
 import klasses.e : global_font_files;
 import klasses.e : extract_value;
+import pix : ClickUserEvent;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -150,7 +151,7 @@ add_class (E* e, Doc* doc, string s) {
 }
 
 void
-remove_class (Doc* doc, string s) {
+remove_class_from_all (Doc* doc, string s) {
     auto kls = doc.find_klass (s);
     if (kls !is null)
         foreach (t; WalkTree (doc.tree))
@@ -1083,16 +1084,23 @@ find_last_with_type (ETree* t, E.PosType pos_type) {
 
 
 void
-go_event_action (Doc* doc, E* e, string[] action) {
-    exec_action (doc, action);
+go_on_event (Doc* doc, ETree* t, string user_event_name, string[string] env=null) {
+    foreach (_on; t.e.on)
+        if (_on.event == user_event_name) // start, click
+            exec_action (doc, _on.action, env);
 }
 
 void
-exec_action (Doc* doc, string[] action) {
+go_event_action (Doc* doc, E* e, string[] action, string[string] env=null) {
+    exec_action (doc,action,env);
+}
+
+void
+exec_action (Doc* doc, string[] action, string[string] env=null) {
     import std.process;
     
     if (action.length) {
-        writeln (action);
+        writeln ("action: ", action);
         string[] cmd = doc_get_klass_field_value (doc,action[0]);
         if (cmd.length)
             goto exec;
@@ -1103,8 +1111,11 @@ exec_action (Doc* doc, string[] action) {
     exec:
         if (cmd.length) {
             // raw exec
-            writeln ("  EXEC: ", cmd);
-            auto pid = spawnProcess (cmd);
+            writeln ("  exec: ", cmd, " ", env);
+            if (env !is null) 
+                auto pid = spawnProcess (cmd,env);
+            else
+                auto pid = spawnProcess (cmd);
         }    
     }
 }
@@ -1176,10 +1187,11 @@ go_question_value (string[] s) {
 
 void
 on_click (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+    auto click_ev = ClickUserEvent (ev);
     _on_click (
         doc, 
-        Pos.from_VoidPtr (ev.user.data1), 
-        Pos.from_VoidPtr (ev.user.data2),
+        click_ev.down_pos, 
+        click_ev.up_pos, 
         ev,
         window,
         renderer
@@ -1203,7 +1215,7 @@ _on_click (Doc* doc, Pos down_pos, Pos up_pos, Event* ev, SDL_Window* window, SD
         deepest);
 
     // focused
-    doc.remove_class ("focused");
+    remove_class_from_all (doc,"focused");
     if (deepest !is null)
         deepest.e.add_class (doc,"focused");
 
@@ -1222,7 +1234,6 @@ pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
 }
 
 
-
 int
 event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     // event
@@ -1236,7 +1247,16 @@ event (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                //
+                auto pressed_e = doc.find_e_at_pos (Pos (ev.button.x.to!X,ev.button.y.to!Y));
+                if (pressed_e !is null)
+                    pressed_e.add_class (doc,"button-pressed");
+                writeln ("pressed_e: ", *pressed_e);
+            }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            if (ev.button.button == SDL_BUTTON_LEFT)
+            if (ev.button.state == SDL_RELEASED) {
+                remove_class_from_all (doc,"button-pressed");
             }
             break;
         case SDL_KEYDOWN: break;// SDL_KeyboardEvent

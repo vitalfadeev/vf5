@@ -2,6 +2,7 @@ module klasses.progress;
 
 import std.stdio;
 import std.string;
+import std.conv;
 import bindbc.sdl;
 import events;
 import doc;
@@ -9,6 +10,8 @@ import etree;
 import klass;
 import e;
 import types;
+import pix : USER_EVENT;
+import pix : ClickUserEvent;
 
 
 struct 
@@ -29,24 +32,19 @@ Progress {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer, ETree* t) {
-    writeln ("PROGRESS.EVENT: ", ev.type);
+    if (ev.type != SDL_MOUSEMOTION)
+        writeln ("PROGRESS.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
     bool drag_started = false;
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN: {
             // Drag start
             if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_PRESSED) {
+            if (ev.button.state  == SDL_PRESSED) {
                 // tree_apply_klasses (doc.tree);
                 //auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
                 //if (clicked_e !is null) {
                 //    drag_started = true;
                 //}
-                int precent;
-                if (t !is null) {
-                    precent_from_click (t, ev.button.x, ev.button.y, &precent);
-                    writeln ("precent: ", precent);
-                    // exec (`audtool playback-seek %s`, precent_to_time (precent));
-                }
             }
             break;
         }
@@ -70,7 +68,27 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
             break;
         }
         case SDL_WINDOWEVENT: break;
-        case SDL_USEREVENT: break;
+        case SDL_USEREVENT: {
+            switch (ev.user.code) {
+                case USER_EVENT.click:
+                    int percent;
+                    if (t !is null) {
+                        Pos pos = ClickUserEvent (ev).down_pos;
+                        percent_from_click (t, pos.x, pos.y, &percent);
+                        writeln ("progress.position: ", percent);
+                        string[string] env = ["PROGRESS_POSITION" : percent.to!string];
+                        go_on_event (doc,t,"progress.position",env);
+                        // total = audtool current-song-length-seconds
+                        // now   = audtool current-song-output-length-seconds
+                        // seek  = total * precent
+                        //         udtool playback-seek seek
+                        // exec (`audtool playback-seek %s`, precent_to_time (precent));
+                    }
+                    break;
+                default:
+            }
+            break;
+        }
         case SDL_QUIT: break;
         default:
     }
@@ -101,11 +119,11 @@ draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
 }
 
 void
-precent_from_click (ETree* t, int click_x, int click_y, int* precent) {
+percent_from_click (ETree* t, int click_x, int click_y, int* percent) {
     auto e = t.e;
     auto offset_x = click_x - e.content.pos.x;
     int  w = e.size.w;
-    *precent = 100 * offset_x / w;
+    *percent = 100 * offset_x / w;
 }
 
 void

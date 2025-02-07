@@ -110,4 +110,24 @@ Pad {
 
 alias Color = SDL_Color;
 
+// HSL
+struct
+Color_tcb {
+    ubyte t; // tome
+    ubyte c; // contrast
+    ubyte b; // bright
+    ubyte a; // alpha
+
+    static
+    Color_tcb
+    from_Color (Color color) {
+        return Color_tcb ();
+    }
+
+    Color
+    to_Color () {
+        return Color ();
+    }
+}
+
 alias Color BG;
