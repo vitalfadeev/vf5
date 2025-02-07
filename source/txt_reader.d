@@ -189,10 +189,9 @@ tb-position
   content.size.w childs
 
 progress
-  //size expand parent
-  size 320 parent
-  progress 50%
-  progress.position 50%
+  size expand parent
+  //size 320 parent
+  progress.position `player.current-song-output-length`
   //on position `audtool playback-seek %s` total*position
   //on position `audtool-playback-seek.sh %s` position
   //env position = ...

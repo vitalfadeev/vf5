@@ -97,7 +97,8 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
 // KLASS_UPDATE_FN 
 void 
 update (Klass* kls, Doc* doc, ETree* t) {
-    //
+    // progress.position
+    //   e e e
 }
 
 // KLASS_SET_FN

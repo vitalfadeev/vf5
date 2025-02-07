@@ -425,6 +425,7 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.content : e_size_w_content (doc,t); break;
         case E.SizeType.parent  : e_size_w_parent  (doc,t); break;
         case E.SizeType.window  : e_size_w_window  (doc,t); break;
+        case E.SizeType.expand  : e_size_w_expand  (doc,t); break;
     }
 
     final
@@ -433,6 +434,7 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.content : e_size_h_content (doc,t); break;
         case E.SizeType.parent  : e_size_h_parent  (doc,t); break;
         case E.SizeType.window  : e_size_h_window  (doc,t); break;
+        case E.SizeType.expand  : e_size_h_expand  (doc,t); break;
     }
 
     // recursive
@@ -485,6 +487,24 @@ e_size_w_window (Doc* doc, ETree* t) {
 }
 
 void
+e_size_w_expand (Doc* doc, ETree* t) {
+    auto e = t.e;
+
+    W all_left;
+    foreach (_t; WalkLeft (t))
+        all_left += _t.e.size.w;
+
+    if (t.parent.e.content.size.w > all_left) {
+        e.size.w = (t.parent.e.content.size.w - all_left).to!W;
+        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    }
+    else {
+        e.size.w = 0;
+        e.content.size.w = 0;
+    }
+}
+
+void
 e_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.h = e.size.h;
@@ -532,6 +552,13 @@ e_size_h_window (Doc* doc, ETree* t) {
         e.size.h = DEFAULT_WINDOW_H;
         e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
     }
+}
+
+void
+e_size_h_expand (Doc* doc, ETree* t) {
+    auto e = t.e;
+    // e.size.h = 
+    // e.content.size.h = ;
 }
 
 void
