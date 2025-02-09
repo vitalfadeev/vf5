@@ -10,8 +10,6 @@ import etree;
 import klass;
 import e;
 import types;
-import pix : USER_EVENT;
-import pix : ClickUserEvent;
 
 
 struct 

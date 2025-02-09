@@ -6,8 +6,7 @@ import doc;
 import etree;
 import klass;
 import types;
-import events : Event;
-import pix : USER_EVENT;
+import events;
 
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
