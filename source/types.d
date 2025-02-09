@@ -2,6 +2,7 @@ module types;
 
 import std.conv;
 import bindbc.sdl;
+public import color;
 
 
 alias ushort X;
@@ -108,29 +109,3 @@ Pad {
 }
 
 
-// SDL_PIXELFORMAT_RGBA32
-//   SDL_PIXELFORMAT_ABGR8888 on little-endian systems
-//   SDL_PIXELFORMAT_RGBA8888 on big-endian systems
-alias Color = SDL_Color;
-
-// HSL
-struct
-Color_tcb {
-    ubyte t; // tome
-    ubyte c; // contrast
-    ubyte b; // bright
-    ubyte a; // alpha
-
-    static
-    Color_tcb
-    from_Color (Color color) {
-        return Color_tcb ();
-    }
-
-    Color
-    to_Color () {
-        return Color ();
-    }
-}
-
-alias Color BG;

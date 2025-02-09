@@ -436,7 +436,12 @@ doc_parse_color (Doc* doc, string s, Color* color) {
     else
     if (s.startsWith ("tcb")) {
         // tcb +0 +0 -25
-        // *color = tcb (*color).update (+0, +0, -25)
+        // Color_tcb.from_string (s, &fixed, &delta);
+        // auto color = 
+        //   Color_tcb
+        //     .from_Color (color)
+        //     .update (delta)
+        //     .to_Color ();
     }
     else {
         string[] color_s = doc_get_klass_field_value (doc,s);

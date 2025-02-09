@@ -4,6 +4,7 @@ import std.stdio;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
+import bindbc.sdlgfx;
 import doc;
 import etree;
 import klass;
@@ -31,7 +32,6 @@ Pix {
         init_sdl ();
     }
 }
-
 
 
 int 
@@ -180,9 +180,9 @@ init_sdl () {
     writeln ("SDL bindbc: ", ret, " lib: ", sdl_ver);
 
     // IMG
-    auto sdlimage_ret = loadSDLImage ();
-    writeln ("SDL_Image: ", sdlimage_ret);
-    if (sdlimage_ret < sdlImageSupport) // 2.6.3
+    auto sdl_image_ret = loadSDLImage ();
+    writeln ("SDL_Image: ", sdl_image_ret);
+    if (sdl_image_ret < sdlImageSupport) // 2.6.3
         throw new Exception ("The SDL_Image shared library failed to load");
     
     auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
@@ -190,13 +190,25 @@ init_sdl () {
         throw new IMGException ("The SDL_Image init failed");
 
     // TTF
-    auto sdlttf_ret = loadSDLTTF (); // SDLTTFSupport
-    writeln ("SDL_TTF: ", sdlttf_ret);
-    if (sdlttf_ret < sdlTTFSupport) // 2.0.20
+    auto sdl_ttf_ret = loadSDLTTF (); // SDLTTFSupport
+    writeln ("SDL_TTF: ", sdl_ttf_ret);
+    if (sdl_ttf_ret < sdlTTFSupport) // 2.0.20
         throw new TTFException ("The SDL_TTF shared library failed to load:");
     
     if (TTF_Init () == -1)
         throw new TTFException ("Failed to initialise SDL_TTF");
+
+    // GFX
+    // libSDL2_gfx.so
+    auto sdl_gfx_ret = loadSDLgfx (); // SDLgfxSupport
+    writeln ("SDL_GFX: ", sdl_gfx_ret);
+    if (sdl_gfx_ret != SDLgfxSupport.SDLgfx) {
+        if (sdl_gfx_ret == SDLgfxSupport.noLibrary) 
+            throw new Exception ("The SDL GFX shared library failed to load");
+        else 
+        if (sdl_gfx_ret == SDLgfxSupport.badLibrary) 
+            throw new Exception ("SDL GFX: One or more symbols failed to load.");
+    }
 }
 
 /**
