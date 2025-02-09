@@ -166,7 +166,7 @@ E {
         fixed,
         parent,
         window,
-        expand,
+        max,
     }
     SizeType  size_w_type;
     SizeType  size_h_type;

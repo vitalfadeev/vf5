@@ -189,7 +189,7 @@ tb-position
   content.size.w childs
 
 progress
-  size expand parent
+  size max parent
   //size 320 parent
   progress.position `player.current-song-output-length`
   //on position `audtool playback-seek %s` total*position

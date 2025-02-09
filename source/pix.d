@@ -52,7 +52,7 @@ go (Pix* pix, Doc* doc) {
     doc.window = new Window (window);
 
     // Event "start"
-    send_user_event (StartUserEvent ());
+    send_user_event!StartUserEvent ();
 
     // Event Loop
     foreach (Event* ev; Events ())
@@ -85,7 +85,7 @@ click_translate (Event* ev) {
             // get  pos up
             // send click (down_pos, up_pos)
             Pos up_pos = Pos (ev.button.x.to!X, ev.button.y.to!Y);
-            send_user_event (USER_EVENT.click, down_pos.toVoidPtr, up_pos.toVoidPtr);
+            send_user_event!ClickUserEvent (down_pos, up_pos);
             down_pos = Pos ();
             break;
         default:
@@ -275,36 +275,15 @@ Window {
 
 
 void
-send_user_event (StartUserEvent ev) {
-    SDL_PushEvent (cast(SDL_Event*)&ev);
+send_user_event (EVT,ARGS...) (ARGS args) {
+    auto evt = EVT (args);
+    SDL_PushEvent (cast(SDL_Event*)&evt);
 }
 
-void
-send_user_event (ClickUserEvent ev) {
-    SDL_PushEvent (cast(SDL_Event*)&ev);
-}
-
-void
-send_user_event (USER_EVENT user_event_id) {
-    SDL_Event ev;
-    ev.type      = SDL_USEREVENT;
-    ev.user.code = user_event_id;
-    SDL_PushEvent (&ev);
-}
-
-void
-send_user_event (USER_EVENT user_event_id, void* data1, void* data2) {
-    SDL_Event ev;
-    ev.type       = SDL_USEREVENT;
-    ev.user.code  = user_event_id;
-    ev.user.data1 = data1;
-    ev.user.data2 = data2;
-    SDL_PushEvent (&ev);
-}
 
 void
 send_redraw_window (SDL_Window* window) {
-    send_user_event (USER_EVENT.redraw);
+    send_user_event!RedrawUserEvent ();
 }
 
 struct
@@ -326,50 +305,43 @@ Events {
     }
 }
 
+union
+UserEvent {
+    Uint32 type; // SDL_USEREVENT
+    SDL_UserEvent  user;
+    StartUserEvent start;
+    ClickUserEvent click;
+}
+
 struct
 StartUserEvent {
-    SDL_UserEvent _super = {
-        SDL_USEREVENT, 
-        /* timestamp */ 0, 
-        /* WindowId  */ 0, 
-        USER_EVENT.start
-    };
-    alias _super this;
+    Uint32 type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.start;
+}
+
+struct
+RedrawUserEvent {
+    Uint32 type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.redraw;
 }
 
 struct
 ClickUserEvent {
-    SDL_UserEvent _super = {
-        SDL_USEREVENT, 
-        /* timestamp */ 0, 
-        /* WindowId  */ 0, 
-        USER_EVENT.click
-    };
-    alias _super this;
+    Uint32 type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.click;
+    Pos    down_pos;
+    Pos    up_pos;
 
-    this (SDL_Event* ev) {
-        _super = ev.user;
-    }
-
-    this (SDL_UserEvent ev) {
-        _super = ev;
-    }
 
     this (Pos down_pos, Pos up_pos) {
-        _super.type  = SDL_USEREVENT;
-        _super.code  = USER_EVENT.click;
-        _super.data1 = down_pos.toVoidPtr;
-        _super.data2 = up_pos.toVoidPtr;
-    }
-
-    Pos
-    down_pos () {
-        return Pos.from_VoidPtr (_super.data1);
-    }
-
-    Pos
-    up_pos () {
-        return Pos.from_VoidPtr (_super.data2);
+        this.down_pos = down_pos;
+        this.up_pos   = up_pos;
     }
 }
 

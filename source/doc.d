@@ -425,7 +425,7 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.content : e_size_w_content (doc,t); break;
         case E.SizeType.parent  : e_size_w_parent  (doc,t); break;
         case E.SizeType.window  : e_size_w_window  (doc,t); break;
-        case E.SizeType.expand  : e_size_w_expand  (doc,t); break;
+        case E.SizeType.max     : e_size_w_max     (doc,t); break;
     }
 
     final
@@ -434,12 +434,15 @@ update_size (Doc* doc, ETree* t) {
         case E.SizeType.content : e_size_h_content (doc,t); break;
         case E.SizeType.parent  : e_size_h_parent  (doc,t); break;
         case E.SizeType.window  : e_size_h_window  (doc,t); break;
-        case E.SizeType.expand  : e_size_h_expand  (doc,t); break;
+        case E.SizeType.max     : e_size_h_max     (doc,t); break;
     }
 
     // recursive
     foreach (tc; WalkChilds (t))
         update_size (doc,tc);
+
+    // update childs size`s
+    //   max
 }
 
 void
@@ -487,7 +490,7 @@ e_size_w_window (Doc* doc, ETree* t) {
 }
 
 void
-e_size_w_expand (Doc* doc, ETree* t) {
+e_size_w_max (Doc* doc, ETree* t) {
     auto e = t.e;
 
     W all_left;
@@ -555,7 +558,7 @@ e_size_h_window (Doc* doc, ETree* t) {
 }
 
 void
-e_size_h_expand (Doc* doc, ETree* t) {
+e_size_h_max (Doc* doc, ETree* t) {
     auto e = t.e;
     // e.size.h = 
     // e.content.size.h = ;
@@ -1214,7 +1217,7 @@ go_question_value (string[] s) {
 
 void
 on_click (Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
-    auto click_ev = ClickUserEvent (ev);
+    auto click_ev = cast (ClickUserEvent*) ev;
     _on_click (
         doc, 
         click_ev.down_pos, 

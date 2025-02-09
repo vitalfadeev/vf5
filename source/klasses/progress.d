@@ -71,10 +71,10 @@ event (Klass* kls, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* render
         case SDL_USEREVENT: {
             switch (ev.user.code) {
                 case USER_EVENT.click:
+                    auto click_ev = cast (ClickUserEvent*) ev;
                     int percent;
                     if (t !is null) {
-                        Pos pos = ClickUserEvent (ev).down_pos;
-                        percent_from_click (t, pos.x, pos.y, &percent);
+                        percent_from_click (t, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
                         writeln ("progress.position: ", percent);
                         string[string] env = ["PROGRESS_POSITION" : percent.to!string];
                         go_on_event (doc,t,"progress.position",env);

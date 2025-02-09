@@ -108,6 +108,9 @@ Pad {
 }
 
 
+// SDL_PIXELFORMAT_RGBA32
+//   SDL_PIXELFORMAT_ABGR8888 on little-endian systems
+//   SDL_PIXELFORMAT_RGBA8888 on big-endian systems
 alias Color = SDL_Color;
 
 // HSL
