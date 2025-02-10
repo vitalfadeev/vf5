@@ -14,10 +14,12 @@ struct
 Uni {
     Type type;
     union {
-        Doc*   _doc;
-        E*     _e;
-        Klass* _klass;
-        Field* _field;
+        Doc*    _doc;      // E*[] Klass*[]
+        E*      _e;        // E*[]
+        Klass*  _klass;    // Field*[] E*[] Switch*[]
+        Field*  _field;    // 
+        //Switch* _switch; // Case*[]
+        //Case*   _case;   // Field*[]
     }
 
     this (Doc* doc) {

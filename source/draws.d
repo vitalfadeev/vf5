@@ -13,12 +13,22 @@ import pix : SDLException, TTFException;
 
 void
 line (Pos pos, Pos pos2, W wid) {
-    //
+    // hickLineColor (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color)
 }
 
 void
 arc (Pos pos, Pos pos2, W wid) {
-    //
+    // aaArcColor (SDL_Renderer * renderer, float cx, float cy, float rx, float ry, float start, float end, float thick, Uint32 color);
+    // thickArcColor (SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, Uint32 color, Uint8 thick);
+
+    //arcColor     (   SDL_Renderer *      renderer,
+    //    Sint16      x,
+    //    Sint16      y,
+    //    Sint16      rad,
+    //    Sint16      start,
+    //    Sint16      end,
+    //    Uint32      color 
+    //)       
 }
 
 void
