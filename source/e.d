@@ -3,7 +3,8 @@ import std.string;
 import std.conv;
 import bindbc.sdl;
 import doc;
-import etree;
+//import etree;
+import utree;
 import klass;
 import types;
 import events;
@@ -11,17 +12,17 @@ import events;
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
 alias E_UPDATE_FN = void function (E* e, Doc* doc);
-alias E_SET_FN    = void function (E* e, Doc* doc, ETree* t, string field_id, string[] values);
+alias E_SET_FN    = void function (E* e, Doc* doc, UTree* t, string field_id, string[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 
 
 struct 
 E {
-    Klass*[] klasses;    // box green rounded
-    Pos  pos;
-    Size size;
-    Pad  pad;
-    BG   bg;
+    UTree*[] klasses;    // box green rounded
+    Pos      pos;
+    Size     size;
+    Pad      pad;
+    BG       bg;
 
     struct
     Border {
@@ -186,8 +187,8 @@ E {
     string
     toString () {
         string ks;
-        foreach (kls; klasses)
-            ks ~= kls.name ~ " ";
+        foreach (UTree* kls_t; klasses)
+            ks ~= kls_t.klass.name ~ " ";
         
         return "E(" ~ ks ~ ")";
     }
@@ -206,7 +207,7 @@ update (E* e, Doc* doc) {
 }
 
 void
-set (E* e, Doc* doc, ETree* t, string field_id, string[] values) {
+set (E* e, Doc* doc, UTree* t, string field_id, string[] values) {
     //
 }
 

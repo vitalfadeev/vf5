@@ -6,7 +6,7 @@ import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import bindbc.sdlgfx;
 import doc;
-import etree;
+import utree;
 import klass;
 import events;
 import draws;
@@ -15,10 +15,10 @@ import std.string : fromStringz;
 import std.string : toStringz;
 import std.algorithm.searching : canFind;
 
-alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc);
-alias PIX_UPDATE_FN = void function (Pix* pix, Doc* doc);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, Doc* doc);
-alias PIX_GO_FN     = int  function (Pix* pix, Doc* doc);
+alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
+alias PIX_UPDATE_FN = void function (Pix* pix, UTree* doc_t);
+alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, UTree* doc_t);
+alias PIX_GO_FN     = int  function (Pix* pix, UTree* doc_t);
 
 struct 
 Pix {
@@ -35,7 +35,7 @@ Pix {
 
 
 int 
-go (Pix* pix, Doc* doc) {
+go (Pix* pix, UTree* doc_t) {
     // Window, Surface
     SDL_Window* window = new_window (__FILE_FULL_PATH__);
 
@@ -43,15 +43,20 @@ go (Pix* pix, Doc* doc) {
     SDL_Renderer* renderer = new_renderer (window);
 
     //
-    doc.window = new Window (window);
+    doc_t.doc.window = new Window (window);
 
     // Event "start"
     send_user_event!StartUserEvent ();
 
     // Event Loop
-    foreach (Event* ev; Events ())
-        if (pix.event (pix,ev,window,renderer,doc) == 1)
+    foreach (Event* ev; Events ()) {
+        ev.doc_t      = doc_t;
+        ev.app_window = window;
+        ev.renderer   = renderer;
+
+        if (pix.event (pix,ev) == 1)
             break;
+    }
 
     return 0;
 }
@@ -94,7 +99,7 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 int
-event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc) {
+event (Pix* pix, Event* ev) {
     //if (ev.type != SDL_MOUSEMOTION)
     //    writeln ("PIX.EVENT: ", ev.type);
     translate (ev);
@@ -102,11 +107,11 @@ event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,renderer,doc); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc_t); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,doc); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.doc_t); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -125,29 +130,29 @@ event (Pix* pix, Event* ev, SDL_Window* window, SDL_Renderer* renderer, Doc* doc
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : pix.draw (pix,renderer,doc); break;
-                default: auto result = doc.event (doc,ev,window,renderer); if (result) return result;
+                case USER_EVENT.redraw : pix.draw (pix,ev.renderer,ev.doc_t); break;
+                default: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result;
             }
             break;
-        case SDL_QUIT: auto result = doc.event (doc,ev,window,renderer); if (result) return result; else return 1;
-        default: auto result = doc.event (doc,ev,window,renderer); if (result) return result;
+        case SDL_QUIT: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result; else return 1;
+        default: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result;
     }
 
     return 0;
 }
 
 void
-update (Pix* pix, Doc* doc) {
-    doc.update (doc); 
+update (Pix* pix, UTree* doc_t) {
+    doc.update (doc_t); 
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, Doc* doc) {
+draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t) {
     // clear
     SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear (renderer);
     // draw
-    doc.draw (doc,renderer);
+    doc.draw (doc_t,renderer);
     // rasterize
     SDL_RenderPresent (renderer);
 }
@@ -288,7 +293,7 @@ send_user_event (EVT,ARGS...) (ARGS args) {
 
 
 void
-send_redraw_window (SDL_Window* window) {
+redraw_window (SDL_Window* window) {
     send_user_event!RedrawUserEvent ();
 }
 
@@ -300,7 +305,7 @@ Events {
     int
     opApply (int delegate (Event* ev) dg) {
         while (_go) {
-            while (SDL_WaitEvent (&ev) > 0) {
+            while (SDL_WaitEvent (&ev.sdl) > 0) {
                 int result = dg (&ev);
                 if (result)
                     return result;

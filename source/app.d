@@ -1,6 +1,6 @@
 import std.stdio;
 import e;
-import etree;
+import utree;
 import klass;
 import pix;
 import txt_reader;
@@ -14,30 +14,36 @@ main () {
 	auto pix = new Pix ();
 	pix.setup ();
 
-	//
-	Doc* doc = new Doc ();
-	doc.setup ();
-	doc.update (doc);
+	// UTree
+	UTree* doc_t = utree.new_doc ();
+	Doc*   doc = doc_t.uni.doc;
+	doc_t.setup ();
+	doc.update (doc_t);
 	//dump_tree (doc.tree);
 	//dump_klasses (doc.klasses);
 
 	//
-	pix.go (pix,doc);
+	pix.go (pix,doc_t);
 }
 
 void
-setup (Doc* doc) {
-	doc.create_reserved_classes ();
-	txt_reader.go (doc, txt_reader.text);
+setup (UTree* doc_t) {
+	create_reserved_classes (doc_t);
+	txt_reader.go (doc_t, txt_reader.text);
 }
 
 void
-create_reserved_classes (Doc* doc) {
+create_reserved_classes (UTree* doc_t) {
 	import klasses.e        : E_Klass;
 	import klasses.progress : Progress;
 
-	doc.add_klass (cast (Klass*) (new E_Klass ()));
-	doc.add_klass (cast (Klass*) (new Progress ()));
+	doc_t.add_child (new_reserved_klass!E_Klass ());
+	doc_t.add_child (new_reserved_klass!Progress ());
+}
+
+UTree*
+new_reserved_klass (KLASS) () {
+	return utree.new_klass!KLASS ();
 }
 
 

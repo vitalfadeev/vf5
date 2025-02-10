@@ -6,8 +6,9 @@ import txt_token;
 import txt_syntax;
 import doc;
 import e;
-import etree;
+import utree;
 import klass;
+import field;
 
 // RESERVED
 // e
@@ -175,6 +176,18 @@ tb-prev
 tb-play-pause
   image /home/vf/src/vf5/img/play-pause.png
   on click commands.player.play_pause
+
+//tb-play-pause...
+// switch `audtool playback-status`
+//   playing
+//     image /home/vf/src/vf5/img/play.png
+//     on click commands.player.pause
+//   paused
+//     image /home/vf/src/vf5/img/pause.png
+//     on click commands.player.play
+// switch `audtool playback-status-2`
+//   playing
+//   paused
 
 tb-stop
   image /home/vf/src/vf5/img/stop.png
@@ -394,7 +407,7 @@ title
   text `audtool current-song`
 
 status
-  inherit_from status-`audtool playback-status`
+  inherit status-`audtool playback-status`
 
 status-plaing  
   fg green
@@ -427,117 +440,147 @@ commands
   player.next.undo                  player.prev
 ";
 
-void
-go (Doc* doc, string s) {
-    ETree* current_t;
-    Klass* current_klass;
-
-    Klass* e_klass = doc.find_klass_or_create ("e");
+void 
+go (UTree* doc_t, string s) {
+    UTree* last_t   = doc_t;
+    UTree* parent_t = doc_t;
+    UTree* t;
+    UTree* e_klass  = find_klass_or_create (doc_t, "e");
+    size_t indent;
+    string name;
 
     auto reader = Token_line_reader (s);
     foreach (t_line; reader) {
         writeln (t_line);
 
-        if (t_line[0].type == Token.Type.string)
-        if (t_line[0].s    == "e") {
-            // e
-            // create e
-            // add classes
-
-            // only first e
-            if (doc.tree is null) {
-                auto t = new ETree (new E ());
-                t.e.klasses ~= e_klass;
-                doc.tree  = t;
-                current_t = t;
-                current_klass = null;
-
-                foreach (tt; t_line[1..$])
-                    if (tt.type == Token.Type.string)
-                        current_t.e.klasses ~= doc.find_klass_or_create (tt.s);
-            }
-            else {
-                // skip 2, 3... e
-            }
+        //
+        if (t_line[0].type == Token.Type.string) {
+            indent = 0;
+            name   = t_line[0].s;
+        }
+        else
+        if (t_line[0].type == Token.Type.spaces) {
+            indent = t_line[0].s.length;
+            name   = t_line[1].s;
         }
 
-        if (t_line[0].type == Token.Type.string)
-        if (t_line[0].s    != "e") {
-            // class_name
-            // check class exist
-            // create new class
-            auto klass = doc.find_klass_or_create (t_line[0].s);
-            current_klass = klass;
-            current_t = null;
-        }
+        //
+        if (name == "e" && indent == 0)  // e
+            t = new_e (doc_t,t_line);
+        else
+        if (name == "e" && indent >= 1)  // sub e
+            t = new_child_e (doc_t,t_line[1..$]);
+        else
+        if (name != "e" && indent == 0)  // klass
+            t = new_klass (doc_t,name,t_line[1..$]);
+        else
+        if (name != "e" && indent >= 1)  // field
+            t = new_field (doc_t,name,t_line[2..$]);
 
-        if (t_line[0].type == Token.Type.spaces)
-        if (t_line[1].type == Token.Type.string)
-        if (t_line[1].s    == "e")
-        if (current_t !is null)
-        if (current_klass is null) {
-            add_child_e (doc,e_klass,t_line,0,null,current_t);
-        }
+        t.indent = indent;
+        parent_t = find_parent (last_t,t);
 
-        if (t_line[0].type == Token.Type.spaces)
-        if (t_line[1].type == Token.Type.string)
-        if (t_line[1].s    == "e")
-        if (current_t is null)
-        if (current_klass !is null) {
-            // sub e tree for klass
-            current_klass.tree_tokens ~= t_line;
-        }
-
-        if (t_line[0].type == Token.Type.spaces)
-        if (t_line[1].type == Token.Type.string)
-        if (t_line[1].s    != "e") {
-            // klass fields
-            // find parent klasss
-            //   create field
-            if (current_klass !is null) {
-                string[] values;
-                foreach (tt; t_line[2..$])
-                    if (tt.type == Token.Type.string || 
-                        tt.type == Token.Type.dquoted || 
-                        tt.type == Token.Type.bquoted) 
-                    {
-                        values ~= tt.s;
-                    }
-                current_klass.fields ~= KlassField (t_line[1].s, values);
-            }
-        }
+        parent_t.add_child (t);
+        last_t = t;
     }
 }
 
 
-void
-add_child_e (Doc* doc, Klass* e_klass, Token[] t_line, int parent_offset, Klass* from_klass, ref ETree* current_t) {
+UTree*
+find_parent (UTree* current_t, UTree* for_t) {
+    size_t for_indent = for_t.indent;
+
+    if (current_t is null)
+        return null;
+
+    if (current_t.indent < for_indent)
+        return current_t;
+
+    if (current_t.indent == for_indent)
+        return current_t.parent;
+
+    if (current_t.indent > for_indent) {
+        loop:
+            current_t = current_t.parent;
+            if (current_t is null) 
+                return null;
+            if (current_t.indent == for_indent)
+                return current_t.parent;
+            if (current_t.indent > for_indent)
+                goto loop;
+
+        return current_t;
+    }
+
+    return null;
+}
+
+UTree*
+new_doc () {
+    return utree.new_doc ();
+}
+
+UTree*
+new_e (UTree* doc_t, Token[] t_line) {
+    return new_child_e (doc_t,t_line);
+}
+
+UTree*
+new_child_e (UTree* doc_t, Token[] t_line) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
     //   add classes
-    ETree* t;
-    auto parent_t = find_parent_t (current_t, t_line[0].s.length+parent_offset);
-    if (parent_t !is null) {
-        t = new ETree (new E ());
-        t.indent = (t_line[0].s.length+parent_offset).to!ubyte;
-        parent_t.add_child (t);
-        current_t = t;
-        // sub e for klass
-        if (from_klass !is null)
-            t.e.added_from = from_klass;
-    }
 
-    // e classes
-    current_t.e.klasses ~= e_klass;
-    foreach (tt; t_line[2..$])
-        if (tt.type == Token.Type.string)
-            current_t.e.klasses ~= doc.find_klass_or_create (tt.s);    
+    auto t = new UTree (new Uni (new E ()));
+    auto e = t.e;
+
+    // klasses
+    foreach (_tok; t_line)
+        if (_tok.type == Token.Type.string)
+            e.klasses ~= find_klass_or_create (doc_t,_tok.s);
+
+    return t;
 }
 
 
-ETree*
-find_parent_t (ETree* current_t, size_t for_indent) {
+UTree*
+new_klass (UTree* doc_t, string name, Token[] t_line) {
+    string[] parent_klasses;
+    foreach (_tok; t_line)
+        switch (_tok.type) {
+            case Token.Type.string:
+            case Token.Type.dquoted:
+            case Token.Type.bquoted:
+                parent_klasses ~= _tok.s;
+                break;
+            default:
+        }
+
+    auto t = new UTree (new Uni (new Klass (name,parent_klasses)));
+    return t;    
+}
+
+UTree*
+new_field (UTree* doc_t, string name, Token[] t_line) {
+    string[] values;
+    foreach (_tok; t_line)
+        switch (_tok.type) {
+            case Token.Type.string:
+            case Token.Type.dquoted:
+            case Token.Type.bquoted:
+                values ~= _tok.s;
+                break;
+            default:
+        }
+
+    auto t = new UTree (new Uni (new Field (name,values)));
+
+    return t;    
+}
+
+UTree*
+find_parent_t (UTree* current_t, size_t for_indent) {
     if (current_t is null)
         return null;
 

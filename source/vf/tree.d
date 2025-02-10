@@ -2,8 +2,8 @@ module vf.tree;
 
 
 struct
-Tree (E) {
-    E* e;
+Tree (UNI) {
+    UNI*  uni; alias uni this;
     Tree* l;
     Tree* r;
     struct 
@@ -13,8 +13,8 @@ Tree (E) {
         mixin childs_op_apply;
     };
     Childs childs;
-    Tree* parent;
-    ubyte indent;
+    Tree*  parent;
+    size_t indent;
 
     mixin tree_functions;
 }
@@ -261,25 +261,13 @@ dump_tree (Tree) (Tree* t, int level=0) {
 
     for (auto i = level; i > 0; i--) 
         write ("  ");
-    if (t.e is null)
-        writeln (t, " ", t.indent, " ", t.e);
+    if (t.uni is null)
+        writeln (t, " ", t.indent, " ", t.uni);
     else
-        writeln (t, " ", t.indent, " ", t.e, " ", *t.e);
+        writeln (t, " ", t.indent, " ", t.uni, " ", *t.uni);
 
     // recursive
     foreach (subt; t.childs) {
         dump_tree!Tree (subt, level+1);
-    }
-}
-
-void
-dump_klasses (Klass) (Klass*[] klasses) {
-    import std.stdio;
-
-    foreach (kls; klasses) {
-        writeln (kls.name);
-        foreach (field; kls.fields) {
-            writeln ("  ", field.id, " ", field.values);
-        }
     }
 }

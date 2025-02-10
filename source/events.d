@@ -2,9 +2,19 @@ module events;
 
 import bindbc.sdl;
 import types : Pos;
+import utree;
 
 
-alias Event = SDL_Event;
+struct
+Event {
+    SDL_Event _super;
+    alias _super this;
+    alias sdl = _super;
+
+    SDL_Window*   app_window;
+    SDL_Renderer* renderer;
+    UTree*        doc_t;
+}
 
 enum 
 USER_EVENT : Sint32 {
