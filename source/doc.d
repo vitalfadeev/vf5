@@ -46,6 +46,11 @@ Doc {
     DOC_EVENT_FN  event  = &.event;
     DOC_UPDATE_FN update = &.update;
     DOC_DRAW_FN   draw   = &.draw;
+
+    Doc*
+    clone () {
+        return new Doc ();
+    }
 }
 
 UTree*
@@ -107,7 +112,7 @@ find_field (UTree* kls_t, string s) {
 
 UTree*
 create_klass (UTree* doc_t, string s) {
-    UTree* kls_t = new UTree(new Uni(new Klass (s)));
+    UTree* kls_t = new UTree (new Uni (new Klass (s)));
     doc_t.add_child (kls_t);
     return kls_t;
 }
@@ -201,14 +206,14 @@ apply_klasses (UTree* doc_t, UTree* t) {
     e.on.length = 0;
     global_font_files.length = 0;
     // remove e added from klass
-    //UTree*[] for_remove;
-    //foreach (_t; WalkChilds (t))
-    //    if (_t.e.added_from !is null)
-    //        for_remove ~= _t;
-    //foreach (_t; for_remove)
-    //    t.remove_child (_t);
+    UTree*[] for_remove;
+    foreach (_t; WalkChilds (t))
+        if (_t.e.added_from !is null)
+            for_remove ~= _t;
+    foreach (_t; for_remove)
+        t.remove_child (_t);
     // set . each e klass
-    foreach (UTree* kls_t; e.klasses)
+    foreach (kls_t; e.klasses)
         apply_klass (doc_t,t,kls_t);
 }
 
@@ -246,7 +251,25 @@ void
 add_sub_tree (UTree* dest_t, UTree* source_t) {
     // clone each t
     // add in dest_t
+    auto cloned = clone_tree (source_t);
+    dest_t.add_child (cloned);
 }
+
+UTree*
+clone_tree (UTree* t) {
+    UTree* cloned;
+
+    final
+    switch (t.type) {
+        case Uni.Type.doc   : cloned = new UTree (new Uni (t.doc.clone  )); break;
+        case Uni.Type.e     : cloned = new UTree (new Uni (t.e.clone    )); break;
+        case Uni.Type.klass : cloned = new UTree (new Uni (t.klass.clone)); break;
+        case Uni.Type.field : cloned = new UTree (new Uni (t.field.clone)); break;
+    }
+
+    return cloned;
+}
+
 
 string[]
 extract_quoted (Field* field, UTree* doc_t) {

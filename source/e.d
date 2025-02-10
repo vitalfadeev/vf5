@@ -183,6 +183,11 @@ E {
     E_SET_FN    set    = &.set;
     E_DRAW_FN   draw   = &.draw;
 
+    E*
+    clone () {
+        return new E ();
+    }
+
     //
     string
     toString () {

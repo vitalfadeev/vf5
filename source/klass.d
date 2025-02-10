@@ -32,6 +32,11 @@ Klass {
     KLASS_UPDATE_FN update = &.update;
     KLASS_SET_FN    set    = &.set;
     KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
+
+    Klass*
+    clone () {
+        return new Klass ();
+    }
 }
 
 void

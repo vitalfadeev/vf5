@@ -11,5 +11,10 @@ Field {
     //    pos_x,
     //    pos_y,
     //}
+
+    Field*
+    clone () {
+        return new Field ();
+    }
 }
 
