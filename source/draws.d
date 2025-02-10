@@ -70,8 +70,8 @@ get_text_size (string s, TTF_Font* font, Color color) {
 void
 one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, int x, int y, int w, int h) {
     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    auto image = _one_string (renderer, s, font, color);
-    render_texture (renderer, image, x, y, w, h);
+    auto image = _one_string (renderer,s,font,color);
+    render_texture (renderer,image,x,y,w,h);
 }
 
 SDL_Texture*
@@ -266,7 +266,7 @@ draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) 
         image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
     if (e.content.text.s.length)
-        draw_text (renderer, e, content_pos, content_size);
+        draw_text (renderer,e,content_pos,content_size);
 }
 
 void

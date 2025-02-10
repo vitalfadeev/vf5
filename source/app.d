@@ -16,11 +16,12 @@ main () {
 
 	// UTree
 	UTree* doc_t = utree.new_doc ();
-	Doc*   doc = doc_t.uni.doc;
 	doc_t.setup ();
-	doc.update (doc_t);
-	//dump_tree (doc.tree);
-	//dump_klasses (doc.klasses);
+	doc_t.doc.update (doc_t);
+
+	// Check
+	//dump_tree (doc_t);
+	//dump_klasses (doc_t);
 
 	//
 	pix.go (pix,doc_t);

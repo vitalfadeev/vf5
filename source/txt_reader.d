@@ -36,6 +36,22 @@ import field;
 // plugin
 //  on player.prev ...
 
+string text1 = "
+e root
+  e rect
+
+rect
+  pos          10 10
+  size         200 64
+  content.size 200 64
+  pad          10
+  pad.bg       #008
+  borders      2 solid #ccc
+  text         123
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+//comment
+";
 string text = "
 e root
  e vbox menubar
@@ -445,13 +461,18 @@ go (UTree* doc_t, string s) {
     UTree* last_t   = doc_t;
     UTree* parent_t = doc_t;
     UTree* t;
-    UTree* e_klass  = find_klass_or_create (doc_t, "e");
     size_t indent;
     string name;
 
     auto reader = Token_line_reader (s);
     foreach (t_line; reader) {
-        writeln (t_line);
+        // skip
+        if (t_line[0].type == Token.Type.cr)
+            continue;
+        if (t_line[0].type == Token.Type.comment)
+            continue;
+        if (t_line[0].type == Token.Type.none)
+            continue;
 
         //
         if (t_line[0].type == Token.Type.string) {
@@ -478,18 +499,24 @@ go (UTree* doc_t, string s) {
             t = new_field (doc_t,name,t_line[2..$]);
 
         t.indent = indent;
-        parent_t = find_parent (last_t,t);
 
-        parent_t.add_child (t);
+        // add in tree, if not added
+        if (t.parent is null) {
+            parent_t = find_parent (last_t,indent);
+
+            if (parent_t is null)
+                doc_t.add_child (t);
+            else
+                parent_t.add_child (t);
+        }
+
         last_t = t;
     }
 }
 
 
 UTree*
-find_parent (UTree* current_t, UTree* for_t) {
-    size_t for_indent = for_t.indent;
-
+find_parent (UTree* current_t, size_t for_indent) {
     if (current_t is null)
         return null;
 
@@ -532,7 +559,7 @@ new_child_e (UTree* doc_t, Token[] t_line) {
     //   create sub e
     //   add classes
 
-    auto t = new UTree (new Uni (new E ()));
+    auto t = utree.new_e ();
     auto e = t.e;
 
     // klasses
@@ -546,18 +573,19 @@ new_child_e (UTree* doc_t, Token[] t_line) {
 
 UTree*
 new_klass (UTree* doc_t, string name, Token[] t_line) {
-    string[] parent_klasses;
+    auto t = find_klass_or_create (doc_t,name);
+
+    // setup parents
     foreach (_tok; t_line)
         switch (_tok.type) {
             case Token.Type.string:
             case Token.Type.dquoted:
             case Token.Type.bquoted:
-                parent_klasses ~= _tok.s;
+                //t.klass.parent_klasses ~= find_klass_or_create (doc_t,_tok.s);
                 break;
             default:
         }
 
-    auto t = new UTree (new Uni (new Klass (name,parent_klasses)));
     return t;    
 }
 

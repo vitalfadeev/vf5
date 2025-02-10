@@ -76,7 +76,7 @@ _WalkTree (Tree,Skip) {
     int
     opApply (int delegate (Tree* t) dg) {
         Tree*  next = t;
-        Tree* _next = next;
+        Tree* _next = t;
         int    result;
 
         loop:
@@ -262,9 +262,9 @@ dump_tree (Tree) (Tree* t, int level=0) {
     for (auto i = level; i > 0; i--) 
         write ("  ");
     if (t.uni is null)
-        writeln (t, " ", t.indent, " ", t.uni);
+        writeln ("null");
     else
-        writeln (t, " ", t.indent, " ", t.uni, " ", *t.uni);
+        writeln (*(t.uni));
 
     // recursive
     foreach (subt; t.childs) {

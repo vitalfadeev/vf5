@@ -26,14 +26,12 @@ alias KLASS_DRAW_FN   = void function (UTree* kls_t, SDL_Renderer* renderer, UTr
 struct
 Klass {
     string   name;
-    string[] parent_klasses;
+    UTree*[] parent_klasses;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;
     KLASS_SET_FN    set    = &.set;
     KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
-
-    Token[][] tokens;
 }
 
 void

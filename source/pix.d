@@ -143,7 +143,7 @@ event (Pix* pix, Event* ev) {
 
 void
 update (Pix* pix, UTree* doc_t) {
-    doc.update (doc_t); 
+    doc_t.doc.update (doc_t); 
 }
 
 void
@@ -152,7 +152,7 @@ draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t) {
     SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear (renderer);
     // draw
-    doc.draw (doc_t,renderer);
+    doc_t.doc.draw (doc_t,renderer);
     // rasterize
     SDL_RenderPresent (renderer);
 }
