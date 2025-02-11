@@ -159,9 +159,9 @@ send_click_in_deep (Event* ev, UTree* t, Pos down_pos, Pos up_pos, ref UTree* de
 void
 send_event_in_tree (Event* ev) {
     // klass event
-    foreach (_e_tree; utree.WalkChilds (ev.doc_t)) {
+    foreach (_e_tree; WalkChilds (ev.doc_t)) {
         if (_e_tree.uni.type == Uni.Type.e)
-            foreach (_t; utree.WalkTree (_e_tree)) {
+            foreach (_t; WalkTree (_e_tree)) {
                 foreach (kls_t; _t.e.klasses)
                     if (kls_t.klass.event !is null)
                         kls_t.klass.event (kls_t,ev,_t);
@@ -226,19 +226,20 @@ apply_klass (UTree* doc_t, UTree* t, UTree* kls_t) {
     // each sub tree
     foreach (_t; utree.WalkFields (kls_t)) {
         switch (_t.uni.type) {
-            case Uni.Type.field : set_field (t, _t, doc_t); break; // set field
-            case Uni.Type.e     : add_sub_tree (t, _t); break; // add e
+            case Uni.Type.field   : set_field    (doc_t,t,_t); break; // set field
+            case Uni.Type.e       : add_sub_tree (doc_t,t,_t); break; // add e
+            case Uni.Type.switch_ : set_switch   (doc_t,t,_t); break; // set field
             default:
         }
     }
 }
 
 void
-set_field (UTree* dest_t, UTree* field_t, UTree* doc_t) {
-    auto e     = dest_t.uni.e;
+set_field (UTree* doc_t, UTree* dest_t, UTree* field_t) {
+    auto e = dest_t.uni.e;
 
     // `command` -> exec command -> output
-    auto values = extract_quoted (field_t.field,doc_t);
+    auto values = extract_quoted (doc_t,field_t.field.values);
 
     // klasses set
     foreach (kls_t; e.klasses) {
@@ -248,12 +249,49 @@ set_field (UTree* dest_t, UTree* field_t, UTree* doc_t) {
 }
 
 void
-add_sub_tree (UTree* dest_t, UTree* source_t) {
+add_sub_tree (UTree* doc_t, UTree* dest_t, UTree* source_t) {
     // clone each t
     // add in dest_t
     auto cloned = clone_tree (source_t);
     dest_t.add_child (cloned);
 }
+
+void
+set_switch (UTree* doc_t, UTree* dest_t, UTree* swicth_t) {
+    auto cond = swicth_t.uni.switch_.cond;
+
+    auto evaluated = evaluate_switch_cond (doc_t,cond);
+
+    // switch value
+    //   case value1
+    //     field values
+    //   case value2
+    //     field values
+
+    // each child case
+    foreach (case_t; swicth_t.childs)
+        if (case_t.uni.type == Uni.Type.case_)
+        if (case_t.uni.case_.values == evaluated)
+            set_case (doc_t,dest_t,case_t);
+}
+
+void
+set_case (UTree* doc_t, UTree* dest_t, UTree* case_t) {
+    apply_klass (doc_t,dest_t,case_t);
+}
+
+auto
+evaluate_switch_cond (UTree* doc_t, string[] cond) {
+    // 'shell_command.sh -with -args'
+    // "double-quoted string"
+    // klass.field
+    // strings a b c
+
+    writeln ("extract_quoted: ", extract_quoted (doc_t,cond));
+
+    return extract_quoted (doc_t,cond);
+}
+
 
 UTree*
 clone_tree (UTree* t) {
@@ -261,10 +299,12 @@ clone_tree (UTree* t) {
 
     final
     switch (t.type) {
-        case Uni.Type.doc   : cloned = new UTree (new Uni (t.doc.clone  )); break;
-        case Uni.Type.e     : cloned = new UTree (new Uni (t.e.clone    )); break;
-        case Uni.Type.klass : cloned = new UTree (new Uni (t.klass.clone)); break;
-        case Uni.Type.field : cloned = new UTree (new Uni (t.field.clone)); break;
+        case Uni.Type.doc     : cloned = new UTree (new Uni (t.doc.clone  )); break;
+        case Uni.Type.e       : cloned = new UTree (new Uni (t.e.clone    )); break;
+        case Uni.Type.klass   : cloned = new UTree (new Uni (t.klass.clone)); break;
+        case Uni.Type.field   : cloned = new UTree (new Uni (t.field.clone)); break;
+        case Uni.Type.switch_ : cloned = new UTree (new Uni (t.switch_.clone)); break;
+        case Uni.Type.case_   : cloned = new UTree (new Uni (t.case_.clone)); break;
     }
 
     return cloned;
@@ -272,16 +312,16 @@ clone_tree (UTree* t) {
 
 
 string[]
-extract_quoted (Field* field, UTree* doc_t) {
-    string[] values;
-    values.reserve (field.values.length);
-    foreach (v; field.values) 
+extract_quoted (UTree* doc_t, string[] values) {
+    string[] vs;
+    vs.reserve (values.length);
+    foreach (v; values) 
         if (v.startsWith ("`")) 
-            values ~= extract_value (doc_t,v);
+            vs ~= extract_value (doc_t,v);
         else
-            values ~= v;
+            vs ~= v;
 
-    return values;    
+    return vs;
 }
 
 //void
@@ -422,15 +462,15 @@ update_sizes (UTree* doc_t) {
 
 void
 update_poses (UTree* doc_t) {
-    foreach (UTree* _e_tree; utree.WalkChilds (doc_t))
+    foreach (UTree* _e_tree; WalkChilds (doc_t))
         if (_e_tree.uni.type == Uni.Type.e)
-            foreach (UTree* _t; utree.WalkTree (_e_tree))
+            foreach (UTree* _t; WalkTree (_e_tree))
                 update_pos (doc_t,_t);
 }
 
 void
 dump_sizes (UTree* doc_t) {
-    foreach (UTree* _e_tree; utree.WalkChilds (doc_t))
+    foreach (UTree* _e_tree; WalkChilds (doc_t))
         if (_e_tree.uni.type == Uni.Type.e)
             dump_size (doc_t,_e_tree); // recursive
 }
@@ -454,7 +494,7 @@ dump_size (UTree* doc_t, UTree* t, int level=0) {
     writeln ("  content.size_w_type : ", e.content.size_w_type);
 
     // recursive
-    foreach (tc; utree.WalkChilds (t))
+    foreach (tc; WalkChilds (t))
         dump_size (doc_t,tc,level+1);
 }
 
@@ -1248,43 +1288,6 @@ doc_get_klass_field_value (UTree* doc_t, string s) {
 //      fg yellow
 //    stopped
 //      fg red
-version (question_)
-void
-go_question_subclass (string[] s) {
-    import std.process;
-
-    if (action.length) {
-        if (s[0] == "?") {
-            if (s.length >= 2) {
-                auto ret = execute (action[1..$]);  // (int status, string output)
-                writeln (ret.status);
-                writeln (ret.output);
-                foreach (c; WalkChilds (this))
-                    if (c.name == ret.output) {
-                        // ...
-                    }
-            }
-        }
-    }
-}
-
-//title
-//  text ? audtool current-song
-version (question_)
-void
-go_question_value (string[] s) {
-    import std.process;
-
-    if (action.length) {
-        if (s[0] == "?") {
-            if (s.length >= 2) {
-                auto ret = execute (action[1..$]);  // (int status, string output)
-                writeln (ret.status);
-                writeln (ret.output);
-            }
-        }
-    }
-}
 
 void
 on_click (Event* ev) {

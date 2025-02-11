@@ -14,12 +14,12 @@ struct
 Uni {
     Type type;
     union {
-        Doc*    _doc;      // E*[] Klass*[]
-        E*      _e;        // E*[]
-        Klass*  _klass;    // Field*[] E*[] Switch*[]
-        Field*  _field;    // 
-        //Switch* _switch; // Case*[]
-        //Case*   _case;   // Field*[]
+        Doc*     _doc;    // E*[] Klass*[]
+        E*       _e;      // E*[]
+        Klass*   _klass;  // Field*[] E*[] Switch*[]
+        Field*   _field;  // 
+        Switch_* _switch; // Case*[]
+        Case_*   _case;   // Field*[]
     }
 
     this (Doc* doc) {
@@ -42,10 +42,22 @@ Uni {
         this._field = field;
     }
 
-    Doc*   doc   () {assert (type == Type.doc  ); return _doc;}
-    E*     e     () {assert (type == Type.e    ); return _e;}
-    Klass* klass () {assert (type == Type.klass); return _klass;}
-    Field* field () {assert (type == Type.field); return _field;}
+    this (Switch_* switch_) {
+        type         = Type.switch_;
+        this._switch = switch_;
+    }
+
+    this (Case_* case_) {
+        type       = Type.case_;
+        this._case = case_;
+    }
+
+    Doc*     doc     () {assert (type == Type.doc  ); return _doc;}
+    E*       e       () {assert (type == Type.e    ); return _e;}
+    Klass*   klass   () {assert (type == Type.klass); return _klass;}
+    Field*   field   () {assert (type == Type.field); return _field;}
+    Switch_* switch_ () {assert (type == Type.switch_); return _switch;}
+    Case_*   case_   () {assert (type == Type.case_); return _case;}
 
     enum
     Type {
@@ -53,19 +65,45 @@ Uni {
         e,
         klass,
         field,
+        switch_,
+        case_,
     }
 
     string
     toString () {
         final
         switch (type) {
-            case Type.doc   : return "Uni(" ~ ((*doc).to!string) ~ ")";
-            case Type.e     : return "Uni(" ~ ((*e).to!string) ~ ")";
-            case Type.klass : return "Uni(" ~ ((*klass).to!string) ~ ")";
-            case Type.field : return "Uni(" ~ ((*field).to!string) ~ ")";
+            case Type.doc     : return "Uni(" ~ ((*doc).to!string) ~ ")";
+            case Type.e       : return "Uni(" ~ ((*e).to!string) ~ ")";
+            case Type.klass   : return "Uni(" ~ ((*klass).to!string) ~ ")";
+            case Type.field   : return "Uni(" ~ ((*field).to!string) ~ ")";
+            case Type.switch_ : return "Uni(" ~ ((*switch_).to!string) ~ ")";
+            case Type.case_   : return "Uni(" ~ ((*case_).to!string) ~ ")";
         }
     }
 }
+
+struct
+Switch_ {
+    string[] cond;
+
+    Switch_*
+    clone () {
+        return new Switch_ ();
+    }
+}
+
+struct
+Case_ {
+    string[] values;
+
+    Case_*
+    clone () {
+        return new Case_ ();
+    }
+}
+
+
 
 UTree*
 new_doc () {
@@ -124,7 +162,7 @@ _WalkFields {
     int
     opApply (int delegate (UTree* field_t) dg) {
         assert (kls_t !is null);
-        assert (kls_t.uni.type == Uni.Type.klass);
+        assert (kls_t.uni.type == Uni.Type.klass || kls_t.uni.type == Uni.Type.case_);
 
         int result;
 
@@ -132,6 +170,7 @@ _WalkFields {
             switch (_t.uni.type) {
                 case Uni.Type.field: 
                 case Uni.Type.e: 
+                case Uni.Type.switch_: 
                     result = dg (_t);
                     if (result)
                         return result;
@@ -204,3 +243,4 @@ auto
 WalkChilds (Tree) (Tree* t) {
     return vf.tree.WalkChilds (t, &skip_hidden);
 }
+

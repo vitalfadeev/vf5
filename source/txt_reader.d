@@ -190,20 +190,13 @@ tb-prev
   on click commands.player.prev
 
 tb-play-pause
-  image /home/vf/src/vf5/img/play-pause.png
-  on click commands.player.play_pause
-
-//tb-play-pause...
-// switch `audtool playback-status`
-//   playing
-//     image /home/vf/src/vf5/img/play.png
-//     on click commands.player.pause
-//   paused
-//     image /home/vf/src/vf5/img/pause.png
-//     on click commands.player.play
-// switch `audtool playback-status-2`
-//   playing
-//   paused
+ switch `commands.player.status`
+   playing
+     image /home/vf/src/vf5/img/pause.png
+     on click commands.player.play_pause
+   paused
+     image /home/vf/src/vf5/img/play.png
+     on click commands.player.play_pause
 
 tb-stop
   image /home/vf/src/vf5/img/stop.png
@@ -353,6 +346,7 @@ commands
   player.current-song-output-length audtool current-song-output-length
   player.current-song-frequency-khz audtool current-song-frequency-khz
   player.current-song-bitrate-kbps  audtool current-song-bitrate-kbps
+  player.status                     audtool playback-status
 
 hotkeys
   x commands.player.prev
@@ -422,18 +416,6 @@ e
 title
   text `audtool current-song`
 
-status
-  inherit status-`audtool playback-status`
-
-status-plaing  
-  fg green
-
-status-paused
-  fg yellow
-
-status-stopped
-  fg red
-
 Play
   pos      t9 1 r
   text     play
@@ -495,12 +477,12 @@ go (UTree* doc_t, string s) {
         if (name != "e" && indent == 0)  // klass
             t = new_klass (doc_t,name,t_line[1..$]);
         else
-        if (name != "e" && indent >= 1)  // field
-            t = new_field (doc_t,name,t_line[2..$]);
+        if (name != "e" && indent >= 1)  // field swicth case
+            t = new_field_swicth_case (doc_t,name,t_line, last_t,indent);
 
         t.indent = indent;
 
-        // add in tree, if not added
+        // check for 'in tree'. add
         if (t.parent is null) {
             parent_t = find_parent (last_t,indent);
 
@@ -603,6 +585,59 @@ new_field (UTree* doc_t, string name, Token[] t_line) {
         }
 
     auto t = new UTree (new Uni (new Field (name,values)));
+
+    return t;    
+}
+
+UTree*
+new_field_swicth_case (UTree* doc_t, string name, Token[] t_line, UTree* last_t, size_t indent) {
+    auto parent_t  = find_parent (last_t,indent);
+    bool in_switch = (parent_t !is null && (parent_t.uni.type == Uni.Type.switch_));
+    UTree* t;
+
+    if (name == "switch")
+        t = new_switch (doc_t,t_line[2..$]);
+    else
+    if (in_switch)
+        t = new_case (doc_t,t_line[1..$]);
+    else
+        t = new_field (doc_t,name,t_line[2..$]);
+
+    return t;    
+}
+
+UTree*
+new_switch (UTree* doc_t, Token[] t_line) {
+    string[] values;
+    foreach (_tok; t_line)
+        switch (_tok.type) {
+            case Token.Type.string:
+            case Token.Type.dquoted:
+            case Token.Type.bquoted:
+                values ~= _tok.s;
+                break;
+            default:
+        }
+
+    auto t = new UTree (new Uni (new Switch_ (values)));
+
+    return t;    
+}
+
+UTree*
+new_case (UTree* doc_t, Token[] t_line) {
+    string[] values;
+    foreach (_tok; t_line)
+        switch (_tok.type) {
+            case Token.Type.string:
+            case Token.Type.dquoted:
+            case Token.Type.bquoted:
+                values ~= _tok.s;
+                break;
+            default:
+        }
+
+    auto t = new UTree (new Uni (new Case_ (values)));
 
     return t;    
 }
