@@ -9,18 +9,11 @@ import bindbc.sdl;
 //   SDL_PIXELFORMAT_RGBA8888 on big-endian systems
 alias Color = SDL_Color;
 
-struct
-DeltaColor {
-    double r;
-    double g;
-    double b;
-}
-
-struct
-DeltaTcbColor {
-    double t;
-    double c;
-    double b;
+enum
+ColorBit {
+    none,
+    plus,
+    minus
 }
 
 // HSL
@@ -45,6 +38,20 @@ Color_tcb {
         return Color_tcb (h,s,l);
     }
 
+    static
+    Color_tcb
+    from_string (string s, ColorBit[4]* bits) {
+        // tcb +1 +1 +1
+        // read tcb
+        // loop:
+        //   read spaecs
+        //   read sign
+        //   read numbers
+        //parse_color_tcb ();
+
+        return Color_tcb ();
+    }
+
     Color
     to_Color () {
         double h = t;
@@ -63,6 +70,44 @@ Color_tcb {
 
         return Color (r,g,b,0xFF);
     }
+
+    Color_tcb
+    update (ColorBit[4] bits, ubyte[4] bytes) {
+        Color_tcb updated = this;
+
+        final
+        switch (bits[0]) {
+            case ColorBit.none : updated.t  = bytes[0]; break;
+            case ColorBit.plus : updated.t += bytes[0]; break;
+            case ColorBit.minus: updated.t -= bytes[0]; break;
+        }
+
+        final
+        switch (bits[1]) {
+            case ColorBit.none : updated.t  = bytes[1]; break;
+            case ColorBit.plus : updated.t += bytes[1]; break;
+            case ColorBit.minus: updated.t -= bytes[1]; break;
+        }
+
+        final
+        switch (bits[2]) {
+            case ColorBit.none : updated.t  = bytes[2]; break;
+            case ColorBit.plus : updated.t += bytes[2]; break;
+            case ColorBit.minus: updated.t -= bytes[2]; break;
+        }
+
+
+        return updated;
+    }
+}
+
+Color 
+update_tcb (Color color, ColorBit[4] bits, ubyte[4] bytes) {
+    return
+        Color_tcb
+            .from_Color (color)
+            .update (bits,bytes)
+            .to_Color;
 }
 
 alias Color BG;

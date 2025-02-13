@@ -11,7 +11,7 @@ import utree;
 import klass;
 import e;
 import types;
-import txt_parser : parse_color_hex, parse_color;
+import txt_parser : parse_color_hex, parse_color, parse_color_tcb;
 
 
 struct 
@@ -504,12 +504,7 @@ doc_parse_color (UTree* doc_t, string s, Color* color) {
     else
     if (s.startsWith ("tcb")) {
         // tcb +0 +0 -25
-        // Color_tcb.from_string (s, &fixed, &delta);
-        // auto color = 
-        //   Color_tcb
-        //     .from_Color (color)
-        //     .update (delta)
-        //     .to_Color ();
+        return parse_color_tcb (s, color);
     }
     else {
         string[] color_s = doc_get_klass_field_value (doc_t,s);

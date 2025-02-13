@@ -3,7 +3,6 @@ module vf.tree;
 
 struct
 Tree (UNI) {
-    UNI*  uni; alias uni this;
     Tree* l;
     Tree* r;
     struct 
@@ -15,6 +14,11 @@ Tree (UNI) {
     Childs childs;
     Tree*  parent;
     size_t indent;
+    UNI*  uni; alias uni this;
+
+    this (UNI* uni) {
+        this.uni = uni;
+    }
 
     mixin tree_functions;
 }

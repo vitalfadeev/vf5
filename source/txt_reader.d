@@ -2,6 +2,7 @@ module txt_reader;
 
 import std.stdio;
 import std.conv;
+import tstring;
 import txt_token;
 import txt_syntax;
 import doc;
@@ -47,7 +48,7 @@ rect
   pad          10
   pad.bg       #008
   borders      2 solid #ccc
-  text         123
+  text         `123 abc`
   text.fg      #ccc
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 //comment
@@ -446,23 +447,24 @@ go (UTree* doc_t, string s) {
     size_t indent;
     string name;
 
+
     auto reader = Token_line_reader (s);
     foreach (t_line; reader) {
         // skip
-        if (t_line[0].type == Token.Type.cr)
+        if (t_line[0].type == TString.Type.cr)
             continue;
-        if (t_line[0].type == Token.Type.comment)
+        if (t_line[0].type == TString.Type.comment)
             continue;
-        if (t_line[0].type == Token.Type.none)
+        if (t_line[0].type == TString.Type.none)
             continue;
 
         //
-        if (t_line[0].type == Token.Type.string) {
+        if (t_line[0].type == TString.Type.string) {
             indent = 0;
             name   = t_line[0].s;
         }
         else
-        if (t_line[0].type == Token.Type.spaces) {
+        if (t_line[0].type == TString.Type.spaces) {
             indent = t_line[0].s.length;
             name   = t_line[1].s;
         }
@@ -530,12 +532,12 @@ new_doc () {
 }
 
 UTree*
-new_e (UTree* doc_t, Token[] t_line) {
+new_e (UTree* doc_t, TString[] t_line) {
     return new_child_e (doc_t,t_line);
 }
 
 UTree*
-new_child_e (UTree* doc_t, Token[] t_line) {
+new_child_e (UTree* doc_t, TString[] t_line) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
@@ -545,25 +547,25 @@ new_child_e (UTree* doc_t, Token[] t_line) {
     auto e = t.e;
 
     // klasses
-    foreach (_tok; t_line)
-        if (_tok.type == Token.Type.string)
-            e.klasses ~= find_klass_or_create (doc_t,_tok.s);
+    foreach (ts; t_line)
+        if (ts.type == TString.Type.string)
+            e.klasses ~= find_klass_or_create (doc_t,ts.s);
 
     return t;
 }
 
 
 UTree*
-new_klass (UTree* doc_t, string name, Token[] t_line) {
+new_klass (UTree* doc_t, string name, TString[] t_line) {
     auto t = find_klass_or_create (doc_t,name);
 
     // setup parents
-    foreach (_tok; t_line)
-        switch (_tok.type) {
-            case Token.Type.string:
-            case Token.Type.dquoted:
-            case Token.Type.bquoted:
-                //t.klass.parent_klasses ~= find_klass_or_create (doc_t,_tok.s);
+    foreach (ts; t_line)
+        switch (ts.type) {
+            case TString.Type.string:
+            case TString.Type.dquoted:
+            case TString.Type.bquoted:
+                //t.klass.parent_klasses ~= find_klass_or_create (doc_t,ts.s);
                 break;
             default:
         }
@@ -572,14 +574,14 @@ new_klass (UTree* doc_t, string name, Token[] t_line) {
 }
 
 UTree*
-new_field (UTree* doc_t, string name, Token[] t_line) {
+new_field (UTree* doc_t, string name, TString[] t_line) {
     string[] values;
-    foreach (_tok; t_line)
-        switch (_tok.type) {
-            case Token.Type.string:
-            case Token.Type.dquoted:
-            case Token.Type.bquoted:
-                values ~= _tok.s;
+    foreach (ts; t_line)
+        switch (ts.type) {
+            case TString.Type.string:
+            case TString.Type.dquoted:
+            case TString.Type.bquoted:
+                values ~= ts.s;
                 break;
             default:
         }
@@ -590,7 +592,7 @@ new_field (UTree* doc_t, string name, Token[] t_line) {
 }
 
 UTree*
-new_field_swicth_case (UTree* doc_t, string name, Token[] t_line, UTree* last_t, size_t indent) {
+new_field_swicth_case (UTree* doc_t, string name, TString[] t_line, UTree* last_t, size_t indent) {
     auto parent_t  = find_parent (last_t,indent);
     bool in_switch = (parent_t !is null && (parent_t.uni.type == Uni.Type.switch_));
     UTree* t;
@@ -607,14 +609,14 @@ new_field_swicth_case (UTree* doc_t, string name, Token[] t_line, UTree* last_t,
 }
 
 UTree*
-new_switch (UTree* doc_t, Token[] t_line) {
+new_switch (UTree* doc_t, TString[] t_line) {
     string[] values;
-    foreach (_tok; t_line)
-        switch (_tok.type) {
-            case Token.Type.string:
-            case Token.Type.dquoted:
-            case Token.Type.bquoted:
-                values ~= _tok.s;
+    foreach (ts; t_line)
+        switch (ts.type) {
+            case TString.Type.string:
+            case TString.Type.dquoted:
+            case TString.Type.bquoted:
+                values ~= ts.s;
                 break;
             default:
         }
@@ -625,14 +627,14 @@ new_switch (UTree* doc_t, Token[] t_line) {
 }
 
 UTree*
-new_case (UTree* doc_t, Token[] t_line) {
+new_case (UTree* doc_t, TString[] t_line) {
     string[] values;
-    foreach (_tok; t_line)
-        switch (_tok.type) {
-            case Token.Type.string:
-            case Token.Type.dquoted:
-            case Token.Type.bquoted:
-                values ~= _tok.s;
+    foreach (ts; t_line)
+        switch (ts.type) {
+            case TString.Type.string:
+            case TString.Type.dquoted:
+            case TString.Type.bquoted:
+                values ~= ts.s;
                 break;
             default:
         }

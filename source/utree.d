@@ -9,6 +9,12 @@ import field : Field;
 
 alias UTree = Tree!Uni;
 
+//alias EUniTree       = Tree!(Uni!E);
+//alias KlassUniTree   = Tree!(Uni!Klass);
+//alias FieldUniTree   = Tree!(Uni!Field);
+//alias SwitchdUniTree = Tree!(Uni!Switch_);
+//alias CaseUniTree    = Tree!(Uni!Case_);
+
 
 struct
 Uni {
@@ -21,6 +27,16 @@ Uni {
         Switch_* _switch; // Case*[]
         Case_*   _case;   // Field*[]
     }
+    //Type type = mixin ("Type."~KLS.stringof.toLower);
+    //KLS  klass;
+    //union {
+    //    Doc[0]     _doc2;    // E*[] Klass*[]
+    //    E[0]       _e2;      // E*[]
+    //    Klass[0]   _klass2;  // Field*[] E*[] Switch*[]
+    //    Field[0]   _field2;  // 
+    //    Switch_[0] _switch2; // Case*[]
+    //    Case_[0]   _case2;   // Field*[]
+    //}
 
     this (Doc* doc) {
         type      = Type.doc;

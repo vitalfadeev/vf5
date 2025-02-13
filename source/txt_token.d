@@ -1,11 +1,12 @@
 module txt_token;
 
 import std.stdio;
+import tstring;
 
 alias UTF8_string = string;
 alias UTF8_char   = dchar;
 
-
+/*
 struct
 Tokenizer {
     UTF8_string s;
@@ -27,22 +28,22 @@ Tokenizer {
     }
 }
 
-struct
-Token {
-    Type        type;
-    UTF8_string s;  // length,ptr
+//struct
+//Token {
+//    Type        type;
+//    UTF8_string s;  // length,ptr
 
-    enum
-    Type {
-        none,
-        string,   // abc
-        dquoted,  // "text"
-        bquoted,  // `text`
-        spaces,   // a b
-        comment,  // // comment
-        cr
-    }
-}
+//    enum
+//    Type {
+//        none,
+//        string,   // abc
+//        dquoted,  // "text"
+//        bquoted,  // `text`
+//        spaces,   // a b
+//        comment,  // // comment
+//        cr
+//    }
+//}
 
 class
 Reader {
@@ -297,19 +298,21 @@ UTF8_reader {
 }
 
 
+
+*/
+
 struct
 Token_line_reader {
     UTF8_string s;
 
     int
-    opApply (int delegate (Token[] t_line) dg) {
-        auto reader = Tokenizer (s);
-        Token[] t_line;
+    opApply (int delegate (TString[] t_line) dg) {
+        TString[] t_line;
 
-        foreach (t; reader) {
-            t_line ~= *t;
+        foreach (ts; to_tstrings (s)) {
+            t_line ~= ts;
 
-            if (t.type ==Token.Type.cr) {
+            if (ts.type ==TString.Type.cr) {
                 int result = dg (t_line);
                 if (result)
                     return result;
@@ -328,4 +331,3 @@ Token_line_reader {
         return 0;
     }
 }
-

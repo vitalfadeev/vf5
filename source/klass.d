@@ -1,5 +1,4 @@
 import bindbc.sdl;
-import txt_token : Token;
 import utree;
 import doc : Doc;
 import e : E;
