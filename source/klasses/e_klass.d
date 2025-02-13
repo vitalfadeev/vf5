@@ -5,6 +5,7 @@ import std.string;
 import std.conv;
 import std.process;
 import bindbc.sdl;
+import tstring;
 import events;
 import doc;
 import utree;
@@ -52,7 +53,7 @@ update (UTree* kls_t, UTree* doc_t, UTree* e_t) {
 
 // KLASS_SET_FN
 void
-set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, string[] values) {
+set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -110,7 +111,7 @@ draw (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t) {
 
 //
 void
-set_pos (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
     
@@ -126,11 +127,11 @@ set_pos (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e = e_t.e;
 
     if (values.length >= 2) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
             case "3"    : e.pos_type = E.PosType.t3; break;
@@ -141,7 +142,7 @@ set_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
             default:
                 e.pos_type = E.PosType.none;
         }
-        switch (values[1]) {
+        switch (values[1].s) {
             case "b" : e.pos_dir = E.PosDir.b; break;
             case "r" : e.pos_dir = E.PosDir.r; break;
             case "l" : e.pos_dir = E.PosDir.l; break;
@@ -152,7 +153,7 @@ set_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
     }
     else
     if (values.length >= 1) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "9"    : e.pos_type = E.PosType.t9; break;
             case "t9"   : e.pos_type = E.PosType.t9; break;
             case "3"    : e.pos_type = E.PosType.t3; break;
@@ -167,21 +168,21 @@ set_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_pos_group (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos_group (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e = e_t.e;
     
     if (values.length >= 1) {
-        e.pos_group = values[0].to!ubyte;
+        e.pos_group = values[0].s.to!ubyte;
     }
 }
 
 void
-set_pos_dir (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos_dir (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length >= 1) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "r": e.pos_dir = E.PosDir.r; break;
             case "l": e.pos_dir = E.PosDir.l; break;
             case "t": e.pos_dir = E.PosDir.b; break;
@@ -192,37 +193,37 @@ set_pos_dir (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_pos_x (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos_x (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        //if (values[0] == "auto")
+        //if (values[0].s == "auto")
         //    e.pos_x_auto = true;
-        if (values[0].isNumeric ()) {
-            e.pos.x = values[0].to!X;
+        if (values[0].s.isNumeric ()) {
+            e.pos.x = values[0].s.to!X;
             //e.pos_x_auto = false;
         }
     }
 }
 
 void
-set_pos_y (UTree* doc_t, UTree* e_t, string[] values) {
+set_pos_y (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        //if (values[0] == "auto")
+        //if (values[0].s == "auto")
         //    e.pos_y_auto = true;
-        if (values[0].isNumeric ()) {
-            e.pos.y = values[0].to!Y;
+        if (values[0].s.isNumeric ()) {
+            e.pos.y = values[0].s.to!Y;
             //e.pos_y_auto = false;
         }
     }
 }
 
 void
-set_size (UTree* doc_t, UTree* e_t, string[] values) {
+set_size (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -238,71 +239,71 @@ set_size (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_size_w (UTree* doc_t, UTree* e_t, string[] values) {
+set_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "fixed"   : e.size_w_type = E.SizeType.fixed;  break;
             case "content" : e.size_w_type = E.SizeType.content; break;
             case "parent"  : e.size_w_type = E.SizeType.parent;  break;
             case "window"  : e.size_w_type = E.SizeType.window;  break;
             case "max"     : e.size_w_type = E.SizeType.max;  break;
             default : 
-                if (values[0].isNumeric ()) {
-                    e.size.w = values[0].to!W;
+                if (values[0].s.isNumeric ()) {
+                    e.size.w = values[0].s.to!W;
                     e.size_w_type = E.SizeType.fixed;
                 }
                 else {
-                    throw new Exception ("unsupported size.w: " ~ values[0]);
+                    throw new Exception ("unsupported size.w: " ~ values[0].s);
                 }
         }
     }
 }
 
 void
-set_size_h (UTree* doc_t, UTree* e_t, string[] values) {
+set_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "fixed"   : e.size_h_type = E.SizeType.fixed;  break;
             case "content" : e.size_h_type = E.SizeType.content; break;
             case "parent"  : e.size_h_type = E.SizeType.parent;  break;
             case "window"  : e.size_w_type = E.SizeType.window;  break;
             case "max"     : e.size_w_type = E.SizeType.max;  break;
             default : 
-                if (values[0].isNumeric ()) {
-                    e.size.h = values[0].to!H;
+                if (values[0].s.isNumeric ()) {
+                    e.size.h = values[0].s.to!H;
                     e.size_h_type = E.SizeType.fixed;
                 }
                 else {
-                    throw new Exception ("unsupported size.h: " ~ values[0]);
+                    throw new Exception ("unsupported size.h: " ~ values[0].s);
                 }
         }
     }
 }
 
 void
-set_hidden (UTree* doc_t, UTree* e_t, string[] values) {
+set_hidden (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        if (values[0].isNumeric)
-            e.hidden = values[0].to!int != 0;
+        if (values[0].s.isNumeric)
+            e.hidden = values[0].s.to!int != 0;
     }
 }
 
 void
-set_popup (UTree* doc_t, UTree* e_t, string[] values) {
+set_popup (UTree* doc_t, UTree* e_t, TString[] values) {
     // e.popup = "popup-file";
 }
 
 void
-set_borders (UTree* doc_t, UTree* e_t, string[] values) {
+set_borders (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -329,7 +330,7 @@ set_borders (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_border_t (UTree* doc_t, UTree* e_t, string[] values) {
+set_border_t (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -339,7 +340,7 @@ set_border_t (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_border_r (UTree* doc_t, UTree* e_t, string[] values) {
+set_border_r (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -349,7 +350,7 @@ set_border_r (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_border_b (UTree* doc_t, UTree* e_t, string[] values) {
+set_border_b (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -359,7 +360,7 @@ set_border_b (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_border_l (UTree* doc_t, UTree* e_t, string[] values) {
+set_border_l (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -369,7 +370,7 @@ set_border_l (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_borders_color (UTree* doc_t, UTree* e_t, string[] values) {
+set_borders_color (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -382,22 +383,22 @@ set_borders_color (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_pad (UTree* doc_t, UTree* e_t, string[] values) {
+set_pad (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length >= 4) {
-        if (values[0].isNumeric) {
-            e.pad.t = values[0].to!Y;
+        if (values[0].s.isNumeric) {
+            e.pad.t = values[0].s.to!Y;
         }
-        if (values[1].isNumeric) {
-            e.pad.r = values[1].to!X;
+        if (values[1].s.isNumeric) {
+            e.pad.r = values[1].s.to!X;
         }
-        if (values[2].isNumeric) {
-            e.pad.b = values[1].to!Y;
+        if (values[2].s.isNumeric) {
+            e.pad.b = values[1].s.to!Y;
         }
-        if (values[3].isNumeric) {
-            e.pad.l = values[1].to!X;
+        if (values[3].s.isNumeric) {
+            e.pad.l = values[1].s.to!X;
         }
     }
     else
@@ -406,30 +407,30 @@ set_pad (UTree* doc_t, UTree* e_t, string[] values) {
     }
     else
     if (values.length >= 2) {
-        if (values[0].isNumeric) {
-            e.pad.r = e.pad.l = values[0].to!X;
+        if (values[0].s.isNumeric) {
+            e.pad.r = e.pad.l = values[0].s.to!X;
         }
-        if (values[1].isNumeric) {
-            e.pad.t = e.pad.b = values[1].to!Y;
+        if (values[1].s.isNumeric) {
+            e.pad.t = e.pad.b = values[1].s.to!Y;
         }
     }
     else
     if (values.length == 1) {
-        if (values[0].isNumeric) {
-            e.pad.r = e.pad.l = values[0].to!X;
-            e.pad.t = e.pad.b = values[0].to!Y;
+        if (values[0].s.isNumeric) {
+            e.pad.r = e.pad.l = values[0].s.to!X;
+            e.pad.t = e.pad.b = values[0].s.to!Y;
         }
     }
 }
 
 void
-set_pad_bg (UTree* doc_t, UTree* e_t, string[] values) {
+set_pad_bg (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         Color c = e.pad.bg;
-        if (doc_parse_color (doc_t, values[0], &c))
+        if (doc_parse_color (doc_t, values, &c))
             e.pad.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -437,7 +438,7 @@ set_pad_bg (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_border (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {    
+set_border (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {    
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -449,39 +450,39 @@ set_border (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {
 }
 
 void
-set_border_w (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {
+set_border_w (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        if (values[0].isNumeric)
-            border.w = values[0].to!W;
+        if (values[0].s.isNumeric)
+            border.w = values[0].s.to!W;
     }
 }
 
 void
-set_border_type (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {
+set_border_type (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        if (values[0] == "none")
+        if (values[0].s == "none")
             border.type = E.Border.Type.none;
-        if (values[0] == "solid")
+        if (values[0].s == "solid")
             border.type = E.Border.Type.solid;
-        if (values[0] == "dash")
+        if (values[0].s == "dash")
             border.type = E.Border.Type.dash;
     }
 }
 
 void
-set_border_color (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {
+set_border_color (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values[0], &c))
+        if (doc_parse_color (doc_t, values, &c))
             border.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -489,45 +490,45 @@ set_border_color (UTree* doc_t, UTree* e_t, E.Border* border, string[] values) {
 }
 
 bool
-doc_parse_color (UTree* doc_t, string s, Color* color) {
+doc_parse_color (UTree* doc_t, TString[] tss, Color* color) {
     import std.string : startsWith;
 
     auto doc = doc_t.doc;
 
-    if (s.startsWith ("#"))
-        return parse_color_hex (s, color);
+    if (tss[0].s.startsWith ("#"))
+        return parse_color_hex (tss[0].s, color);
     else
-    if (s.startsWith ("rgb")) {
+    if (tss[0].s.startsWith ("rgb")) {
         // rgb()
         // rgb 0 0 0
     }
     else
-    if (s.startsWith ("tcb")) {
+    if (tss[0].s.startsWith ("tcb")) {
         // tcb +0 +0 -25
-        return parse_color_tcb (s, color);
+        return parse_color_tcb (tss,color);
     }
     else {
-        string[] color_s = doc_get_klass_field_value (doc_t,s);
+        TString[] color_s = doc_get_klass_field_value (doc_t,tss[0].s);
         if (color_s.length)
-            return parse_color (color_s[0], color); 
+            return parse_color (color_s, color); 
     }
 
     return false;
 }
 
 void
-set_content_image (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_image (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        e.content.image.src = values[0];
+        e.content.image.src = values[0].s;
     }
 }
 
 
 void
-set_content_text (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_text (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -537,13 +538,13 @@ set_content_text (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_text_fg (UTree* doc_t, UTree* e_t, string[] values) {
+set_text_fg (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values[0], &c))
+        if (doc_parse_color (doc_t, values, &c))
             e.content.text.fg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -551,13 +552,13 @@ set_text_fg (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_text_bg (UTree* doc_t, UTree* e_t, string[] values) {
+set_text_bg (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values[0], &c))
+        if (doc_parse_color (doc_t, values, &c))
             e.content.text.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -565,12 +566,12 @@ set_text_bg (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_text_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
+set_text_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "9"    : e.content.text.pos_type = E.PosType.t9; break;
             case "t9"   : e.content.text.pos_type = E.PosType.t9; break;
             case "3"    : e.content.text.pos_type = E.PosType.t3; break;
@@ -585,12 +586,12 @@ set_text_pos_type (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content_size_w (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
             case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
@@ -598,8 +599,8 @@ set_content_size_w (UTree* doc_t, UTree* e_t, string[] values) {
             case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
             default: {
-                if (isNumeric (values[0])) {
-                    e.content.size.w      = values[0].to!W;
+                if (isNumeric (values[0].s)) {
+                    e.content.size.w      = values[0].s.to!W;
                     e.content.size_w_type = E.Content.SizeType.fixed;
                 }
                 else
@@ -610,12 +611,12 @@ set_content_size_w (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content_size_h (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_h_type = E.Content.SizeType.fixed; break;
             case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
@@ -623,8 +624,8 @@ set_content_size_h (UTree* doc_t, UTree* e_t, string[] values) {
             case "text"   : e.content.size_h_type = E.Content.SizeType.text; break;
             case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
             default:
-            if (isNumeric (values[0])) {
-                e.content.size.h      = values[0].to!H;
+            if (isNumeric (values[0].s)) {
+                e.content.size.h      = values[0].s.to!H;
                 e.content.size_h_type = E.Content.SizeType.fixed;
             }
             else
@@ -634,7 +635,7 @@ set_content_size_h (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content_size (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_size (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -650,12 +651,12 @@ set_content_size (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content_size_type (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_size_type (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        switch (values[0]) {
+        switch (values[0].s) {
             case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
             case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
@@ -669,7 +670,7 @@ set_content_size_type (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content_text_font (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_text_font (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -686,45 +687,45 @@ static
 string[] global_font_files;
 
 void
-set_content_text_font_file (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_text_font_file (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         // collect font names
-        global_font_files ~= values[0];
-        e.content.text.font.file = values[0];
+        global_font_files ~= values[0].s;
+        e.content.text.font.file = values[0].s;
     }
 }
 
 void
-set_content_text_font_family (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_text_font_family (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        e.content.text.font.family = values[0];
+        e.content.text.font.family = values[0].s;
     }
 }
 
 void
-set_content_text_font_size (UTree* doc_t, UTree* e_t, string[] values) {
+set_content_text_font_size (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        e.content.text.font.size = values[0].to!ubyte;
+        e.content.text.font.size = values[0].s.to!ubyte;
     }
 }
 
 void
-set_bg (UTree* doc_t, UTree* e_t, string[] values) {
+set_bg (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t,values[0], &c))
+        if (doc_parse_color (doc_t,values, &c))
             e.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -732,7 +733,7 @@ set_bg (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_content (UTree* doc_t, UTree* e_t, string[] values) {
+set_content (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -742,12 +743,12 @@ set_content (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 void
-set_on (UTree* doc_t, UTree* e_t, string[] values) {
+set_on (UTree* doc_t, UTree* e_t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
     if (values.length) {
-        string event  = values[0];
+        string event  = values[0].s;
         if (values.length == 1) {
             // no action
         }
@@ -759,7 +760,7 @@ set_on (UTree* doc_t, UTree* e_t, string[] values) {
 }
 
 //void
-//set_e (Doc* doc, ETree* t, Klass* kls, string[] values) {
+//set_e (Doc* doc, ETree* t, Klass* kls, TString[] values) {
 //    auto e = t.e;
 //    if (values.length) {
 //        // add child to t
@@ -793,7 +794,7 @@ extract_value (UTree* doc_t, string bquoted) {
 
 string
 extract_class_field_value (UTree* doc_t, string s) {
-    string[] cmd = doc_get_klass_field_value (doc_t,s);
+    TString[] cmd = doc_get_klass_field_value (doc_t,s);
     if (cmd.length)
         return cmd.join (" ");
     else

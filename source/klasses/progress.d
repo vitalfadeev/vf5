@@ -4,6 +4,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
+import tstring;
 import events;
 import doc;
 import utree;
@@ -101,7 +102,7 @@ update (UTree* kls_t, UTree* doc_t, UTree* t) {
 
 // KLASS_SET_FN
 void 
-set (UTree* kls_t, UTree* doc_t, UTree* t, string field_id, string[] values) {
+set (UTree* kls_t, UTree* doc_t, UTree* t, string field_id, TString[] values) {
     auto e = t.e;
 
     switch (field_id) {
@@ -126,9 +127,9 @@ percent_from_click (UTree* t, int click_x, int click_y, int* percent) {
 }
 
 void
-set_progress_position (UTree* doc_t, UTree* t, E* e, string[] values) {
+set_progress_position (UTree* doc_t, UTree* t, E* e, TString[] values) {
     if (values.length) {
-        string percent = values[0];
+        string percent = values[0].s;
         percent = percent.stripRight ("%");
 
         if (!isNumeric (percent))

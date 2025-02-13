@@ -1,4 +1,5 @@
 import bindbc.sdl;
+import tstring;
 import utree;
 import doc : Doc;
 import e : E;
@@ -6,7 +7,7 @@ import events : Event;
 
 alias KLASS_EVENT_FN  = void function (UTree* kls_t, Event* ev, UTree* e_t);
 alias KLASS_UPDATE_FN = void function (UTree* kls_t, UTree* doc_t, UTree* e_t);
-alias KLASS_SET_FN    = void function (UTree* kls_t, UTree* doc_t, UTree* e_t, string field, string[] values);
+alias KLASS_SET_FN    = void function (UTree* kls_t, UTree* doc_t, UTree* e_t, string field, TString[] values);
 alias KLASS_DRAW_FN   = void function (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t);
 
 // e green
@@ -49,7 +50,7 @@ update (UTree* kls_t, UTree* doc_t, UTree* t) {
 }
 
 void 
-set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, string[] values) {
+set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, TString[] values) {
     //
 }
 

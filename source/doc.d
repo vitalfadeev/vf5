@@ -10,6 +10,7 @@ import std.algorithm.searching : find;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
+import tstring;
 import utree;
 import klass;
 import e;
@@ -281,7 +282,7 @@ set_case (UTree* doc_t, UTree* dest_t, UTree* case_t) {
 }
 
 auto
-evaluate_switch_cond (UTree* doc_t, string[] cond) {
+evaluate_switch_cond (UTree* doc_t, TString[] cond) {
     // 'shell_command.sh -with -args'
     // "double-quoted string"
     // klass.field
@@ -311,13 +312,13 @@ clone_tree (UTree* t) {
 }
 
 
-string[]
-extract_quoted (UTree* doc_t, string[] values) {
-    string[] vs;
+TString[]
+extract_quoted (UTree* doc_t, TString[] values) {
+    TString[] vs;
     vs.reserve (values.length);
     foreach (v; values) 
-        if (v.startsWith ("`")) 
-            vs ~= extract_value (doc_t,v);
+        if (v.type == TString.Type.bquoted) 
+            vs ~= TString (TString.Type.string, extract_value (doc_t,v.s));
         else
             vs ~= v;
 
@@ -1231,17 +1232,17 @@ go_on_event (UTree* doc_t, UTree* t, string user_event_name, string[string] env=
 }
 
 void
-go_event_action (UTree* doc_t, E* e, string[] action, string[string] env=null) {
+go_event_action (UTree* doc_t, E* e, TString[] action, string[string] env=null) {
     exec_action (doc_t,action,env);
 }
 
 void
-exec_action (UTree* doc_t, string[] action, string[string] env=null) {
+exec_action (UTree* doc_t, TString[] action, string[string] env=null) {
     import std.process;
     
     if (action.length) {
         writeln ("action: ", action);
-        string[] cmd = doc_get_klass_field_value (doc_t,action[0]);
+        TString[] cmd = doc_get_klass_field_value (doc_t,action[0].s);
         if (cmd.length)
             goto exec;
         else
@@ -1250,17 +1251,22 @@ exec_action (UTree* doc_t, string[] action, string[string] env=null) {
         //
     exec:
         if (cmd.length) {
+            //
+            string[] s_cmd;
+            foreach (s; cmd)
+                if (s.type == TString.Type.string)
+                    s_cmd ~= s.s;
             // raw exec
-            writeln ("  exec: ", cmd, " ", env);
+            writeln ("  exec: ", s_cmd, " ", env);
             if (env !is null) 
-                auto pid = spawnProcess (cmd,env);
+                auto pid = spawnProcess (s_cmd,env);
             else
-                auto pid = spawnProcess (cmd);
+                auto pid = spawnProcess (s_cmd);
         }    
     }
 }
 
-string[]
+TString[] 
 doc_get_klass_field_value (UTree* doc_t, string s) {
     auto dot = s.indexOf ('.');
     if (dot != -1) {
@@ -1270,7 +1276,6 @@ doc_get_klass_field_value (UTree* doc_t, string s) {
 
         auto kls_t = doc_t.find_klass (klass_name);
         if (kls_t !is null) {
-            string[] values;
             auto fret = find_field (kls_t, klass_field);
             if (fret)
                 return fret.field.values;// OK

@@ -575,13 +575,13 @@ new_klass (UTree* doc_t, string name, TString[] t_line) {
 
 UTree*
 new_field (UTree* doc_t, string name, TString[] t_line) {
-    string[] values;
+    TString[] values;
     foreach (ts; t_line)
         switch (ts.type) {
             case TString.Type.string:
             case TString.Type.dquoted:
             case TString.Type.bquoted:
-                values ~= ts.s;
+                values ~= ts;
                 break;
             default:
         }
@@ -610,13 +610,13 @@ new_field_swicth_case (UTree* doc_t, string name, TString[] t_line, UTree* last_
 
 UTree*
 new_switch (UTree* doc_t, TString[] t_line) {
-    string[] values;
+    TString[] values;
     foreach (ts; t_line)
         switch (ts.type) {
             case TString.Type.string:
             case TString.Type.dquoted:
             case TString.Type.bquoted:
-                values ~= ts.s;
+                values ~= ts;
                 break;
             default:
         }
@@ -628,13 +628,13 @@ new_switch (UTree* doc_t, TString[] t_line) {
 
 UTree*
 new_case (UTree* doc_t, TString[] t_line) {
-    string[] values;
+    TString[] values;
     foreach (ts; t_line)
         switch (ts.type) {
             case TString.Type.string:
             case TString.Type.dquoted:
             case TString.Type.bquoted:
-                values ~= ts.s;
+                values ~= ts;
                 break;
             default:
         }

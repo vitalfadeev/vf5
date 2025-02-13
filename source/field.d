@@ -1,9 +1,12 @@
 module field;
 
+import tstring;
+
+
 struct
 Field {
     string   name;
-    string[] values;
+    TString[] values;
 
     //enum 
     //ID : ubyte {

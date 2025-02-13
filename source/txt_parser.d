@@ -1,26 +1,27 @@
 module txt_parser;
 
+import tstring;
 import types;
 import klass;
 import std.stdio : writeln;
 
 
 bool 
-parse_color (string s, Color* color) {
+parse_color (TString[] tss, Color* color) {
     import std.string : startsWith;
 
-    if (s.startsWith ("#"))
-        return parse_color_hex (s, color);
+    if (tss[0].s.startsWith ("#"))
+        return parse_color_hex (tss[0].s, color);
     else
-    if (s.startsWith ("rgb")) {
+    if (tss[0].s.startsWith ("rgb")) {
         //
     }
     else
-    if (s.startsWith ("tcb")) {
-        return parse_color_tcb (s,color);
+    if (tss[0].s.startsWith ("tcb")) {
+        return parse_color_tcb (tss,color);
     }
     else {
-        assert (0, "error: usupported color: " ~ s);
+        assert (0, "error: usupported color: " ~ tss.join (" "));
     }
 
     return false;
@@ -76,7 +77,7 @@ parse_color_hex6 (string s, Color* color) {
 }
 
 bool 
-parse_color_tcb (string s, Color* color) {
+parse_color_tcb (TString[] tss, Color* color) {
     // tcb +0 +0 -25
     // read tcb
     // loop:
@@ -87,15 +88,14 @@ parse_color_tcb (string s, Color* color) {
     import std.algorithm : startsWith;
     import std.string;
 
-    auto splits = s.split (" ");
     ColorBit[4] bits;
     ubyte[4]    color_bytes;
     *color = update_tcb (*color,bits,color_bytes);
-    return parse_color_tcb (splits, &bits, &color_bytes);
+    return parse_color_tcb (tss, &bits, &color_bytes);
 }
 
 bool 
-parse_color_tcb (string[] ss, ColorBit[4]* bits, ubyte[4]* color_bytes) {
+parse_color_tcb (TString[] tss, ColorBit[4]* bits, ubyte[4]* color_bytes) {
     // tcb +0 +0 -25
     // read tcb
     // loop:
@@ -109,23 +109,23 @@ parse_color_tcb (string[] ss, ColorBit[4]* bits, ubyte[4]* color_bytes) {
     bool ret;
 
     //
-    if (ss.length >= 1) {
-        ret = parse_one_color_tcb (ss[0], &(*bits)[0], &(*color_bytes)[0]);
+    if (tss.length >= 1) {
+        ret = parse_one_color_tcb (tss[0].s, &(*bits)[0], &(*color_bytes)[0]);
         if (!ret)
             return ret;
     }
-    if (ss.length >= 2) {
-        ret = parse_one_color_tcb (ss[1], &(*bits)[1], &(*color_bytes)[1]);
+    if (tss.length >= 2) {
+        ret = parse_one_color_tcb (tss[1].s, &(*bits)[1], &(*color_bytes)[1]);
         if (!ret)
             return ret;
     }
-    if (ss.length >= 3) {
-        ret = parse_one_color_tcb (ss[2], &(*bits)[2], &(*color_bytes)[2]);
+    if (tss.length >= 3) {
+        ret = parse_one_color_tcb (tss[2].s, &(*bits)[2], &(*color_bytes)[2]);
         if (!ret)
             return ret;
     }
-    if (ss.length >= 4) {
-        ret = parse_one_color_tcb (ss[3], &(*bits)[3], &(*color_bytes)[3]);
+    if (tss.length >= 4) {
+        ret = parse_one_color_tcb (tss[3].s, &(*bits)[3], &(*color_bytes)[3]);
         if (!ret)
             return ret;
     }

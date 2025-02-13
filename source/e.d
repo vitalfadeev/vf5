@@ -2,8 +2,8 @@ import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
+import tstring;
 import doc;
-//import etree;
 import utree;
 import klass;
 import types;
@@ -12,7 +12,7 @@ import events;
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
 alias E_UPDATE_FN = void function (E* e, Doc* doc);
-alias E_SET_FN    = void function (E* e, Doc* doc, UTree* t, string field_id, string[] values);
+alias E_SET_FN    = void function (E* e, Doc* doc, UTree* t, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 
 
@@ -173,8 +173,8 @@ E {
 
     struct
     On {
-        string   event;  // click
-        string[] action; // exec audacious --play-pause
+        string    event;  // click
+        TString[] action; // exec audacious --play-pause
     }
     On[] on;
 
@@ -212,7 +212,7 @@ update (E* e, Doc* doc) {
 }
 
 void
-set (E* e, Doc* doc, UTree* t, string field_id, string[] values) {
+set (E* e, Doc* doc, UTree* t, string field_id, TString[] values) {
     //
 }
 

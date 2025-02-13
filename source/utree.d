@@ -2,6 +2,7 @@ module utree;
 
 import std.conv;
 public import vf.tree;
+import tstring;
 import doc   : Doc;
 import e     : E;
 import klass : Klass;
@@ -101,7 +102,7 @@ Uni {
 
 struct
 Switch_ {
-    string[] cond;
+    TString[] cond;
 
     Switch_*
     clone () {
@@ -111,7 +112,7 @@ Switch_ {
 
 struct
 Case_ {
-    string[] values;
+    TString[] values;
 
     Case_*
     clone () {

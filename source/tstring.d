@@ -26,6 +26,18 @@ TString {
     }
 }
 
+string
+join (TString[] tss, string sep) {
+    string joined;
+
+    foreach (ts; tss)
+        if (ts.type == TString.Type.string)
+            joined ~= ts.s ~ sep;
+
+    return joined;
+}
+
+
 auto
 to_tstrings (string s)  {
     return _to_tstrings (s);
