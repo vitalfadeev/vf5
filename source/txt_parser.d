@@ -90,8 +90,10 @@ parse_color_tcb (TString[] tss, Color* color) {
 
     ColorBit[4] bits;
     ubyte[4]    color_bytes;
+    auto ret = parse_color_tcb (tss, &bits, &color_bytes);
+    writeln ("TCB: ", bits, color_bytes);
     *color = update_tcb (*color,bits,color_bytes);
-    return parse_color_tcb (tss, &bits, &color_bytes);
+    return ret;
 }
 
 bool 
@@ -102,33 +104,29 @@ parse_color_tcb (TString[] tss, ColorBit[4]* bits, ubyte[4]* color_bytes) {
     //   read spaecs
     //   read sign
     //   read numbers
-
-    import std.algorithm : startsWith;
-    import std.string : strip;
-
     bool ret;
 
     //
-    if (tss.length >= 1) {
-        ret = parse_one_color_tcb (tss[0].s, &(*bits)[0], &(*color_bytes)[0]);
-        if (!ret)
-            return ret;
-    }
     if (tss.length >= 2) {
-        ret = parse_one_color_tcb (tss[1].s, &(*bits)[1], &(*color_bytes)[1]);
+        ret = parse_one_color_tcb (tss[1].s, &(*bits)[0], &(*color_bytes)[0]);
         if (!ret)
             return ret;
     }
     if (tss.length >= 3) {
-        ret = parse_one_color_tcb (tss[2].s, &(*bits)[2], &(*color_bytes)[2]);
+        ret = parse_one_color_tcb (tss[2].s, &(*bits)[1], &(*color_bytes)[1]);
         if (!ret)
             return ret;
     }
     if (tss.length >= 4) {
-        ret = parse_one_color_tcb (tss[3].s, &(*bits)[3], &(*color_bytes)[3]);
+        ret = parse_one_color_tcb (tss[3].s, &(*bits)[2], &(*color_bytes)[2]);
         if (!ret)
             return ret;
     }
+    //if (tss.length >= 4) {
+    //    ret = parse_one_color_tcb (tss[3].s, &(*bits)[3], &(*color_bytes)[3]);
+    //    if (!ret)
+    //        return ret;
+    //}
 
     return ret;
 }
@@ -149,17 +147,20 @@ parse_one_color_tcb (string s, ColorBit* color_bit, ubyte* color_value) {
             *color_bit = ColorBit.plus;
             if (s[1..$].isNumeric)
                 *color_value = s[1..$].to!ubyte;
+            return true;
         }
         else
         if (s[0] == '-') {
             *color_bit = ColorBit.minus;
             if (s[1..$].isNumeric)
                 *color_value = s[1..$].to!ubyte;
+            return true;
         }
         else
         if (s.isNumeric) {
             *color_bit   = ColorBit.none;
             *color_value = s.to!ubyte;
+            return true;
         }
     }
 

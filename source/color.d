@@ -2,6 +2,7 @@ module color;
 
 import std.conv;
 import bindbc.sdl;
+import std.stdio : writeln;
 
 
 // SDL_PIXELFORMAT_RGBA32
@@ -19,19 +20,19 @@ ColorBit {
 // HSL
 struct
 Color_tcb {
-    double t; // tome
-    double c; // contrast
-    double b; // bright
-    double a; // alpha
+    double t; // tome        0..1
+    double c; // contrast    0..1
+    double b; // bright      0..1
+    double a; // alpha 
 
     static
     Color_tcb
     from_Color (Color color) {
         double h, s, l;
 
-        double R = cast (double) color.r / 255;
-        double G = cast (double) color.g / 255;
-        double B = cast (double) color.b / 255;
+        double R = cast (double) color.r;
+        double G = cast (double) color.g;
+        double B = cast (double) color.b;
 
         rgb_to_hsl (R, G, B, &h, &s, &l);
 
@@ -64,9 +65,12 @@ Color_tcb {
 
         hsl_to_rgb (h, s, l, &R, &G, &B);
 
-        ubyte r = (R*255).to!ubyte;
-        ubyte g = (G*255).to!ubyte;
-        ubyte b = (B*255).to!ubyte;
+        writeln ("hsl: ", h, " ", s, " ", l);
+        writeln ("RGB: ", R, " ", G, " ", B);
+
+        ubyte r = (R).to!ubyte;
+        ubyte g = (G).to!ubyte;
+        ubyte b = (B).to!ubyte;
 
         return Color (r,g,b,0xFF);
     }
@@ -75,27 +79,38 @@ Color_tcb {
     update (ColorBit[4] bits, ubyte[4] bytes) {
         Color_tcb updated = this;
 
+        double[4] doubles;
+        doubles[0] = cast (double) bytes[0] / 255;
+        doubles[1] = cast (double) bytes[1] / 255;
+        doubles[2] = cast (double) bytes[2] / 255;
+        doubles[3] = cast (double) bytes[3] / 255;
+
         final
         switch (bits[0]) {
-            case ColorBit.none : updated.t  = bytes[0]; break;
-            case ColorBit.plus : updated.t += bytes[0]; break;
-            case ColorBit.minus: updated.t -= bytes[0]; break;
+            case ColorBit.none : updated.t  = doubles[0]; break;
+            case ColorBit.plus : updated.t += doubles[0]; break;
+            case ColorBit.minus: updated.t -= doubles[0]; break;
         }
+        if (updated.t > 1) updated.t = 1;
+        if (updated.t < 0) updated.t = 0;
 
         final
         switch (bits[1]) {
-            case ColorBit.none : updated.t  = bytes[1]; break;
-            case ColorBit.plus : updated.t += bytes[1]; break;
-            case ColorBit.minus: updated.t -= bytes[1]; break;
+            case ColorBit.none : updated.c  = doubles[1]; break;
+            case ColorBit.plus : updated.c += doubles[1]; break;
+            case ColorBit.minus: updated.c -= doubles[1]; break;
         }
+        if (updated.c > 1) updated.c = 1;
+        if (updated.c < 0) updated.c = 0;
 
         final
         switch (bits[2]) {
-            case ColorBit.none : updated.t  = bytes[2]; break;
-            case ColorBit.plus : updated.t += bytes[2]; break;
-            case ColorBit.minus: updated.t -= bytes[2]; break;
+            case ColorBit.none : updated.b  = doubles[2]; break;
+            case ColorBit.plus : updated.b += doubles[2]; break;
+            case ColorBit.minus: updated.b -= doubles[2]; break;
         }
-
+        if (updated.b > 1) updated.b = 1;
+        if (updated.b < 0) updated.b = 0;
 
         return updated;
     }
@@ -120,6 +135,8 @@ rgb_to_hsl (double r, double g, double b, double *h, double *s, double *l) {
     r /= 255.0;
     g /= 255.0;
     b /= 255.0;
+
+    writeln ("HSL: ", r, " ", g, " ", b);
 
     double max = dmax (dmax (r, g), b);
     double min = dmin (dmin (r, g), b);
@@ -149,6 +166,8 @@ rgb_to_hsl (double r, double g, double b, double *h, double *s, double *l) {
 
         *h /= 6;
     }
+
+    writeln ("HSL: ", *h, " ", *s, " ", *l);
 }
 
 // Converts an HUE to r, g or b.

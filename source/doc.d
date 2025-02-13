@@ -181,7 +181,7 @@ void
 remove_class_from_all (UTree* doc_t, string s) {
     UTree* kls_t = doc_t.find_klass (s);
     if (kls_t !is null)
-        foreach (t; utree.WalkTree (doc_t))
+        foreach (t; WalkE (doc_t))
             remove_class (t.e, kls_t);
 }
 
@@ -1358,12 +1358,16 @@ event (UTree* doc_t, Event* ev) {
                 if (pressed_e !is null)
                     pressed_e.e.add_class (doc_t,"button-pressed");
                 writeln ("pressed_e: ", *pressed_e);
+                ev.doc_t.doc.update (ev.doc_t);
+                redraw_window (ev.app_window);
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 remove_class_from_all (doc_t,"button-pressed");
+                ev.doc_t.doc.update (ev.doc_t);
+                redraw_window (ev.app_window);
             }
             break;
         case SDL_KEYDOWN: break;// SDL_KeyboardEvent
