@@ -64,7 +64,7 @@ e root
   e menubar-item border hbox view
 
  e vbox toolbar
-  e toolbar-item hbox tb-search
+  e toolbar-item hbox tb-search button
   e toolbar-item hbox tb-open
   e toolbar-item hbox tb-add
   e toolbar-item hbox tb-prev
@@ -120,13 +120,13 @@ toolbar-item
  pad.bg       colors.pad_bg
  borders      1 solid colors.fg+1
 
-button-pressed
- pad.bg       tcb +0 +0 -25
- content.bg   tcb +0 +0 -25
+button.pressed
+ pad.bg       tcb +0 +0 -32
+ content.bg   tcb +0 +0 -32
 
 button-hover
- pad.bg       tcb +0 +0 +25
- content.bg   tcb +0 +0 +25
+ pad.bg       tcb +0 +0 +32
+ content.bg   tcb +0 +0 +32
  //content.bg   tcb +0 +0 +25 fast
  //content.bg   tcb +0 +0 +25 slow
 
@@ -437,6 +437,64 @@ commands
   player.prev.undo                  player.next
   player.next                       audtool playlist-advance
   player.next.undo                  player.prev
+
+forms
+  border-form    
+  border-form ┌─┐ │ │ └─┘
+  border-form ╓─╖ ║ ║ ╙─╜ 
+  border-form ╒═╕ │ │ ╘═╛
+  border-form ╔═╗ ║ ║ ╚═╝
+  border-form ░
+  border-form ▒
+  border-form ▓
+  border-form █
+  border-form ▄▄▄ ▌ ▐ ▀▀▀
+  border-form ▀
+  border-form ⊂ ⊃
+  border-form ( )
+  border-form [ ]
+  border-form { }
+  border-form / /
+  border-form | |
+  border-form ‿ ⁀
+  border-form 
+  border-form ⁐
+  border-form 
+  border-form ⁓
+  border-form ∿
+  border-form :
+  border-form ⁝
+  border-form ⁞
+  border-form ∏
+  border-form ∐
+  border-form ∧
+  border-form ∨
+  border-form ∩
+  border-form ∪
+  border-form ≈
+  border-form ⌇
+  border-form ⎛
+  border-form ⎝
+  border-form ⎞
+  border-form ⎠
+  border-form ⎨
+  border-form ⎬
+  border-form ◸
+  border-form ◺
+  border-form ◹
+  border-form ◿
+  border-form 
+  border-form-1 ┌─┐
+  border-form-2 │ │
+  border-form-3 └─┘
+  border-form-1 ╔═╗
+  border-form-2 ║ ║
+  border-form-3 ╚═╝
+  border-form-1 ╔═╗
+  border-form-2 ║ ║
+  border-form-3 ║ ║
+
+
 ";
 
 void 

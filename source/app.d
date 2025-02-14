@@ -37,9 +37,11 @@ void
 create_reserved_classes (UTree* doc_t) {
 	import klasses.e        : E_Klass;
 	import klasses.progress : Progress;
+	import klasses.button   : Button;
 
 	doc_t.add_child (new_reserved_klass!E_Klass ());
 	doc_t.add_child (new_reserved_klass!Progress ());
+	doc_t.add_child (new_reserved_klass!Button ());
 }
 
 UTree*
@@ -72,4 +74,22 @@ new_reserved_klass (KLASS) () {
 //   pos.x = value
 //   on_pos_x_changed ()
 //   on_[ID.pos_x]_changed ()
+
+
+// button
+//   on mouse-button-pressed  add klass "pressed"
+//   on mouse-button-released rem klass "pressed"
+// check
+//   on click add klass "checked"
+//   on click rem klass "checked"
+// edit
+//   on key ... edit text
+// progress
+//   drag "progress-cursor"
+//   fill bg rect size.w * percent
+//   percent `command`
+//   on percent `command $percent`
+// list
+//   childs
+//   generator childs  <-- data + template
 

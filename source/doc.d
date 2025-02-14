@@ -158,15 +158,37 @@ send_click_in_deep (Event* ev, UTree* t, Pos down_pos, Pos up_pos, ref UTree* de
 }
 
 void
-send_event_in_tree (Event* ev) {
+send_mouse_event_in_deep (Event* ev, UTree* t, Pos pos, ref UTree* deepest) {
+    bool 
+    valid_e (UTree* t) {
+        return (
+            (t.uni.type == Uni.Type.e) && 
+            pos_in_rect (pos, t.e.pos, t.e.size)
+        );
+    }
+
     // klass event
-    foreach (_e_tree; WalkChilds (ev.doc_t)) {
-        if (_e_tree.uni.type == Uni.Type.e)
-            foreach (_t; WalkTree (_e_tree)) {
+    foreach (_e_tree; WalkChilds (t))
+        if (_e_tree.uni.type == Uni.Type.e) {
+
+            foreach (_t; FindDeepest (_e_tree,&valid_e)) {
+                //writeln (*_t);
                 foreach (kls_t; _t.e.klasses)
                     if (kls_t.klass.event !is null)
                         kls_t.klass.event (kls_t,ev,_t);
+                deepest = _t;
             }
+            
+        }
+}
+
+void
+send_event_in_tree (Event* ev) {
+    // klass event
+    foreach (_t; WalkE (ev.doc_t)) {
+        foreach (kls_t; _t.e.klasses)
+            if (kls_t.klass.event !is null)
+                kls_t.klass.event (kls_t,ev,_t);
     }
 }
 
@@ -183,6 +205,13 @@ remove_class_from_all (UTree* doc_t, string s) {
     if (kls_t !is null)
         foreach (t; WalkE (doc_t))
             remove_class (t.e, kls_t);
+}
+
+void
+remove_class (E* e, UTree* doc_t, string s) {
+    auto kls = doc_t.find_klass (s);
+    if (kls !is null)
+        e.remove_class (kls);
 }
 
 void
@@ -1343,7 +1372,8 @@ int
 event (UTree* doc_t, Event* ev) {
     // event
     //   KEYS  --> focused
-    //   CLICK --> all
+    //   CLICK --> if in x,y e.rect -> send -> in deep
+    //   MOUSE --> if in x,y e.rect -> send -> in deep
     //   *     --> all
     Doc* doc = doc_t.doc;
 
@@ -1354,20 +1384,20 @@ event (UTree* doc_t, Event* ev) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                auto pressed_e = doc_t.find_e_at_pos (Pos (ev.button.x.to!X,ev.button.y.to!Y));
-                if (pressed_e !is null)
-                    pressed_e.e.add_class (doc_t,"button-pressed");
-                writeln ("pressed_e: ", *pressed_e);
-                ev.doc_t.doc.update (ev.doc_t);
-                redraw_window (ev.app_window);
+                UTree* deepest;
+                send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                //ev.doc_t.doc.update (ev.doc_t);
+                //redraw_window (ev.app_window);
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
-                remove_class_from_all (doc_t,"button-pressed");
-                ev.doc_t.doc.update (ev.doc_t);
-                redraw_window (ev.app_window);
+                UTree* deepest;
+                send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                //remove_class_from_all (doc_t,"button-pressed");
+                //ev.doc_t.doc.update (ev.doc_t);
+                //redraw_window (ev.app_window);
             }
             break;
         case SDL_KEYDOWN: break;// SDL_KeyboardEvent
