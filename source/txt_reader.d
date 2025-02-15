@@ -54,6 +54,7 @@ rect
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 //comment
 ";
+
 string text = "
 e root
  e vbox menubar
@@ -517,7 +518,7 @@ go (UTree* doc_t, string s) {
         if (t_line[0].type == TString.Type.none)
             continue;
 
-        //
+        // indent, name
         if (t_line[0].type == TString.Type.string) {
             indent = 0;
             name   = t_line[0].s;
@@ -528,7 +529,7 @@ go (UTree* doc_t, string s) {
             name   = t_line[1].s;
         }
 
-        //
+        // e klass field switch case
         if (name == "e" && indent == 0)  // e
             t = new_e (doc_t,t_line);
         else
@@ -645,7 +646,7 @@ new_field (UTree* doc_t, string name, TString[] t_line) {
             default:
         }
 
-    auto t = new UTree (new Uni (new Field (name,values)));
+    auto t = new UTree (Uni (Field (name,values)));
 
     return t;    
 }
@@ -680,7 +681,7 @@ new_switch (UTree* doc_t, TString[] t_line) {
             default:
         }
 
-    auto t = new UTree (new Uni (new Switch_ (values)));
+    auto t = new UTree (Uni (Switch_ (values)));
 
     return t;    
 }
@@ -698,7 +699,7 @@ new_case (UTree* doc_t, TString[] t_line) {
             default:
         }
 
-    auto t = new UTree (new Uni (new Case_ (values)));
+    auto t = new UTree (Uni (Case_ (values)));
 
     return t;    
 }

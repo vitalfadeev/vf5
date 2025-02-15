@@ -10,6 +10,7 @@ import field : Field;
 
 alias UTree = Tree!Uni;
 
+//alias DocUniTree     = Tree!(Uni!Doc);
 //alias EUniTree       = Tree!(Uni!E);
 //alias KlassUniTree   = Tree!(Uni!Klass);
 //alias FieldUniTree   = Tree!(Uni!Field);
@@ -20,61 +21,52 @@ alias UTree = Tree!Uni;
 struct
 Uni {
     Type type;
-    union {
-        Doc*     _doc;    // E*[] Klass*[]
-        E*       _e;      // E*[]
-        Klass*   _klass;  // Field*[] E*[] Switch*[]
-        Field*   _field;  // 
-        Switch_* _switch; // Case*[]
-        Case_*   _case;   // Field*[]
-    }
     //Type type = mixin ("Type."~KLS.stringof.toLower);
     //KLS  klass;
-    //union {
-    //    Doc[0]     _doc2;    // E*[] Klass*[]
-    //    E[0]       _e2;      // E*[]
-    //    Klass[0]   _klass2;  // Field*[] E*[] Switch*[]
-    //    Field[0]   _field2;  // 
-    //    Switch_[0] _switch2; // Case*[]
-    //    Case_[0]   _case2;   // Field*[]
-    //}
+    union {
+        Doc     _doc;    // E*[] Klass*[]
+        E       _e;      // E*[]
+        Klass   _klass;  // Field*[] E*[] Switch*[]
+        Field   _field;  // 
+        Switch_ _switch; // Case*[]
+        Case_   _case;   // Field*[]
+    }
+    Doc*     doc     () {assert (type == Type.doc    ); return &_doc;}
+    E*       e       () {assert (type == Type.e      ); return &_e;}
+    Klass*   klass   () {assert (type == Type.klass  ); return &_klass;}
+    Field*   field   () {assert (type == Type.field  ); return &_field;}
+    Switch_* switch_ () {assert (type == Type.switch_); return &_switch;}
+    Case_*   case_   () {assert (type == Type.case_  ); return &_case;}
 
-    this (Doc* doc) {
+    this (Doc doc) {
         type      = Type.doc;
         this._doc = doc;
     }
 
-    this (E* e) {
+    this (E e) {
         type    = Type.e;
         this._e = e;
     }
 
-    this (Klass* klass) {
+    this (Klass klass) {
         type        = Type.klass;
         this._klass = klass;
     }
 
-    this (Field* field) {
+    this (Field field) {
         type        = Type.field;
         this._field = field;
     }
 
-    this (Switch_* switch_) {
+    this (Switch_ switch_) {
         type         = Type.switch_;
         this._switch = switch_;
     }
 
-    this (Case_* case_) {
+    this (Case_ case_) {
         type       = Type.case_;
         this._case = case_;
     }
-
-    Doc*     doc     () {assert (type == Type.doc  ); return _doc;}
-    E*       e       () {assert (type == Type.e    ); return _e;}
-    Klass*   klass   () {assert (type == Type.klass); return _klass;}
-    Field*   field   () {assert (type == Type.field); return _field;}
-    Switch_* switch_ () {assert (type == Type.switch_); return _switch;}
-    Case_*   case_   () {assert (type == Type.case_); return _case;}
 
     enum
     Type {
@@ -124,17 +116,18 @@ Case_ {
 
 UTree*
 new_doc () {
-    return new UTree (new Uni (new Doc ()));
+    return new UTree (Uni (Doc ()));
+    //return cast (UTree*) new DocUniTree ();
 }
 
 UTree*
 new_klass (KLASS) () {
-    return new UTree (new Uni (cast (Klass*) new KLASS ()));
+    return new UTree (Uni (KLASS ()));
 }
 
 UTree*
 new_e () {
-    return new UTree (new Uni (new E ()));
+    return new UTree (Uni (E ()));
 }
 
 

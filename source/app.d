@@ -20,7 +20,7 @@ main () {
 	doc_t.doc.update (doc_t);
 
 	// Check
-	dump_tree (doc_t);
+	//dump_tree (doc_t);
 	//dump_klasses (doc_t);
 
 	//

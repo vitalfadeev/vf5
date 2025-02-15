@@ -14,9 +14,9 @@ Tree (UNI) {
     Childs childs;
     Tree*  parent;
     size_t indent;
-    UNI*  uni; alias uni this;
+    UNI   uni; alias uni this;
 
-    this (UNI* uni) {
+    this (UNI uni) {
         this.uni = uni;
     }
 
@@ -265,10 +265,10 @@ dump_tree (Tree) (Tree* t, int level=0) {
 
     for (auto i = level; i > 0; i--) 
         write ("  ");
-    if (t.uni is null)
-        writeln ("null");
-    else
-        writeln (*(t.uni));
+    //if (t.uni is null)
+    //    writeln ("null");
+    //else
+        writeln (t.uni);
 
     // recursive
     foreach (subt; t.childs) {

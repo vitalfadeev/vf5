@@ -114,7 +114,7 @@ find_field (UTree* kls_t, string s) {
 
 UTree*
 create_klass (UTree* doc_t, string s) {
-    UTree* kls_t = new UTree (new Uni (new Klass (s)));
+    UTree* kls_t = new UTree (Uni (Klass (s)));
     doc_t.add_child (kls_t);
     return kls_t;
 }
@@ -298,8 +298,8 @@ void
 add_sub_tree (UTree* doc_t, UTree* dest_t, UTree* source_t) {
     // clone each t
     // add in dest_t
-    auto cloned = clone_tree (source_t);
-    dest_t.add_child (cloned);
+    //auto cloned = clone_tree (source_t);
+    //dest_t.add_child (cloned);
 }
 
 void
@@ -343,15 +343,15 @@ UTree*
 clone_tree (UTree* t) {
     UTree* cloned;
 
-    final
-    switch (t.type) {
-        case Uni.Type.doc     : cloned = new UTree (new Uni (t.doc.clone  )); break;
-        case Uni.Type.e       : cloned = new UTree (new Uni (t.e.clone    )); break;
-        case Uni.Type.klass   : cloned = new UTree (new Uni (t.klass.clone)); break;
-        case Uni.Type.field   : cloned = new UTree (new Uni (t.field.clone)); break;
-        case Uni.Type.switch_ : cloned = new UTree (new Uni (t.switch_.clone)); break;
-        case Uni.Type.case_   : cloned = new UTree (new Uni (t.case_.clone)); break;
-    }
+    //final
+    //switch (t.type) {
+    //    case Uni.Type.doc     : cloned = new UTree (Uni (t.doc.clone  )); break;
+    //    case Uni.Type.e       : cloned = new UTree (Uni (t.e.clone    )); break;
+    //    case Uni.Type.klass   : cloned = new UTree (Uni (t.klass.clone)); break;
+    //    case Uni.Type.field   : cloned = new UTree (Uni (t.field.clone)); break;
+    //    case Uni.Type.switch_ : cloned = new UTree (Uni (t.switch_.clone)); break;
+    //    case Uni.Type.case_   : cloned = new UTree (Uni (t.case_.clone)); break;
+    //}
 
     return cloned;
 }
