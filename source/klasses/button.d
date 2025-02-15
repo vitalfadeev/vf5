@@ -43,21 +43,16 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 e.add_class (ev.doc_t,"button.pressed");
+                ev.doc_t.doc.update (ev.doc_t);
                 e_t.redraw ();
-                //writeln ("BUTTON: SDL_MOUSEBUTTONDOWN: button.pressed");
-                //ev.doc_t.doc.update (ev.doc_t);
-                //import pix;
-                //pix.redraw_window (ev.app_window);
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 e.remove_class (ev.doc_t,"button.pressed");
+                ev.doc_t.doc.update (ev.doc_t);
                 e_t.redraw ();
-                //remove_class_from_all (doc_t,"button-pressed");
-                //ev.doc_t.doc.update (ev.doc_t);
-                //redraw_window (ev.app_window);
             }
             break;
         default:

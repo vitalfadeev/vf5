@@ -65,18 +65,18 @@ e root
   e menubar-item border hbox view
 
  e vbox toolbar
-  e toolbar-item hbox tb-search button
-  e toolbar-item hbox tb-open
-  e toolbar-item hbox tb-add
-  e toolbar-item hbox tb-prev
-  e toolbar-item hbox tb-play-pause
-  e toolbar-item hbox tb-stop
-  e toolbar-item hbox tb-next
+  e toolbar-item hbox button tb-search
+  e toolbar-item hbox button tb-open
+  e toolbar-item hbox button tb-add
+  e toolbar-item hbox button tb-prev
+  e toolbar-item hbox button tb-play-pause
+  e toolbar-item hbox button tb-stop
+  e toolbar-item hbox button tb-next
   e toolbar-item hbox progress tb-position
-  e toolbar-item t3-right tb-time 
-  e toolbar-item t3-right tb-loop
-  e toolbar-item t3-right tb-random
-  e toolbar-item t3-right tb-volume
+  e toolbar-item t3-right button tb-time 
+  e toolbar-item t3-right button tb-loop
+  e toolbar-item t3-right button tb-random
+  e toolbar-item t3-right button tb-volume
 
  e vbox playlist
  e vbox info

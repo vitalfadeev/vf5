@@ -161,12 +161,16 @@ draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, UTree* t) {
         clip_rect.y = t.e.pos.y;
         clip_rect.w = t.e.size.w;
         clip_rect.h = t.e.size.h;
+        writeln (clip_rect);
         SDL_RenderSetClipRect (renderer,&clip_rect);
     }
 
     // clear
-    SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
-    SDL_RenderClear (renderer);
+    if (t is null) {
+        SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
+        SDL_RenderClear (renderer);
+    }
+
     // draw
     doc_t.doc.draw (doc_t,renderer,t);
     // rasterize
