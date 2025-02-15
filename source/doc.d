@@ -27,6 +27,7 @@ import draws : e_pos, e_size, content_pos;
 import klasses.e : global_font_files;
 import klasses.e : extract_value;
 import field : Field;
+import pix : redraw;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -1351,9 +1352,9 @@ on_click (Event* ev) {
 void
 _on_click (Event* ev, Pos down_pos, Pos up_pos) {
     //
+    UTree* deepest;
     foreach (UTree* _e_tree; utree.WalkTree (ev.doc_t)) {
         if (_e_tree.uni.type == Uni.Type.e) {
-            UTree* deepest;
             send_click_in_deep (
                 ev, 
                 _e_tree, 
@@ -1370,7 +1371,8 @@ _on_click (Event* ev, Pos down_pos, Pos up_pos) {
 
     //
     ev.doc_t.doc.update (ev.doc_t);
-    redraw_window (ev.app_window);
+    if (deepest !is null)
+        deepest.redraw ();
 }
 
 bool

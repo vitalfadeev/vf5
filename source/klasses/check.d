@@ -43,7 +43,7 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
             switch (ev.user.code) {
                 case USER_EVENT.click : 
                     e.trigger_class (ev.doc_t,"check.pressed");
-                    emit ("on check.pressed", doc_t, e_t);
+                    //emit ("on check.pressed", doc_t, e_t);
                     e_t.redraw ();
                     break;
                 default:
