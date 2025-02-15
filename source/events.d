@@ -46,6 +46,11 @@ RedrawUserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.redraw;
+    UTree* t;
+
+    this (UTree* t) {
+        this.t = t;
+    }
 }
 
 struct

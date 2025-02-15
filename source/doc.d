@@ -35,7 +35,7 @@ const DEFAULT_FONT_SIZE = 12;
 
 alias DOC_EVENT_FN  = int  function (UTree* t, Event* ev);
 alias DOC_UPDATE_FN = void function (UTree* t);
-alias DOC_DRAW_FN   = void function (UTree* t,SDL_Renderer* renderer);
+alias DOC_DRAW_FN   = void function (UTree* t,SDL_Renderer* renderer, UTree* t);
 
 struct
 Doc {
@@ -198,6 +198,21 @@ add_class (E* e, UTree* doc_t, string s) {
     if (!e.klasses.canFind (kls_t))
         e.klasses ~= kls_t;
 }
+
+bool
+has_class (E* e, UTree* doc_t, string s) {
+    UTree* kls_t = doc_t.find_klass (s);
+    return (!e.klasses.canFind (kls_t));
+}
+
+void
+trigger_class (E* e, UTree* doc_t, string s) {
+    if (e.has_class (doc_t,"check.pressed"))
+        e.remove_class (doc_t,"check.pressed");
+    else
+        e.add_class (doc_t,"check.pressed");
+}
+
 
 void
 remove_class_from_all (UTree* doc_t, string s) {
@@ -1447,17 +1462,27 @@ update (UTree* doc_t) {
 }
 
 void
-draw (UTree* doc_t, SDL_Renderer* renderer) {
+draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
     Doc* doc = doc_t.doc;
 
-    foreach (t; WalkE (doc_t)) {
-        foreach (UTree* kls_t; t.e.klasses) {
-            if (kls_t.klass.draw !is null)
-                kls_t.klass.draw (kls_t,renderer,t);
-        }
-        if (t.e.draw !is null)
-            t.e.draw (t.e,renderer);
+    if (t !is null) {
+        _draw_one (renderer,t);
     }
+    else {
+        foreach (t; WalkE (doc_t)) {
+            _draw_one (renderer,t);
+        }
+    }
+}
+
+void
+_draw_one (SDL_Renderer* renderer, UTree* t) {
+    foreach (UTree* kls_t; t.e.klasses) {
+        if (kls_t.klass.draw !is null)
+            kls_t.klass.draw (kls_t,renderer,t);
+    }
+    if (t.e.draw !is null)
+        t.e.draw (t.e,renderer);    
 }
 
 

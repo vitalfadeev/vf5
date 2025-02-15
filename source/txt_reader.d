@@ -18,14 +18,15 @@ import field;
 
 // RESERVED CLASSES
 // e
+// button
+// button.pressed
+// check
+// check.pressed
+// edit
 // progress
 //
-// edit
-// check
 // radio
-// checked
 // focused
-// button-pressed
 // button-hover
 // hotkeys
 // colors

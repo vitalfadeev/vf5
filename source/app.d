@@ -38,10 +38,14 @@ create_reserved_classes (UTree* doc_t) {
 	import klasses.e        : E_Klass;
 	import klasses.progress : Progress;
 	import klasses.button   : Button;
+	import klasses.check    : Check;
+	import klasses.edit     : Edit;
 
 	doc_t.add_child (new_reserved_klass!E_Klass ());
 	doc_t.add_child (new_reserved_klass!Progress ());
 	doc_t.add_child (new_reserved_klass!Button ());
+	doc_t.add_child (new_reserved_klass!Check ());
+	doc_t.add_child (new_reserved_klass!Edit ());
 }
 
 UTree*

@@ -11,6 +11,7 @@ import utree;
 import klass;
 import e;
 import types;
+import pix : redraw;
 
 
 struct 
@@ -31,10 +32,6 @@ Button {
 // KLASS_EVENT_FN  
 void 
 event (UTree* kls_t, Event* ev, UTree* e_t) {
-    // event
-    //   KEYS  --> focused
-    //   CLICK --> all
-    //   *     --> all
     Klass* kls = kls_t.klass;
     E*     e   = e_t.e;
 
@@ -46,7 +43,7 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 e.add_class (ev.doc_t,"button.pressed");
-                e.redraw ();
+                e_t.redraw ();
                 //writeln ("BUTTON: SDL_MOUSEBUTTONDOWN: button.pressed");
                 //ev.doc_t.doc.update (ev.doc_t);
                 //import pix;
@@ -57,7 +54,7 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 e.remove_class (ev.doc_t,"button.pressed");
-                e.redraw ();
+                e_t.redraw ();
                 //remove_class_from_all (doc_t,"button-pressed");
                 //ev.doc_t.doc.update (ev.doc_t);
                 //redraw_window (ev.app_window);
@@ -70,8 +67,7 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
 // KLASS_UPDATE_FN 
 void 
 update (UTree* kls_t, UTree* doc_t, UTree* t) {
-    // progress.position
-    //   e e e
+    //
 }
 
 // KLASS_SET_FN

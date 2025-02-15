@@ -14,10 +14,11 @@ import types;
 import std.string : fromStringz; 
 import std.string : toStringz;
 import std.algorithm.searching : canFind;
+import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
 alias PIX_UPDATE_FN = void function (Pix* pix, UTree* doc_t);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, UTree* doc_t);
+alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, UTree* t);
 alias PIX_GO_FN     = int  function (Pix* pix, UTree* doc_t);
 
 struct 
@@ -98,6 +99,11 @@ click_translate (Event* ev) {
 //      foreach (kls; klasses)  // widget
 //        kls.event (ev)
 
+void
+_redraw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, RedrawUserEvent* ev) {
+    pix.draw (pix,renderer,doc_t,ev.t);
+}
+
 int
 event (Pix* pix, Event* ev) {
     //if (ev.type != SDL_MOUSEMOTION)
@@ -107,7 +113,7 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc_t); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc_t,null); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
@@ -130,7 +136,7 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : pix.draw (pix,ev.renderer,ev.doc_t); break;
+                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.doc_t,cast (RedrawUserEvent*) ev); break;
                 default: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result;
             }
             break;
@@ -147,12 +153,12 @@ update (Pix* pix, UTree* doc_t) {
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t) {
+draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, UTree* t) {
     // clear
     SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear (renderer);
     // draw
-    doc_t.doc.draw (doc_t,renderer);
+    doc_t.doc.draw (doc_t,renderer,t);
     // rasterize
     SDL_RenderPresent (renderer);
 }
@@ -295,6 +301,11 @@ send_user_event (EVT,ARGS...) (ARGS args) {
 void
 redraw_window (SDL_Window* window) {
     send_user_event!RedrawUserEvent ();
+}
+
+void
+redraw (UTree* t) {
+    send_user_event!RedrawUserEvent (t);
 }
 
 struct
