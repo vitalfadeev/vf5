@@ -18,11 +18,9 @@ alias UTree = Tree!Uni;
 //alias CaseUniTree    = Tree!(Uni!Case_);
 
 
-struct
+struct // 400 Bytes
 Uni {
     Type type;
-    //Type type = mixin ("Type."~KLS.stringof.toLower);
-    //KLS  klass;
     union {
         Doc     _doc;    // E*[] Klass*[]
         E       _e;      // E*[]
@@ -82,12 +80,12 @@ Uni {
     toString () {
         final
         switch (type) {
-            case Type.doc     : return "Uni(" ~ ((*doc).to!string) ~ ")";
-            case Type.e       : return "Uni(" ~ ((*e).to!string) ~ ")";
-            case Type.klass   : return "Uni(" ~ ((*klass).to!string) ~ ")";
-            case Type.field   : return "Uni(" ~ ((*field).to!string) ~ ")";
-            case Type.switch_ : return "Uni(" ~ ((*switch_).to!string) ~ ")";
-            case Type.case_   : return "Uni(" ~ ((*case_).to!string) ~ ")";
+            case Type.doc     : return "Uni(" ~ (_doc.to!string) ~ ")";
+            case Type.e       : return "Uni(" ~ (_e.to!string) ~ ")";
+            case Type.klass   : return "Uni(" ~ (_klass.to!string) ~ ")";
+            case Type.field   : return "Uni(" ~ (_field.to!string) ~ ")";
+            case Type.switch_ : return "Uni(" ~ (_switch.to!string) ~ ")";
+            case Type.case_   : return "Uni(" ~ (_case.to!string) ~ ")";
         }
     }
 }

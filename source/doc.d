@@ -332,9 +332,6 @@ evaluate_switch_cond (UTree* doc_t, TString[] cond) {
     // "double-quoted string"
     // klass.field
     // strings a b c
-
-    writeln ("extract_quoted: ", extract_quoted (doc_t,cond));
-
     return extract_quoted (doc_t,cond);
 }
 
@@ -1353,7 +1350,7 @@ void
 _on_click (Event* ev, Pos down_pos, Pos up_pos) {
     //
     UTree* deepest;
-    foreach (UTree* _e_tree; utree.WalkTree (ev.doc_t)) {
+    foreach (UTree* _e_tree; utree.WalkChilds (ev.doc_t)) {
         if (_e_tree.uni.type == Uni.Type.e) {
             send_click_in_deep (
                 ev, 
