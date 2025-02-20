@@ -205,10 +205,21 @@ _WalkE {
     int
     opApply (int delegate (UTree* t) dg) {
         assert (doc_t !is null);
-        assert (doc_t.uni.type == Uni.Type.doc);
+        assert (doc_t.uni.type == Uni.Type.doc || doc_t.uni.type == Uni.Type.e);
 
         int result;
 
+        // e
+        if (doc_t.uni.type == Uni.Type.e) {
+            if (skip_hidden (doc_t))
+                return 0;
+
+            result = dg (doc_t);
+            if (result)
+                return result;
+        }
+
+        // childs
         foreach (e_tree; doc_t.childs) 
             if (e_tree.uni.type == Uni.Type.e)
                 foreach (_t; WalkTree (e_tree)) {

@@ -1483,11 +1483,13 @@ draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
     Doc* doc = doc_t.doc;
 
     if (t !is null) {
-        _draw_one (renderer,t);
+        foreach (_t; WalkE (t)) {
+            _draw_one (renderer,_t);
+        }
     }
     else {
-        foreach (t; WalkE (doc_t)) {
-            _draw_one (renderer,t);
+        foreach (_t; WalkE (doc_t)) {
+            _draw_one (renderer,_t);
         }
     }
 }
