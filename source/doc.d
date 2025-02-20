@@ -268,6 +268,8 @@ apply_klasses (UTree* doc_t, UTree* t) {
 // WIDGET_APPLY_KLASS_FN
 void
 apply_klass (UTree* doc_t, UTree* t, UTree* kls_t) {
+    assert (kls_t.type == Uni.Type.klass || 
+            kls_t.type == Uni.Type.case_);
     E* e = t.uni.e;
 
     // each field
@@ -317,10 +319,12 @@ set_switch (UTree* doc_t, UTree* dest_t, UTree* swicth_t) {
     //     field values
 
     // each child case
-    foreach (case_t; swicth_t.childs)
+    if (evaluated.length >= 1)
+    foreach (case_t; swicth_t.childs) {
         if (case_t.uni.type == Uni.Type.case_)
-        if (case_t.uni.case_.values == evaluated)
+        if (case_t.uni.case_.name == evaluated[0].s)
             set_case (doc_t,dest_t,case_t);
+    }
 }
 
 void
@@ -1431,6 +1435,8 @@ _on_click (Event* ev, Pos down_pos, Pos up_pos) {
 
     //
     ev.doc_t.doc.update (ev.doc_t);
+    writeln ("deepest: ", *deepest);
+    writeln ("deepest: ", deepest.e.content.image);
     if (deepest !is null)
         deepest.redraw ();
 }
@@ -1527,16 +1533,13 @@ void
 draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
     Doc* doc = doc_t.doc;
 
-    if (t !is null) {
-        foreach (_t; WalkE (t)) {
-            _draw_one (renderer,_t);
-        }
-    }
-    else {
-        foreach (_t; WalkE (doc_t)) {
-            _draw_one (renderer,_t);
-        }
-    }
+    auto e_tree = 
+        (t is null) ? 
+            doc_t : 
+            t;
+
+    foreach (_t; WalkE (e_tree))
+        _draw_one (renderer,_t);
 }
 
 void

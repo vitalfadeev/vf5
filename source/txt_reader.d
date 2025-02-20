@@ -632,7 +632,7 @@ new_field_swicth_case (UTree* doc_t, string name, TString[] values, UTree* last_
         t = new_switch (doc_t,values);
     else
     if (in_switch)
-        t = new_case (doc_t,values);
+        t = new_case (doc_t,name,values);
     else
         t = new_field (doc_t,name,values);
 
@@ -641,16 +641,12 @@ new_field_swicth_case (UTree* doc_t, string name, TString[] values, UTree* last_
 
 UTree*
 new_switch (UTree* doc_t, TString[] values) {
-    auto t = new UTree (Uni (Switch_ (values)));
-
-    return t;    
+    return new UTree (Uni (Switch_ (values)));
 }
 
 UTree*
-new_case (UTree* doc_t, TString[] values) {
-    auto t = new UTree (Uni (Case_ (values)));
-
-    return t;    
+new_case (UTree* doc_t, string name, TString[] values) {
+    return new UTree (Uni (Case_ (name,values)));
 }
 
 UTree*

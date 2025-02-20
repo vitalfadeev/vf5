@@ -102,6 +102,7 @@ Switch_ {
 
 struct
 Case_ {
+    string    name;
     TString[] values;
 
     Case_*
