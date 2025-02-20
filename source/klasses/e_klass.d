@@ -3,7 +3,6 @@ module klasses.e;
 import std.stdio;
 import std.string;
 import std.conv;
-import std.process;
 import bindbc.sdl;
 import tstring;
 import events;
@@ -830,29 +829,3 @@ set_on (UTree* doc_t, UTree* e_t, TString[] values) {
 //        }
 //    }
 //}
-
-string
-extract_value (UTree* doc_t, string bquoted) {
-    //writeln ("extract_value: ", bquoted);
-
-    auto stripped  = bquoted.strip ("`");
-    auto converted = extract_class_field_value (doc_t,stripped);
-    //writeln ("converted: ", converted);
-    auto ret = executeShell (converted);  // (int status, string output)
-
-    //writeln (ret.status);
-    //writeln ("ret.output: ", ret.output);
-
-   return ret.output.stripRight ();
-}
-
-
-string
-extract_class_field_value (UTree* doc_t, string s) {
-    TString[] cmd = doc_get_klass_field_value (doc_t,s);
-    if (cmd.length)
-        return cmd.join (" ");
-    else
-        return s;
-}
-

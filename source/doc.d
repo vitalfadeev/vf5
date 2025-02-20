@@ -7,6 +7,7 @@ import std.string : fromStringz, toStringz;
 import std.algorithm.searching : canFind;
 import std.algorithm.searching : countUntil;
 import std.algorithm.searching : find;
+import std.process : executeShell;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
@@ -25,7 +26,6 @@ import pix : IMGException;
 import pix : redraw_window;
 import draws : e_pos, e_size, content_pos;
 import klasses.e : global_font_files;
-import klasses.e : extract_value;
 import field : Field;
 import pix : redraw;
 
@@ -1401,6 +1401,31 @@ doc_get_klass_field_value (UTree* doc_t, string s) {
     }
 
     return [];
+}
+
+string
+extract_value (UTree* doc_t, string bquoted) {
+    //writeln ("extract_value: ", bquoted);
+
+    auto stripped  = bquoted.strip ("`");
+    auto converted = extract_class_field_value (doc_t,stripped);
+    //writeln ("converted: ", converted);
+    auto ret = executeShell (converted);  // (int status, string output)
+
+    //writeln (ret.status);
+    //writeln ("ret.output: ", ret.output);
+
+   return ret.output.stripRight ();
+}
+
+
+string
+extract_class_field_value (UTree* doc_t, string s) {
+    TString[] cmd = doc_get_klass_field_value (doc_t,s);
+    if (cmd.length)
+        return cmd.join (" ");
+    else
+        return s;
 }
 
 //status
