@@ -585,6 +585,7 @@ set_content_image (UTree* doc_t, UTree* e_t, TString[] values) {
 
     if (values.length) {
         e.content.image.src = values[0].s;
+        e.content.image.ptr = null;
     }
 }
 
