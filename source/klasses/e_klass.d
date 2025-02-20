@@ -237,11 +237,7 @@ set_pos_x (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e   = e_t.e;
 
     if (values.length) {
-        string value;
-        if (values[0].type == TString.Type.bquoted)
-            value = extract_value (doc_t,values[0].s);
-        else
-            value = values[0].s;
+        string value = values[0].s;
 
         if (value.is_percent (&e.pos_percent)) { // 50%
             e.pos_type = E.PosType.percent;
@@ -259,11 +255,7 @@ set_pos_x_percent (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e   = e_t.e;
 
     if (values.length) {
-        string value;
-        if (values[0].type == TString.Type.bquoted)
-            value = extract_value (doc_t,values[0].s);
-        else
-            value = values[0].s;
+        string value = values[0].s;
 
         if (value.isNumeric)
             e.pos_percent = value.to!byte;
