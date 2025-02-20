@@ -222,6 +222,7 @@ _WalkE {
         // childs
         foreach (e_tree; doc_t.childs) 
             if (e_tree.uni.type == Uni.Type.e)
+            if (!skip_hidden (e_tree))
                 foreach (_t; WalkTree (e_tree)) {
                     result = dg (_t);
                     if (result)
