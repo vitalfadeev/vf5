@@ -17,6 +17,8 @@ TString {
     enum
     Type {
         none,
+        indent,
+        name,
         spaces,
         string,
         dquoted,
@@ -50,6 +52,10 @@ _to_tstrings {
     enum
     Type {
         none,
+        //indent_start,
+        //indent_end,
+        //name_start,
+        //name_end,
         dquoted_start,
         dquoted_end,
         bquoted_start,

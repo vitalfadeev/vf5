@@ -493,29 +493,24 @@ go (UTree* doc_t, string s) {
     UTree* last_t   = doc_t;
     UTree* parent_t = doc_t;
     UTree* t;
-    size_t indent;
-    string name;
+    size_t    indent;
+    string    name;
+    TString[] values;
 
-
-    auto reader = Token_line_reader (s);
-    foreach (t_line; reader) {
-        // skip
-        if (t_line[0].type == TString.Type.cr)
-            continue;
-        if (t_line[0].type == TString.Type.comment)
-            continue;
-        if (t_line[0].type == TString.Type.none)
-            continue;
-
-        // indent, name
-        if (t_line[0].type == TString.Type.string) {
-            indent = 0;
-            name   = t_line[0].s;
-        }
-        else
-        if (t_line[0].type == TString.Type.spaces) {
-            indent = t_line[0].s.length;
-            name   = t_line[1].s;
+    foreach (t_line; Token_line_reader (s)) {
+        // indent, name, values
+        indent        = 0;
+        name.length   = 0;
+        values.length = 0;
+        foreach (ts; t_line) {            
+            switch (ts.type) {
+                case TString.Type.indent  : indent = ts.s.length; break;
+                case TString.Type.name    : name   = ts.s; break;
+                case TString.Type.comment : continue;
+                case TString.Type.none    : continue;
+                case TString.Type.cr      : continue;
+                default: values ~= ts;
+            }
         }
 
         // e klass field switch case
@@ -523,14 +518,15 @@ go (UTree* doc_t, string s) {
             t = new_e (doc_t,t_line);
         else
         if (name == "e" && indent >= 1)  // sub e
-            t = new_child_e (doc_t,t_line[1..$]);
+            t = new_child_e (doc_t,values);
         else
         if (name != "e" && indent == 0)  // klass
-            t = new_klass (doc_t,name,t_line[1..$]);
+            t = new_klass (doc_t,name,values);
         else
         if (name != "e" && indent >= 1)  // field swicth case
-            t = new_field_swicth_case (doc_t,name,t_line, last_t,indent);
+            t = new_field_swicth_case (doc_t,name,values,last_t,indent);
 
+        //
         t.indent = indent;
 
         // check for 'in tree'. add
@@ -581,12 +577,12 @@ new_doc () {
 }
 
 UTree*
-new_e (UTree* doc_t, TString[] t_line) {
-    return new_child_e (doc_t,t_line);
+new_e (UTree* doc_t, TString[] values) {
+    return new_child_e (doc_t,values);
 }
 
 UTree*
-new_child_e (UTree* doc_t, TString[] t_line) {
+new_child_e (UTree* doc_t, TString[] values) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
@@ -595,99 +591,63 @@ new_child_e (UTree* doc_t, TString[] t_line) {
     auto t = utree.new_e ();
     auto e = t.e;
 
+    e.klasses ~= find_klass_or_create (doc_t,"e");
+
     // klasses
-    foreach (ts; t_line)
-        if (ts.type == TString.Type.string)
-            e.klasses ~= find_klass_or_create (doc_t,ts.s);
+    foreach (ts; values)
+        switch (ts.type) {
+            case TString.Type.name   : 
+            case TString.Type.string : 
+                e.klasses ~= find_klass_or_create (doc_t,ts.s);
+                break;
+            default:
+        }
 
     return t;
 }
 
 
 UTree*
-new_klass (UTree* doc_t, string name, TString[] t_line) {
+new_klass (UTree* doc_t, string name, TString[] values) {
     auto t = find_klass_or_create (doc_t,name);
 
     // setup parents
-    foreach (ts; t_line)
-        switch (ts.type) {
-            case TString.Type.string:
-            case TString.Type.dquoted:
-            case TString.Type.bquoted:
-                //t.klass.parent_klasses ~= find_klass_or_create (doc_t,ts.s);
-                break;
-            default:
-        }
+    //   values
 
     return t;    
 }
 
 UTree*
-new_field (UTree* doc_t, string name, TString[] t_line) {
-    TString[] values;
-    foreach (ts; t_line)
-        switch (ts.type) {
-            case TString.Type.string:
-            case TString.Type.dquoted:
-            case TString.Type.bquoted:
-                values ~= ts;
-                break;
-            default:
-        }
-
-    auto t = new UTree (Uni (Field (name,values)));
-
-    return t;    
+new_field (UTree* doc_t, string name, TString[] values) {
+    return new UTree (Uni (Field (name,values)));
 }
 
 UTree*
-new_field_swicth_case (UTree* doc_t, string name, TString[] t_line, UTree* last_t, size_t indent) {
+new_field_swicth_case (UTree* doc_t, string name, TString[] values, UTree* last_t, size_t indent) {
     auto parent_t  = find_parent (last_t,indent);
     bool in_switch = (parent_t !is null && (parent_t.uni.type == Uni.Type.switch_));
     UTree* t;
 
     if (name == "switch")
-        t = new_switch (doc_t,t_line[2..$]);
+        t = new_switch (doc_t,values);
     else
     if (in_switch)
-        t = new_case (doc_t,t_line[1..$]);
+        t = new_case (doc_t,values);
     else
-        t = new_field (doc_t,name,t_line[2..$]);
+        t = new_field (doc_t,name,values);
 
     return t;    
 }
 
 UTree*
-new_switch (UTree* doc_t, TString[] t_line) {
-    TString[] values;
-    foreach (ts; t_line)
-        switch (ts.type) {
-            case TString.Type.string:
-            case TString.Type.dquoted:
-            case TString.Type.bquoted:
-                values ~= ts;
-                break;
-            default:
-        }
-
+new_switch (UTree* doc_t, TString[] values) {
     auto t = new UTree (Uni (Switch_ (values)));
 
     return t;    
 }
 
 UTree*
-new_case (UTree* doc_t, TString[] t_line) {
-    TString[] values;
-    foreach (ts; t_line)
-        switch (ts.type) {
-            case TString.Type.string:
-            case TString.Type.dquoted:
-            case TString.Type.bquoted:
-                values ~= ts;
-                break;
-            default:
-        }
-
+new_case (UTree* doc_t, TString[] values) {
     auto t = new UTree (Uni (Case_ (values)));
 
     return t;    

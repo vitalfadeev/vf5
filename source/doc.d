@@ -251,6 +251,7 @@ apply_klasses (UTree* doc_t, UTree* t) {
     E* e = t.uni.e;
     e.on.length = 0;
     global_font_files.length = 0;
+
     // remove e added from klass
     UTree*[] for_remove;
     foreach (_t; WalkChilds (t))
@@ -258,6 +259,7 @@ apply_klasses (UTree* doc_t, UTree* t) {
             for_remove ~= _t;
     foreach (_t; for_remove)
         t.remove_child (_t);
+
     // set . each e klass
     foreach (kls_t; e.klasses)
         apply_klass (doc_t,t,kls_t);
