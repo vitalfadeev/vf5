@@ -243,11 +243,6 @@ WalkLeft (Tree) (Tree* t) {
 }
 
 auto 
-WalkChildsE (Tree) (Tree* t) {
-    return vf.tree.WalkChilds (t, &skip_hidden);
-}
-
-auto 
 WalkChilds (Tree) (Tree* t) {
     return vf.tree.WalkChilds (t, &skip_hidden);
 }

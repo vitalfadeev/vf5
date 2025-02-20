@@ -1029,12 +1029,13 @@ update_pos (UTree* doc_t, UTree* t) {
     //
     final
     switch (e.pos_type) {
-        case E.PosType.t9   : pos_type_t9   (t); break;
-        case E.PosType.t3   : pos_type_t3   (t); break;
-        case E.PosType.grid : pos_type_grid (t); break;
-        case E.PosType.vbox : pos_type_vbox (t); break;
-        case E.PosType.hbox : pos_type_hbox (t); break;
-        case E.PosType.none : pos_type_none (t); break;
+        case E.PosType.t9      : pos_type_t9   (t); break;
+        case E.PosType.t3      : pos_type_t3   (t); break;
+        case E.PosType.grid    : pos_type_grid (t); break;
+        case E.PosType.vbox    : pos_type_vbox (t); break;
+        case E.PosType.hbox    : pos_type_hbox (t); break;
+        case E.PosType.percent : pos_type_percent (t); break;
+        case E.PosType.none    : pos_type_none (t); break;
    }
 
     //e.pos         = Pos (0,0);
@@ -1237,6 +1238,23 @@ pos_type_hbox (UTree* t) {
             e.pos.x = 0;
             e.pos.y = 0;
         }
+    }
+}
+
+void
+pos_type_percent (UTree* t) {
+    // e e e
+    E* e = t.e;
+    if (t.parent !is null) {
+        auto parent_content_pos = content_pos (t.parent.e);
+        auto parent_w = t.parent.e.size.w;
+        auto percent = e.pos_percent;
+        e.pos.x = (parent_content_pos.x + (cast(float)parent_w * percent / 100)).to!X;
+        e.pos.y = parent_content_pos.y;
+    }
+    else {
+        e.pos.x = 0;
+        e.pos.y = 0;
     }
 }
 

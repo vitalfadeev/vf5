@@ -25,6 +25,8 @@ Edit {
             &.draw, 
         );
     alias _super this;
+
+    size_t cursor_pos;
 }
 
 
@@ -39,7 +41,13 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
 
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN: break;
-        case SDL_KEYDOWN: break; // SDL_KeyboardEvent
+        case SDL_KEYDOWN:  // SDL_KeyboardEvent
+            // backspace
+            // del
+            // left
+            // right
+            // a-z а-я
+            break;
         case SDL_KEYUP: break;
         default:
     }

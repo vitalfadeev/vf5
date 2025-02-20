@@ -116,8 +116,14 @@ set_pos (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e   = e_t.e;
     
     if (values.length >= 2) {
-        set_pos_x (doc_t, e_t, values[0..1]);
-        set_pos_y (doc_t, e_t, values[1..$]);
+        if (values[1].type == TString.Type.string && values[1].s == "%") {
+            set_pos_x_percent (doc_t, e_t, values[0..1]);
+            e.pos_type = E.PosType.percent;
+        }
+        else {
+            set_pos_x (doc_t, e_t, values[0..1]);
+            set_pos_y (doc_t, e_t, values[1..$]);
+        }
     }
     else
     if (values.length == 1) {
@@ -132,15 +138,20 @@ set_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
 
     if (values.length >= 2) {
         switch (values[0].s) {
-            case "9"    : e.pos_type = E.PosType.t9; break;
-            case "t9"   : e.pos_type = E.PosType.t9; break;
-            case "3"    : e.pos_type = E.PosType.t3; break;
-            case "t3"   : e.pos_type = E.PosType.t3; break;
-            case "grid" : e.pos_type = E.PosType.grid; break;
-            case "vbox" : e.pos_type = E.PosType.vbox; break;
-            case "hbox" : e.pos_type = E.PosType.hbox; break;
-            default:
-                e.pos_type = E.PosType.none;
+            case "9"       : e.pos_type = E.PosType.t9; break;
+            case "t9"      : e.pos_type = E.PosType.t9; break;
+            case "3"       : e.pos_type = E.PosType.t3; break;
+            case "t3"      : e.pos_type = E.PosType.t3; break;
+            case "grid"    : e.pos_type = E.PosType.grid; break;
+            case "vbox"    : e.pos_type = E.PosType.vbox; break;
+            case "hbox"    : e.pos_type = E.PosType.hbox; break;
+            case "percent" : e.pos_type = E.PosType.percent; break;
+            default: {
+                if (is_percent (values[0].s,&e.pos_percent)) // 50%
+                    e.pos_type = E.PosType.percent;
+                else
+                    e.pos_type = E.PosType.none;
+            }
         }
         switch (values[1].s) {
             case "b" : e.pos_dir = E.PosDir.b; break;
@@ -154,17 +165,45 @@ set_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
     else
     if (values.length >= 1) {
         switch (values[0].s) {
-            case "9"    : e.pos_type = E.PosType.t9; break;
-            case "t9"   : e.pos_type = E.PosType.t9; break;
-            case "3"    : e.pos_type = E.PosType.t3; break;
-            case "t3"   : e.pos_type = E.PosType.t3; break;
-            case "grid" : e.pos_type = E.PosType.grid; break;
-            case "vbox" : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
-            case "hbox" : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
-            default:
-                e.pos_type = E.PosType.none;
+            case "9"       : e.pos_type = E.PosType.t9; break;
+            case "t9"      : e.pos_type = E.PosType.t9; break;
+            case "3"       : e.pos_type = E.PosType.t3; break;
+            case "t3"      : e.pos_type = E.PosType.t3; break;
+            case "grid"    : e.pos_type = E.PosType.grid; break;
+            case "vbox"    : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
+            case "hbox"    : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
+            case "percent" : e.pos_type = E.PosType.percent; break;
+            default: {
+                if (is_percent (values[0].s,&e.pos_percent)) // 50%
+                    e.pos_type = E.PosType.percent;
+                else
+                    e.pos_type = E.PosType.none;
+            }
         }
     }
+}
+
+bool
+is_percent (string s, byte* percent) {
+    auto perc_pos = s.indexOf ("%");
+    if (perc_pos != -1) {
+        if (s[0..perc_pos].isNumeric ()) {
+            *percent = s[0..perc_pos].to!byte;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+is_numeric (string s, int* num) {
+    if (s.isNumeric) {
+        *num = s.to!int;
+        return true;
+    }
+
+    return false;
 }
 
 void
@@ -198,12 +237,38 @@ set_pos_x (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e   = e_t.e;
 
     if (values.length) {
-        //if (values[0].s == "auto")
-        //    e.pos_x_auto = true;
-        if (values[0].s.isNumeric ()) {
-            e.pos.x = values[0].s.to!X;
-            //e.pos_x_auto = false;
+        string value;
+        if (values[0].type == TString.Type.bquoted)
+            value = extract_value (doc_t,values[0].s);
+        else
+            value = values[0].s;
+
+        if (value.is_percent (&e.pos_percent)) { // 50%
+            e.pos_type = E.PosType.percent;
         }
+        else
+        if (value.isNumeric ()) { // 50
+            e.pos.x = value.to!X;
+        }
+    }
+}
+
+void
+set_pos_x_percent (UTree* doc_t, UTree* e_t, TString[] values) {
+    auto doc = doc_t.doc;
+    auto e   = e_t.e;
+
+    if (values.length) {
+        string value;
+        if (values[0].type == TString.Type.bquoted)
+            value = extract_value (doc_t,values[0].s);
+        else
+            value = values[0].s;
+
+        if (value.isNumeric)
+            e.pos_percent = value.to!byte;
+        else
+            e.pos_percent = 0;
     }
 }
 
@@ -213,11 +278,8 @@ set_pos_y (UTree* doc_t, UTree* e_t, TString[] values) {
     auto e   = e_t.e;
 
     if (values.length) {
-        //if (values[0].s == "auto")
-        //    e.pos_y_auto = true;
         if (values[0].s.isNumeric ()) {
             e.pos.y = values[0].s.to!Y;
-            //e.pos_y_auto = false;
         }
     }
 }
@@ -572,13 +634,14 @@ set_text_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
 
     if (values.length) {
         switch (values[0].s) {
-            case "9"    : e.content.text.pos_type = E.PosType.t9; break;
-            case "t9"   : e.content.text.pos_type = E.PosType.t9; break;
-            case "3"    : e.content.text.pos_type = E.PosType.t3; break;
-            case "t3"   : e.content.text.pos_type = E.PosType.t3; break;
-            case "grid" : e.content.text.pos_type = E.PosType.grid; break;
-            case "vbox" : e.content.text.pos_type = E.PosType.vbox; break;
-            case "hbox" : e.content.text.pos_type = E.PosType.hbox; break;
+            case "9"       : e.content.text.pos_type = E.PosType.t9; break;
+            case "t9"      : e.content.text.pos_type = E.PosType.t9; break;
+            case "3"       : e.content.text.pos_type = E.PosType.t3; break;
+            case "t3"      : e.content.text.pos_type = E.PosType.t3; break;
+            case "grid"    : e.content.text.pos_type = E.PosType.grid; break;
+            case "vbox"    : e.content.text.pos_type = E.PosType.vbox; break;
+            case "hbox"    : e.content.text.pos_type = E.PosType.hbox; break;
+            case "percent" : e.content.text.pos_type = E.PosType.percent; break;
             default:
                 e.content.text.pos_type = E.PosType.none;
         }

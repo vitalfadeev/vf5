@@ -142,6 +142,7 @@ E {
     PosType pos_type;
     ubyte   pos_group;
     PosDir  pos_dir;
+    byte    pos_percent;
 
     enum
     PosType : ubyte {
@@ -151,6 +152,7 @@ E {
         grid,
         vbox,
         hbox,
+        percent,
     }
     enum
     PosDir : ubyte {

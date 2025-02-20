@@ -74,6 +74,7 @@ e root
   e toolbar-item hbox button tb-stop
   e toolbar-item hbox button tb-next
   e toolbar-item hbox progress tb-position
+    e progress-current
   e toolbar-item t3-right button tb-time 
   e toolbar-item t3-right button tb-loop
   e toolbar-item t3-right button tb-random
@@ -216,7 +217,7 @@ tb-position
 progress
   size max parent
   //size 320 parent
-  progress.position `player.current-song-output-length`
+  //progress.position `player.current-song-output-length`
   //on position `audtool playback-seek %s` total*position
   //on position `audtool-playback-seek.sh %s` position
   //env position = ...
@@ -226,24 +227,9 @@ progress
   e hbox progress-current
   e hbox progress-rest
 
-progress-passed
-  size          content
-  //pad           10 5
-  content.size  50 16
-  bg            colors.blue
-  borders       2 solid colors.blue
-
 progress-current
-  size          content
-  //pad           10 5
-  content.size  10 16
-  bg            colors.blue
-  borders       2 solid colors.blue
-
-progress-rest
-  size          content
-  //pad           10 5
-  content.size  200 16
+  size          16 parent
+  pos           `commands.player.audtool-playback-position`%
   bg            colors.blue
   borders       2 solid colors.blue
 
@@ -350,6 +336,7 @@ commands
   player.current-song-frequency-khz audtool current-song-frequency-khz
   player.current-song-bitrate-kbps  audtool current-song-bitrate-kbps
   player.status                     audtool playback-status
+  player.audtool-playback-position  /home/vf/src/vf5/bin/audtool-playback-position.sh
 
 hotkeys
   x commands.player.prev
@@ -439,6 +426,11 @@ commands
   player.prev.undo                  player.next
   player.next                       audtool playlist-advance
   player.next.undo                  player.prev
+
+update.links
+  tb-play-pause
+    commands.player.play_pause
+    tb-stop
 
 forms
   border-form    
