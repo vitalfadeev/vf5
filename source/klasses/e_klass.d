@@ -843,7 +843,7 @@ string
 extract_value (UTree* doc_t, string bquoted) {
     //writeln ("extract_value: ", bquoted);
 
-    auto stripped = bquoted.strip ("`");
+    auto stripped  = bquoted.strip ("`");
     auto converted = extract_class_field_value (doc_t,stripped);
     //writeln ("converted: ", converted);
     auto ret = executeShell (converted);  // (int status, string output)

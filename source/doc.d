@@ -242,7 +242,7 @@ remove_class (E* e, UTree* kls_t) {
 
 void
 doc_apply_klasses (UTree* doc_t) {
-    foreach (_t; utree.WalkE (doc_t)) 
+    foreach (_t; WalkE (doc_t)) 
         apply_klasses (doc_t,_t);
 }
 
@@ -251,6 +251,8 @@ apply_klasses (UTree* doc_t, UTree* t) {
     E* e = t.uni.e;
     e.on.length = 0;
     global_font_files.length = 0;
+    writeln (*e);
+    time_step ();
 
     // remove e added from klass
     UTree*[] for_remove;
@@ -274,7 +276,7 @@ apply_klass (UTree* doc_t, UTree* t, UTree* kls_t) {
 
     // each field
     // each sub tree
-    foreach (_t; utree.WalkFields (kls_t)) {
+    foreach (_t; WalkFields (kls_t)) {
         switch (_t.uni.type) {
             case Uni.Type.field   : set_field    (doc_t,t,_t); break; // set field
             case Uni.Type.e       : add_sub_tree (doc_t,t,_t); break; // add e
@@ -381,11 +383,11 @@ extract_quoted (UTree* doc_t, TString[] values) {
 //}
 
 
-alias PTR = TTF_Font*;
+alias FONTPTR = TTF_Font*;
 static
-PTR[string] global_fonts;
+FONTPTR[string] global_fonts;
 static
-PTR default_ptr;
+FONTPTR default_ptr;
 
 void
 load_fonts (UTree* doc_t) {
@@ -394,17 +396,22 @@ load_fonts (UTree* doc_t) {
     if (default_ptr is null)
         default_ptr  = open_font (default_file,default_size);
 
-    foreach (t; utree.WalkE (doc_t)) {
+    foreach (t; WalkE (doc_t)) {
         if (t.e.content.text.s.length) {
-            string font_file = t.e.content.text.font.file;
-            ubyte  font_size = t.e.content.text.font.size;
+            string  font_file = t.e.content.text.font.file;
+            ubyte   font_size = t.e.content.text.font.size;
+            FONTPTR font_ptr  = t.e.content.text.font.ptr;
+            FONTPTR* _ptr = font_file in global_fonts;
 
-            if (font_file.length >= 1 && !(font_file in global_fonts)) {
-                PTR ptr = open_font (font_file,font_size);
-                if (ptr is null)
-                    throw new Exception ("open_font");
+            if (font_file.length >= 1) {
+                if (_ptr is null || font_ptr != *_ptr) {
+                    auto ptr = open_font (font_file,font_size);
+                    if (ptr is null)
+                        throw new Exception ("open_font");
 
-                global_fonts[font_file] = ptr;
+                    global_fonts[font_file] = ptr;
+                    t.e.content.text.font.ptr = ptr;
+                }
             }
         }
     }
@@ -1506,34 +1513,54 @@ event (UTree* doc_t, Event* ev) {
 void
 update (UTree* doc_t) {
     Doc* doc = doc_t.doc;
+    time_step ();
 
     // 0
     if (doc.window !is null)
         doc.size = doc.window.size;
+    time_step ();
     // 1
     doc_t.doc_apply_klasses ();
+    time_step ();
 
     // 2
     doc_t.load_images ();
+    time_step ();
     // 3
     doc_t.load_fonts ();
+    time_step ();
     // 4
     doc_t.load_colors ();
+    time_step ();
     // 5
     doc_t.load_texts ();
+    time_step ();
     // 6
     // 7
     doc_t.update_sizes ();
+    time_step ();
     //doc.dump_sizes ();
     // ...
     // 8
     // 9
     doc_t.update_poses ();
+    time_step ();
+}
+
+void
+time_step (string file_name=__FILE__, size_t line=__LINE__) {
+    import core.time;
+    static MonoTime last_time;
+    auto cur = MonoTime.currTime ();
+    auto dur = cur - last_time;
+    writeln (file_name, ": ", line, ": ", dur);
+    last_time = cur;
 }
 
 void
 draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
     Doc* doc = doc_t.doc;
+    time_step ();
 
     auto e_tree = 
         (t is null) ? 
@@ -1542,6 +1569,7 @@ draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
 
     foreach (_t; WalkE (e_tree))
         _draw_one (renderer,_t);
+    time_step ();
 }
 
 void
