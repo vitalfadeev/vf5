@@ -436,17 +436,19 @@ IMGPTR[string] global_images;
 
 void
 load_e_image (E* e) {
-    if (e.content.image.ptr is null) {
+    string img_file = e.content.image.src;
+    IMGPTR* ptr = img_file in global_images;
+
+    if (ptr is null || e.content.image.ptr != *ptr) {
         IMGPTR img_surface;
-        if (!(e.content.image.src in global_images)) {
-            string img_file = e.content.image.src;
+        if (ptr is null) {
             img_surface = IMG_Load (img_file.toStringz);
             if (img_surface is null)
                 throw new IMGException ("IMG_Load");
             global_images[img_file] = img_surface;
         }
         else {
-            img_surface = global_images[e.content.image.src];
+            img_surface = *ptr;
         }
 
         e.content.image.ptr = img_surface;
