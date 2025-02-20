@@ -500,14 +500,14 @@ update_text_size (Doc* doc) {
 void
 update_sizes (UTree* doc_t) {
     foreach (t; WalkE (doc_t))
-            update_size (doc_t,t); // recursive
+        update_size (doc_t,t); // recursive
 }
 
 void
 update_poses (UTree* doc_t) {
     foreach (UTree* _e_tree; WalkChilds (doc_t))
         if (_e_tree.uni.type == Uni.Type.e)
-            foreach (UTree* _t; WalkTree (_e_tree))
+            foreach (UTree* _t; WalkE (_e_tree))
                 update_pos (doc_t,_t);
 }
 
@@ -589,11 +589,52 @@ update_size (UTree* doc_t, UTree* t) {
     }
 
     // recursive
-    foreach (tc; WalkChilds (t))
-        update_size (doc_t,tc);
+    foreach (_t; WalkChilds (t))
+        update_size (doc_t,_t);
 
-    // update childs size`s
-    //   max
+    // fix size`s
+    e_fix_size_w (doc_t,t);
+}
+
+void
+e_fix_size_w (UTree* doc_t, UTree* t) {
+    W parent_w;
+    W other_w;
+    size_t max_cnt;
+
+    // total
+    foreach (_t; WalkChilds (t)) {
+        if (_t.e.size_w_type == E.SizeType.max)
+            max_cnt ++;
+        else
+            other_w += _t.e.size.w;
+    }
+
+    // has max
+    if (max_cnt >= 1) {
+        // divide
+        assert (t.parent !is null);
+        auto total_w = t.e.content.size.w;
+
+        auto one_max_w = ((total_w - other_w) / max_cnt).to!W;
+        foreach (_t; WalkChilds (t)) {
+            if (_t.uni.type == Uni.Type.e) 
+            if (_t.e.size_w_type == E.SizeType.max)  {
+                _t.e.size.w = one_max_w;
+                _t.e.content.size.w = (-_t.e.borders.l.w - _t.e.pad.l + _t.e.size.w - _t.e.borders.r.w - _t.e.pad.r).to!W;
+                writeln ("XXX: ", *_t.e, ": ", one_max_w);
+                writeln ("   : ", max_cnt);
+                writeln ("   : ", total_w);
+                writeln ("   : ", other_w);
+                writeln ("   : ", one_max_w); // 456
+
+                // recursive update childs
+                foreach (__t; WalkChilds (_t))
+                    if (__t.uni.type == Uni.Type.e) 
+                        update_size (doc_t,__t);
+            }
+        }
+    }
 }
 
 void
@@ -645,18 +686,20 @@ void
 e_size_w_max (UTree* doc_t, UTree* t) {
     auto e = t.e;
 
-    W all_left;
-    foreach (_t; WalkLeft (t))
-        all_left += _t.e.size.w;
+    //e.size.w = 0;
+    //e.content.size.w = 0;
+    //W all_left;
+    //foreach (_t; WalkLeft (t))
+    //    all_left += _t.e.size.w;
 
-    if (t.parent.e.content.size.w > all_left) {
-        e.size.w = (t.parent.e.content.size.w - all_left).to!W;
-        e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
-    }
-    else {
-        e.size.w = 0;
-        e.content.size.w = 0;
-    }
+    //if (t.parent.e.content.size.w > all_left) {
+    //    e.size.w = (t.parent.e.content.size.w - all_left).to!W;
+    //    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
+    //}
+    //else {
+    //    e.size.w = 0;
+    //    e.content.size.w = 0;
+    //}
 }
 
 void

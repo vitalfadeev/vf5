@@ -216,16 +216,13 @@ tb-position
 
 progress
   size max parent
-  //size 320 parent
   //progress.position `player.current-song-output-length`
   //on position `audtool playback-seek %s` total*position
   //on position `audtool-playback-seek.sh %s` position
   //env position = ...
   //  on position `audtool-playback-seek.sh`
   on progress.position /home/vf/src/vf5/bin/audtool-playback-seek.sh
-  e hbox progress-passed
-  e hbox progress-current
-  e hbox progress-rest
+  borders       8 solid colors.blue
 
 progress-current
   size          16 parent
