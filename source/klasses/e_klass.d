@@ -31,6 +31,8 @@ E_Klass {
 // KLASS_EVENT_FN
 void
 event (UTree* kls_t, Event* ev, UTree* e_t) {
+    assert (kls_t.uni.type == Uni.Type.klass);
+    assert (  e_t.uni.type == Uni.Type.e);
     E* e = e_t.e;
 
     if (ev.type != SDL_MOUSEMOTION)

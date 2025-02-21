@@ -1,4 +1,4 @@
-module klasses.check;
+module klasses.list;
 
 import std.stdio;
 import std.string;
@@ -11,11 +11,10 @@ import utree;
 import klass;
 import e;
 import types;
-import pix : redraw;
 
 
 struct 
-Check {
+List {
     Klass _super = 
         Klass (
             typeof(this).stringof.toLower, 
@@ -38,20 +37,12 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
     E*     e   = e_t.e;
 
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("CHECK.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writeln ("LIST.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     switch (ev.type) {
-        case SDL_USEREVENT:
-            switch (ev.user.code) {
-                case USER_EVENT.click : 
-                    e.trigger_class (ev.doc_t,"check.pressed");
-                    //emit ("on check.pressed", doc_t, e_t);
-                    ev.doc_t.doc.update (ev.doc_t);
-                    e_t.redraw ();
-                    break;
-                default:
-            }
-            break;
+        case SDL_MOUSEBUTTONDOWN: break;
+        case SDL_KEYDOWN: break;
+        case SDL_KEYUP: break;
         default:
     }
 }
@@ -74,3 +65,21 @@ draw (UTree* kls_t, SDL_Renderer* renderer, UTree* t) {
     //
 }
 
+
+// list
+//   childs
+//   generator childs  <-- data + template
+//     select
+//       from generator
+//       offset A
+//       limit  B
+//   generator.s[a..b]
+struct
+Generator {
+    string[] impl;
+
+    string[] 
+    opSlice (size_t dim: 0) (size_t a, size_t b) {
+        return impl[a..b];
+    }
+}

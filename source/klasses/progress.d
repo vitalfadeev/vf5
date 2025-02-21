@@ -17,7 +17,7 @@ struct
 Progress {
     Klass _super = 
         Klass (
-            "progress", 
+            typeof(this).stringof.toLower, 
             [], 
             &.event,
             &.update,
@@ -31,8 +31,12 @@ Progress {
 // KLASS_EVENT_FN  
 void 
 event (UTree* kls_t, Event* ev, UTree* e_t) {
+    assert (kls_t.uni.type == Uni.Type.klass);
+    assert (  e_t.uni.type == Uni.Type.e);
+
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("PROGRESS.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+
     bool drag_started = false;
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN: {

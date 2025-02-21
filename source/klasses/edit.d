@@ -17,7 +17,7 @@ struct
 Edit {
     Klass _super = 
         Klass (
-            "edit", 
+            typeof(this).stringof.toLower, 
             [], 
             &.event,
             &.update,
@@ -33,6 +33,8 @@ Edit {
 // KLASS_EVENT_FN  
 void 
 event (UTree* kls_t, Event* ev, UTree* e_t) {
+    assert (kls_t.uni.type == Uni.Type.klass);
+    assert (  e_t.uni.type == Uni.Type.e);
     Klass* kls = kls_t.klass;
     E*     e   = e_t.e;
 

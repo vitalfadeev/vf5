@@ -18,7 +18,7 @@ struct
 Button {
     Klass _super = 
         Klass (
-            "button", 
+            typeof(this).stringof.toLower, 
             [], 
             &.event,
             &.update,
@@ -32,6 +32,8 @@ Button {
 // KLASS_EVENT_FN  
 void 
 event (UTree* kls_t, Event* ev, UTree* e_t) {
+    assert (kls_t.uni.type == Uni.Type.klass);
+    assert (  e_t.uni.type == Uni.Type.e);
     Klass* kls = kls_t.klass;
     E*     e   = e_t.e;
 

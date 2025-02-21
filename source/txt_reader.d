@@ -334,6 +334,7 @@ commands
   player.current-song-bitrate-kbps  audtool current-song-bitrate-kbps
   player.status                     audtool playback-status
   player.audtool-playback-position  /home/vf/src/vf5/bin/audtool-playback-position.sh
+  player.playlist-display           audtool playlist-display
 
 hotkeys
   x commands.player.prev

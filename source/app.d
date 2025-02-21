@@ -96,4 +96,9 @@ new_reserved_klass (KLASS) () {
 // list
 //   childs
 //   generator childs  <-- data + template
+//     select
+//       from generator
+//       offset A
+//       limit  B
+//   generator.s[a..b]
 
