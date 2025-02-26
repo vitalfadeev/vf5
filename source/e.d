@@ -14,6 +14,8 @@ alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window
 alias E_UPDATE_FN = void function (E* e, Doc* doc);
 alias E_SET_FN    = void function (E* e, Doc* doc, UTree* t, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
+alias E_DUP_FN    = EPtr function (EPtr _this);
+alias EPtr = E*;
 
 
 struct 
@@ -137,7 +139,8 @@ E {
     Content content;
 
     bool    hidden;
-    Klass*  added_from;
+    Klass*  from_klass;
+    UTree*  from_template;
 
     PosType pos_type;
     ubyte   pos_group;
@@ -173,6 +176,61 @@ E {
     SizeType  size_w_type;
     SizeType  size_h_type;
 
+    // e-list
+    //   childs.src       fs
+    //   childs.src       cmd `command` delimiter |
+    //   childs.src       csv /path/to/file.csv
+    //   childs.tpl.klass list-template
+    //   childs.tpl.src   1         2    3
+    //   childs.tpl.dst   image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+    struct
+    ChildsSrc {
+        Type     type;      // cmd `command` delimiter | skip 1
+        union {
+            None none;
+            Cmd  cmd;
+            Fs   fs;
+            Csv  csv;
+        }
+        Tpl      tpl;
+        size_t   offset;
+        size_t   limit;
+
+        enum 
+        Type {
+            none,
+            cmd,
+            fs,
+            csv,
+        }
+        struct 
+        None {
+            //
+        }
+        struct 
+        Cmd {
+            string command;   // `command`
+            string delimiter; // |
+            size_t skip;      // 1 (header line)
+        }
+        struct 
+        Fs {
+            //
+        }
+        struct 
+        Csv {
+            //
+        }
+
+        struct
+        Tpl {
+            string   klass;  // klass-name
+            size_t[] src;    // 1         2    3
+            string[] dst;    // image.src text text            
+        }
+    }
+    ChildsSrc childs_src;
+
     struct
     On {
         string    event;  // click
@@ -184,11 +242,7 @@ E {
     E_UPDATE_FN update = &.update;
     E_SET_FN    set    = &.set;
     E_DRAW_FN   draw   = &.draw;
-
-    E*
-    clone () {
-        return new E ();
-    }
+    E_DUP_FN    dup    = &._dup;
 
     //
     string
@@ -223,3 +277,41 @@ draw (E* e, SDL_Renderer* renderer) {
     //
 }
 
+EPtr
+_dup (EPtr _this) {
+     auto cloned = new E ();
+
+     cloned.klasses       = _this.klasses.dup;
+     cloned.pos           = _this.pos;
+     cloned.size          = _this.size;
+     cloned.pad           = _this.pad;
+     cloned.bg            = _this.bg;
+     cloned.borders       = _this.borders;
+     cloned.corners       = _this.corners;
+     cloned.content       = _this.content;
+     cloned.content.text.rects 
+                          = _this.content.text.rects.dup;
+     cloned.hidden        = _this.hidden;
+     cloned.from_klass    = _this.from_klass;
+     cloned.from_template = _this.from_template;
+     cloned.pos_type      = _this.pos_type;
+     cloned.pos_group     = _this.pos_group;
+     cloned.pos_dir       = _this.pos_dir;
+     cloned.pos_percent   = _this.pos_percent;
+     cloned.size_w_type   = _this.size_w_type;
+     cloned.size_h_type   = _this.size_h_type;
+     cloned.childs_src    = _this.childs_src;
+     cloned.childs_src.tpl.src 
+                          = _this.childs_src.tpl.src.dup;
+     cloned.childs_src.tpl.dst 
+                          = _this.childs_src.tpl.dst.dup;
+     cloned.on            = _this.on.dup;
+     foreach (ref _on; cloned.on)
+        _on.action = _on.action.dup;
+     cloned.event         = _this.event;
+     cloned.update        = _this.update;
+     cloned.set           = _this.set;
+     cloned.draw          = _this.draw;
+
+     return cloned;
+}

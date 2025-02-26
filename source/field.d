@@ -5,7 +5,7 @@ import tstring;
 
 struct
 Field {
-    string   name;
+    string    name;
     TString[] values;
 
     //enum 
@@ -16,8 +16,13 @@ Field {
     //}
 
     Field*
-    clone () {
-        return new Field ();
+    dup () {
+        auto cloned = new Field ();
+
+        cloned.name   = this.name;
+        cloned.values = this.values.dup;
+
+        return cloned;
     }
 }
 

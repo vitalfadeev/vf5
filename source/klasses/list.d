@@ -126,6 +126,7 @@ Template (T) {
 //   e icon
 //   e number
 //   e name
+//   childs.map  image.src text text
 //
 // generator-3
 //   type csv 
@@ -136,3 +137,10 @@ Template (T) {
 //   type delimiter
 //   type fixed
 //
+// e-list
+//   childs.src         fs
+//   childs.src         cmd `command` delimiter |
+//   childs.src         csv /path/to/file.csv
+//   childs.src.tpl     list-template  ...or childs under t
+//   childs.src.tpl.src 1         2    3
+//   childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)

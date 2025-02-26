@@ -34,9 +34,11 @@ const DEFAULT_WINDOW_H = 480;
 const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
-alias DOC_EVENT_FN  = int  function (UTree* t, Event* ev);
-alias DOC_UPDATE_FN = void function (UTree* t);
-alias DOC_DRAW_FN   = void function (UTree* t,SDL_Renderer* renderer, UTree* t);
+alias DOC_EVENT_FN  = int    function (UTree* t, Event* ev);
+alias DOC_UPDATE_FN = void   function (UTree* t);
+alias DOC_DRAW_FN   = void   function (UTree* t,SDL_Renderer* renderer, UTree* t);
+alias DOC_DUP_FN    = DocPtr function (DocPtr _this);
+alias DocPtr = Doc*;
 
 struct
 Doc {
@@ -48,11 +50,7 @@ Doc {
     DOC_EVENT_FN  event  = &.event;
     DOC_UPDATE_FN update = &.update;
     DOC_DRAW_FN   draw   = &.draw;
-
-    Doc*
-    clone () {
-        return new Doc ();
-    }
+    DOC_DUP_FN    dup    = &._dup;
 }
 
 UTree*
@@ -257,7 +255,7 @@ apply_klasses (UTree* doc_t, UTree* t) {
     // remove e added from klass
     UTree*[] for_remove;
     foreach (_t; WalkChilds (t))
-        if (_t.e.added_from !is null)
+        if (_t.e.from_klass !is null)
             for_remove ~= _t;
     foreach (_t; for_remove)
         t.remove_child (_t);
@@ -428,6 +426,56 @@ load_fonts (UTree* doc_t) {
 void
 load_colors (UTree* doc_t) {
     // after load all classes, because able color 'class.field'
+}
+
+void
+load_childs (UTree* doc_t) {
+    foreach (UTree* t; utree.WalkE (doc_t))
+        final
+        switch (t.e.childs_src.type) {
+            case E.ChildsSrc.Type.none : break;
+            case E.ChildsSrc.Type.cmd  : load_childs_cmd (doc_t,t); break;
+            case E.ChildsSrc.Type.fs   : break;
+            case E.ChildsSrc.Type.csv  : break;
+        }
+}
+
+void
+load_childs_cmd (UTree* doc_t, UTree* t) {
+    auto cmd = t.e.childs_src.cmd.command;
+    auto dlm = t.e.childs_src.cmd.delimiter;
+    auto skp = t.e.childs_src.cmd.skip;
+
+    if (cmd.length) {
+        auto ret = executeShell (cmd);
+        
+        foreach (line; ret.output.splitLines) {
+            if (skp > 0) {
+                skp--;
+                continue;
+            }
+
+            auto splits = line.split (dlm);
+            TString[] values;
+            foreach (s;splits) {
+                values ~= TString (TString.Type.string,s);
+            }
+
+            // map
+            //   to template
+            auto tpl_klass = t.e.childs_src.tpl.klass;
+            auto tpl_src   = t.e.childs_src.tpl.src;
+            auto tpl_dst   = t.e.childs_src.tpl.dst;
+            //
+            //auto cloned = kls_t.childs.clone ();
+            //auto cloned =     t.childs.clone ();
+            //
+            foreach (i; tpl_src) {
+                auto field_name = tpl_dst[i];
+                //t.e.set (kls_t,doc_t,t, field_name,values);
+            }
+        }
+    }
 }
 
 void
@@ -1547,7 +1595,9 @@ update (UTree* doc_t) {
     // 1
     doc_t.doc_apply_klasses ();
     time_step ();
-
+    // 1.1
+    doc_t.load_childs ();
+    time_step ();
     // 2
     doc_t.load_images ();
     time_step ();
@@ -1605,6 +1655,22 @@ _draw_one (SDL_Renderer* renderer, UTree* t) {
     }
     if (t.e.draw !is null)
         t.e.draw (t.e,renderer);    
+}
+
+
+DocPtr
+_dup (DocPtr _this) {
+    auto cloned = new Doc ();
+
+    cloned.hotkeys = _this.hotkeys;
+    cloned.window  = _this.window;
+    cloned.size    = _this.size;
+    cloned.focused = _this.focused;
+    cloned.event   = _this.event;
+    cloned.update  = _this.update;
+    cloned.draw    = _this.draw;
+
+    return cloned;
 }
 
 

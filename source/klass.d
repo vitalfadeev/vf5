@@ -9,6 +9,8 @@ alias KLASS_EVENT_FN  = void function (UTree* kls_t, Event* ev, UTree* e_t);
 alias KLASS_UPDATE_FN = void function (UTree* kls_t, UTree* doc_t, UTree* e_t);
 alias KLASS_SET_FN    = void function (UTree* kls_t, UTree* doc_t, UTree* e_t, string field, TString[] values);
 alias KLASS_DRAW_FN   = void function (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t);
+alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
+alias KlassPtr = Klass*;
 
 // e green
 // green
@@ -32,11 +34,7 @@ Klass {
     KLASS_UPDATE_FN update = &.update;
     KLASS_SET_FN    set    = &.set;
     KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
-
-    Klass*
-    clone () {
-        return new Klass ();
-    }
+    KLASS_DUP_FN    dup    = &._dup; // simple, bordered, bordered-titled, custom
 }
 
 void
@@ -59,3 +57,16 @@ draw (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t) {
     //
 }
 
+KlassPtr
+_dup (KlassPtr _this) {
+    auto cloned = new Klass ();
+
+    cloned.name           = _this.name;
+    cloned.parent_klasses = _this.parent_klasses.dup;
+    cloned.event          = _this.event;
+    cloned.update         = _this.update;
+    cloned.set            = _this.set;
+    cloned.draw           = _this.draw;
+
+    return cloned;
+}

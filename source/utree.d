@@ -76,6 +76,11 @@ Uni {
         case_,
     }
 
+    auto
+    dup () {
+        return this;
+    }
+
     string
     toString () {
         final
@@ -95,7 +100,7 @@ Switch_ {
     TString[] cond;
 
     Switch_*
-    clone () {
+    dup () {
         return new Switch_ ();
     }
 }
@@ -106,7 +111,7 @@ Case_ {
     TString[] values;
 
     Case_*
-    clone () {
+    dup () {
         return new Case_ ();
     }
 }

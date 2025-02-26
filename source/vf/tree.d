@@ -64,6 +64,14 @@ tree_functions () {
         c.l = null;
         c.r = null;
     }
+
+    auto
+    dup () {
+        assert (0);
+        // dup this
+        //   dup childs
+        return this;
+    }
 }
 
 // in depth
