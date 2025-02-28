@@ -139,7 +139,7 @@ E {
     Content content;
 
     bool    hidden;
-    Klass*  from_klass;
+    UTree*  from_klass;
     UTree*  from_template;
 
     PosType pos_type;
@@ -173,8 +173,8 @@ E {
         window,
         max,
     }
-    SizeType  size_w_type;
-    SizeType  size_h_type;
+    SizeType size_w_type;
+    SizeType size_h_type;
 
     // e-list
     //   childs.src       fs

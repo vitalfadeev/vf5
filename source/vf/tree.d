@@ -65,12 +65,26 @@ tree_functions () {
         c.r = null;
     }
 
-    auto
+    typeof(this)*
     dup () {
         assert (0);
         // dup this
         //   dup childs
-        return this;
+        auto cloned = new typeof(this) ();
+
+        cloned.l        = null;
+        cloned.r        = null;
+        cloned.childs.l = null;
+        cloned.childs.r = null;
+        cloned.parent   = null;
+        cloned.indent   = this.indent;
+        cloned.uni      = this.uni;
+
+        // childs
+        foreach (c; this.childs)
+            cloned.add_child (c.dup);
+
+        return cloned;
     }
 }
 
