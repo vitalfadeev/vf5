@@ -12,7 +12,7 @@ import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import tstring;
-import utree;
+import etree;
 import klass;
 import e;
 import types;
@@ -34,9 +34,9 @@ const DEFAULT_WINDOW_H = 480;
 const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
-alias DOC_EVENT_FN  = int    function (UTree* t, Event* ev);
-alias DOC_UPDATE_FN = void   function (UTree* t);
-alias DOC_DRAW_FN   = void   function (UTree* t,SDL_Renderer* renderer, UTree* t);
+alias DOC_EVENT_FN  = int    function (Doc* doc, Event* ev);
+alias DOC_UPDATE_FN = void   function (Doc* Doc);
+alias DOC_DRAW_FN   = void   function (Doc* Doc,SDL_Renderer* renderer, ETree* t);
 alias DOC_DUP_FN    = DocPtr function (DocPtr _this);
 alias DocPtr = Doc*;
 
@@ -65,35 +65,24 @@ add_child (Doc* doc, Klass* kls) {
     doc.klasses ~= kls;
 }
 
-UTree*
-find_e_at_pos (UTree* doc_t, Pos pos) {
-    UTree* found;
+ETree*
+find_e_at_pos (Doc* doc, Pos pos) {
+    ETree* found;
 
     bool 
-    valid_e (UTree* t) {
-        return (pos_in_rect (pos, t.e.pos, t.e.size));
+    valid_e (ETree* t) {
+        return pos_in_rect (pos, t.e.pos, t.e.size);
     }
 
-    import utree : WalkChilds;
-    import utree : FindDeepest;
-    foreach (_e_tree; WalkChilds (doc_t)) {
-        if (_e_tree.uni.type == Uni.Type.e)
-            foreach (t; FindDeepest (_e_tree,&valid_e)) {
-                found = t;
-            }
+    import etree : WalkChilds;
+    import etree : FindDeepest;
+    foreach (_e_tree; doc.tree.childs) {
+        foreach (t; FindDeepest (_e_tree,&valid_e)) {
+            found = t;
+        }
     }
 
     return found;
-}
-
-UTree*[]
-klasses (UTree* doc_t) {
-    UTree*[] klasses;
-
-    foreach (_t; utree.WalkKlasses (doc_t))
-        klasses ~= _t;
-
-    return klasses;
 }
 
 Klass*
@@ -113,8 +102,8 @@ find_klass (Doc* doc, string s) {
     return null;
 }
 
-UTree*
-find_field (UTree* kls_t, string s) {
+ETree*
+find_field (Klass* kls, string s) {
     foreach (field_t; WalkFields (kls_t))
         if (field_t.field.name == s)
             return field_t;
@@ -149,9 +138,9 @@ new_e (Doc* doc) {
 
 
 void
-send_event_in_deep (Event* ev, UTree* t, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
+send_event_in_deep (Event* ev, ETree* t, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
     bool 
-    valid_e (UTree* t) {
+    valid_e (ETree* t) {
         return (
             (t.uni.type == Uni.type.e) && 
             pos_in_rect (pos, t.e.pos, t.e.size)
@@ -167,9 +156,9 @@ send_event_in_deep (Event* ev, UTree* t, Pos pos, SDL_Window* window, SDL_Render
 }
 
 void
-send_click_in_deep (Event* ev, UTree* t, Pos down_pos, Pos up_pos, ref UTree* deepest) {
+send_click_in_deep (Event* ev, ETree* t, Pos down_pos, Pos up_pos, ref ETree* deepest) {
     bool 
-    valid_e (UTree* t) {
+    valid_e (ETree* t) {
         return (
             (t.uni.type == Uni.Type.e) && 
             pos_in_rect (down_pos, t.e.pos, t.e.size) &&
@@ -187,9 +176,9 @@ send_click_in_deep (Event* ev, UTree* t, Pos down_pos, Pos up_pos, ref UTree* de
 }
 
 void
-send_mouse_event_in_deep (Event* ev, UTree* t, Pos pos, ref UTree* deepest) {
+send_mouse_event_in_deep (Event* ev, ETree* t, Pos pos, ref ETree* deepest) {
     bool 
-    valid_e (UTree* t) {
+    valid_e (ETree* t) {
         return (
             (t.uni.type == Uni.Type.e) && 
             pos_in_rect (pos, t.e.pos, t.e.size)
@@ -223,7 +212,7 @@ send_event_in_tree (Event* ev) {
 
 void
 add_class (E* e, Doc* doc, string s) {
-    UTree* kls_t = doc.find_klass_or_create (s);
+    Klass* kls = doc.find_klass_or_create (s);
     if (!e.klasses.canFind (kls_t))
         e.klasses ~= kls_t;
 }
@@ -245,8 +234,8 @@ trigger_class (E* e, Doc* doc, string s) {
 
 
 void
-remove_class_from_all (UTree* doc_t, string s) {
-    UTree* kls_t = doc_t.find_klass (s);
+remove_class_from_all (Doc* doc, string s) {
+    Klass* kls = doc_t.find_klass (s);
     if (kls_t !is null)
         foreach (t; WalkE (doc_t))
             remove_class (t.e, kls_t);
@@ -270,13 +259,13 @@ remove_class (E* e, Klass* kls) {
 }
 
 void
-doc_apply_klasses (UTree* doc_t) {
+doc_apply_klasses (Doc* doc) {
     foreach (_t; WalkE (doc_t)) 
         apply_klasses (doc_t,_t);
 }
 
 void
-apply_klasses (UTree* doc_t, UTree* t) {
+apply_klasses (Doc* doc, ETree* t) {
     E* e = t.uni.e;
     e.on.length = 0;
     global_font_files.length = 0;
@@ -284,7 +273,7 @@ apply_klasses (UTree* doc_t, UTree* t) {
     time_step ();
 
     // remove e added from klass
-    UTree*[] for_remove;
+    ETree*[] for_remove;
     foreach (_t; WalkChilds (t))
         if (_t.e.from_klass !is null)
             for_remove ~= _t;
@@ -298,7 +287,7 @@ apply_klasses (UTree* doc_t, UTree* t) {
 
 // WIDGET_APPLY_KLASS_FN
 void
-apply_klass (UTree* doc_t, UTree* t, UTree* kls_t) {
+apply_klass (Doc* doc, ETree* t, Klass* kls) {
     assert (kls_t.type == Uni.Type.klass || 
             kls_t.type == Uni.Type.case_);
     E* e = t.uni.e;
@@ -316,8 +305,8 @@ apply_klass (UTree* doc_t, UTree* t, UTree* kls_t) {
 }
 
 void
-set_field (UTree* doc_t, UTree* dest_t, UTree* field_t) {
-    auto e = dest_t.uni.e;
+set_field (Doc* doc, ETree* dest_t, ETree* field_t) {
+    auto e = &dest_t.e;
 
     // `command` -> exec command -> output
     auto values = extract_quoted (doc_t,field_t.field.values);
@@ -330,7 +319,7 @@ set_field (UTree* doc_t, UTree* dest_t, UTree* field_t) {
 }
 
 void
-add_sub_tree (UTree* doc_t, UTree* dest_t, UTree* source_t) {
+add_sub_tree (Doc* doc, ETree* dest_t, ETree* source_t) {
     // clone each t
     // add in dest_t
     //auto cloned = clone_tree (source_t);
@@ -338,7 +327,7 @@ add_sub_tree (UTree* doc_t, UTree* dest_t, UTree* source_t) {
 }
 
 void
-set_switch (UTree* doc_t, UTree* dest_t, UTree* swicth_t) {
+set_switch (Doc* doc, ETree* dest_t, ETree* swicth_t) {
     auto cond = swicth_t.uni.switch_.cond;
 
     auto evaluated = evaluate_switch_cond (doc_t,cond);
@@ -359,12 +348,12 @@ set_switch (UTree* doc_t, UTree* dest_t, UTree* swicth_t) {
 }
 
 void
-set_case (UTree* doc_t, UTree* dest_t, UTree* case_t) {
+set_case (Doc* doc, ETree* dest_t, ETree* case_t) {
     apply_klass (doc_t,dest_t,case_t);
 }
 
 auto
-evaluate_switch_cond (UTree* doc_t, TString[] cond) {
+evaluate_switch_cond (Doc* doc, TString[] cond) {
     // 'shell_command.sh -with -args'
     // "double-quoted string"
     // klass.field
@@ -373,9 +362,9 @@ evaluate_switch_cond (UTree* doc_t, TString[] cond) {
 }
 
 
-UTree*
-clone_tree (UTree* t) {
-    UTree* cloned;
+ETree*
+clone_tree (ETree* t) {
+    ETree* cloned;
 
     //final
     //switch (t.type) {
@@ -392,7 +381,7 @@ clone_tree (UTree* t) {
 
 
 TString[]
-extract_quoted (UTree* doc_t, TString[] values) {
+extract_quoted (Doc* doc, TString[] values) {
     TString[] vs;
     vs.reserve (values.length);
     foreach (v; values) 
@@ -405,7 +394,7 @@ extract_quoted (UTree* doc_t, TString[] values) {
 }
 
 //void
-//_on_start (UTree* doc_t, E* e) {
+//_on_start (Doc* doc, E* e) {
 //    foreach (_on; e.on)
 //        if (_on.event == "start")
 //            exec_action (doc_t, _on.action);
@@ -419,7 +408,7 @@ static
 FONTPTR default_ptr;
 
 void
-load_fonts (UTree* doc_t) {
+load_fonts (Doc* doc) {
     auto default_file = DEFAULT_FONT_FILE;
     auto default_size = DEFAULT_FONT_SIZE;
     if (default_ptr is null)
@@ -455,13 +444,13 @@ load_fonts (UTree* doc_t) {
 }
 
 void
-load_colors (UTree* doc_t) {
+load_colors (Doc* doc) {
     // after load all classes, because able color 'class.field'
 }
 
 void
-load_childs (UTree* doc_t) {
-    foreach (UTree* t; utree.WalkE (doc_t))
+load_childs (Doc* doc) {
+    foreach (ETree* t; utree.WalkE (doc_t))
         final
         switch (t.e.childs_src.type) {
             case E.ChildsSrc.Type.none : break;
@@ -472,7 +461,7 @@ load_childs (UTree* doc_t) {
 }
 
 void
-load_childs_cmd (UTree* doc_t, UTree* t) {
+load_childs_cmd (Doc* doc, ETree* t) {
     auto cmd = t.e.childs_src.cmd.command;
     auto dlm = t.e.childs_src.cmd.delimiter;
     auto skp = t.e.childs_src.cmd.skip;
@@ -510,8 +499,8 @@ load_childs_cmd (UTree* doc_t, UTree* t) {
 }
 
 void
-load_images (UTree* doc_t) {
-    foreach (UTree* t; utree.WalkE (doc_t))
+load_images (Doc* doc) {
+    foreach (ETree* t; utree.WalkE (doc_t))
         if (t.e.content.image.src.length)
             load_e_image (t.e);
 }
@@ -546,7 +535,7 @@ load_e_image (E* e) {
 }
 
 void
-load_texts (UTree* doc_t) {
+load_texts (Doc* doc) {
     foreach (t; WalkE (doc_t))
         if (t.e.content.text.s.length)
             load_e_text (t.e);
@@ -580,7 +569,7 @@ load_e_text (E* e) {
 
 void
 update_text_size (Doc* doc) {
-    //foreach (UTree* t; WalkTree (doc.tree))
+    //foreach (ETree* t; WalkTree (doc.tree))
     //    if (t.e.content.text.s.length)
     //        update_e_text_size (t.e);
 }
@@ -592,28 +581,28 @@ update_text_size (Doc* doc) {
 //}
 
 void
-update_sizes (UTree* doc_t) {
+update_sizes (Doc* doc) {
     foreach (t; WalkE (doc_t))
         update_size (doc_t,t); // recursive
 }
 
 void
-update_poses (UTree* doc_t) {
-    foreach (UTree* _e_tree; WalkChilds (doc_t))
+update_poses (Doc* doc) {
+    foreach (ETree* _e_tree; WalkChilds (doc_t))
         if (_e_tree.uni.type == Uni.Type.e)
-            foreach (UTree* _t; WalkE (_e_tree))
+            foreach (ETree* _t; WalkE (_e_tree))
                 update_pos (doc_t,_t);
 }
 
 void
-dump_sizes (UTree* doc_t) {
-    foreach (UTree* _e_tree; WalkChilds (doc_t))
+dump_sizes (Doc* doc) {
+    foreach (ETree* _e_tree; WalkChilds (doc_t))
         if (_e_tree.uni.type == Uni.Type.e)
             dump_size (doc_t,_e_tree); // recursive
 }
 
 void
-dump_size (UTree* doc_t, UTree* t, int level=0) {
+dump_size (Doc* doc, ETree* t, int level=0) {
     E* e = t.e;
 
     for (auto i=0; i<level; i++) write ("  ");
@@ -661,7 +650,7 @@ dump_size (UTree* doc_t, UTree* t, int level=0) {
 //       image
 //       content
 void
-update_size (UTree* doc_t, UTree* t) {
+update_size (Doc* doc, ETree* t) {
     E* e = t.e;
 
     final
@@ -691,7 +680,7 @@ update_size (UTree* doc_t, UTree* t) {
 }
 
 void
-e_fix_size_w (UTree* doc_t, UTree* t) {
+e_fix_size_w (Doc* doc, ETree* t) {
     W parent_w;
     W other_w;
     size_t max_cnt;
@@ -732,7 +721,7 @@ e_fix_size_w (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_w_fixed (UTree* doc_t, UTree* t) {
+e_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.w = e.size.w;
     if ((-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r) > 0)
@@ -742,7 +731,7 @@ e_size_w_fixed (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_w_content (UTree* doc_t, UTree* t) {
+e_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_w (doc_t,t);
     update_pos (doc_t,t);
@@ -750,7 +739,7 @@ e_size_w_content (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_w_parent (UTree* doc_t, UTree* t) {
+e_size_w_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     if (t.parent !is null && t.parent.type == Uni.Type.e) {
         e.size.w = t.parent.e.content.size.w;
@@ -764,7 +753,7 @@ e_size_w_parent (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_w_window (UTree* doc_t, UTree* t) {
+e_size_w_window (Doc* doc, ETree* t) {
     auto e = t.e;
     if (doc_t.doc.window !is null) {
         e.size.w = doc_t.doc.window.size.w;
@@ -777,7 +766,7 @@ e_size_w_window (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_w_max (UTree* doc_t, UTree* t) {
+e_size_w_max (Doc* doc, ETree* t) {
     auto e = t.e;
 
     //e.size.w = 0;
@@ -797,7 +786,7 @@ e_size_w_max (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_h_fixed (UTree* doc_t, UTree* t) {
+e_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.size.h = e.size.h;
     if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
@@ -807,7 +796,7 @@ e_size_h_fixed (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_h_content (UTree* doc_t, UTree* t) {
+e_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_size_h (doc_t,t);
     update_pos (doc_t,t);
@@ -815,7 +804,7 @@ e_size_h_content (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_h_parent (UTree* doc_t, UTree* t) {
+e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
     if (t.parent !is null && t.parent.type == Uni.Type.e) {
         e.size.h = t.parent.e.content.size.h;
@@ -835,7 +824,7 @@ e_size_h_parent (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_h_window (UTree* doc_t, UTree* t) {
+e_size_h_window (Doc* doc, ETree* t) {
     auto e = t.e;
     if (doc_t.doc.window !is null) {
         e.size.h = doc_t.doc.window.size.h;
@@ -848,14 +837,14 @@ e_size_h_window (UTree* doc_t, UTree* t) {
 }
 
 void
-e_size_h_max (UTree* doc_t, UTree* t) {
+e_size_h_max (Doc* doc, ETree* t) {
     auto e = t.e;
     // e.size.h = 
     // e.content.size.h = ;
 }
 
 void
-e_content_size_w (UTree* doc_t, UTree* t) {
+e_content_size_w (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -870,38 +859,38 @@ e_content_size_w (UTree* doc_t, UTree* t) {
 }
 
 void
-e_content_size_w_e (UTree* doc_t, UTree* t) {
+e_content_size_w_e (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.w = e.size.w;
 }
 
 void
-e_content_size_w_fixed (UTree* doc_t, UTree* t) {
+e_content_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.content.size.w = e.content.size.w;
 }
 
 void
-e_content_size_w_image (UTree* doc_t, UTree* t) {
+e_content_size_w_image (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.w = e.content.image.size.w;
 }
 
 void
-e_content_size_w_text (UTree* doc_t, UTree* t) {
+e_content_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.w = e.content.text.size.w;
 }
 
 void
-e_content_size_w_childs (UTree* doc_t, UTree* t) {
+e_content_size_w_childs (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_childs_size (doc_t,t);
     e.content.size.w = e.content.childs_size.w;
 }
 
 void
-e_content_childs_size (UTree* doc_t, UTree* t) {
+e_content_childs_size (Doc* doc, ETree* t) {
     auto e = t.e;
 
     Size max_sz;
@@ -925,13 +914,13 @@ e_content_childs_size (UTree* doc_t, UTree* t) {
 
 
 void
-e_content_size_w_max (UTree* doc_t, UTree* t) {
+e_content_size_w_max (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.w = max (e.content.image.size.w, e.content.text.size.w);
 }
 
 void
-e_content_size_h (UTree* doc_t, UTree* t) {
+e_content_size_h (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -946,44 +935,44 @@ e_content_size_h (UTree* doc_t, UTree* t) {
 }
 
 void
-e_content_size_h_e (UTree* doc_t, UTree* t) {
+e_content_size_h_e (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.h = e.size.h;
 }
 
 void
-e_content_size_h_fixed (UTree* doc_t, UTree* t) {
+e_content_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.content.size.w = e.content.size.w;
 }
 
 void
-e_content_size_h_image (UTree* doc_t, UTree* t) {
+e_content_size_h_image (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.h = e.content.image.size.h;
 }
 
 void
-e_content_size_h_text (UTree* doc_t, UTree* t) {
+e_content_size_h_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.h = e.content.text.size.h;
 }
 
 void
-e_content_size_h_childs (UTree* doc_t, UTree* t) {
+e_content_size_h_childs (Doc* doc, ETree* t) {
     auto e = t.e;
     e_content_childs_size (doc_t,t);
     e.content.size.h = e.content.childs_size.h;
 }
 
 void
-e_content_size_h_max (UTree* doc_t, UTree* t) {
+e_content_size_h_max (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.size.h = max (e.content.image.size.h, e.content.text.size.h);
 }
 
 void
-e_content_image_size_w (UTree* doc_t, UTree* t) {
+e_content_image_size_w (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -996,13 +985,13 @@ e_content_image_size_w (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_image_size_w_fixed (UTree* doc_t, UTree* t) {
+e_content_image_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.w = e.content.image.size.w;
 }
 
 void 
-e_content_image_size_w_image (UTree* doc_t, UTree* t) {
+e_content_image_size_w_image (Doc* doc, ETree* t) {
     auto e = t.e;
     if (e.content.image.ptr !is null) {
         auto img_surface = e.content.image.ptr;
@@ -1015,19 +1004,19 @@ e_content_image_size_w_image (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_image_size_w_text (UTree* doc_t, UTree* t) {
+e_content_image_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.w = e.content.text.size.w;
 }
 
 void 
-e_content_image_size_w_content (UTree* doc_t, UTree* t) {
+e_content_image_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.w = e.content.size.w;
 }
 
 void
-e_content_image_size_h (UTree* doc_t, UTree* t) {
+e_content_image_size_h (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -1040,13 +1029,13 @@ e_content_image_size_h (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_image_size_h_fixed (UTree* doc_t, UTree* t) {
+e_content_image_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.h = e.content.image.size.h;
 }
 
 void 
-e_content_image_size_h_image (UTree* doc_t, UTree* t) {
+e_content_image_size_h_image (Doc* doc, ETree* t) {
     auto e = t.e;
     if (e.content.image.ptr !is null) {
         auto img_surface = e.content.image.ptr;
@@ -1059,20 +1048,20 @@ e_content_image_size_h_image (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_image_size_h_text (UTree* doc_t, UTree* t) {
+e_content_image_size_h_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.h = e.content.text.size.h;
 }
 
 void 
-e_content_image_size_h_content (UTree* doc_t, UTree* t) {
+e_content_image_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.image.size.h = e.content.size.h;
 }
 
 
 void
-e_content_text_size_w (UTree* doc_t, UTree* t) {
+e_content_text_size_w (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -1085,19 +1074,19 @@ e_content_text_size_w (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_text_size_w_fixed (UTree* doc_t, UTree* t) {
+e_content_text_size_w_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.content.text.size.w = e.content.text.size.w;
 }
 
 void 
-e_content_text_size_w_image (UTree* doc_t, UTree* t) {
+e_content_text_size_w_image (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.w = e.content.image.size.w;
 }
 
 void 
-e_content_text_size_w_text (UTree* doc_t, UTree* t) {
+e_content_text_size_w_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.w = get_text_size (
         e.content.text.s, 
@@ -1107,13 +1096,13 @@ e_content_text_size_w_text (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_text_size_w_content (UTree* doc_t, UTree* t) {
+e_content_text_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.w = e.content.size.w;
 }
 
 void
-e_content_text_size_h (UTree* doc_t, UTree* t) {
+e_content_text_size_h (Doc* doc, ETree* t) {
     auto e = t.e;
 
     final
@@ -1126,19 +1115,19 @@ e_content_text_size_h (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_text_size_h_fixed (UTree* doc_t, UTree* t) {
+e_content_text_size_h_fixed (Doc* doc, ETree* t) {
     auto e = t.e;
     //e.content.text.size.w = e.content.text.size.w;
 }
 
 void 
-e_content_text_size_h_image (UTree* doc_t, UTree* t) {
+e_content_text_size_h_image (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.h = e.content.image.size.h;
 }
 
 void 
-e_content_text_size_h_text (UTree* doc_t, UTree* t) {
+e_content_text_size_h_text (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.h = get_text_size (
         e.content.text.s, 
@@ -1148,7 +1137,7 @@ e_content_text_size_h_text (UTree* doc_t, UTree* t) {
 }
 
 void 
-e_content_text_size_h_content (UTree* doc_t, UTree* t) {
+e_content_text_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
     e.content.text.size.h = e.content.size.h;
 }
@@ -1157,7 +1146,7 @@ e_content_text_size_h_content (UTree* doc_t, UTree* t) {
 
 
 void
-update_pos (UTree* doc_t, UTree* t) {
+update_pos (Doc* doc, ETree* t) {
     E* e = t.e;
 
     if (t.e is null)
@@ -1191,14 +1180,14 @@ update_pos (UTree* doc_t, UTree* t) {
 
 
 void
-pos_type_t9 (UTree* t) {
+pos_type_t9 (ETree* t) {
     // 1 2 3 
     // 8 9 4 
     // 7 6 5 
     E* e = t.e;
 
     if (e.pos_group == 1) {
-        UTree* prev = find_last_in_group (t, e.pos_group);
+        ETree* prev = find_last_in_group (t, e.pos_group);
         if (prev !is null) {
             if (e.pos_dir == E.PosDir.r) {
                 e.pos.x = (prev.e.pos.x + prev.e.size.w).to!X;
@@ -1234,12 +1223,12 @@ pos_type_t9 (UTree* t) {
 }
 
 void
-pos_type_t3 (UTree* t) {
+pos_type_t3 (ETree* t) {
     // 1 2 3 
     E* e = t.e;
 
     if (e.pos_group == 1) {
-        UTree* prev = find_last_in_group (t, e.pos_group);
+        ETree* prev = find_last_in_group (t, e.pos_group);
         if (prev !is null) {
             final
             switch (e.pos_dir) {
@@ -1285,7 +1274,7 @@ pos_type_t3 (UTree* t) {
                     e.pos.y = 0;
                 }
                 // update prev posed
-                for (UTree* _t = find_last_in_group (t, e.pos_group); 
+                for (ETree* _t = find_last_in_group (t, e.pos_group); 
                     _t !is null; 
                     _t = find_last_in_group (_t, e.pos_group)) 
                 {
@@ -1303,20 +1292,20 @@ pos_type_t3 (UTree* t) {
 }
 
 void
-pos_type_grid (UTree* t) {
+pos_type_grid (ETree* t) {
     // e e e
     // e e e
     // e e e
 }
 
 void
-pos_type_vbox (UTree* t) {
+pos_type_vbox (ETree* t) {
     // e
     // e 
     // e
     E* e = t.e;
 
-    UTree* prev = find_last_with_type (t, e.pos_type);
+    ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
         final
         switch (e.pos_dir) {
@@ -1345,11 +1334,11 @@ pos_type_vbox (UTree* t) {
 }
 
 void
-pos_type_hbox (UTree* t) {
+pos_type_hbox (ETree* t) {
     // e e e
     E* e = t.e;
 
-    UTree* prev = find_last_with_type (t, e.pos_type);
+    ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
         final
         switch (e.pos_dir) {
@@ -1379,7 +1368,7 @@ pos_type_hbox (UTree* t) {
 }
 
 void
-pos_type_percent (UTree* t) {
+pos_type_percent (ETree* t) {
     // e e e
     E* e = t.e;
     if (t.parent !is null) {
@@ -1396,14 +1385,14 @@ pos_type_percent (UTree* t) {
 }
 
 void
-pos_type_none (UTree* t) {
+pos_type_none (ETree* t) {
     E* e = t.e;
     e.pos = Pos (0,0);
 }
 
-UTree*
-find_last_in_group (UTree* t, ubyte pos_group) {
-    foreach (UTree* _t; WalkLeft (t))
+ETree*
+find_last_in_group (ETree* t, ubyte pos_group) {
+    foreach (ETree* _t; WalkLeft (t))
         if (_t.e.pos_group == pos_group)
             return _t;
 
@@ -1411,9 +1400,9 @@ find_last_in_group (UTree* t, ubyte pos_group) {
 }
 
 
-UTree*
-find_last_with_type (UTree* t, E.PosType pos_type) {
-    foreach (UTree* _t; WalkLeft (t))
+ETree*
+find_last_with_type (ETree* t, E.PosType pos_type) {
+    foreach (ETree* _t; WalkLeft (t))
         if (_t.e.pos_type == pos_type)
             return _t;
 
@@ -1422,19 +1411,19 @@ find_last_with_type (UTree* t, E.PosType pos_type) {
 
 
 void
-go_on_event (UTree* doc_t, UTree* t, string user_event_name, string[string] env=null) {
+go_on_event (Doc* doc, ETree* t, string user_event_name, string[string] env=null) {
     foreach (_on; t.e.on)
         if (_on.event == user_event_name) // start, click
             exec_action (doc_t, _on.action, env);
 }
 
 void
-go_event_action (UTree* doc_t, E* e, TString[] action, string[string] env=null) {
+go_event_action (Doc* doc, E* e, TString[] action, string[string] env=null) {
     exec_action (doc_t,action,env);
 }
 
 void
-exec_action (UTree* doc_t, TString[] action, string[string] env=null) {
+exec_action (Doc* doc, TString[] action, string[string] env=null) {
     import std.process;
     
     if (action.length) {
@@ -1464,7 +1453,7 @@ exec_action (UTree* doc_t, TString[] action, string[string] env=null) {
 }
 
 TString[] 
-doc_get_klass_field_value (UTree* doc_t, string s) {
+doc_get_klass_field_value (Doc* doc, string s) {
     auto dot = s.indexOf ('.');
     if (dot != -1) {
         // class field
@@ -1483,7 +1472,7 @@ doc_get_klass_field_value (UTree* doc_t, string s) {
 }
 
 string
-extract_value (UTree* doc_t, string bquoted) {
+extract_value (Doc* doc, string bquoted) {
     //writeln ("extract_value: ", bquoted);
 
     auto stripped  = bquoted.strip ("`");
@@ -1499,7 +1488,7 @@ extract_value (UTree* doc_t, string bquoted) {
 
 
 string
-extract_class_field_value (UTree* doc_t, string s) {
+extract_class_field_value (Doc* doc, string s) {
     TString[] cmd = doc_get_klass_field_value (doc_t,s);
     if (cmd.length)
         return cmd.join (" ");
@@ -1529,8 +1518,8 @@ on_click (Event* ev) {
 void
 _on_click (Event* ev, Pos down_pos, Pos up_pos) {
     //
-    UTree* deepest;
-    foreach (UTree* _e_tree; utree.WalkChilds (ev.doc_t)) {
+    ETree* deepest;
+    foreach (ETree* _e_tree; utree.WalkChilds (ev.doc_t)) {
         if (_e_tree.uni.type == Uni.Type.e) {
             send_click_in_deep (
                 ev, 
@@ -1565,7 +1554,7 @@ pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
 
 
 int
-event (UTree* doc_t, Event* ev) {
+event (Doc* doc, Event* ev) {
     // event
     //   KEYS  --> focused
     //   CLICK --> if in x,y e.rect -> send -> in deep
@@ -1580,7 +1569,7 @@ event (UTree* doc_t, Event* ev) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                UTree* deepest;
+                ETree* deepest;
                 send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
                 //ev.doc_t.doc.update (ev.doc_t);
                 //redraw_window (ev.app_window);
@@ -1589,7 +1578,7 @@ event (UTree* doc_t, Event* ev) {
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
-                UTree* deepest;
+                ETree* deepest;
                 send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
                 //remove_class_from_all (doc_t,"button-pressed");
                 //ev.doc_t.doc.update (ev.doc_t);
@@ -1615,7 +1604,7 @@ event (UTree* doc_t, Event* ev) {
 }
 
 void
-update (UTree* doc_t) {
+update (Doc* doc) {
     Doc* doc = doc_t.doc;
     time_step ();
 
@@ -1664,7 +1653,7 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
 }
 
 void
-draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
+draw (Doc* doc, SDL_Renderer* renderer, ETree* t) {
     Doc* doc = doc_t.doc;
     time_step ();
 
@@ -1679,8 +1668,8 @@ draw (UTree* doc_t, SDL_Renderer* renderer, UTree* t) {
 }
 
 void
-_draw_one (SDL_Renderer* renderer, UTree* t) {
-    foreach (UTree* kls_t; t.e.klasses) {
+_draw_one (SDL_Renderer* renderer, ETree* t) {
+    foreach (Klass* kls; t.e.klasses) {
         if (kls_t.klass.draw !is null)
             kls_t.klass.draw (kls_t,renderer,t);
     }

@@ -7,7 +7,7 @@ import bindbc.sdl;
 import tstring;
 import events;
 import doc;
-import utree;
+import etree;
 import klass;
 import e;
 import types;
@@ -20,6 +20,7 @@ E_Klass {
         Klass (
             "e", 
             [],  
+            [],  
             &.event,     // event
             &.update,    // update
             &.set,       // set
@@ -30,7 +31,7 @@ E_Klass {
 
 // KLASS_EVENT_FN
 void
-event (UTree* kls_t, Event* ev, UTree* e_t) {
+event (Klass* kls, Event* ev, ETree* t) {
     assert (kls_t.uni.type == Uni.Type.klass);
     assert (  e_t.uni.type == Uni.Type.e);
     E* e = e_t.e;
@@ -48,13 +49,13 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
 
 // KLASS_UPDATE_FN
 void
-update (UTree* kls_t, UTree* doc_t, UTree* e_t) {
+update (Klass* kls, Doc* doc, ETree* t) {
     //
 }
 
 // KLASS_SET_FN
 void
-set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -104,7 +105,7 @@ set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, TString[] values) 
 
 // KLASS_DRAW_FN
 void
-draw (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t) {
+draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     import draws : draw_e;
     E* e = e_t.e;
     draw_e (renderer,e);
@@ -112,7 +113,7 @@ draw (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t) {
 
 //
 void
-set_pos (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
     
@@ -134,7 +135,7 @@ set_pos (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_type (Doc* doc, ETree* t, TString[] values) {
     auto e = e_t.e;
 
     if (values.length >= 2) {
@@ -208,7 +209,7 @@ is_numeric (string s, int* num) {
 }
 
 void
-set_pos_group (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_group (Doc* doc, ETree* t, TString[] values) {
     auto e = e_t.e;
     
     if (values.length >= 1) {
@@ -217,7 +218,7 @@ set_pos_group (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pos_dir (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_dir (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -233,7 +234,7 @@ set_pos_dir (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pos_x (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_x (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -251,7 +252,7 @@ set_pos_x (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pos_x_percent (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_x_percent (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -266,7 +267,7 @@ set_pos_x_percent (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pos_y (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pos_y (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -278,7 +279,7 @@ set_pos_y (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_size (UTree* doc_t, UTree* e_t, TString[] values) {
+set_size (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -294,7 +295,7 @@ set_size (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
+set_size_w (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -318,7 +319,7 @@ set_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
+set_size_h (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -342,7 +343,7 @@ set_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_hidden (UTree* doc_t, UTree* e_t, TString[] values) {
+set_hidden (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -353,12 +354,12 @@ set_hidden (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_popup (UTree* doc_t, UTree* e_t, TString[] values) {
+set_popup (Doc* doc, ETree* t, TString[] values) {
     // e.popup = "popup-file";
 }
 
 void
-set_borders (UTree* doc_t, UTree* e_t, TString[] values) {
+set_borders (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -385,7 +386,7 @@ set_borders (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_border_t (UTree* doc_t, UTree* e_t, TString[] values) {
+set_border_t (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -395,7 +396,7 @@ set_border_t (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_border_r (UTree* doc_t, UTree* e_t, TString[] values) {
+set_border_r (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -405,7 +406,7 @@ set_border_r (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_border_b (UTree* doc_t, UTree* e_t, TString[] values) {
+set_border_b (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -415,7 +416,7 @@ set_border_b (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_border_l (UTree* doc_t, UTree* e_t, TString[] values) {
+set_border_l (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -425,7 +426,7 @@ set_border_l (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_borders_color (UTree* doc_t, UTree* e_t, TString[] values) {
+set_borders_color (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -438,7 +439,7 @@ set_borders_color (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pad (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pad (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -479,7 +480,7 @@ set_pad (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_pad_bg (UTree* doc_t, UTree* e_t, TString[] values) {
+set_pad_bg (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -493,7 +494,7 @@ set_pad_bg (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_border (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {    
+set_border (Doc* doc, ETree* t, E.Border* border, TString[] values) {    
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -505,7 +506,7 @@ set_border (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
 }
 
 void
-set_border_w (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
+set_border_w (Doc* doc, ETree* t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -516,7 +517,7 @@ set_border_w (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
 }
 
 void
-set_border_type (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
+set_border_type (Doc* doc, ETree* t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -531,7 +532,7 @@ set_border_type (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
 }
 
 void
-set_border_color (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) {
+set_border_color (Doc* doc, ETree* t, E.Border* border, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -545,7 +546,7 @@ set_border_color (UTree* doc_t, UTree* e_t, E.Border* border, TString[] values) 
 }
 
 bool
-doc_parse_color (UTree* doc_t, TString[] tss, Color* color) {
+doc_parse_color (Doc* doc, TString[] tss, Color* color) {
     import std.string : startsWith;
 
     auto doc = doc_t.doc;
@@ -572,7 +573,7 @@ doc_parse_color (UTree* doc_t, TString[] tss, Color* color) {
 }
 
 void
-set_content_image (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_image (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -583,7 +584,7 @@ set_content_image (UTree* doc_t, UTree* e_t, TString[] values) {
 
 
 void
-set_content_text (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_text (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -593,7 +594,7 @@ set_content_text (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_text_fg (UTree* doc_t, UTree* e_t, TString[] values) {
+set_text_fg (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -607,7 +608,7 @@ set_text_fg (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_text_bg (UTree* doc_t, UTree* e_t, TString[] values) {
+set_text_bg (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -621,7 +622,7 @@ set_text_bg (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_text_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
+set_text_pos_type (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -642,7 +643,7 @@ set_text_pos_type (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_size_w (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -667,7 +668,7 @@ set_content_size_w (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_size_h (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -691,7 +692,7 @@ set_content_size_h (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_size (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_size (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -707,7 +708,7 @@ set_content_size (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_size_type (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_size_type (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -726,7 +727,7 @@ set_content_size_type (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_text_font (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_text_font (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -743,7 +744,7 @@ static
 string[] global_font_files;
 
 void
-set_content_text_font_file (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_text_font_file (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -755,7 +756,7 @@ set_content_text_font_file (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_text_font_family (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_text_font_family (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -765,7 +766,7 @@ set_content_text_font_family (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content_text_font_size (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content_text_font_size (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -775,7 +776,7 @@ set_content_text_font_size (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_bg (UTree* doc_t, UTree* e_t, TString[] values) {
+set_bg (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -789,7 +790,7 @@ set_bg (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_content (UTree* doc_t, UTree* e_t, TString[] values) {
+set_content (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 
@@ -799,7 +800,7 @@ set_content (UTree* doc_t, UTree* e_t, TString[] values) {
 }
 
 void
-set_on (UTree* doc_t, UTree* e_t, TString[] values) {
+set_on (Doc* doc, ETree* t, TString[] values) {
     auto doc = doc_t.doc;
     auto e   = e_t.e;
 

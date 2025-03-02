@@ -5,6 +5,8 @@ public import vf.tree;
 import tstring;
 import doc   : Doc;
 import e     : E;
+import klass : Klass;
+import klass : UniField;
 
 alias ETree = Tree!E;
 
@@ -14,26 +16,21 @@ new_e () {
 }
 
 auto 
-WalkKlasses (UTree* doc_t) {
+WalkKlasses (Doc* doc) {
     return _WalkKlasses (doc_t);
 }
 struct 
 _WalkKlasses {
-    UTree* doc_t;
+    Doc* doc;
 
     int
-    opApply (int delegate (UTree* kls_t) dg) {
-        assert (doc_t !is null);
-        assert (doc_t.uni.type == Uni.Type.doc);
-
+    opApply (int delegate (Klass* kls) dg) {
         int result;
 
-        foreach (UTree* _t; doc_t.childs)
-            if (_t.uni.type == Uni.Type.klass) {
-                result = dg (_t);
-                if (result)
-                    return result;
-            }            
+        foreach (kls; doc.klasses)
+            result = dg (kls);
+            if (result)
+                return result;
 
         return 0;
     }
@@ -41,33 +38,23 @@ _WalkKlasses {
 
 
 auto 
-WalkFields (UTree* kls_t) {
-    return _WalkFields (kls_t);
+WalkFields (Klass* kls) {
+    return _WalkFields (kls);
 }
 
 
 struct 
 _WalkFields {
-    UTree* kls_t;
+    Klass* kls;
 
     int
-    opApply (int delegate (UTree* field_t) dg) {
-        assert (kls_t !is null);
-        assert (kls_t.uni.type == Uni.Type.klass || kls_t.uni.type == Uni.Type.case_);
-
+    opApply (int delegate (UniField* field) dg) {
         int result;
 
-        foreach (_t; kls_t.childs) {
-            switch (_t.uni.type) {
-                case Uni.Type.field: 
-                case Uni.Type.e: 
-                case Uni.Type.switch_: 
-                    result = dg (_t);
-                    if (result)
-                        return result;
-                    break;
-                default:
-            }
+        foreach (ref unifield; kls.fields) {
+            result = dg (&unifield);
+            if (result)
+                return result;
         }
 
         return 0;
@@ -76,17 +63,17 @@ _WalkFields {
 
 
 auto 
-WalkE (UTree* doc_t) {
+WalkE (Doc* doc) {
     return _WalkE (doc_t);
 }
 
 
 struct 
 _WalkE {
-    UTree* doc_t;
+    Doc* doc;
 
     int
-    opApply (int delegate (UTree* t) dg) {
+    opApply (int delegate (ETree* t) dg) {
         assert (doc_t !is null);
         assert (doc_t.uni.type == Uni.Type.doc || doc_t.uni.type == Uni.Type.e);
 
@@ -123,7 +110,7 @@ WalkTree (Tree) (Tree* t) {
 }
 
 bool 
-skip_hidden (UTree* t) {
+skip_hidden (ETree* t) {
     return (t.uni.type != Uni.Type.e) || t.uni.e.hidden;
 }
 

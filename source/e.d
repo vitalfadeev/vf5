@@ -4,7 +4,7 @@ import std.conv;
 import bindbc.sdl;
 import tstring;
 import doc;
-import utree;
+import etree;
 import klass;
 import types;
 import events;
@@ -12,7 +12,7 @@ import events;
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
 alias E_UPDATE_FN = void function (E* e, Doc* doc);
-alias E_SET_FN    = void function (E* e, Doc* doc, UTree* t, string field_id, TString[] values);
+alias E_SET_FN    = void function (E* e, Doc* doc, ETree* t, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
@@ -20,7 +20,7 @@ alias EPtr = E*;
 
 struct 
 E {
-    UTree*[] klasses;    // box green rounded
+    Klass*[] klasses;    // box green rounded
     Pos      pos;
     Size     size;
     Pad      pad;
@@ -139,8 +139,8 @@ E {
     Content content;
 
     bool    hidden;
-    UTree*  from_klass;
-    UTree*  from_template;
+    Klass*  from_klass;
+    Klass*  from_template;
 
     PosType pos_type;
     ubyte   pos_group;
@@ -248,7 +248,7 @@ E {
     string
     toString () {
         string ks;
-        foreach (UTree* kls_t; klasses)
+        foreach (Klass* kls; klasses)
             ks ~= kls_t.klass.name ~ " ";
         
         return "E(" ~ ks ~ ")";
@@ -274,7 +274,7 @@ update (E* e, Doc* doc) {
 }
 
 void
-set (E* e, Doc* doc, UTree* t, string field_id, TString[] values) {
+set (E* e, Doc* doc, ETree* t, string field_id, TString[] values) {
     //
 }
 

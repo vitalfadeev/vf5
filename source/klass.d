@@ -1,14 +1,15 @@
 import bindbc.sdl;
 import tstring;
-import utree;
+import etree;
 import doc : Doc;
 import e : E;
+import field : Field;
 import events : Event;
 
-alias KLASS_EVENT_FN  = void function (UTree* kls_t, Event* ev, UTree* e_t);
-alias KLASS_UPDATE_FN = void function (UTree* kls_t, UTree* doc_t, UTree* e_t);
-alias KLASS_SET_FN    = void function (UTree* kls_t, UTree* doc_t, UTree* e_t, string field, TString[] values);
-alias KLASS_DRAW_FN   = void function (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t);
+alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, ETree* t);
+alias KLASS_UPDATE_FN = void function (Klass* kls, Doc* doc, ETree* t);
+alias KLASS_SET_FN    = void function (Klass* kls, Doc* doc, ETree* t, string field, TString[] values);
+alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, ETree* t);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
 alias KlassPtr = Klass*;
 
@@ -30,9 +31,6 @@ Klass {
     string     name;
     Klass*[]   parent_klasses;
     UniField[] fields;
-
-    //Childs!Field  childs;
-    //Childs!Switch childs;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;
@@ -60,13 +58,15 @@ UniField {
     union {
         Field   field;
         Switch_ switch_;
-        E       e;
+        Case_   case_;
+        ETree*  t;
     }
 
     enum
     Type {
         field,
         switch_,
+        case_,
         e,
     }
 
@@ -80,9 +80,14 @@ UniField {
         this.switch_ = s;
     }
 
-    this (E e) {
+    this (Case_ c) {
+        this.type    = Type.case_;
+        this.case_ = c;
+    }
+
+    this (ETree* t) {
         this.type = Type.e;
-        this.e    = e;
+        this.t    = t;
     }
 }
 
@@ -115,22 +120,22 @@ add_child (Klass* kls, UniField* unifield) {
 
 
 void
-event (UTree* kls_t, Event* ev, UTree* e_t) {
+event (Klass* kls, Event* ev, ETree* t) {
     //
 }
 
 void
-update (UTree* kls_t, UTree* doc_t, UTree* t) {
+update (Klass* kls, Doc* doc, ETree* t) {
     //
 }
 
 void 
-set (UTree* kls_t, UTree* doc_t, UTree* e_t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
     //
 }
 
 void
-draw (UTree* kls_t, SDL_Renderer* renderer, UTree* e_t) {
+draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     //
 }
 

@@ -7,7 +7,7 @@ import bindbc.sdl;
 import tstring;
 import events;
 import doc;
-import utree;
+import etree;
 import klass;
 import e;
 import types;
@@ -18,6 +18,7 @@ Edit {
     Klass _super = 
         Klass (
             typeof(this).stringof.toLower, 
+            [], 
             [], 
             &.event,
             &.update,
@@ -32,7 +33,7 @@ Edit {
 
 // KLASS_EVENT_FN  
 void 
-event (UTree* kls_t, Event* ev, UTree* e_t) {
+event (Klass* kls, Event* ev, ETree* t) {
     assert (kls_t.uni.type == Uni.Type.klass);
     assert (  e_t.uni.type == Uni.Type.e);
     Klass* kls = kls_t.klass;
@@ -57,19 +58,19 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
 
 // KLASS_UPDATE_FN 
 void 
-update (UTree* kls_t, UTree* doc_t, UTree* t) {
+update (Klass* kls, Doc* doc, ETree* t) {
     //
 }
 
 // KLASS_SET_FN
 void 
-set (UTree* kls_t, UTree* doc_t, UTree* t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
     //
 }
 
 // KLASS_DRAW_FN
 void
-draw (UTree* kls_t, SDL_Renderer* renderer, UTree* t) {
+draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     //
 }
 

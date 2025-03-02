@@ -2,7 +2,8 @@ module events;
 
 import bindbc.sdl;
 import types : Pos;
-import utree;
+import etree;
+import doc : Doc;
 
 
 struct
@@ -13,7 +14,7 @@ Event {
 
     SDL_Window*   app_window;
     SDL_Renderer* renderer;
-    UTree*        doc_t;
+    Doc*          doc;
 }
 
 enum 
@@ -46,9 +47,9 @@ RedrawUserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.redraw;
-    UTree* t;
+    ETree* t;
 
-    this (UTree* t) {
+    this (ETree* t) {
         this.t = t;
     }
 }

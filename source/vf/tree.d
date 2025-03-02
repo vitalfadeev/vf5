@@ -2,7 +2,7 @@ module vf.tree;
 
 
 struct
-Tree (UNI) {
+Tree (E) {
     Tree* l;
     Tree* r;
     struct 
@@ -13,10 +13,10 @@ Tree (UNI) {
     };
     Childs childs;
     Tree*  parent;
-    UNI   uni; alias uni this;
+    E      e;
 
-    this (UNI uni) {
-        this.uni = uni;
+    this (E e) {
+        this.e = e;
     }
 
     mixin tree_functions;

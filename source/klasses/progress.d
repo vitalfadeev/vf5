@@ -7,7 +7,7 @@ import bindbc.sdl;
 import tstring;
 import events;
 import doc;
-import utree;
+import etree;
 import klass;
 import e;
 import types;
@@ -18,6 +18,7 @@ Progress {
     Klass _super = 
         Klass (
             typeof(this).stringof.toLower, 
+            [], 
             [], 
             &.event,
             &.update,
@@ -30,7 +31,7 @@ Progress {
 
 // KLASS_EVENT_FN  
 void 
-event (UTree* kls_t, Event* ev, UTree* e_t) {
+event (Klass* kls, Event* ev, ETree* t) {
     assert (kls_t.uni.type == Uni.Type.klass);
     assert (  e_t.uni.type == Uni.Type.e);
 
@@ -99,14 +100,14 @@ event (UTree* kls_t, Event* ev, UTree* e_t) {
 
 // KLASS_UPDATE_FN 
 void 
-update (UTree* kls_t, UTree* doc_t, UTree* t) {
+update (Klass* kls, Doc* doc, ETree* t) {
     // progress.position
     //   e e e
 }
 
 // KLASS_SET_FN
 void 
-set (UTree* kls_t, UTree* doc_t, UTree* t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
     auto e = t.e;
 
     switch (field_id) {
@@ -118,12 +119,12 @@ set (UTree* kls_t, UTree* doc_t, UTree* t, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (UTree* kls_t, SDL_Renderer* renderer, UTree* t) {
+draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     //
 }
 
 void
-percent_from_click (UTree* t, int click_x, int click_y, int* percent) {
+percent_from_click (ETree* t, int click_x, int click_y, int* percent) {
     auto e = t.e;
     auto offset_x = click_x - e.content.pos.x;
     int  w = e.size.w;
@@ -131,7 +132,7 @@ percent_from_click (UTree* t, int click_x, int click_y, int* percent) {
 }
 
 void
-set_progress_position (UTree* doc_t, UTree* t, E* e, TString[] values) {
+set_progress_position (Doc* doc, ETree* t, E* e, TString[] values) {
     if (values.length) {
         string percent = values[0].s;
         percent = percent.stripRight ("%");
@@ -151,8 +152,8 @@ set_progress_position (UTree* doc_t, UTree* t, E* e, TString[] values) {
 }
 
 
-UTree*
-find (UTree* t, string kls_name) {
+ETree*
+find (ETree* t, string kls_name) {
     return null;
 }
 

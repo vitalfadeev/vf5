@@ -1,6 +1,6 @@
 import std.stdio;
 import e;
-import utree;
+import etree;
 import klass;
 import pix;
 import txt_reader;
@@ -15,42 +15,42 @@ main () {
 	pix.setup ();
 
 	 //UTree
-	UTree* doc_t = utree.new_doc ();
-	doc_t.setup ();
-	doc_t.doc.update (doc_t);
+	Doc* doc = new_doc ();
+	doc.setup ();
+	doc.update (doc);
 
 	// Check
 	//dump_tree (doc_t);
 	//dump_klasses (doc_t);
 
 	//
-	pix.go (pix,doc_t);
+	pix.go (pix,doc);
 }
 
 void
-setup (UTree* doc_t) {
-	create_reserved_classes (doc_t);
-	txt_reader.go (doc_t, txt_reader.text);
+setup (Doc* doc) {
+	create_reserved_classes (doc);
+	txt_reader.go (doc, txt_reader.text);
 }
 
 void
-create_reserved_classes (UTree* doc_t) {
+create_reserved_classes (Doc* doc) {
 	import klasses.e        : E_Klass;
 	import klasses.progress : Progress;
 	import klasses.button   : Button;
 	import klasses.check    : Check;
 	import klasses.edit     : Edit;
 
-	doc_t.add_child (new_reserved_klass!E_Klass ());
-	doc_t.add_child (new_reserved_klass!Progress ());
-	doc_t.add_child (new_reserved_klass!Button ());
-	doc_t.add_child (new_reserved_klass!Check ());
-	doc_t.add_child (new_reserved_klass!Edit ());
+	doc.add_child (new_reserved_klass!E_Klass ());
+	doc.add_child (new_reserved_klass!Progress ());
+	doc.add_child (new_reserved_klass!Button ());
+	doc.add_child (new_reserved_klass!Check ());
+	doc.add_child (new_reserved_klass!Edit ());
 }
 
-UTree*
+Klass*
 new_reserved_klass (KLASS) () {
-	return utree.new_klass!KLASS ();
+	return cast (Klass*) new KLASS ();
 }
 
 

@@ -6,7 +6,7 @@ import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import bindbc.sdlgfx;
 import doc;
-import utree;
+import etree;
 import klass;
 import events;
 import draws;
@@ -17,9 +17,9 @@ import std.algorithm.searching : canFind;
 import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
-alias PIX_UPDATE_FN = void function (Pix* pix, UTree* doc_t);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, UTree* t);
-alias PIX_GO_FN     = int  function (Pix* pix, UTree* doc_t);
+alias PIX_UPDATE_FN = void function (Pix* pix, Doc* doc);
+alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, Doc* doc, ETree* t);
+alias PIX_GO_FN     = int  function (Pix* pix, Doc* doc);
 
 struct 
 Pix {
@@ -36,7 +36,7 @@ Pix {
 
 
 int 
-go (Pix* pix, UTree* doc_t) {
+go (Pix* pix, Doc* doc) {
     // Window, Surface
     SDL_Window* window = new_window (__FILE_FULL_PATH__);
 
@@ -100,7 +100,7 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 void
-_redraw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, RedrawUserEvent* ev) {
+_redraw (Pix* pix, SDL_Renderer* renderer, Doc* doc, RedrawUserEvent* ev) {
     pix.draw (pix,renderer,doc_t,ev.t);
 }
 
@@ -148,12 +148,12 @@ event (Pix* pix, Event* ev) {
 }
 
 void
-update (Pix* pix, UTree* doc_t) {
+update (Pix* pix, Doc* doc) {
     doc_t.doc.update (doc_t); 
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, UTree* doc_t, UTree* t) {
+draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, ETree* t) {
     // Clip to e
     if (t !is null) {
         SDL_Rect clip_rect;
@@ -323,7 +323,7 @@ redraw_window (SDL_Window* window) {
 }
 
 void
-redraw (UTree* t) {
+redraw (ETree* t) {
     send_user_event!RedrawUserEvent (t);
 }
 
