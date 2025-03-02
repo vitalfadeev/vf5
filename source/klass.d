@@ -27,15 +27,92 @@ alias KlassPtr = Klass*;
 
 struct
 Klass {
-    string   name;
-    UTree*[] parent_klasses;
+    string     name;
+    Klass*[]   parent_klasses;
+    UniField[] fields;
+
+    //Childs!Field  childs;
+    //Childs!Switch childs;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;
     KLASS_SET_FN    set    = &.set;
     KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
     KLASS_DUP_FN    dup    = &._dup; // simple, bordered, bordered-titled, custom
+
+    //void
+    //add_child (Field* field) {
+    //    //
+    //}
+    //void
+    //add_child (Switch_* switch_) {
+    //    //
+    //}
+    //void
+    //add_child (E* e) {
+    //    //
+    //}
 }
+
+struct
+UniField {
+    Type type;
+    union {
+        Field   field;
+        Switch_ switch_;
+        E       e;
+    }
+
+    enum
+    Type {
+        field,
+        switch_,
+        e,
+    }
+
+    this (Field f) {
+        this.type  = Type.field;
+        this.field = f;
+    }
+
+    this (Switch_ s) {
+        this.type    = Type.switch_;
+        this.switch_ = s;
+    }
+
+    this (E e) {
+        this.type = Type.e;
+        this.e    = e;
+    }
+}
+
+
+struct
+Switch_ {
+    TString[] cond;
+
+    Switch_*
+    dup () {
+        return new Switch_ ();
+    }
+}
+
+struct
+Case_ {
+    string    name;
+    TString[] values;
+
+    Case_*
+    dup () {
+        return new Case_ ();
+    }
+}
+
+void
+add_child (Klass* kls, UniField* unifield) {
+    kls.fields ~= unifield;
+}
+
 
 void
 event (UTree* kls_t, Event* ev, UTree* e_t) {

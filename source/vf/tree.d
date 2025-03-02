@@ -13,7 +13,6 @@ Tree (UNI) {
     };
     Childs childs;
     Tree*  parent;
-    size_t indent;
     UNI   uni; alias uni this;
 
     this (UNI uni) {

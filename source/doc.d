@@ -42,15 +42,27 @@ alias DocPtr = Doc*;
 
 struct
 Doc {
-    Klass*  hotkeys;
-    Window* window;
-    Size    size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    UTree*  focused;
+    Klass*   hotkeys;
+    Window*  window;
+    Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    ETree*   focused;
+    ETree*   tree;
+    Klass*[] klasses;
 
     DOC_EVENT_FN  event  = &.event;
     DOC_UPDATE_FN update = &.update;
     DOC_DRAW_FN   draw   = &.draw;
     DOC_DUP_FN    dup    = &._dup;
+}
+
+void
+add_child (Doc* doc, ETree* t) {
+    doc.tree.add_child (t);
+}
+
+void
+add_child (Doc* doc, Klass* kls) {
+    doc.klasses ~= kls;
 }
 
 UTree*
@@ -84,19 +96,19 @@ klasses (UTree* doc_t) {
     return klasses;
 }
 
-UTree*
-find_klass_or_create (UTree* doc_t, string s) {
-    auto t = find_klass (doc_t,s);
-    if (t is null)
-        t = create_klass (doc_t,s);
-    return t;
+Klass*
+find_klass_or_create (Doc* doc, string s) {
+    auto kls = find_klass (doc,s);
+    if (kls is null)
+        kls = create_klass (doc,s);
+    return kls;
 }
 
-UTree*
-find_klass (UTree* doc_t, string s) {
-    foreach (kls_t; WalkKlasses (doc_t))
-        if (kls_t.klass.name == s)
-            return kls_t;
+Klass*
+find_klass (Doc* doc, string s) {
+    foreach (kls; doc.klasses)
+        if (kls.name == s)
+            return kls;
 
     return null;
 }
@@ -110,11 +122,29 @@ find_field (UTree* kls_t, string s) {
     return null;
 }
 
-UTree*
-create_klass (UTree* doc_t, string s) {
-    UTree* kls_t = new UTree (Uni (Klass (s)));
-    doc_t.add_child (kls_t);
-    return kls_t;
+Klass*
+create_klass (Doc* doc, string s) {
+    Klass* kls = new Klass (s);
+    add_klass (doc,kls);
+    return kls;
+}
+
+
+void
+add_klass (Doc* doc, Klass* kls) {
+    doc.klasses ~= kls;
+}
+
+
+void
+add_e (Doc* doc, ETree* t) {
+    doc.tree.add_child (t);
+}
+
+
+auto
+new_e (Doc* doc) {
+    return etree.new_e ();
 }
 
 
@@ -192,24 +222,25 @@ send_event_in_tree (Event* ev) {
 }
 
 void
-add_class (E* e, UTree* doc_t, string s) {
-    UTree* kls_t = doc_t.find_klass_or_create (s);
+add_class (E* e, Doc* doc, string s) {
+    UTree* kls_t = doc.find_klass_or_create (s);
     if (!e.klasses.canFind (kls_t))
         e.klasses ~= kls_t;
 }
 
 bool
-has_class (E* e, UTree* doc_t, string s) {
-    UTree* kls_t = doc_t.find_klass (s);
-    return (!e.klasses.canFind (kls_t));
+has_class (E* e, Doc* doc, string s) {
+    Klass* kls = doc.find_klass (s);
+    assert (kls !is null);
+    return (!e.klasses.canFind (kls));
 }
 
 void
-trigger_class (E* e, UTree* doc_t, string s) {
-    if (e.has_class (doc_t,"check.pressed"))
-        e.remove_class (doc_t,"check.pressed");
+trigger_class (E* e, Doc* doc, string s) {
+    if (e.has_class (doc,"check.pressed"))
+        e.remove_class (doc,"check.pressed");
     else
-        e.add_class (doc_t,"check.pressed");
+        e.add_class (doc,"check.pressed");
 }
 
 
@@ -222,18 +253,18 @@ remove_class_from_all (UTree* doc_t, string s) {
 }
 
 void
-remove_class (E* e, UTree* doc_t, string s) {
-    auto kls = doc_t.find_klass (s);
+remove_class (E* e, Doc* doc, string s) {
+    auto kls = doc.find_klass (s);
     if (kls !is null)
         e.remove_class (kls);
 }
 
 void
-remove_class (E* e, UTree* kls_t) {
+remove_class (E* e, Klass* kls) {
     import std.algorithm.searching : countUntil;
     import std.algorithm : remove;
 
-    auto i = e.klasses.countUntil (kls_t);
+    auto i = e.klasses.countUntil (kls);
     if (i != -1)
         e.klasses = e.klasses.remove (i);
 }

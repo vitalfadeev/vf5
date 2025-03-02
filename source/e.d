@@ -257,6 +257,12 @@ E {
 
 
 void
+add_klass (E* e, Klass* kls) {
+    e.klasses ~= kls;
+}
+
+
+void
 event (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
