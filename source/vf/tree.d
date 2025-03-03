@@ -288,10 +288,10 @@ dump_tree (Tree) (Tree* t, int level=0) {
     //if (t.uni is null)
     //    writeln ("null");
     //else
-        writeln (t.uni);
+        writeln (t.e);
 
     // recursive
-    foreach (subt; t.childs) {
-        dump_tree!Tree (subt, level+1);
+    foreach (_t; t.childs) {
+        dump_tree!Tree (_t, level+1);
     }
 }

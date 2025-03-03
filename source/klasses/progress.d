@@ -122,7 +122,7 @@ draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
 
 void
 percent_from_click (ETree* t, int click_x, int click_y, int* percent) {
-    auto e = t.e;
+    E* e = &t.e;
     auto offset_x = click_x - e.content.pos.x;
     int  w = e.size.w;
     *percent = 100 * offset_x / w;

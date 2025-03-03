@@ -515,9 +515,12 @@ go (Doc* doc, string s) {
             }
         }
 
+        //writeln (name, " ", values);
+        //writeln (" ", indents);
+
         // e
         if (name == "e" && indent == 0) { 
-            t = doc.new_e (t_line);
+            t = new_e (doc,values);
             doc.add_e (t);
             indents.length = 0;
             indents ~= Indent (Indent.Type.e,t,indent);
@@ -569,13 +572,18 @@ go (Doc* doc, string s) {
 
             // case
             else
-            if (parent_ind.is_switch)  
+            if (parent_ind.is_switch)  {
                 unifield = new UniField (Case_ (name,values));
+                writeln ("unifield: ", *unifield);
+            }
 
             // field
-            else                       
+            else {
                 unifield = new UniField (Field (name,values));
+                writeln ("unifield: ", *unifield);
+            }
 
+            //
             parent_ind.add_child (unifield);
             indents ~= Indent (unifield,indent);
         }
@@ -647,6 +655,11 @@ Indent {
     is_switch () {
         return (type == Type.switch_);
     }
+
+    string
+    toString () {
+        return "Indent ("~ type.to!string ~ "," ~ indent.to!string ~")";
+    }
 }
 
 //enum
@@ -666,11 +679,11 @@ add_child (TC) (Indent* ind, TC* c) {
     // e -> case
     // e -> e
     static
-    if (is (TC == E)) {
+    if (is (TC == ETree)) {
         switch (ind.type) {
-            case Indent.Type.doc   : ind.doc.add_child (c); break;
-            case Indent.Type.klass : ind.klass.add_child (c); break;
-            case Indent.Type.case_ : ind.case_.add_child (c); break;
+            case Indent.Type.doc   : doc.add_child (ind.doc,c); break;
+            case Indent.Type.klass : klass.add_child (ind.klass,c); break;
+            case Indent.Type.case_ : klass.add_child (ind.case_,c); break;
             case Indent.Type.e     : ind.t.add_child (c); break;
             default: assert (0);
         }        
@@ -681,9 +694,10 @@ add_child (TC) (Indent* ind, TC* c) {
     static
     if (is (TC == UniField)) {
         switch (ind.type) {
-            case Indent.Type.klass : .klass.add_child (ind.klass,c); break;
-            case Indent.Type.case_ : .klass.add_child (ind.case_,c); break;
-            default: assert (0);
+            case Indent.Type.klass   : .klass.add_child (ind.klass,c); break;
+            case Indent.Type.switch_ : .klass.add_child (ind.switch_,c); break;
+            case Indent.Type.case_   : .klass.add_child (ind.case_,c); break;
+            default: writeln (ind.type); assert (0);
         }        
     }
 }

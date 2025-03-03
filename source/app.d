@@ -20,8 +20,8 @@ main () {
 	doc.update (doc);
 
 	// Check
-	//dump_tree (doc_t);
-	//dump_klasses (doc_t);
+	//dump_tree (doc);
+	//dump_klasses (doc);
 
 	//
 	pix.go (pix,doc);
@@ -52,6 +52,13 @@ Klass*
 new_reserved_klass (KLASS) () {
 	return cast (Klass*) new KLASS ();
 }
+
+void
+dump_tree (Doc* doc) {
+    vf.tree.dump_tree (doc.tree);
+}
+
+
 
 
 

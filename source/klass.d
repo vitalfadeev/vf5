@@ -5,6 +5,7 @@ import doc : Doc;
 import e : E;
 import field : Field;
 import events : Event;
+import std.conv : to;
 
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, ETree* t);
 alias KLASS_UPDATE_FN = void function (Klass* kls, Doc* doc, ETree* t);
@@ -50,6 +51,11 @@ Klass {
     //add_child (E* e) {
     //    //
     //}
+
+    string
+    toString () {
+        return "Klass ("~ name ~")";
+    }
 }
 
 struct
@@ -89,6 +95,18 @@ UniField {
         this.type = Type.e;
         this.t    = t;
     }
+
+    string
+    toString () {
+        import std.conv : to;
+        final
+        switch (type) {
+            case Type.field: return "UniField ("~ type.to!string ~ "," ~ field.to!string ~")";
+            case Type.switch_: return "UniField ("~ type.to!string ~ "," ~ switch_.to!string ~")";
+            case Type.case_: return "UniField ("~ type.to!string ~ "," ~ case_.to!string ~")";
+            case Type.e: return "UniField ("~ type.to!string ~ "," ~ t.to!string ~")";
+        }
+    }
 }
 
 
@@ -123,6 +141,13 @@ add_child (Klass* kls, UniField* unifield) {
 void
 add_child (Klass* kls, ETree* t) {
     kls.fields ~= new UniField (t);
+}
+
+void
+add_child (Switch_* switch_, UniField* unifield) {
+    assert (unifield.type == UniField.Type.case_);
+    auto case_ = new Case_ (unifield.case_.name,unifield.case_.values,unifield.case_.fields);
+    switch_.cases ~= case_;
 }
 
 void

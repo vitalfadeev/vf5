@@ -132,7 +132,7 @@ set_pos (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pos_type (Doc* doc, ETree* t, TString[] values) {
-    auto e = t.e;
+    E* e = &t.e;
 
     if (values.length >= 2) {
         switch (values[0].s) {
@@ -206,7 +206,7 @@ is_numeric (string s, int* num) {
 
 void
 set_pos_group (Doc* doc, ETree* t, TString[] values) {
-    auto e = t.e;
+    E* e = &t.e;
     
     if (values.length >= 1) {
         e.pos_group = values[0].s.to!ubyte;
@@ -777,7 +777,7 @@ set_on (Doc* doc, ETree* t, TString[] values) {
 
 //void
 //set_e (Doc* doc, ETree* t, Klass* kls, TString[] values) {
-//    auto e = t.e;
+//    E* e = &t.e;
 //    if (values.length) {
 //        // add child to t
 //        //   set classes
