@@ -104,10 +104,9 @@ find_klass (Doc* doc, string s) {
 
 Field*
 find_field (Klass* kls, string s) {
-    foreach (unifield; WalkFields (kls))
-        if (unifield.type == UniField.Type.field)
-        if (unifield.field.name == s)
-            return &unifield.field;
+    foreach (field; WalkFields (kls))
+        if (field.name == s)
+            return field;
 
     return null;
 }
@@ -288,12 +287,11 @@ apply_klass (Doc* doc, ETree* t, Klass* kls) {
 
     // each field
     // each sub tree
-    foreach (unifield; WalkFields (kls)) {
-        switch (unifield.type) {
-            case UniField.Type.field   : set_field    (doc,t,&unifield.field); break; // set field
-            case UniField.Type.e       : add_sub_tree (doc,t, unifield.t); break; // add e
-            case UniField.Type.switch_ : set_switch   (doc,t,&unifield.switch_); break; // set field
-            default:
+    foreach (field; WalkFields (kls)) {
+        switch (field.name) {
+            case "e"      : add_sub_tree (doc,t,field); break; // add e
+            case "switch" : set_switch   (doc,t,field); break; // set field
+            default       : set_field    (doc,t,field); break; // set field
         }
     }
 }
@@ -313,7 +311,7 @@ set_field (Doc* doc, ETree* t, Field* field) {
 }
 
 void
-add_sub_tree (Doc* doc, ETree* dest_t, ETree* source_t) {
+add_sub_tree (Doc* doc, ETree* dest_t, Field* field) {
     // clone each t
     // add in dest_t
     //auto cloned = clone_tree (source_t);
@@ -321,8 +319,8 @@ add_sub_tree (Doc* doc, ETree* dest_t, ETree* source_t) {
 }
 
 void
-set_switch (Doc* doc, ETree* dest_t, Switch_* switch_) {
-    auto evaluated = evaluate_switch_cond (doc,switch_.cond);
+set_switch (Doc* doc, ETree* dest_t, Field* field) {
+    auto evaluated = evaluate_switch_cond (doc,field.values);
     writeln ("SWITCH!!!", evaluated);
 
     // switch value
@@ -333,42 +331,41 @@ set_switch (Doc* doc, ETree* dest_t, Switch_* switch_) {
 
     // each child case
     if (evaluated.length >= 1)
-    foreach (case_; switch_.cases) {
-        writeln ("  CASE!!!", case_.name);
-        if (case_.name == evaluated[0].s) {
-            set_case (doc,dest_t,case_);
+    foreach (_field; field.fields) {
+        writeln ("  CASE!!!", _field.name);
+        if (_field.name == evaluated[0].s) {
+            set_case (doc,dest_t,_field);
             return;
         }
     }
 
     // default
-    foreach (case_; switch_.cases) {
-        if (case_.name == "default") {
-            set_case (doc,dest_t,case_);
+    foreach (_field; field.fields) {
+        if (_field.name == "default") {
+            set_case (doc,dest_t,_field);
             return;
         }
     }
 }
 
 void
-set_case (Doc* doc, ETree* dest_t, Case_* case_) {
-    apply_case (doc,dest_t,case_);
+set_case (Doc* doc, ETree* dest_t, Field* field) {
+    apply_case (doc,dest_t,field);
 }
 
 void
-apply_case (Doc* doc, ETree* t, Case_* case_) {
+apply_case (Doc* doc, ETree* t, Field* field) {
     E* e = &t.e;
 
     // each field
     // each sub tree
-    writeln ("    FIELDS: ", case_.fields);
-    foreach (unifield; WalkFields (case_)) {
-        writeln ("    FIELD: ", unifield);
-        switch (unifield.type) {
-            case UniField.Type.field   : set_field    (doc,t,&unifield.field); break; // set field
-            case UniField.Type.e       : add_sub_tree (doc,t, unifield.t); break; // add e
-            case UniField.Type.switch_ : set_switch   (doc,t,&unifield.switch_); break; // set field
-            default:
+    writeln ("    FIELDS: ", field.fields);
+    foreach (field; WalkFields (field)) {
+        writeln ("    FIELD: ", field);
+        switch (field.name) {
+            case "e"      : add_sub_tree (doc,t,field); break; // add e
+            case "switch" : set_switch   (doc,t,field); break; // set field
+            default       : set_field    (doc,t,field); break; // set field
         }
     }
 }

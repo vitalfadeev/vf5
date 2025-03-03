@@ -6,8 +6,7 @@ import tstring;
 import doc   : Doc;
 import e     : E;
 import klass : Klass;
-import klass : UniField;
-import klass : Case_;
+import field : Field;
 
 alias ETree = Tree!E;
 
@@ -44,21 +43,21 @@ WalkFields (Klass* kls) {
 }
 
 auto 
-WalkFields (Case_* case_) {
-    return _WalkFields!Case_ (case_);
+WalkFields (Field* field) {
+    return _WalkFields!Field (field);
 }
 
 
 struct 
 _WalkFields (T) {
-    T* klass_or_case;
+    T* klass_or_field;
 
     int
-    opApply (int delegate (UniField* unifield) dg) {
+    opApply (int delegate (Field* field) dg) {
         int result;
 
-        foreach (_unifield; klass_or_case.fields) {
-            result = dg (_unifield);
+        foreach (_field; klass_or_field.fields) {
+            result = dg (_field);
             if (result)
                 return result;
         }

@@ -29,9 +29,9 @@ alias KlassPtr = Klass*;
 
 struct
 Klass {
-    string      name;
-    Klass*[]    parent_klasses;
-    UniField*[] fields;
+    string   name;
+    Klass*[] parent_klasses;
+    Field*[] fields;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;
@@ -58,108 +58,10 @@ Klass {
     }
 }
 
-struct
-UniField {
-    Type type;
-    union {
-        Field   field;
-        Switch_ switch_;
-        Case_   case_;
-        ETree*  t;
-    }
-
-    enum
-    Type {
-        field,
-        switch_,
-        case_,
-        e,
-    }
-
-    this (Field f) {
-        this.type  = Type.field;
-        this.field = f;
-    }
-
-    this (Switch_ s) {
-        this.type    = Type.switch_;
-        this.switch_ = s;
-    }
-
-    this (Case_ c) {
-        this.type    = Type.case_;
-        this.case_ = c;
-    }
-
-    this (ETree* t) {
-        this.type = Type.e;
-        this.t    = t;
-    }
-
-    string
-    toString () {
-        import std.conv : to;
-        final
-        switch (type) {
-            case Type.field: return "UniField ("~ type.to!string ~ "," ~ field.to!string ~")";
-            case Type.switch_: return "UniField ("~ type.to!string ~ "," ~ switch_.to!string ~")";
-            case Type.case_: return "UniField ("~ type.to!string ~ "," ~ case_.to!string ~")";
-            case Type.e: return "UniField ("~ type.to!string ~ "," ~ t.to!string ~")";
-        }
-    }
-}
-
-
-struct
-Switch_ {
-    TString[] cond;
-    Case_*[]  cases;
-
-    Switch_*
-    dup () {
-        return new Switch_ ();
-    }
-}
-
-struct
-Case_ {
-    string      name;
-    TString[]   values;
-    UniField*[] fields;
-
-    Case_*
-    dup () {
-        return new Case_ ();
-    }
-}
-
 void
-add_child (Klass* kls, UniField* unifield) {
-    kls.fields ~= unifield;
+add_child (Klass* kls, Field* field) {
+    kls.fields ~= field;
 }
-
-void
-add_child (Klass* kls, ETree* t) {
-    kls.fields ~= new UniField (t);
-}
-
-void
-add_child (Switch_* switch_, UniField* unifield) {
-    assert (unifield.type == UniField.Type.case_);
-    auto case_ = new Case_ (unifield.case_.name,unifield.case_.values,unifield.case_.fields);
-    switch_.cases ~= case_;
-}
-
-void
-add_child (Case_* case_, ETree* t) {
-    case_.fields ~= new UniField (t);
-}
-
-void
-add_child (Case_* case_, UniField* unifield) {
-    case_.fields ~= unifield;
-}
-
 
 void
 event (Klass* kls, Event* ev, ETree* t) {

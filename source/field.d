@@ -7,6 +7,7 @@ struct
 Field {
     string    name;
     TString[] values;
+    Field*[]  fields;
 
     //enum 
     //ID : ubyte {
@@ -24,5 +25,10 @@ Field {
 
         return cloned;
     }
+}
+
+void
+add_child (Field* field, Field* child_field) {
+    field.fields ~= child_field;
 }
 
