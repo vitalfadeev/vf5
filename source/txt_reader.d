@@ -201,6 +201,9 @@ tb-play-pause
    paused
      image /home/vf/src/vf5/img/play.png
      on click commands.player.play_pause
+   default
+     image /home/vf/src/vf5/img/play.png
+     on click commands.player.play
 
 tb-stop
   image /home/vf/src/vf5/img/stop.png
@@ -322,6 +325,7 @@ colors
 commands
   player.start                      audacious
   player.prev                       audtool playlist-reverse
+  player.play                       audtool playback-play
   player.play_pause                 audtool playback-playpause
   player.stop                       audtool playback-stop
   player.next                       audtool playlist-advance

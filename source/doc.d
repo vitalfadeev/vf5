@@ -321,7 +321,6 @@ add_sub_tree (Doc* doc, ETree* dest_t, Field* field) {
 void
 set_switch (Doc* doc, ETree* dest_t, Field* field) {
     auto evaluated = evaluate_switch_cond (doc,field.values);
-    writeln ("SWITCH!!!", evaluated);
 
     // switch value
     //   case value1
@@ -332,7 +331,6 @@ set_switch (Doc* doc, ETree* dest_t, Field* field) {
     // each child case
     if (evaluated.length >= 1)
     foreach (_field; field.fields) {
-        writeln ("  CASE!!!", _field.name);
         if (_field.name == evaluated[0].s) {
             set_case (doc,dest_t,_field);
             return;
@@ -359,9 +357,7 @@ apply_case (Doc* doc, ETree* t, Field* field) {
 
     // each field
     // each sub tree
-    writeln ("    FIELDS: ", field.fields);
     foreach (field; WalkFields (field)) {
-        writeln ("    FIELD: ", field);
         switch (field.name) {
             case "e"      : add_sub_tree (doc,t,field); break; // add e
             case "switch" : set_switch   (doc,t,field); break; // set field
