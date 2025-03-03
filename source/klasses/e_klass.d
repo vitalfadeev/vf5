@@ -32,16 +32,14 @@ E_Klass {
 // KLASS_EVENT_FN
 void
 event (Klass* kls, Event* ev, ETree* t) {
-    assert (kls_t.uni.type == Uni.Type.klass);
-    assert (  e_t.uni.type == Uni.Type.e);
-    E* e = e_t.e;
+    E* e = &t.e;
 
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("KLASS: ", kls_t.klass.name, ".EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writeln ("KLASS: ", kls.name, ".EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     switch (ev.type) {
         case SDL_USEREVENT:
-            go_on_event (ev.doc_t,e_t,(cast(USER_EVENT)ev.user.code).to!string);
+            go_on_event (ev.doc,t,(cast(USER_EVENT)ev.user.code).to!string);
             break;
         default:
     }
@@ -56,48 +54,47 @@ update (Klass* kls, Doc* doc, ETree* t) {
 // KLASS_SET_FN
 void
 set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     switch (field_id) {
-        case "pos.x"            : set_pos_x             (doc_t,e_t,values); break;
-        case "pos.y"            : set_pos_y             (doc_t,e_t,values); break;
-        case "pos"              : set_pos               (doc_t,e_t,values); break;
-        case "pos.type"         : set_pos_type          (doc_t,e_t,values); break;
-        case "pos.group"        : set_pos_group         (doc_t,e_t,values); break;
-        case "pos.dir"          : set_pos_dir           (doc_t,e_t,values); break;
-        case "size.w"           : set_size_w            (doc_t,e_t,values); break;
-        case "size.h"           : set_size_h            (doc_t,e_t,values); break;
-        case "size"             : set_size              (doc_t,e_t,values); break;
-        case "hidden"           : set_hidden            (doc_t,e_t,values); break;
-        case "popup"            : set_popup             (doc_t,e_t,values); break;
-        case "borders"          : set_borders           (doc_t,e_t,values); break;
-        case "borders.t"        : set_border_t          (doc_t,e_t,values); break;
-        case "borders.r"        : set_border_r          (doc_t,e_t,values); break;
-        case "borders.b"        : set_border_b          (doc_t,e_t,values); break;
-        case "borders.l"        : set_border_l          (doc_t,e_t,values); break;
-        case "borders.color"    : set_borders_color     (doc_t,e_t,values); break;
-        case "pad"              : set_pad               (doc_t,e_t,values); break;
-        case "pad.bg"           : set_pad_bg            (doc_t,e_t,values); break;
-        case "content.image"    : set_content_image     (doc_t,e_t,values); break;
-        case "content.text"     : set_content_text      (doc_t,e_t,values); break;
-        case "content"          : set_content           (doc_t,e_t,values); break;
-        case "image"            : set_content_image     (doc_t,e_t,values); break;
-        case "text"             : set_content_text      (doc_t,e_t,values); break;
-        case "text.color"       : set_text_fg           (doc_t,e_t,values); break;
-        case "text.fg"          : set_text_fg           (doc_t,e_t,values); break;
-        case "text.bg"          : set_text_bg           (doc_t,e_t,values); break;
-        case "text.pos.type"    : set_text_pos_type     (doc_t,e_t,values); break;
-        case "content.size.w"   : set_content_size_w    (doc_t,e_t,values); break;
-        case "content.size.h"   : set_content_size_h    (doc_t,e_t,values); break;
-        case "content.size"     : set_content_size      (doc_t,e_t,values); break;
-        case "content.size.type": set_content_size_type (doc_t,e_t,values); break;
-        case "text.font"        : set_content_text_font (doc_t,e_t,values); break;
-        case "text.font.family" : set_content_text_font_family (doc_t,e_t,values); break;
-        case "text.font.size"   : set_content_text_font_size   (doc_t,e_t,values); break;
-        case "text.font.file"   : set_content_text_font_file   (doc_t,e_t,values); break;
-        case "bg"               : set_bg                (doc_t,e_t,values); break;
-        case "on"               : set_on                (doc_t,e_t,values); break;
+        case "pos.x"            : set_pos_x             (doc,t,values); break;
+        case "pos.y"            : set_pos_y             (doc,t,values); break;
+        case "pos"              : set_pos               (doc,t,values); break;
+        case "pos.type"         : set_pos_type          (doc,t,values); break;
+        case "pos.group"        : set_pos_group         (doc,t,values); break;
+        case "pos.dir"          : set_pos_dir           (doc,t,values); break;
+        case "size.w"           : set_size_w            (doc,t,values); break;
+        case "size.h"           : set_size_h            (doc,t,values); break;
+        case "size"             : set_size              (doc,t,values); break;
+        case "hidden"           : set_hidden            (doc,t,values); break;
+        case "popup"            : set_popup             (doc,t,values); break;
+        case "borders"          : set_borders           (doc,t,values); break;
+        case "borders.t"        : set_border_t          (doc,t,values); break;
+        case "borders.r"        : set_border_r          (doc,t,values); break;
+        case "borders.b"        : set_border_b          (doc,t,values); break;
+        case "borders.l"        : set_border_l          (doc,t,values); break;
+        case "borders.color"    : set_borders_color     (doc,t,values); break;
+        case "pad"              : set_pad               (doc,t,values); break;
+        case "pad.bg"           : set_pad_bg            (doc,t,values); break;
+        case "content.image"    : set_content_image     (doc,t,values); break;
+        case "content.text"     : set_content_text      (doc,t,values); break;
+        case "content"          : set_content           (doc,t,values); break;
+        case "image"            : set_content_image     (doc,t,values); break;
+        case "text"             : set_content_text      (doc,t,values); break;
+        case "text.color"       : set_text_fg           (doc,t,values); break;
+        case "text.fg"          : set_text_fg           (doc,t,values); break;
+        case "text.bg"          : set_text_bg           (doc,t,values); break;
+        case "text.pos.type"    : set_text_pos_type     (doc,t,values); break;
+        case "content.size.w"   : set_content_size_w    (doc,t,values); break;
+        case "content.size.h"   : set_content_size_h    (doc,t,values); break;
+        case "content.size"     : set_content_size      (doc,t,values); break;
+        case "content.size.type": set_content_siztype (doc,t,values); break;
+        case "text.font"        : set_content_text_font (doc,t,values); break;
+        case "text.font.family" : set_content_text_font_family (doc,t,values); break;
+        case "text.font.size"   : set_content_text_font_size   (doc,t,values); break;
+        case "text.font.file"   : set_content_text_font_file   (doc,t,values); break;
+        case "bg"               : set_bg                (doc,t,values); break;
+        case "on"               : set_on                (doc,t,values); break;
         //case "e"                : set_e                 (doc,t,kls,values); break;
         default:
     }
@@ -107,36 +104,35 @@ set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
 void
 draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
     import draws : draw_e;
-    E* e = e_t.e;
+    E* e = &t.e;
     draw_e (renderer,e);
 }
 
 //
 void
 set_pos (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
     
     if (values.length >= 2) {
         if (values[1].type == TString.Type.string && values[1].s == "%") {
-            set_pos_x_percent (doc_t, e_t, values[0..1]);
+            set_pos_x_percent (doc, t, values[0..1]);
             e.pos_type = E.PosType.percent;
         }
         else {
-            set_pos_x (doc_t, e_t, values[0..1]);
-            set_pos_y (doc_t, e_t, values[1..$]);
+            set_pos_x (doc, t, values[0..1]);
+            set_pos_y (doc, t, values[1..$]);
         }
     }
     else
     if (values.length == 1) {
-        set_pos_x (doc_t, e_t, values[0..1]);
-        set_pos_y (doc_t, e_t, values[0..1]);
+        set_pos_x (doc, t, values[0..1]);
+        set_pos_y (doc, t, values[0..1]);
     }
 }
 
 void
 set_pos_type (Doc* doc, ETree* t, TString[] values) {
-    auto e = e_t.e;
+    auto e = t.e;
 
     if (values.length >= 2) {
         switch (values[0].s) {
@@ -210,7 +206,7 @@ is_numeric (string s, int* num) {
 
 void
 set_pos_group (Doc* doc, ETree* t, TString[] values) {
-    auto e = e_t.e;
+    auto e = t.e;
     
     if (values.length >= 1) {
         e.pos_group = values[0].s.to!ubyte;
@@ -219,8 +215,7 @@ set_pos_group (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pos_dir (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 1) {
         switch (values[0].s) {
@@ -235,8 +230,7 @@ set_pos_dir (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pos_x (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         string value = values[0].s;
@@ -253,8 +247,7 @@ set_pos_x (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pos_x_percent (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         string value = values[0].s;
@@ -268,8 +261,7 @@ set_pos_x_percent (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pos_y (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         if (values[0].s.isNumeric ()) {
@@ -280,24 +272,22 @@ set_pos_y (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_size (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 2) {
-        set_size_w (doc_t, e_t, values[0..1]);
-        set_size_h (doc_t, e_t, values[1..2]);
+        set_size_w (doc, t, values[0..1]);
+        set_size_h (doc, t, values[1..2]);
     }
     else
     if (values.length == 1) {
-        set_size_w (doc_t, e_t, values[0..1]);
-        set_size_h (doc_t, e_t, values[0..1]);
+        set_size_w (doc, t, values[0..1]);
+        set_size_h (doc, t, values[0..1]);
     }
 }
 
 void
 set_size_w (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -320,8 +310,7 @@ set_size_w (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_size_h (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -344,8 +333,7 @@ set_size_h (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_hidden (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         if (values[0].s.isNumeric)
@@ -360,88 +348,81 @@ set_popup (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_borders (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border (doc_t, e_t, &e.borders.t, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.r, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.b, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.l, values[0..$]);
+        set_border (doc, t, &e.borders.t, values[0..$]);
+        set_border (doc, t, &e.borders.r, values[0..$]);
+        set_border (doc, t, &e.borders.b, values[0..$]);
+        set_border (doc, t, &e.borders.l, values[0..$]);
     }
     else
     if (values.length >= 2) {
-        set_border (doc_t, e_t, &e.borders.t, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.r, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.b, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.l, values[0..$]);
+        set_border (doc, t, &e.borders.t, values[0..$]);
+        set_border (doc, t, &e.borders.r, values[0..$]);
+        set_border (doc, t, &e.borders.b, values[0..$]);
+        set_border (doc, t, &e.borders.l, values[0..$]);
     }
     else
     if (values.length == 1) {
-        set_border (doc_t, e_t, &e.borders.t, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.r, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.b, values[0..$]);
-        set_border (doc_t, e_t, &e.borders.l, values[0..$]);
+        set_border (doc, t, &e.borders.t, values[0..$]);
+        set_border (doc, t, &e.borders.r, values[0..$]);
+        set_border (doc, t, &e.borders.b, values[0..$]);
+        set_border (doc, t, &e.borders.l, values[0..$]);
     }
 }
 
 void
 set_border_t (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border (doc_t, e_t, &e.borders.t, values);
+        set_border (doc, t, &e.borders.t, values);
     }
 }
 
 void
 set_border_r (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border (doc_t, e_t, &e.borders.r, values);
+        set_border (doc, t, &e.borders.r, values);
     }
 }
 
 void
 set_border_b (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border (doc_t, e_t, &e.borders.b, values);
+        set_border (doc, t, &e.borders.b, values);
     }
 }
 
 void
 set_border_l (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border (doc_t, e_t, &e.borders.l, values);
+        set_border (doc, t, &e.borders.l, values);
     }
 }
 
 void
 set_borders_color (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 1) {
-        set_border_color (doc_t, e_t, &e.borders.t, values);
-        set_border_color (doc_t, e_t, &e.borders.t, values);
-        set_border_color (doc_t, e_t, &e.borders.b, values);
-        set_border_color (doc_t, e_t, &e.borders.l, values);
+        set_border_color (doc, t, &e.borders.t, values);
+        set_border_color (doc, t, &e.borders.t, values);
+        set_border_color (doc, t, &e.borders.b, values);
+        set_border_color (doc, t, &e.borders.l, values);
     }
 }
 
 void
 set_pad (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 4) {
         if (values[0].s.isNumeric) {
@@ -481,12 +462,11 @@ set_pad (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_pad_bg (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         Color c = e.pad.bg;
-        if (doc_parse_color (doc_t, values, &c))
+        if (doc_parse_color (doc, values, &c))
             e.pad.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -495,20 +475,18 @@ set_pad_bg (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_border (Doc* doc, ETree* t, E.Border* border, TString[] values) {    
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 3) {
-        set_border_w     (doc_t, e_t, border, values[0..1]);
-        set_border_type  (doc_t, e_t, border, values[1..2]);
-        set_border_color (doc_t, e_t, border, values[2..3]);
+        set_border_w     (doc, t, border, values[0..1]);
+        set_border_type  (doc, t, border, values[1..2]);
+        set_border_color (doc, t, border, values[2..3]);
     }
 }
 
 void
 set_border_w (Doc* doc, ETree* t, E.Border* border, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         if (values[0].s.isNumeric)
@@ -518,8 +496,7 @@ set_border_w (Doc* doc, ETree* t, E.Border* border, TString[] values) {
 
 void
 set_border_type (Doc* doc, ETree* t, E.Border* border, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         if (values[0].s == "none")
@@ -533,12 +510,11 @@ set_border_type (Doc* doc, ETree* t, E.Border* border, TString[] values) {
 
 void
 set_border_color (Doc* doc, ETree* t, E.Border* border, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values, &c))
+        if (doc_parse_color (doc, values, &c))
             border.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -549,7 +525,6 @@ bool
 doc_parse_color (Doc* doc, TString[] tss, Color* color) {
     import std.string : startsWith;
 
-    auto doc = doc_t.doc;
 
     if (tss[0].s.startsWith ("#"))
         return parse_color_hex (tss[0].s, color);
@@ -564,7 +539,7 @@ doc_parse_color (Doc* doc, TString[] tss, Color* color) {
         return parse_color_tcb (tss,color);
     }
     else {
-        TString[] color_s = doc_get_klass_field_value (doc_t,tss[0].s);
+        TString[] color_s = doc_get_klass_field_value (doc,tss[0].s);
         if (color_s.length)
             return parse_color (color_s, color); 
     }
@@ -574,8 +549,7 @@ doc_parse_color (Doc* doc, TString[] tss, Color* color) {
 
 void
 set_content_image (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         e.content.image.src = values[0].s;
@@ -585,8 +559,7 @@ set_content_image (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_text (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         e.content.text.s = values.join (" ");
@@ -595,12 +568,11 @@ set_content_text (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_text_fg (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values, &c))
+        if (doc_parse_color (doc, values, &c))
             e.content.text.fg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -609,12 +581,11 @@ set_text_fg (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_text_bg (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t, values, &c))
+        if (doc_parse_color (doc, values, &c))
             e.content.text.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -623,8 +594,7 @@ set_text_bg (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_text_pos_type (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -644,8 +614,7 @@ set_text_pos_type (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_size_w (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -669,8 +638,7 @@ set_content_size_w (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_size_h (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -693,24 +661,22 @@ set_content_size_h (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_size (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 2) {
-        set_content_size_w (doc_t, e_t, values[0..1]);
-        set_content_size_h (doc_t, e_t, values[1..2]);
+        set_content_size_w (doc, t, values[0..1]);
+        set_content_size_h (doc, t, values[1..2]);
     }
     else
     if (values.length == 1) {
-        set_content_size_w (doc_t, e_t, values);
-        set_content_size_h (doc_t, e_t, values);
+        set_content_size_w (doc, t, values);
+        set_content_size_h (doc, t, values);
     }
 }
 
 void
-set_content_size_type (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+set_content_siztype (Doc* doc, ETree* t, TString[] values) {
+    E* e = &t.e;
 
     if (values.length) {
         switch (values[0].s) {
@@ -728,15 +694,14 @@ set_content_size_type (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_text_font (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length >= 2) {
-        set_content_text_font_file (doc_t,e_t,values[0..1]);
-        set_content_text_font_size (doc_t,e_t,values[1..2]);
+        set_content_text_font_file (doc,t,values[0..1]);
+        set_content_text_font_size (doc,t,values[1..2]);
     }
     if (values.length >= 1) {
-        set_content_text_font_file (doc_t,e_t,values[0..1]);
+        set_content_text_font_file (doc,t,values[0..1]);
     }
 }
 
@@ -745,8 +710,7 @@ string[] global_font_files;
 
 void
 set_content_text_font_file (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         // collect font names
@@ -757,8 +721,7 @@ set_content_text_font_file (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_text_font_family (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         e.content.text.font.family = values[0].s;
@@ -767,8 +730,7 @@ set_content_text_font_family (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content_text_font_size (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         e.content.text.font.size = values[0].s.to!ubyte;
@@ -777,12 +739,11 @@ set_content_text_font_size (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_bg (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         Color c;
-        if (doc_parse_color (doc_t,values, &c))
+        if (doc_parse_color (doc,values, &c))
             e.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -791,8 +752,7 @@ set_bg (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_content (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         //
@@ -801,8 +761,7 @@ set_content (Doc* doc, ETree* t, TString[] values) {
 
 void
 set_on (Doc* doc, ETree* t, TString[] values) {
-    auto doc = doc_t.doc;
-    auto e   = e_t.e;
+    E* e = &t.e;
 
     if (values.length) {
         string event  = values[0].s;

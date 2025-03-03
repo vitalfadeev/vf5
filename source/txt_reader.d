@@ -491,20 +491,20 @@ forms
 
 void 
 go (Doc* doc, string s) {
-    LineType  type, last_type;
-    ETree*    parent_t = doc_t;
-    ETree*    t, last_t;
     size_t    indent;
     string    name;
     TString[] values;
     Indent[]  indents;
+    ETree*    t;
+    Klass*    kls;
+    UniField* unifield;
 
     foreach (t_line; Token_line_reader (s)) {
         // indent, name, values
         indent        = 0;
         name.length   = 0;
         values.length = 0;
-        foreach (ts; t_line) {            
+        foreach (ts; t_line) {
             switch (ts.type) {
                 case TString.Type.indent  : indent = ts.s.length; break;
                 case TString.Type.name    : name   = ts.s; break;
@@ -515,13 +515,17 @@ go (Doc* doc, string s) {
             }
         }
 
-        // e klass field switch case
-        if (name == "e" && indent == 0) { // e
-            t = .new_e (doc.t_line);
-            indents ~= Indent (t,indent);
+        // e
+        if (name == "e" && indent == 0) { 
+            t = doc.new_e (t_line);
+            doc.add_e (t);
+            indents.length = 0;
+            indents ~= Indent (Indent.Type.e,t,indent);
         }
+
+        // sub e
         else
-        if (name == "e" && indent >= 1) { // sub e
+        if (name == "e" && indent >= 1) { 
             // klass
             // switch-case
             // doc
@@ -540,40 +544,55 @@ go (Doc* doc, string s) {
             t = new_child_e (doc,values);
             auto _ind = indents.find_parent (indent);
             assert (_ind !is null);
-            assert (_ind.type == Indent.Type.e || _ind.type == Indent.Type.doc || _ind.type == Indent.Type.klass);
-            _ind.t.add_child (t);
-            indents ~= Indent (t,indent);
+            _ind.add_child (t);
+            indents ~= Indent (Indent.Type.e,t,indent);
         }
+
+        // klass
         else
-        if (name != "e" && indent == 0) { // klass
+        if (name != "e" && indent == 0) { 
             kls = new_klass (doc,name,values);
+            indents.length = 0;
             indents ~= Indent (kls,indent);
+            // added in doc
         }
+
+        // field swicth case
         else
-        if (name != "e" && indent >= 1) { // field swicth case
+        if (name != "e" && indent >= 1) { 
             auto parent_ind = indents.find_parent (indent);
-            assert (parent_ind !is null);            
-            unifield = new_unifield (doc,name,values,parent_ind);
-            final
-            switch (parent_ind.type) {
-                case Indent.Type.doc      : assert (0); break;
-                case Indent.Type.klass    : parent_ind.klass   .add_child (unifield); break;
-                case Indent.Type.unifield : parent_ind.unifield.add_child (unifield); break;
-                case Indent.Type.e        : assert (0); break;
-            }
-            indents ~= Indent (UniField,indent);
+            assert (parent_ind !is null);
+
+            // switch
+            if (name == "switch")
+                unifield = new UniField (Switch_ (values));
+
+            // case
+            else
+            if (parent_ind.is_switch)  
+                unifield = new UniField (Case_ (name,values));
+
+            // field
+            else                       
+                unifield = new UniField (Field (name,values));
+
+            parent_ind.add_child (unifield);
+            indents ~= Indent (unifield,indent);
         }
     }
 }
 
 struct
 Indent {
-    Type   type;
+    Type type;
     union {
         Doc*      doc;
         Klass*    klass;
-        UniField* unifield;
+        Switch_*  switch_;
+        Case_*    case_;
+        Field*    field;
         ETree*    t;
+        //UniField* unifield;
     } 
     size_t indent;
 
@@ -581,8 +600,11 @@ Indent {
     Type {
         doc,
         klass,
-        unifield,
+        switch_,
+        case_,
+        field,
         e,
+        //unifield,
     }
 
     this (Doc* doc, size_t indent) {
@@ -598,8 +620,14 @@ Indent {
     }
 
     this (UniField* unifield, size_t indent) {
-        this.type     = Type.unifield;
-        this.unifield = unifield;
+        final
+        switch (unifield.type) {
+            case UniField.Type.field  : this.type = Type.field;   this.field   = &unifield.field; break;
+            case UniField.Type.switch_: this.type = Type.switch_; this.switch_ = &unifield.switch_; break;
+            case UniField.Type.case_  : this.type = Type.case_;   this.case_   = &unifield.case_; break;
+            case UniField.Type.e      : this.type = Type.e;       this.t       = unifield.t; break;
+        }
+        //this.unifield = unifield;
         this.indent   = indent;
     }
 
@@ -609,24 +637,56 @@ Indent {
         this.indent = indent;
     }
 
+    this (Type type, ETree* t, size_t indent) {
+        this.type   = type;
+        this.t      = t;
+        this.indent = indent;
+    }
+
     bool
     is_switch () {
-        return (
-            type == Type.unifield && 
-            unifield.type == UniField.Type.switch_);
+        return (type == Type.switch_);
     }
 }
 
-enum
-LineType {
-    none,
-    e,
-    klass,
-    field,
-    switch_,
-    case_
-}
+//enum
+//LineType {
+//    none,
+//    e,
+//    klass,
+//    field,
+//    switch_,
+//    case_
+//}
 
+void
+add_child (TC) (Indent* ind, TC* c) {
+    // e -> doc
+    // e -> klass
+    // e -> case
+    // e -> e
+    static
+    if (is (TC == E)) {
+        switch (ind.type) {
+            case Indent.Type.doc   : ind.doc.add_child (c); break;
+            case Indent.Type.klass : ind.klass.add_child (c); break;
+            case Indent.Type.case_ : ind.case_.add_child (c); break;
+            case Indent.Type.e     : ind.t.add_child (c); break;
+            default: assert (0);
+        }        
+    }
+
+    // unifield -> klass
+    // unifield -> case
+    static
+    if (is (TC == UniField)) {
+        switch (ind.type) {
+            case Indent.Type.klass : .klass.add_child (ind.klass,c); break;
+            case Indent.Type.case_ : .klass.add_child (ind.case_,c); break;
+            default: assert (0);
+        }        
+    }
+}
 
 Indent*
 find_parent (ref Indent[] indents, size_t for_indent) {
@@ -660,8 +720,8 @@ new_child_e (Doc* doc, TString[] values) {
     //   create sub e
     //   add classes
 
-    auto t = doc.new_e ();
-    auto e = &t.e;
+    auto t = .doc.new_e (doc);
+    E*   e = &t.e;
 
     e.add_klass (doc.find_klass_or_create ("e"));
 
@@ -689,33 +749,6 @@ new_klass (Doc* doc, string name, TString[] values) {
     return kls;    
 }
 
-auto
-new_field (Doc* doc, string name, TString[] values) {
-    return new UniField (Field (name,values));
-}
-
-UniField*
-new_unifield (Doc* doc, string name, TString[] values, Indent* parent_ind) {
-    assert (parent_ind !is null);
-
-    if (name == "switch")
-        return new_switch (doc,values);
-    else
-    if (parent_ind.is_switch)
-        return new_case (doc,name,values);
-    else
-        return new_field (doc,name,values);
-}
-
-auto
-new_switch (Doc* doc, TString[] values) {
-    return new UniField (Switch_ (values));
-}
-
-auto
-new_case (Doc* doc, string name, TString[] values) {
-    return new UniField (Case_ (name,values));
-}
 
 //ETree*
 //find_parent_t (ETree* current_t, size_t for_indent) {

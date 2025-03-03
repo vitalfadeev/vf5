@@ -28,9 +28,9 @@ alias KlassPtr = Klass*;
 
 struct
 Klass {
-    string     name;
-    Klass*[]   parent_klasses;
-    UniField[] fields;
+    string      name;
+    Klass*[]    parent_klasses;
+    UniField*[] fields;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;
@@ -95,6 +95,7 @@ UniField {
 struct
 Switch_ {
     TString[] cond;
+    Case_*[]  cases;
 
     Switch_*
     dup () {
@@ -104,8 +105,9 @@ Switch_ {
 
 struct
 Case_ {
-    string    name;
-    TString[] values;
+    string      name;
+    TString[]   values;
+    UniField*[] fields;
 
     Case_*
     dup () {
@@ -116,6 +118,21 @@ Case_ {
 void
 add_child (Klass* kls, UniField* unifield) {
     kls.fields ~= unifield;
+}
+
+void
+add_child (Klass* kls, ETree* t) {
+    kls.fields ~= new UniField (t);
+}
+
+void
+add_child (Case_* case_, ETree* t) {
+    case_.fields ~= new UniField (t);
+}
+
+void
+add_child (Case_* case_, UniField* unifield) {
+    case_.fields ~= unifield;
 }
 
 

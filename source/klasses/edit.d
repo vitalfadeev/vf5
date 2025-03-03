@@ -34,10 +34,7 @@ Edit {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, ETree* t) {
-    assert (kls_t.uni.type == Uni.Type.klass);
-    assert (  e_t.uni.type == Uni.Type.e);
-    Klass* kls = kls_t.klass;
-    E*     e   = e_t.e;
+    E* e = &t.e;
 
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("EDIT.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");

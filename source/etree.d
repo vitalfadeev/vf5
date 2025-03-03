@@ -7,17 +7,18 @@ import doc   : Doc;
 import e     : E;
 import klass : Klass;
 import klass : UniField;
+import klass : Case_;
 
 alias ETree = Tree!E;
 
 auto
 new_e () {
-    return new E ();
+    return new ETree ();
 }
 
 auto 
 WalkKlasses (Doc* doc) {
-    return _WalkKlasses (doc_t);
+    return _WalkKlasses (doc);
 }
 struct 
 _WalkKlasses {
@@ -39,20 +40,25 @@ _WalkKlasses {
 
 auto 
 WalkFields (Klass* kls) {
-    return _WalkFields (kls);
+    return _WalkFields!Klass (kls);
+}
+
+auto 
+WalkFields (Case_* case_) {
+    return _WalkFields!Case_ (case_);
 }
 
 
 struct 
-_WalkFields {
-    Klass* kls;
+_WalkFields (T) {
+    T* klass_or_case;
 
     int
-    opApply (int delegate (UniField* field) dg) {
+    opApply (int delegate (UniField* unifield) dg) {
         int result;
 
-        foreach (ref unifield; kls.fields) {
-            result = dg (&unifield);
+        foreach (_unifield; klass_or_case.fields) {
+            result = dg (_unifield);
             if (result)
                 return result;
         }
@@ -63,46 +69,9 @@ _WalkFields {
 
 
 auto 
-WalkE (Doc* doc) {
-    return _WalkE (doc_t);
+WalkTree (Doc* doc) {
+    return WalkTree (doc.tree);
 }
-
-
-struct 
-_WalkE {
-    Doc* doc;
-
-    int
-    opApply (int delegate (ETree* t) dg) {
-        assert (doc_t !is null);
-        assert (doc_t.uni.type == Uni.Type.doc || doc_t.uni.type == Uni.Type.e);
-
-        int result;
-
-        // e
-        if (doc_t.uni.type == Uni.Type.e) {
-            if (skip_hidden (doc_t))
-                return 0;
-
-            result = dg (doc_t);
-            if (result)
-                return result;
-        }
-
-        // childs
-        foreach (e_tree; doc_t.childs) 
-            if (e_tree.uni.type == Uni.Type.e)
-            if (!skip_hidden (e_tree))
-                foreach (_t; WalkTree (e_tree)) {
-                    result = dg (_t);
-                    if (result)
-                        return result;
-                }
-
-        return 0;
-    }
-}
-
 
 auto 
 WalkTree (Tree) (Tree* t) {
@@ -111,7 +80,7 @@ WalkTree (Tree) (Tree* t) {
 
 bool 
 skip_hidden (ETree* t) {
-    return (t.uni.type != Uni.Type.e) || t.uni.e.hidden;
+    return t.e.hidden;
 }
 
 auto 

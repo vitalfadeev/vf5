@@ -44,14 +44,14 @@ go (Pix* pix, Doc* doc) {
     SDL_Renderer* renderer = new_renderer (window);
 
     //
-    doc_t.doc.window = new Window (window);
+    doc.window = new Window (window);
 
     // Event "start"
     send_user_event!StartUserEvent ();
 
     // Event Loop
     foreach (Event* ev; Events ()) {
-        ev.doc_t      = doc_t;
+        ev.doc        = doc;
         ev.app_window = window;
         ev.renderer   = renderer;
 
@@ -101,7 +101,7 @@ click_translate (Event* ev) {
 
 void
 _redraw (Pix* pix, SDL_Renderer* renderer, Doc* doc, RedrawUserEvent* ev) {
-    pix.draw (pix,renderer,doc_t,ev.t);
+    pix.draw (pix,renderer,doc,ev.t);
 }
 
 int
@@ -113,11 +113,11 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc_t,null); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc,null); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.doc_t); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.doc); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -136,12 +136,12 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.doc_t,cast (RedrawUserEvent*) ev); break;
-                default: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result;
+                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.doc,cast (RedrawUserEvent*) ev); break;
+                default: auto result = ev.doc.event (ev.doc,ev); if (result) return result;
             }
             break;
-        case SDL_QUIT: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result; else return 1;
-        default: auto result = ev.doc_t.doc.event (ev.doc_t,ev); if (result) return result;
+        case SDL_QUIT: auto result = ev.doc.event (ev.doc,ev); if (result) return result; else return 1;
+        default: auto result = ev.doc.event (ev.doc,ev); if (result) return result;
     }
 
     return 0;
@@ -149,7 +149,7 @@ event (Pix* pix, Event* ev) {
 
 void
 update (Pix* pix, Doc* doc) {
-    doc_t.doc.update (doc_t); 
+    doc.update (doc); 
 }
 
 void
@@ -172,7 +172,7 @@ draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, ETree* t) {
     }
 
     // draw
-    doc_t.doc.draw (doc_t,renderer,t);
+    doc.draw (doc,renderer,t);
     // rasterize
     SDL_RenderPresent (renderer);
 

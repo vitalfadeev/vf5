@@ -249,7 +249,7 @@ E {
     toString () {
         string ks;
         foreach (Klass* kls; klasses)
-            ks ~= kls_t.klass.name ~ " ";
+            ks ~= kls.name ~ " ";
         
         return "E(" ~ ks ~ ")";
     }

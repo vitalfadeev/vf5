@@ -33,10 +33,7 @@ Check {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, ETree* t) {
-    assert (kls_t.uni.type == Uni.Type.klass);
-    assert (  e_t.uni.type == Uni.Type.e);
-    Klass* kls = kls_t.klass;
-    E*     e   = e_t.e;
+    E* e = &t.e;
 
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("CHECK.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
@@ -45,10 +42,10 @@ event (Klass* kls, Event* ev, ETree* t) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.click : 
-                    e.trigger_class (ev.doc_t,"check.pressed");
+                    e.trigger_class (ev.doc,"check.pressed");
                     //emit ("on check.pressed", doc_t, e_t);
-                    ev.doc_t.doc.update (ev.doc_t);
-                    e_t.redraw ();
+                    ev.doc.update (ev.doc);
+                    t.redraw ();
                     break;
                 default:
             }

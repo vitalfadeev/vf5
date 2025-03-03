@@ -76,8 +76,7 @@ tree_functions () {
         cloned.childs.l = null;
         cloned.childs.r = null;
         cloned.parent   = null;
-        cloned.indent   = this.indent;
-        cloned.uni      = this.uni;
+        cloned.e        = this.e;
 
         // childs
         foreach (c; this.childs)

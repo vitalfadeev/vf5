@@ -33,10 +33,7 @@ Button {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, ETree* t) {
-    assert (kls_t.uni.type == Uni.Type.klass);
-    assert (  e_t.uni.type == Uni.Type.e);
-    Klass* kls = kls_t.klass;
-    E*     e   = e_t.e;
+    E* e = &t.e;
 
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("BUTTON.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
@@ -45,17 +42,17 @@ event (Klass* kls, Event* ev, ETree* t) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                e.add_class (ev.doc_t,"button.pressed");
-                ev.doc_t.doc.update (ev.doc_t);
-                e_t.redraw ();
+                e.add_class (ev.doc,"button.pressed");
+                ev.doc.update (ev.doc);
+                t.redraw ();
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
-                e.remove_class (ev.doc_t,"button.pressed");
-                ev.doc_t.doc.update (ev.doc_t);
-                e_t.redraw ();
+                e.remove_class (ev.doc,"button.pressed");
+                ev.doc.update (ev.doc);
+                t.redraw ();
             }
             break;
         default:

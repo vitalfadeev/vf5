@@ -32,9 +32,6 @@ Progress {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, ETree* t) {
-    assert (kls_t.uni.type == Uni.Type.klass);
-    assert (  e_t.uni.type == Uni.Type.e);
-
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("PROGRESS.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
@@ -77,11 +74,11 @@ event (Klass* kls, Event* ev, ETree* t) {
                 case USER_EVENT.click:
                     auto click_ev = cast (ClickUserEvent*) ev;
                     int percent;
-                    if (e_t !is null) {
-                        percent_from_click (e_t, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
+                    if (t !is null) {
+                        percent_from_click (t, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
                         writeln ("progress.position: ", percent);
                         string[string] env = ["PROGRESS_POSITION" : percent.to!string];
-                        go_on_event (ev.doc_t,e_t,"progress.position",env);
+                        go_on_event (ev.doc,t,"progress.position",env);
                         // total = audtool current-song-length-seconds
                         // now   = audtool current-song-output-length-seconds
                         // seek  = total * precent
@@ -108,11 +105,11 @@ update (Klass* kls, Doc* doc, ETree* t) {
 // KLASS_SET_FN
 void 
 set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
-    auto e = t.e;
+    E* e = &t.e;
 
     switch (field_id) {
-        case "progress"            : set_progress_position (doc_t,t,e,values); break;
-        case "progress.position"   : set_progress_position (doc_t,t,e,values); break;
+        case "progress"            : set_progress_position (doc,t,e,values); break;
+        case "progress.position"   : set_progress_position (doc,t,e,values); break;
         default:
     }
 }

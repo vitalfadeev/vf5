@@ -102,11 +102,12 @@ find_klass (Doc* doc, string s) {
     return null;
 }
 
-ETree*
+Field*
 find_field (Klass* kls, string s) {
-    foreach (field_t; WalkFields (kls_t))
-        if (field_t.field.name == s)
-            return field_t;
+    foreach (unifield; WalkFields (kls))
+        if (unifield.type == UniField.Type.field)
+        if (unifield.field.name == s)
+            return &unifield.field;
 
     return null;
 }
@@ -142,16 +143,15 @@ send_event_in_deep (Event* ev, ETree* t, Pos pos, SDL_Window* window, SDL_Render
     bool 
     valid_e (ETree* t) {
         return (
-            (t.uni.type == Uni.type.e) && 
             pos_in_rect (pos, t.e.pos, t.e.size)
         );
     }
 
     // klass event
-    foreach (_t; utree.FindDeepest (t,&valid_e)) {
-        foreach (kls_t; _t.e.klasses)
-            if (kls_t.klass.event !is null)
-                kls_t.klass.event (kls_t,ev,_t);
+    foreach (_t; etree.FindDeepest (t,&valid_e)) {
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,ev,_t);
     }
 }
 
@@ -160,7 +160,6 @@ send_click_in_deep (Event* ev, ETree* t, Pos down_pos, Pos up_pos, ref ETree* de
     bool 
     valid_e (ETree* t) {
         return (
-            (t.uni.type == Uni.Type.e) && 
             pos_in_rect (down_pos, t.e.pos, t.e.size) &&
             pos_in_rect (up_pos,   t.e.pos, t.e.size)
         );
@@ -168,9 +167,9 @@ send_click_in_deep (Event* ev, ETree* t, Pos down_pos, Pos up_pos, ref ETree* de
 
     // klass event
     foreach (_t; FindDeepest (t,&valid_e)) {
-        foreach (kls_t; _t.e.klasses)
-            if (kls_t.klass.event !is null)
-                kls_t.klass.event (kls_t,ev,_t);
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,ev,_t);
         deepest = _t;
     }
 }
@@ -180,41 +179,35 @@ send_mouse_event_in_deep (Event* ev, ETree* t, Pos pos, ref ETree* deepest) {
     bool 
     valid_e (ETree* t) {
         return (
-            (t.uni.type == Uni.Type.e) && 
             pos_in_rect (pos, t.e.pos, t.e.size)
         );
     }
 
     // klass event
-    foreach (_e_tree; WalkChilds (t))
-        if (_e_tree.uni.type == Uni.Type.e) {
-
-            foreach (_t; FindDeepest (_e_tree,&valid_e)) {
-                //writeln (*_t);
-                foreach (kls_t; _t.e.klasses)
-                    if (kls_t.klass.event !is null)
-                        kls_t.klass.event (kls_t,ev,_t);
-                deepest = _t;
-            }
-            
-        }
+    foreach (_t; FindDeepest (t,&valid_e)) {
+        //writeln (*_t);
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,ev,_t);
+        deepest = _t;
+    }
 }
 
 void
 send_event_in_tree (Event* ev) {
     // klass event
-    foreach (_t; WalkE (ev.doc_t)) {
-        foreach (kls_t; _t.e.klasses)
-            if (kls_t.klass.event !is null)
-                kls_t.klass.event (kls_t,ev,_t);
+    foreach (_t; WalkTree (ev.doc)) {
+        foreach (kls; _t.e.klasses)
+            if (kls.event !is null)
+                kls.event (kls,ev,_t);
     }
 }
 
 void
 add_class (E* e, Doc* doc, string s) {
     Klass* kls = doc.find_klass_or_create (s);
-    if (!e.klasses.canFind (kls_t))
-        e.klasses ~= kls_t;
+    if (!e.klasses.canFind (kls))
+        e.klasses ~= kls;
 }
 
 bool
@@ -235,10 +228,10 @@ trigger_class (E* e, Doc* doc, string s) {
 
 void
 remove_class_from_all (Doc* doc, string s) {
-    Klass* kls = doc_t.find_klass (s);
-    if (kls_t !is null)
-        foreach (t; WalkE (doc_t))
-            remove_class (t.e, kls_t);
+    Klass* kls = doc.find_klass (s);
+    if (kls !is null)
+        foreach (t; WalkTree (doc))
+            remove_class (&t.e, kls);
 }
 
 void
@@ -260,13 +253,13 @@ remove_class (E* e, Klass* kls) {
 
 void
 doc_apply_klasses (Doc* doc) {
-    foreach (_t; WalkE (doc_t)) 
-        apply_klasses (doc_t,_t);
+    foreach (t; WalkTree (doc.tree)) 
+        apply_klasses (doc,t);
 }
 
 void
 apply_klasses (Doc* doc, ETree* t) {
-    E* e = t.uni.e;
+    E* e = &t.e;
     e.on.length = 0;
     global_font_files.length = 0;
     writeln (*e);
@@ -281,40 +274,38 @@ apply_klasses (Doc* doc, ETree* t) {
         t.remove_child (_t);
 
     // set . each e klass
-    foreach (kls_t; e.klasses)
-        apply_klass (doc_t,t,kls_t);
+    foreach (kls; e.klasses)
+        apply_klass (doc,t,kls);
 }
 
 // WIDGET_APPLY_KLASS_FN
 void
 apply_klass (Doc* doc, ETree* t, Klass* kls) {
-    assert (kls_t.type == Uni.Type.klass || 
-            kls_t.type == Uni.Type.case_);
-    E* e = t.uni.e;
+    E* e = &t.e;
 
     // each field
     // each sub tree
-    foreach (_t; WalkFields (kls_t)) {
-        switch (_t.uni.type) {
-            case Uni.Type.field   : set_field    (doc_t,t,_t); break; // set field
-            case Uni.Type.e       : add_sub_tree (doc_t,t,_t); break; // add e
-            case Uni.Type.switch_ : set_switch   (doc_t,t,_t); break; // set field
+    foreach (unifield; WalkFields (kls)) {
+        switch (unifield.type) {
+            case UniField.Type.field   : set_field    (doc,t,&unifield.field); break; // set field
+            case UniField.Type.e       : add_sub_tree (doc,t, unifield.t); break; // add e
+            case UniField.Type.switch_ : set_switch   (doc,t,&unifield.switch_); break; // set field
             default:
         }
     }
 }
 
 void
-set_field (Doc* doc, ETree* dest_t, ETree* field_t) {
-    auto e = &dest_t.e;
+set_field (Doc* doc, ETree* t, Field* field) {
+    auto e = &t.e;
 
     // `command` -> exec command -> output
-    auto values = extract_quoted (doc_t,field_t.field.values);
+    auto values = extract_quoted (doc,field.values);
 
     // klasses set
-    foreach (kls_t; e.klasses) {
-        if (kls_t.klass.set !is null)
-            kls_t.klass.set (kls_t,doc_t,dest_t,field_t.field.name,values);
+    foreach (kls; e.klasses) {
+        if (kls.set !is null)
+            kls.set (kls,doc,t,field.name,values);
     }
 }
 
@@ -327,10 +318,8 @@ add_sub_tree (Doc* doc, ETree* dest_t, ETree* source_t) {
 }
 
 void
-set_switch (Doc* doc, ETree* dest_t, ETree* swicth_t) {
-    auto cond = swicth_t.uni.switch_.cond;
-
-    auto evaluated = evaluate_switch_cond (doc_t,cond);
+set_switch (Doc* doc, ETree* dest_t, Switch_* switch_) {
+    auto evaluated = evaluate_switch_cond (doc,switch_.cond);
 
     // switch value
     //   case value1
@@ -340,17 +329,33 @@ set_switch (Doc* doc, ETree* dest_t, ETree* swicth_t) {
 
     // each child case
     if (evaluated.length >= 1)
-    foreach (case_t; swicth_t.childs) {
-        if (case_t.uni.type == Uni.Type.case_)
-        if (case_t.uni.case_.name == evaluated[0].s)
-            set_case (doc_t,dest_t,case_t);
+    foreach (case_; switch_.cases) {
+        if (case_.name == evaluated[0].s)
+            set_case (doc,dest_t,case_);
     }
 }
 
 void
-set_case (Doc* doc, ETree* dest_t, ETree* case_t) {
-    apply_klass (doc_t,dest_t,case_t);
+set_case (Doc* doc, ETree* dest_t, Case_* case_) {
+    apply_case (doc,dest_t,case_);
 }
+
+void
+apply_case (Doc* doc, ETree* t, Case_* case_) {
+    E* e = &t.e;
+
+    // each field
+    // each sub tree
+    foreach (unifield; WalkFields (case_)) {
+        switch (unifield.type) {
+            case UniField.Type.field   : set_field    (doc,t,&unifield.field); break; // set field
+            case UniField.Type.e       : add_sub_tree (doc,t, unifield.t); break; // add e
+            case UniField.Type.switch_ : set_switch   (doc,t,&unifield.switch_); break; // set field
+            default:
+        }
+    }
+}
+
 
 auto
 evaluate_switch_cond (Doc* doc, TString[] cond) {
@@ -358,7 +363,7 @@ evaluate_switch_cond (Doc* doc, TString[] cond) {
     // "double-quoted string"
     // klass.field
     // strings a b c
-    return extract_quoted (doc_t,cond);
+    return extract_quoted (doc,cond);
 }
 
 
@@ -386,7 +391,7 @@ extract_quoted (Doc* doc, TString[] values) {
     vs.reserve (values.length);
     foreach (v; values) 
         if (v.type == TString.Type.bquoted) 
-            vs ~= TString (TString.Type.string, extract_value (doc_t,v.s));
+            vs ~= TString (TString.Type.string, extract_value (doc,v.s));
         else
             vs ~= v;
 
@@ -397,7 +402,7 @@ extract_quoted (Doc* doc, TString[] values) {
 //_on_start (Doc* doc, E* e) {
 //    foreach (_on; e.on)
 //        if (_on.event == "start")
-//            exec_action (doc_t, _on.action);
+//            exec_action (doc, _on.action);
 //}
 
 
@@ -414,7 +419,7 @@ load_fonts (Doc* doc) {
     if (default_ptr is null)
         default_ptr  = open_font (default_file,default_size);
 
-    foreach (t; WalkE (doc_t)) {
+    foreach (t; WalkTree (doc)) {
         if (t.e.content.text.s.length) {
             string  font_file = t.e.content.text.font.file;
             ubyte   font_size = t.e.content.text.font.size;
@@ -434,7 +439,7 @@ load_fonts (Doc* doc) {
         }
     }
 
-    foreach (t; utree.WalkE (doc_t))
+    foreach (t; WalkTree (doc))
         if (t.e.content.text.s.length) {
             if (t.e.content.text.font.file.length)
                 t.e.content.text.font.ptr = global_fonts[t.e.content.text.font.file];
@@ -450,11 +455,11 @@ load_colors (Doc* doc) {
 
 void
 load_childs (Doc* doc) {
-    foreach (ETree* t; utree.WalkE (doc_t))
+    foreach (ETree* t; WalkTree (doc))
         final
         switch (t.e.childs_src.type) {
             case E.ChildsSrc.Type.none : break;
-            case E.ChildsSrc.Type.cmd  : load_childs_cmd (doc_t,t); break;
+            case E.ChildsSrc.Type.cmd  : load_childs_cmd (doc,t); break;
             case E.ChildsSrc.Type.fs   : break;
             case E.ChildsSrc.Type.csv  : break;
         }
@@ -492,7 +497,7 @@ load_childs_cmd (Doc* doc, ETree* t) {
             //
             foreach (i; tpl_src) {
                 auto field_name = tpl_dst[i];
-                //t.e.set (kls_t,doc_t,t, field_name,values);
+                //t.e.set (kls_t,doc,t, field_name,values);
             }
         }
     }
@@ -500,9 +505,9 @@ load_childs_cmd (Doc* doc, ETree* t) {
 
 void
 load_images (Doc* doc) {
-    foreach (ETree* t; utree.WalkE (doc_t))
+    foreach (ETree* t; WalkTree (doc))
         if (t.e.content.image.src.length)
-            load_e_image (t.e);
+            load_e_image (&t.e);
 }
 
 alias IMGPTR = SDL_Surface*;
@@ -536,9 +541,9 @@ load_e_image (E* e) {
 
 void
 load_texts (Doc* doc) {
-    foreach (t; WalkE (doc_t))
+    foreach (t; WalkTree (doc))
         if (t.e.content.text.s.length)
-            load_e_text (t.e);
+            load_e_text (&t.e);
 }
 
 void
@@ -582,28 +587,25 @@ update_text_size (Doc* doc) {
 
 void
 update_sizes (Doc* doc) {
-    foreach (t; WalkE (doc_t))
-        update_size (doc_t,t); // recursive
+    foreach (t; WalkTree (doc))
+        update_size (doc,t); // recursive
 }
 
 void
 update_poses (Doc* doc) {
-    foreach (ETree* _e_tree; WalkChilds (doc_t))
-        if (_e_tree.uni.type == Uni.Type.e)
-            foreach (ETree* _t; WalkE (_e_tree))
-                update_pos (doc_t,_t);
+    foreach (ETree* t; WalkTree (doc))
+        update_pos (doc,t);
 }
 
 void
 dump_sizes (Doc* doc) {
-    foreach (ETree* _e_tree; WalkChilds (doc_t))
-        if (_e_tree.uni.type == Uni.Type.e)
-            dump_size (doc_t,_e_tree); // recursive
+    foreach (ETree* t; WalkChilds (doc.tree))
+        dump_size (doc,t); // recursive
 }
 
 void
 dump_size (Doc* doc, ETree* t, int level=0) {
-    E* e = t.e;
+    E* e = &t.e;
 
     for (auto i=0; i<level; i++) write ("  ");
     writeln (*e);
@@ -621,7 +623,7 @@ dump_size (Doc* doc, ETree* t, int level=0) {
 
     // recursive
     foreach (tc; WalkChilds (t))
-        dump_size (doc_t,tc,level+1);
+        dump_size (doc,tc,level+1);
 }
 
 
@@ -651,32 +653,32 @@ dump_size (Doc* doc, ETree* t, int level=0) {
 //       content
 void
 update_size (Doc* doc, ETree* t) {
-    E* e = t.e;
+    E* e = &t.e;
 
     final
     switch (e.size_w_type) {
-        case E.SizeType.fixed   : e_size_w_fixed   (doc_t,t); break;
-        case E.SizeType.content : e_size_w_content (doc_t,t); break;
-        case E.SizeType.parent  : e_size_w_parent  (doc_t,t); break;
-        case E.SizeType.window  : e_size_w_window  (doc_t,t); break;
-        case E.SizeType.max     : e_size_w_max     (doc_t,t); break;
+        case E.SizeType.fixed   : e_size_w_fixed   (doc,t); break;
+        case E.SizeType.content : e_size_w_content (doc,t); break;
+        case E.SizeType.parent  : e_size_w_parent  (doc,t); break;
+        case E.SizeType.window  : e_size_w_window  (doc,t); break;
+        case E.SizeType.max     : e_size_w_max     (doc,t); break;
     }
 
     final
     switch (e.size_h_type) {
-        case E.SizeType.fixed   : e_size_h_fixed   (doc_t,t); break;
-        case E.SizeType.content : e_size_h_content (doc_t,t); break;
-        case E.SizeType.parent  : e_size_h_parent  (doc_t,t); break;
-        case E.SizeType.window  : e_size_h_window  (doc_t,t); break;
-        case E.SizeType.max     : e_size_h_max     (doc_t,t); break;
+        case E.SizeType.fixed   : e_size_h_fixed   (doc,t); break;
+        case E.SizeType.content : e_size_h_content (doc,t); break;
+        case E.SizeType.parent  : e_size_h_parent  (doc,t); break;
+        case E.SizeType.window  : e_size_h_window  (doc,t); break;
+        case E.SizeType.max     : e_size_h_max     (doc,t); break;
     }
 
     // recursive
     foreach (_t; WalkChilds (t))
-        update_size (doc_t,_t);
+        update_size (doc,_t);
 
     // fix size`s
-    e_fix_size_w (doc_t,t);
+    e_fix_size_w (doc,t);
 }
 
 void
@@ -701,11 +703,10 @@ e_fix_size_w (Doc* doc, ETree* t) {
 
         auto one_max_w = ((total_w - other_w) / max_cnt).to!W;
         foreach (_t; WalkChilds (t)) {
-            if (_t.uni.type == Uni.Type.e) 
             if (_t.e.size_w_type == E.SizeType.max)  {
                 _t.e.size.w = one_max_w;
                 _t.e.content.size.w = (-_t.e.borders.l.w - _t.e.pad.l + _t.e.size.w - _t.e.borders.r.w - _t.e.pad.r).to!W;
-                writeln ("XXX: ", *_t.e, ": ", one_max_w);
+                writeln ("XXX: ", _t.e, ": ", one_max_w);
                 writeln ("   : ", max_cnt);
                 writeln ("   : ", total_w);
                 writeln ("   : ", other_w);
@@ -713,8 +714,7 @@ e_fix_size_w (Doc* doc, ETree* t) {
 
                 // recursive update childs
                 foreach (__t; WalkChilds (_t))
-                    if (__t.uni.type == Uni.Type.e) 
-                        update_size (doc_t,__t);
+                    update_size (doc,__t);
             }
         }
     }
@@ -733,21 +733,21 @@ e_size_w_fixed (Doc* doc, ETree* t) {
 void
 e_size_w_content (Doc* doc, ETree* t) {
     auto e = t.e;
-    e_content_size_w (doc_t,t);
-    update_pos (doc_t,t);
+    e_content_size_w (doc,t);
+    update_pos (doc,t);
     e.size.w = (e.borders.l.w + e.pad.l + e.content.size.w + e.pad.r + e.borders.r.w).to!W;
 }
 
 void
 e_size_w_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    if (t.parent !is null && t.parent.type == Uni.Type.e) {
+    if (t.parent !is null) {
         e.size.w = t.parent.e.content.size.w;
         e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
     }
     else
-    if (t.parent !is null && t.parent.type == Uni.Type.doc) {
-        e.size.w = doc_t.doc.size.w;
+    if (t.parent !is null) {
+        e.size.w = doc.size.w;
         e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
     }
 }
@@ -755,8 +755,8 @@ e_size_w_parent (Doc* doc, ETree* t) {
 void
 e_size_w_window (Doc* doc, ETree* t) {
     auto e = t.e;
-    if (doc_t.doc.window !is null) {
-        e.size.w = doc_t.doc.window.size.w;
+    if (doc.window !is null) {
+        e.size.w = doc.window.size.w;
         e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
     }
     else {
@@ -798,15 +798,15 @@ e_size_h_fixed (Doc* doc, ETree* t) {
 void
 e_size_h_content (Doc* doc, ETree* t) {
     auto e = t.e;
-    e_content_size_h (doc_t,t);
-    update_pos (doc_t,t);
+    e_content_size_h (doc,t);
+    update_pos (doc,t);
     e.size.h = (e.borders.t.w + e.pad.t + e.content.size.h + e.pad.b + e.borders.b.w).to!H;
 }
 
 void
 e_size_h_parent (Doc* doc, ETree* t) {
     auto e = t.e;
-    if (t.parent !is null && t.parent.type == Uni.Type.e) {
+    if (t.parent !is null) {
         e.size.h = t.parent.e.content.size.h;
         if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
             e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
@@ -814,8 +814,8 @@ e_size_h_parent (Doc* doc, ETree* t) {
             e.content.size.h = 0;
     }
     else
-    if (t.parent !is null && t.parent.type == Uni.Type.doc) {
-        e.size.h = doc_t.doc.size.h;
+    if (t.parent !is null) {
+        e.size.h = doc.size.h;
         if ((-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b) > 0)
             e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
         else
@@ -826,8 +826,8 @@ e_size_h_parent (Doc* doc, ETree* t) {
 void
 e_size_h_window (Doc* doc, ETree* t) {
     auto e = t.e;
-    if (doc_t.doc.window !is null) {
-        e.size.h = doc_t.doc.window.size.h;
+    if (doc.window !is null) {
+        e.size.h = doc.window.size.h;
         e.content.size.h = (-e.borders.t.w - e.pad.t + e.size.h - e.borders.b.w - e.pad.b).to!H;
     }
     else {
@@ -849,12 +849,12 @@ e_content_size_w (Doc* doc, ETree* t) {
 
     final
     switch (e.content.size_w_type) {
-        case E.Content.SizeType.e      : e_content_size_w_e      (doc_t,t); break;
-        case E.Content.SizeType.fixed  : e_content_size_w_fixed  (doc_t,t); break;
-        case E.Content.SizeType.image  : e_content_size_w_image  (doc_t,t); break;
-        case E.Content.SizeType.text   : e_content_size_w_text   (doc_t,t); break;
-        case E.Content.SizeType.childs : e_content_size_w_childs (doc_t,t); break;
-        case E.Content.SizeType.max    : e_content_size_w_max    (doc_t,t); break;
+        case E.Content.SizeType.e      : e_content_size_w_e      (doc,t); break;
+        case E.Content.SizeType.fixed  : e_content_size_w_fixed  (doc,t); break;
+        case E.Content.SizeType.image  : e_content_size_w_image  (doc,t); break;
+        case E.Content.SizeType.text   : e_content_size_w_text   (doc,t); break;
+        case E.Content.SizeType.childs : e_content_size_w_childs (doc,t); break;
+        case E.Content.SizeType.max    : e_content_size_w_max    (doc,t); break;
     }
 }
 
@@ -885,7 +885,7 @@ e_content_size_w_text (Doc* doc, ETree* t) {
 void
 e_content_size_w_childs (Doc* doc, ETree* t) {
     auto e = t.e;
-    e_content_childs_size (doc_t,t);
+    e_content_childs_size (doc,t);
     e.content.size.w = e.content.childs_size.w;
 }
 
@@ -895,7 +895,7 @@ e_content_childs_size (Doc* doc, ETree* t) {
 
     Size max_sz;
     foreach (tc; WalkChilds (t)) {
-        update_size (doc_t,tc);
+        update_size (doc,tc);
         max_sz.w = max (max_sz.w, tc.e.pos.x + tc.e.size.w).to!W;
         max_sz.h = max (max_sz.h, tc.e.pos.y + tc.e.size.h).to!H;
     }
@@ -925,12 +925,12 @@ e_content_size_h (Doc* doc, ETree* t) {
 
     final
     switch (e.content.size_h_type) {
-        case E.Content.SizeType.e      : e_content_size_h_e      (doc_t,t); break;
-        case E.Content.SizeType.fixed  : e_content_size_h_fixed  (doc_t,t); break;
-        case E.Content.SizeType.image  : e_content_size_h_image  (doc_t,t); break;
-        case E.Content.SizeType.text   : e_content_size_h_text   (doc_t,t); break;
-        case E.Content.SizeType.childs : e_content_size_h_childs (doc_t,t); break;
-        case E.Content.SizeType.max    : e_content_size_h_max    (doc_t,t); break;
+        case E.Content.SizeType.e      : e_content_size_h_e      (doc,t); break;
+        case E.Content.SizeType.fixed  : e_content_size_h_fixed  (doc,t); break;
+        case E.Content.SizeType.image  : e_content_size_h_image  (doc,t); break;
+        case E.Content.SizeType.text   : e_content_size_h_text   (doc,t); break;
+        case E.Content.SizeType.childs : e_content_size_h_childs (doc,t); break;
+        case E.Content.SizeType.max    : e_content_size_h_max    (doc,t); break;
     }
 }
 
@@ -961,7 +961,7 @@ e_content_size_h_text (Doc* doc, ETree* t) {
 void
 e_content_size_h_childs (Doc* doc, ETree* t) {
     auto e = t.e;
-    e_content_childs_size (doc_t,t);
+    e_content_childs_size (doc,t);
     e.content.size.h = e.content.childs_size.h;
 }
 
@@ -977,10 +977,10 @@ e_content_image_size_w (Doc* doc, ETree* t) {
 
     final
     switch (e.content.image.size_w_type) {
-        case E.Content.Image.SizeType.fixed   : e_content_image_size_w_fixed   (doc_t,t); break;
-        case E.Content.Image.SizeType.image   : e_content_image_size_w_image   (doc_t,t); break;
-        case E.Content.Image.SizeType.text    : e_content_image_size_w_text    (doc_t,t); break;
-        case E.Content.Image.SizeType.content : e_content_image_size_w_content (doc_t,t); break;
+        case E.Content.Image.SizeType.fixed   : e_content_image_size_w_fixed   (doc,t); break;
+        case E.Content.Image.SizeType.image   : e_content_image_size_w_image   (doc,t); break;
+        case E.Content.Image.SizeType.text    : e_content_image_size_w_text    (doc,t); break;
+        case E.Content.Image.SizeType.content : e_content_image_size_w_content (doc,t); break;
     }
 }
 
@@ -1021,10 +1021,10 @@ e_content_image_size_h (Doc* doc, ETree* t) {
 
     final
     switch (e.content.image.size_h_type) {
-        case E.Content.Image.SizeType.fixed   : e_content_image_size_h_fixed   (doc_t,t); break;
-        case E.Content.Image.SizeType.image   : e_content_image_size_h_image   (doc_t,t); break;
-        case E.Content.Image.SizeType.text    : e_content_image_size_h_text    (doc_t,t); break;
-        case E.Content.Image.SizeType.content : e_content_image_size_h_content (doc_t,t); break;
+        case E.Content.Image.SizeType.fixed   : e_content_image_size_h_fixed   (doc,t); break;
+        case E.Content.Image.SizeType.image   : e_content_image_size_h_image   (doc,t); break;
+        case E.Content.Image.SizeType.text    : e_content_image_size_h_text    (doc,t); break;
+        case E.Content.Image.SizeType.content : e_content_image_size_h_content (doc,t); break;
     }
 }
 
@@ -1066,10 +1066,10 @@ e_content_text_size_w (Doc* doc, ETree* t) {
 
     final
     switch (e.content.text.size_w_type) {
-        case E.Content.Text.SizeType.fixed   : e_content_text_size_w_fixed   (doc_t,t); break;
-        case E.Content.Text.SizeType.text    : e_content_text_size_w_text    (doc_t,t); break;
-        case E.Content.Text.SizeType.image   : e_content_text_size_w_image   (doc_t,t); break;
-        case E.Content.Text.SizeType.content : e_content_text_size_w_content (doc_t,t); break;
+        case E.Content.Text.SizeType.fixed   : e_content_text_size_w_fixed   (doc,t); break;
+        case E.Content.Text.SizeType.text    : e_content_text_size_w_text    (doc,t); break;
+        case E.Content.Text.SizeType.image   : e_content_text_size_w_image   (doc,t); break;
+        case E.Content.Text.SizeType.content : e_content_text_size_w_content (doc,t); break;
     }
 }
 
@@ -1107,10 +1107,10 @@ e_content_text_size_h (Doc* doc, ETree* t) {
 
     final
     switch (e.content.text.size_h_type) {
-        case E.Content.Text.SizeType.fixed   : e_content_text_size_h_fixed   (doc_t,t); break;
-        case E.Content.Text.SizeType.text    : e_content_text_size_h_text    (doc_t,t); break;
-        case E.Content.Text.SizeType.image   : e_content_text_size_h_image   (doc_t,t); break;
-        case E.Content.Text.SizeType.content : e_content_text_size_h_content (doc_t,t); break;
+        case E.Content.Text.SizeType.fixed   : e_content_text_size_h_fixed   (doc,t); break;
+        case E.Content.Text.SizeType.text    : e_content_text_size_h_text    (doc,t); break;
+        case E.Content.Text.SizeType.image   : e_content_text_size_h_image   (doc,t); break;
+        case E.Content.Text.SizeType.content : e_content_text_size_h_content (doc,t); break;
     }
 }
 
@@ -1147,10 +1147,7 @@ e_content_text_size_h_content (Doc* doc, ETree* t) {
 
 void
 update_pos (Doc* doc, ETree* t) {
-    E* e = t.e;
-
-    if (t.e is null)
-        return;
+    E* e = &t.e;
 
     //
     final
@@ -1184,7 +1181,7 @@ pos_type_t9 (ETree* t) {
     // 1 2 3 
     // 8 9 4 
     // 7 6 5 
-    E* e = t.e;
+    E* e = &t.e;
 
     if (e.pos_group == 1) {
         ETree* prev = find_last_in_group (t, e.pos_group);
@@ -1225,7 +1222,7 @@ pos_type_t9 (ETree* t) {
 void
 pos_type_t3 (ETree* t) {
     // 1 2 3 
-    E* e = t.e;
+    E* e = &t.e;
 
     if (e.pos_group == 1) {
         ETree* prev = find_last_in_group (t, e.pos_group);
@@ -1303,7 +1300,7 @@ pos_type_vbox (ETree* t) {
     // e
     // e 
     // e
-    E* e = t.e;
+    E* e = &t.e;
 
     ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
@@ -1312,8 +1309,8 @@ pos_type_vbox (ETree* t) {
             case E.PosDir.r: break;
             case E.PosDir.l: break;
             case E.PosDir.b: 
-                auto prev_pos  = e_pos  (prev.e);
-                auto prev_size = e_size (prev.e);
+                auto prev_pos  = e_pos  (&prev.e);
+                auto prev_size = e_size (&prev.e);
                 e.pos.x = prev_pos.x;
                 e.pos.y = (prev_pos.y + prev_size.h).to!Y;
                 break;
@@ -1322,7 +1319,7 @@ pos_type_vbox (ETree* t) {
     }
     else {
         if (t.parent !is null) {
-            auto parent_content_pos = content_pos (t.parent.e);
+            auto parent_content_pos = content_pos (&t.parent.e);
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
         }
@@ -1336,15 +1333,15 @@ pos_type_vbox (ETree* t) {
 void
 pos_type_hbox (ETree* t) {
     // e e e
-    E* e = t.e;
+    E* e = &t.e;
 
     ETree* prev = find_last_with_type (t, e.pos_type);
     if (prev !is null) {
         final
         switch (e.pos_dir) {
             case E.PosDir.r:
-                auto prev_pos  = e_pos  (prev.e);
-                auto prev_size = e_size (prev.e);
+                auto prev_pos  = e_pos  (&prev.e);
+                auto prev_size = e_size (&prev.e);
                 e.pos.x = (prev_pos.x + prev_size.w).to!X;
                 e.pos.y =  prev_pos.y;
                 break;
@@ -1355,7 +1352,7 @@ pos_type_hbox (ETree* t) {
     }
     else {
         if (t.parent !is null) {
-            auto parent_content_pos = content_pos (t.parent.e);
+            auto parent_content_pos = content_pos (&t.parent.e);
             //writeln ("parent_content_pos: ", parent_content_pos);
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
@@ -1370,9 +1367,9 @@ pos_type_hbox (ETree* t) {
 void
 pos_type_percent (ETree* t) {
     // e e e
-    E* e = t.e;
+    E* e = &t.e;
     if (t.parent !is null) {
-        auto parent_content_pos = content_pos (t.parent.e);
+        auto parent_content_pos = content_pos (&t.parent.e);
         auto parent_w = t.parent.e.size.w;
         auto percent = e.pos_percent;
         e.pos.x = (parent_content_pos.x + (cast(float)parent_w * percent / 100)).to!X;
@@ -1386,7 +1383,7 @@ pos_type_percent (ETree* t) {
 
 void
 pos_type_none (ETree* t) {
-    E* e = t.e;
+    E* e = &t.e;
     e.pos = Pos (0,0);
 }
 
@@ -1414,12 +1411,12 @@ void
 go_on_event (Doc* doc, ETree* t, string user_event_name, string[string] env=null) {
     foreach (_on; t.e.on)
         if (_on.event == user_event_name) // start, click
-            exec_action (doc_t, _on.action, env);
+            exec_action (doc, _on.action, env);
 }
 
 void
 go_event_action (Doc* doc, E* e, TString[] action, string[string] env=null) {
-    exec_action (doc_t,action,env);
+    exec_action (doc,action,env);
 }
 
 void
@@ -1428,7 +1425,7 @@ exec_action (Doc* doc, TString[] action, string[string] env=null) {
     
     if (action.length) {
         writeln ("action: ", action);
-        TString[] cmd = doc_get_klass_field_value (doc_t,action[0].s);
+        TString[] cmd = doc_get_klass_field_value (doc,action[0].s);
         if (cmd.length)
             goto exec;
         else
@@ -1460,11 +1457,11 @@ doc_get_klass_field_value (Doc* doc, string s) {
         auto klass_name  = s[0..dot];
         auto klass_field = s[dot+1..$];
 
-        auto kls_t = doc_t.find_klass (klass_name);
+        auto kls_t = doc.find_klass (klass_name);
         if (kls_t !is null) {
             auto fret = find_field (kls_t, klass_field);
             if (fret)
-                return fret.field.values;// OK
+                return fret.values;// OK
         }
     }
 
@@ -1476,7 +1473,7 @@ extract_value (Doc* doc, string bquoted) {
     //writeln ("extract_value: ", bquoted);
 
     auto stripped  = bquoted.strip ("`");
-    auto converted = extract_class_field_value (doc_t,stripped);
+    auto converted = extract_class_field_value (doc,stripped);
     //writeln ("converted: ", converted);
     auto ret = executeShell (converted);  // (int status, string output)
 
@@ -1489,7 +1486,7 @@ extract_value (Doc* doc, string bquoted) {
 
 string
 extract_class_field_value (Doc* doc, string s) {
-    TString[] cmd = doc_get_klass_field_value (doc_t,s);
+    TString[] cmd = doc_get_klass_field_value (doc,s);
     if (cmd.length)
         return cmd.join (" ");
     else
@@ -1519,24 +1516,22 @@ void
 _on_click (Event* ev, Pos down_pos, Pos up_pos) {
     //
     ETree* deepest;
-    foreach (ETree* _e_tree; utree.WalkChilds (ev.doc_t)) {
-        if (_e_tree.uni.type == Uni.Type.e) {
-            send_click_in_deep (
-                ev, 
-                _e_tree, 
-                down_pos,
-                up_pos,
-                deepest);
+    foreach (ETree* _e_tree; WalkChilds (ev.doc.tree)) {
+        send_click_in_deep (
+            ev, 
+            _e_tree, 
+            down_pos,
+            up_pos,
+            deepest);
 
             // focused
             //remove_class_from_all (_e_tree,"focused");
             //if (deepest !is null)
-                //deepest.e.add_class (ev.doc_t,"focused");
-        }
+                //deepest.e.add_class (ev.doc,"focused");
     }
 
     //
-    ev.doc_t.doc.update (ev.doc_t);
+    ev.doc.update (ev.doc);
     writeln ("deepest: ", *deepest);
     writeln ("deepest: ", deepest.e.content.image);
     if (deepest !is null)
@@ -1560,8 +1555,6 @@ event (Doc* doc, Event* ev) {
     //   CLICK --> if in x,y e.rect -> send -> in deep
     //   MOUSE --> if in x,y e.rect -> send -> in deep
     //   *     --> all
-    Doc* doc = doc_t.doc;
-
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("DOC.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
@@ -1570,8 +1563,8 @@ event (Doc* doc, Event* ev) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 ETree* deepest;
-                send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
-                //ev.doc_t.doc.update (ev.doc_t);
+                send_mouse_event_in_deep (ev, ev.doc.tree, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                //ev.doc.update (ev.doc);
                 //redraw_window (ev.app_window);
             }
             break;
@@ -1579,9 +1572,9 @@ event (Doc* doc, Event* ev) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 ETree* deepest;
-                send_mouse_event_in_deep (ev, ev.doc_t, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
-                //remove_class_from_all (doc_t,"button-pressed");
-                //ev.doc_t.doc.update (ev.doc_t);
+                send_mouse_event_in_deep (ev, ev.doc.tree, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                //remove_class_from_all (doc,"button-pressed");
+                //ev.doc.update (ev.doc);
                 //redraw_window (ev.app_window);
             }
             break;
@@ -1605,7 +1598,6 @@ event (Doc* doc, Event* ev) {
 
 void
 update (Doc* doc) {
-    Doc* doc = doc_t.doc;
     time_step ();
 
     // 0
@@ -1613,32 +1605,32 @@ update (Doc* doc) {
         doc.size = doc.window.size;
     time_step ();
     // 1
-    doc_t.doc_apply_klasses ();
+    doc.doc_apply_klasses ();
     time_step ();
     // 1.1
-    doc_t.load_childs ();
+    doc.load_childs ();
     time_step ();
     // 2
-    doc_t.load_images ();
+    doc.load_images ();
     time_step ();
     // 3
-    doc_t.load_fonts ();
+    doc.load_fonts ();
     time_step ();
     // 4
-    doc_t.load_colors ();
+    doc.load_colors ();
     time_step ();
     // 5
-    doc_t.load_texts ();
+    doc.load_texts ();
     time_step ();
     // 6
     // 7
-    doc_t.update_sizes ();
+    doc.update_sizes ();
     time_step ();
     //doc.dump_sizes ();
     // ...
     // 8
     // 9
-    doc_t.update_poses ();
+    doc.update_poses ();
     time_step ();
 }
 
@@ -1654,15 +1646,14 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
 
 void
 draw (Doc* doc, SDL_Renderer* renderer, ETree* t) {
-    Doc* doc = doc_t.doc;
     time_step ();
 
     auto e_tree = 
         (t is null) ? 
-            doc_t : 
+            doc.tree : 
             t;
 
-    foreach (_t; WalkE (e_tree))
+    foreach (_t; WalkTree (e_tree))
         _draw_one (renderer,_t);
     time_step ();
 }
@@ -1670,11 +1661,11 @@ draw (Doc* doc, SDL_Renderer* renderer, ETree* t) {
 void
 _draw_one (SDL_Renderer* renderer, ETree* t) {
     foreach (Klass* kls; t.e.klasses) {
-        if (kls_t.klass.draw !is null)
-            kls_t.klass.draw (kls_t,renderer,t);
+        if (kls.draw !is null)
+            kls.draw (kls,renderer,t);
     }
     if (t.e.draw !is null)
-        t.e.draw (t.e,renderer);    
+        t.e.draw (&t.e,renderer);    
 }
 
 
