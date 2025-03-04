@@ -264,8 +264,6 @@ apply_klasses (Doc* doc, ETree* t) {
     E* e = &t.e;
     e.on.length = 0;
     global_font_files.length = 0;
-    write (format!"%60s" (e.toString));
-    time_step ("",0);
 
     // remove e added from klass
     ETree*[] for_remove;
@@ -278,6 +276,8 @@ apply_klasses (Doc* doc, ETree* t) {
     // set . each e klass
     foreach (kls; e.klasses)
         apply_klass (doc,t,kls);
+
+    write (format!"%60s" (e.toString)); time_step ("",0);
 }
 
 // WIDGET_APPLY_KLASS_FN
@@ -527,7 +527,7 @@ load_childs_cmd (Doc* doc, ETree* t) {
 
             auto splits = line.split (dlm);
             TString[] values;
-            foreach (s;splits) {
+            foreach (s; splits) {
                 values ~= TString (TString.Type.string,s);
             }
 
@@ -536,13 +536,27 @@ load_childs_cmd (Doc* doc, ETree* t) {
             auto tpl_klass = t.e.childs_src.tpl.klass;
             auto tpl_src   = t.e.childs_src.tpl.src;
             auto tpl_dst   = t.e.childs_src.tpl.dst;
+
             //
-            //auto cloned = kls_t.childs.clone ();
-            //auto cloned =     t.childs.clone ();
-            //
-            foreach (i; tpl_src) {
-                auto field_name = tpl_dst[i];
-                //t.e.set (kls_t,doc,t, field_name,values);
+            auto kls = find_klass (doc,tpl_klass);
+            if (kls !is null) {
+                ETree*[] e_line;
+
+                foreach (field; WalkFields (kls)) {
+                    if (field.name == "e") {
+                        auto _t = doc.new_child_e (field.values);
+                        t.add_child (_t);
+                        e_line ~= _t;
+                    }
+                }
+
+                //
+                foreach (i; tpl_src) {
+                    auto field_name = tpl_dst[i];
+                    auto _t = e_line[i];
+                    //foreach (kls; _t.klasses)
+                    //    _t.e.set (kls,doc,_t, field_name,values);
+                }
             }
         }
     }
