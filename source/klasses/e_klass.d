@@ -57,45 +57,49 @@ set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
     E* e = &t.e;
 
     switch (field_id) {
-        case "pos.x"            : set_pos_x             (doc,t,values); break;
-        case "pos.y"            : set_pos_y             (doc,t,values); break;
-        case "pos"              : set_pos               (doc,t,values); break;
-        case "pos.type"         : set_pos_type          (doc,t,values); break;
-        case "pos.group"        : set_pos_group         (doc,t,values); break;
-        case "pos.dir"          : set_pos_dir           (doc,t,values); break;
-        case "size.w"           : set_size_w            (doc,t,values); break;
-        case "size.h"           : set_size_h            (doc,t,values); break;
-        case "size"             : set_size              (doc,t,values); break;
-        case "hidden"           : set_hidden            (doc,t,values); break;
-        case "popup"            : set_popup             (doc,t,values); break;
-        case "borders"          : set_borders           (doc,t,values); break;
-        case "borders.t"        : set_border_t          (doc,t,values); break;
-        case "borders.r"        : set_border_r          (doc,t,values); break;
-        case "borders.b"        : set_border_b          (doc,t,values); break;
-        case "borders.l"        : set_border_l          (doc,t,values); break;
-        case "borders.color"    : set_borders_color     (doc,t,values); break;
-        case "pad"              : set_pad               (doc,t,values); break;
-        case "pad.bg"           : set_pad_bg            (doc,t,values); break;
-        case "content.image"    : set_content_image     (doc,t,values); break;
-        case "content.text"     : set_content_text      (doc,t,values); break;
-        case "content"          : set_content           (doc,t,values); break;
-        case "image"            : set_content_image     (doc,t,values); break;
-        case "text"             : set_content_text      (doc,t,values); break;
-        case "text.color"       : set_text_fg           (doc,t,values); break;
-        case "text.fg"          : set_text_fg           (doc,t,values); break;
-        case "text.bg"          : set_text_bg           (doc,t,values); break;
-        case "text.pos.type"    : set_text_pos_type     (doc,t,values); break;
-        case "content.size.w"   : set_content_size_w    (doc,t,values); break;
-        case "content.size.h"   : set_content_size_h    (doc,t,values); break;
-        case "content.size"     : set_content_size      (doc,t,values); break;
-        case "content.size.type": set_content_siztype (doc,t,values); break;
-        case "text.font"        : set_content_text_font (doc,t,values); break;
-        case "text.font.family" : set_content_text_font_family (doc,t,values); break;
-        case "text.font.size"   : set_content_text_font_size   (doc,t,values); break;
-        case "text.font.file"   : set_content_text_font_file   (doc,t,values); break;
-        case "bg"               : set_bg                (doc,t,values); break;
-        case "on"               : set_on                (doc,t,values); break;
-        //case "e"                : set_e                 (doc,t,kls,values); break;
+        case "pos.x"             : set_pos_x              (doc,t,values); break;
+        case "pos.y"             : set_pos_y              (doc,t,values); break;
+        case "pos"               : set_pos                (doc,t,values); break;
+        case "pos.type"          : set_pos_type           (doc,t,values); break;
+        case "pos.group"         : set_pos_group          (doc,t,values); break;
+        case "pos.dir"           : set_pos_dir            (doc,t,values); break;
+        case "size.w"            : set_size_w             (doc,t,values); break;
+        case "size.h"            : set_size_h             (doc,t,values); break;
+        case "size"              : set_size               (doc,t,values); break;
+        case "hidden"            : set_hidden             (doc,t,values); break;
+        case "popup"             : set_popup              (doc,t,values); break;
+        case "borders"           : set_borders            (doc,t,values); break;
+        case "borders.t"         : set_border_t           (doc,t,values); break;
+        case "borders.r"         : set_border_r           (doc,t,values); break;
+        case "borders.b"         : set_border_b           (doc,t,values); break;
+        case "borders.l"         : set_border_l           (doc,t,values); break;
+        case "borders.color"     : set_borders_color      (doc,t,values); break;
+        case "pad"               : set_pad                (doc,t,values); break;
+        case "pad.bg"            : set_pad_bg             (doc,t,values); break;
+        case "content.image"     : set_content_image      (doc,t,values); break;
+        case "content.text"      : set_content_text       (doc,t,values); break;
+        case "content"           : set_content            (doc,t,values); break;
+        case "image"             : set_content_image      (doc,t,values); break;
+        case "text"              : set_content_text       (doc,t,values); break;
+        case "text.color"        : set_text_fg            (doc,t,values); break;
+        case "text.fg"           : set_text_fg            (doc,t,values); break;
+        case "text.bg"           : set_text_bg            (doc,t,values); break;
+        case "text.pos.type"     : set_text_pos_type      (doc,t,values); break;
+        case "content.size.w"    : set_content_size_w     (doc,t,values); break;
+        case "content.size.h"    : set_content_size_h     (doc,t,values); break;
+        case "content.size"      : set_content_size       (doc,t,values); break;
+        case "content.size.type" : set_content_siztype    (doc,t,values); break;
+        case "text.font"         : set_content_text_font  (doc,t,values); break;
+        case "text.font.family"  : set_content_text_font_family (doc,t,values); break;
+        case "text.font.size"    : set_content_text_font_size   (doc,t,values); break;
+        case "text.font.file"    : set_content_text_font_file   (doc,t,values); break;
+        case "bg"                : set_bg                 (doc,t,values); break;
+        case "childs.src"        : set_childs_src         (doc,t,values); break;
+        case "childs.src.tpl"    : set_childs_src_tpl     (doc,t,values); break;
+        case "childs.src.tpl.src": set_childs_src_tpl_src (doc,t,values); break;
+        case "childs.src.tpl.dst": set_childs_src_tpl_dst (doc,t,values); break;
+        case "on"                : set_on                 (doc,t,values); break;
+        //case "e"                : set_e                  (doc,t,kls,values); break;
         default:
     }
 }
@@ -748,6 +752,50 @@ set_bg (Doc* doc, ETree* t, TString[] values) {
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }
+}
+
+void
+set_childs_src (Doc* doc, ETree* t, TString[] values) {
+    // childs.src cmd `command` delimiter |
+    E* e = &t.e;
+
+    if (values.length >= 1) {
+        E.ChildsSrc.Type type;
+        switch (values[0].s) {
+            case "cmd"  : type = E.ChildsSrc.Type.cmd;  break;
+            case "gs"   : type = E.ChildsSrc.Type.fs;   break;
+            case "csv"  : type = E.ChildsSrc.Type.csv;  break;
+            case "none" : type = E.ChildsSrc.Type.none; break;
+            default     : type = E.ChildsSrc.Type.none; break;
+        }
+
+        //
+        final
+        switch (type) {
+            case E.ChildsSrc.Type.none: break;
+            case E.ChildsSrc.Type.cmd : break;
+            case E.ChildsSrc.Type.fs  : break;
+            case E.ChildsSrc.Type.csv : break;
+        }
+    }
+}
+
+void
+set_childs_src_tpl (Doc* doc, ETree* t, TString[] values) {
+    // childs.src.tpl list-template  ...or childs under t
+    E* e = &t.e;
+}
+
+void
+set_childs_src_tpl_src (Doc* doc, ETree* t, TString[] values) {
+    // childs.src.tpl.src 1 2 3
+    E* e = &t.e;
+}
+
+void
+set_childs_src_tpl_dst (Doc* doc, ETree* t, TString[] values) {
+    // childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+    E* e = &t.e;
 }
 
 void

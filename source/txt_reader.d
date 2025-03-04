@@ -134,8 +134,17 @@ button-hover
  //content.bg   tcb +0 +0 +25 slow
 
 playlist
- size         parent 240
- borders      10 solid #ccc
+ size               parent 240
+ borders            10 solid #ccc
+ childs.src         cmd `command` delimiter |
+ childs.src.tpl     list-template  ...or childs under t
+ childs.src.tpl.src 1         2    3
+ childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+
+list-template
+  e icon
+  e number
+  e name
 
 info
  size         parent 64
