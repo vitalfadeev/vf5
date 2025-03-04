@@ -519,9 +519,6 @@ go (Doc* doc, string s) {
             }
         }
 
-        //writeln (name, " ", values);
-        //writeln (" ", indents);
-
         // e
         if (name == "e" && indent == 0) { 
             t = new_e (doc,values);
@@ -533,21 +530,6 @@ go (Doc* doc, string s) {
         // sub e
         else
         if (name == "e" && indent >= 1) { 
-            // klass
-            // switch-case
-            // doc
-            //
-            //klass
-            // e      -> kls.tree
-            //  e     -> e
-            //  switch
-            //   case
-            //    e   -> case_.tree
-            //     e  -> e
-            //doc 
-            // e      -> doc.tree
-            //  e     -> e
-
             auto _ind = indents.find_parent (indent);
             assert (_ind !is null);
             switch (_ind.type) {
@@ -574,9 +556,9 @@ go (Doc* doc, string s) {
         else
         if (name != "e" && indent == 0) { 
             kls = new_klass (doc,name,values);
+            // added
             indents.length = 0;
             indents ~= Indent (kls,indent);
-            // added in doc
         }
 
         // field swicth case
@@ -669,31 +651,6 @@ new_doc () {
 auto
 new_e (Doc* doc, TString[] values) {
     return new_child_e (doc,values);
-}
-
-auto
-new_child_e (Doc* doc, TString[] values) {
-    // sub e
-    // find parent e  in tree  from last e
-    //   create sub e
-    //   add classes
-
-    auto t = .doc.new_e (doc);
-    E*   e = &t.e;
-
-    e.add_klass (doc.find_klass_or_create ("e"));
-
-    // klasses
-    foreach (ts; values)
-        switch (ts.type) {
-            case TString.Type.name   : 
-            case TString.Type.string : 
-                e.add_klass (doc.find_klass_or_create (ts.s));
-                break;
-            default:
-        }
-
-    return t;
 }
 
 

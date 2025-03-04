@@ -314,8 +314,17 @@ void
 add_sub_tree (Doc* doc, ETree* dest_t, Field* field) {
     // clone each t
     // add in dest_t
-    //auto cloned = clone_tree (source_t);
-    //dest_t.add_child (cloned);
+    auto t = doc.new_child_e (field.values);
+    dest_t.add_child (t);
+
+    // recursive
+    foreach (_field; WalkFields (field)) {
+        switch (_field.name) {
+            case "e"      : add_sub_tree (doc,t,_field); break; // add e
+            case "switch" : set_switch   (doc,t,_field); break; // set field
+            default       : set_field    (doc,t,_field); break; // set field
+        }
+    }
 }
 
 void
@@ -364,6 +373,32 @@ apply_case (Doc* doc, ETree* t, Field* field) {
             default       : set_field    (doc,t,field); break; // set field
         }
     }
+}
+
+
+auto
+new_child_e (Doc* doc, TString[] values) {
+    // sub e
+    // find parent e  in tree  from last e
+    //   create sub e
+    //   add classes
+
+    auto t = doc.new_e ();
+    E*   e = &t.e;
+
+    .e.add_klass (e, doc.find_klass_or_create ("e"));
+
+    // klasses
+    foreach (ts; values)
+        switch (ts.type) {
+            case TString.Type.name   : 
+            case TString.Type.string : 
+                .e.add_klass (e, doc.find_klass_or_create (ts.s));
+                break;
+            default:
+        }
+
+    return t;
 }
 
 
