@@ -768,12 +768,33 @@ set_childs_src (Doc* doc, ETree* t, TString[] values) {
             case "none" : type = E.ChildsSrc.Type.none; break;
             default     : type = E.ChildsSrc.Type.none; break;
         }
+        e.childs_src.type = type;
 
         //
         final
         switch (type) {
             case E.ChildsSrc.Type.none: break;
-            case E.ChildsSrc.Type.cmd : break;
+            case E.ChildsSrc.Type.cmd : 
+                e.childs_src.cmd.command = values[1];
+                for (size_t i=2; i < values.length; i++) {
+                    switch (values[i].s) {
+                        case "delimiter" : 
+                            i++; 
+                            if (i < values.length) {
+                                e.childs_src.cmd.delimiter = values[i];
+                            }
+                            break;
+                        case "skip":
+                            i++; 
+                            if (i < values.length) {
+                                if (values[i].s.isNumeric)
+                                    e.childs_src.cmd.skip = values[i].s.to!size_t; 
+                            }
+                            break;
+                        default:
+                    }
+                }
+                break;
             case E.ChildsSrc.Type.fs  : break;
             case E.ChildsSrc.Type.csv : break;
         }
@@ -783,7 +804,10 @@ set_childs_src (Doc* doc, ETree* t, TString[] values) {
 void
 set_childs_src_tpl (Doc* doc, ETree* t, TString[] values) {
     // childs.src.tpl list-template  ...or childs under t
-    E* e = &t.e;
+    E* e = &t.e;    
+    if (values.length >= 1) {
+        e.childs_src.tpl.klass = values[0].s;
+    }
 }
 
 void

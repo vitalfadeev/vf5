@@ -339,7 +339,7 @@ set_switch (Doc* doc, ETree* dest_t, Field* field) {
 
     // each child case
     if (evaluated.length >= 1)
-    foreach (_field; field.fields) {
+    foreach (_field; WalkFields (field)) {
         if (_field.name == evaluated[0].s) {
             set_case (doc,dest_t,_field);
             return;
@@ -347,7 +347,7 @@ set_switch (Doc* doc, ETree* dest_t, Field* field) {
     }
 
     // default
-    foreach (_field; field.fields) {
+    foreach (_field; WalkFields (field)) {
         if (_field.name == "default") {
             set_case (doc,dest_t,_field);
             return;
@@ -512,12 +512,14 @@ load_childs (Doc* doc) {
 
 void
 load_childs_cmd (Doc* doc, ETree* t) {
-    auto cmd = t.e.childs_src.cmd.command;
-    auto dlm = t.e.childs_src.cmd.delimiter;
+    auto cmd = t.e.childs_src.cmd.command.s;
+    auto dlm = t.e.childs_src.cmd.delimiter.s;
     auto skp = t.e.childs_src.cmd.skip;
 
     if (cmd.length) {
-        auto ret = executeShell (cmd);
+        auto converted = extract_class_field_value (doc,cmd);
+        auto ret = executeShell (converted);
+        writeln ("RET: ", ret);
         
         foreach (line; ret.output.splitLines) {
             if (skp > 0) {
@@ -537,7 +539,7 @@ load_childs_cmd (Doc* doc, ETree* t) {
             auto tpl_src   = t.e.childs_src.tpl.src;
             auto tpl_dst   = t.e.childs_src.tpl.dst;
 
-            //
+            // tpl
             auto kls = find_klass (doc,tpl_klass);
             if (kls !is null) {
                 ETree*[] e_line;
@@ -547,15 +549,17 @@ load_childs_cmd (Doc* doc, ETree* t) {
                         auto _t = doc.new_child_e (field.values);
                         t.add_child (_t);
                         e_line ~= _t;
+
+                        apply_klasses (doc,_t);
                     }
                 }
 
-                //
+                // set fields
                 foreach (i; tpl_src) {
                     auto field_name = tpl_dst[i];
                     auto _t = e_line[i];
-                    //foreach (kls; _t.klasses)
-                    //    _t.e.set (kls,doc,_t, field_name,values);
+                    foreach (_kls; _t.e.klasses)
+                        _kls.set (_kls,doc,_t,field_name,values);
                 }
             }
         }
@@ -765,11 +769,11 @@ e_fix_size_w (Doc* doc, ETree* t) {
             if (_t.e.size_w_type == E.SizeType.max)  {
                 _t.e.size.w = one_max_w;
                 _t.e.content.size.w = (-_t.e.borders.l.w - _t.e.pad.l + _t.e.size.w - _t.e.borders.r.w - _t.e.pad.r).to!W;
-                writeln ("XXX: ", _t.e, ": ", one_max_w);
-                writeln ("   : ", max_cnt);
-                writeln ("   : ", total_w);
-                writeln ("   : ", other_w);
-                writeln ("   : ", one_max_w); // 456
+                //writeln ("XXX: ", _t.e, ": ", one_max_w);
+                //writeln ("   : ", max_cnt);
+                //writeln ("   : ", total_w);
+                //writeln ("   : ", other_w);
+                //writeln ("   : ", one_max_w); // 456
 
                 // recursive update childs
                 foreach (__t; WalkChilds (_t))

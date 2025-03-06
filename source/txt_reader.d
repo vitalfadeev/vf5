@@ -136,15 +136,25 @@ button-hover
 playlist
  size               parent 240
  borders            10 solid #ccc
- childs.src         cmd `command` delimiter |
- childs.src.tpl     list-template  ...or childs under t
- childs.src.tpl.src 1         2    3
- childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+ //childs             cmd `command`  splitter |  tpl list-template  src 1 2 3  dst image.src text text
+ childs.src         cmd commands.test delimiter | skip 0
+ childs.src.tpl     list-template
+ //   ...or childs under t
+ //childs.src.tpl.src 1         2    3
+ //childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+ childs.src.tpl.src 1
+ childs.src.tpl.dst text
 
 list-template
-  e icon
-  e number
-  e name
+  e list-template-name
+
+list-template-name
+  size         content
+  content.size 32 32
+  pad          5 5
+  borders      5 solid #444
+  pos.type     vbox b
+  text         1
 
 info
  size         parent 64
@@ -348,6 +358,7 @@ commands
   player.status                     audtool playback-status
   player.audtool-playback-position  /home/vf/src/vf5/bin/audtool-playback-position.sh
   player.playlist-display           audtool playlist-display
+  test                              echo 1
 
 hotkeys
   x commands.player.prev

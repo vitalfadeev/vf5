@@ -209,9 +209,9 @@ E {
         }
         struct 
         Cmd {
-            string command;   // `command`
-            string delimiter; // |
-            size_t skip;      // 1 (header line)
+            TString command;   // `command`
+            TString delimiter; // |
+            size_t  skip;      // 1 (header line)
         }
         struct 
         Fs {
@@ -227,6 +227,17 @@ E {
             string   klass;  // klass-name
             size_t[] src;    // 1         2    3
             string[] dst;    // image.src text text            
+        }
+
+        string
+        toString () {
+            final
+            switch (type) {
+                case Type.none: return "ChildsSrc ("~ type.to!string ~")";
+                case Type.cmd : return "ChildsSrc ("~ type.to!string ~ "," ~ cmd.to!string ~")";
+                case Type.fs  : return "ChildsSrc ("~ type.to!string ~")";
+                case Type.csv : return "ChildsSrc ("~ type.to!string ~")";
+            }
         }
     }
     ChildsSrc childs_src;
