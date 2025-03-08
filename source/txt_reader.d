@@ -149,12 +149,11 @@ list-template
   e list-template-name
 
 list-template-name
-  size         content
-  content.size 32 32
-  pad          5 5
-  borders      5 solid #444
+  size         parent 32
+  content.size e
+  pad          1 1
+  borders      1 solid #444
   pos.type     vbox b
-  text         1
 
 info
  size         parent 64
@@ -358,7 +357,7 @@ commands
   player.status                     audtool playback-status
   player.audtool-playback-position  /home/vf/src/vf5/bin/audtool-playback-position.sh
   player.playlist-display           audtool playlist-display
-  test                              echo 1
+  test                              ls -1
 
 hotkeys
   x commands.player.prev

@@ -551,16 +551,18 @@ load_childs_cmd (Doc* doc, ETree* t) {
                         e_line ~= _t;
 
                         apply_klasses (doc,_t);
+                        foreach (_kls; _t.e.klasses)
+                            _kls.set (_kls,doc,_t,"text",values);
                     }
                 }
 
                 // set fields
-                foreach (i; tpl_src) {
-                    auto field_name = tpl_dst[i];
-                    auto _t = e_line[i];
-                    foreach (_kls; _t.e.klasses)
-                        _kls.set (_kls,doc,_t,field_name,values);
-                }
+                //foreach (i; tpl_src) {
+                //    auto field_name = tpl_dst[i];
+                //    auto _t = e_line[i];
+                //    foreach (_kls; _t.e.klasses)
+                //        _kls.set (_kls,doc,_t,field_name,values);
+                //}
             }
         }
     }
