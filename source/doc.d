@@ -521,6 +521,7 @@ load_childs_cmd (Doc* doc, ETree* t) {
         auto ret = executeShell (converted);
         writeln ("RET: ", ret);
         
+        load_childs_add_lines:
         foreach (line; ret.output.splitLines) {
             if (skp > 0) {
                 skp--;
@@ -544,15 +545,40 @@ load_childs_cmd (Doc* doc, ETree* t) {
             if (kls !is null) {
                 ETree*[] e_line;
 
+                load_childs_add_fields:
                 foreach (field; WalkFields (kls)) {
                     if (field.name == "e") {
                         auto _t = doc.new_child_e (field.values);
                         t.add_child (_t);
                         e_line ~= _t;
 
+                        //
                         apply_klasses (doc,_t);
+
+                        // set text
                         foreach (_kls; _t.e.klasses)
                             _kls.set (_kls,doc,_t,"text",values);
+
+                        // images
+                        if (_t.e.content.image.src.length)
+                            load_e_image (&_t.e);
+
+                        // fonts
+                        load_fonts (doc);
+
+                        // text
+                        if (_t.e.content.text.s.length)
+                            load_e_text (&_t.e);
+
+                        // size
+                        update_size (doc,_t); // recursive
+
+                        // pos
+                        update_pos (doc,_t);
+
+                        // limit height
+                        if (_t.e.pos.y > t.e.pos.y + t.e.size.h)
+                            break load_childs_add_lines;
                     }
                 }
 
@@ -652,8 +678,7 @@ update_text_size (Doc* doc) {
 
 void
 update_sizes (Doc* doc) {
-    foreach (t; WalkTree (doc))
-        update_size (doc,t); // recursive
+    update_size (doc,doc.tree); // recursive
 }
 
 void
@@ -1680,9 +1705,6 @@ update (Doc* doc) {
     // 1
     doc.doc_apply_klasses ();
     time_step ();
-    // 1.1
-    doc.load_childs ();
-    time_step ();
     // 2
     doc.load_images ();
     time_step ();
@@ -1696,15 +1718,15 @@ update (Doc* doc) {
     doc.load_texts ();
     time_step ();
     // 6
-    // 7
     doc.update_sizes ();
     time_step ();
-    //doc.dump_sizes ();
-    // ...
-    // 8
-    // 9
+    // 7
     doc.update_poses ();
     time_step ();
+    // 8
+    doc.load_childs ();
+    time_step ();
+    // 9
 }
 
 void
