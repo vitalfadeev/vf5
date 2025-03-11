@@ -33,8 +33,8 @@ Check {
 
 // KLASS_EVENT_FN  
 void 
-event (Klass* kls, Event* ev, ETree* t) {
-    E* e = &t.e;
+event (Klass* kls, Event* ev, E* e) {
+    
 
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("CHECK.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
@@ -46,7 +46,7 @@ event (Klass* kls, Event* ev, ETree* t) {
                     e.trigger_class (ev.doc,"check.pressed");
                     //emit ("on check.pressed", doc_t, e_t);
                     ev.doc.update (ev.doc);
-                    t.redraw ();
+                    e.redraw ();
                     break;
                 default:
             }
@@ -57,19 +57,19 @@ event (Klass* kls, Event* ev, ETree* t) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Doc* doc, ETree* t) {
+update (Klass* kls, Doc* doc, E* e) {
     //
 }
 
 // KLASS_SET_FN
 void 
-set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
     //
 }
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
+draw (Klass* kls, SDL_Renderer* renderer, E* e) {
     //
 }
 

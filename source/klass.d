@@ -7,10 +7,10 @@ import field : Field;
 import events : Event;
 import std.conv : to;
 
-alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, ETree* t);
-alias KLASS_UPDATE_FN = void function (Klass* kls, Doc* doc, ETree* t);
-alias KLASS_SET_FN    = void function (Klass* kls, Doc* doc, ETree* t, string field, TString[] values);
-alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, ETree* t);
+alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
+alias KLASS_UPDATE_FN = void function (Klass* kls, Doc* doc, E* e);
+alias KLASS_SET_FN    = void function (Klass* kls, Doc* doc, E* e, string field, TString[] values);
+alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, E* e);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
 alias KlassPtr = Klass*;
 
@@ -65,22 +65,22 @@ add_child (Klass* kls, Field* field) {
 }
 
 void
-event (Klass* kls, Event* ev, ETree* t) {
+event (Klass* kls, Event* ev, E* e) {
     //
 }
 
 void
-update (Klass* kls, Doc* doc, ETree* t) {
+update (Klass* kls, Doc* doc, E* e) {
     //
 }
 
 void 
-set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
+set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
     //
 }
 
 void
-draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
+draw (Klass* kls, SDL_Renderer* renderer, E* e) {
     //
 }
 

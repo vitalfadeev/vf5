@@ -8,11 +8,9 @@ import e     : E;
 import klass : Klass;
 import field : Field;
 
-alias ETree = Tree!E;
-
 auto
 new_e () {
-    return new ETree ();
+    return new E ();
 }
 
 auto 
@@ -73,13 +71,13 @@ WalkTree (Doc* doc) {
 }
 
 auto 
-WalkTree (Tree) (Tree* t) {
-    return vf.tree.WalkTree (t,&skip_hidden);
+WalkTree (E* e) {
+    return vf.tree.WalkTree (e,&skip_hidden);
 }
 
 bool 
-skip_hidden (ETree* t) {
-    return t.e.hidden;
+skip_hidden (E* e) {
+    return e.hidden;
 }
 
 auto 
@@ -88,8 +86,8 @@ FindDeepest (Tree,Cond) (Tree* t, Cond cond) {
 }
 
 auto 
-WalkLeft (Tree) (Tree* t) {
-    return vf.tree.WalkLeft (t, &skip_hidden);
+WalkLeft (E* e) {
+    return vf.tree.WalkLeft (e, &skip_hidden);
 }
 
 auto 

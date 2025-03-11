@@ -32,7 +32,7 @@ Progress {
 
 // KLASS_EVENT_FN  
 void 
-event (Klass* kls, Event* ev, ETree* t) {
+event (Klass* kls, Event* ev, E* e) {
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("PROGRESS.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
@@ -75,11 +75,11 @@ event (Klass* kls, Event* ev, ETree* t) {
                 case USER_EVENT.click:
                     auto click_ev = cast (ClickUserEvent*) ev;
                     int percent;
-                    if (t !is null) {
-                        percent_from_click (t, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
+                    if (e !is null) {
+                        percent_from_click (e, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
                         writeln ("progress.position: ", percent);
                         string[string] env = ["PROGRESS_POSITION" : percent.to!string];
-                        go_on_event (ev.doc,t,"progress.position",env);
+                        go_on_event (ev.doc,e,"progress.position",env);
                         // total = audtool current-song-length-seconds
                         // now   = audtool current-song-output-length-seconds
                         // seek  = total * precent
@@ -98,39 +98,39 @@ event (Klass* kls, Event* ev, ETree* t) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Doc* doc, ETree* t) {
+update (Klass* kls, Doc* doc, E* e) {
     // progress.position
     //   e e e
 }
 
 // KLASS_SET_FN
 void 
-set (Klass* kls, Doc* doc, ETree* t, string field_id, TString[] values) {
-    E* e = &t.e;
+set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
+    
 
     switch (field_id) {
-        case "progress"            : set_progress_position (doc,t,e,values); break;
-        case "progress.position"   : set_progress_position (doc,t,e,values); break;
+        case "progress"            : set_progress_position (doc,e,values); break;
+        case "progress.position"   : set_progress_position (doc,e,values); break;
         default:
     }
 }
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, SDL_Renderer* renderer, ETree* t) {
+draw (Klass* kls, SDL_Renderer* renderer, E* e) {
     //
 }
 
 void
-percent_from_click (ETree* t, int click_x, int click_y, int* percent) {
-    E* e = &t.e;
+percent_from_click (E* e, int click_x, int click_y, int* percent) {
+    
     auto offset_x = click_x - e.content.pos.x;
     int  w = e.size.w;
     *percent = 100 * offset_x / w;
 }
 
 void
-set_progress_position (Doc* doc, ETree* t, E* e, TString[] values) {
+set_progress_position (Doc* doc, E* e, TString[] values) {
     if (values.length) {
         string percent = values[0].s;
         percent = percent.stripRight ("%");
@@ -139,9 +139,9 @@ set_progress_position (Doc* doc, ETree* t, E* e, TString[] values) {
             return;
 
         // 50%
-        auto passed  = t.find ("progress-passed");
-        auto current = t.find ("progress-current");
-        auto rest    = t.find ("progress-rest");
+        auto passed  = e.find ("progress-passed");
+        auto current = e.find ("progress-current");
+        auto rest    = e.find ("progress-rest");
         //passed.size.w = ...
         //current.pos.x = ...
         //rest.pos.x    = ...
@@ -150,8 +150,8 @@ set_progress_position (Doc* doc, ETree* t, E* e, TString[] values) {
 }
 
 
-ETree*
-find (ETree* t, string kls_name) {
+E*
+find (E* e, string kls_name) {
     return null;
 }
 

@@ -1,7 +1,7 @@
 module vf.tree;
 
 struct
-Tree (E) {
+Tree {
     Tree* l;
     Tree* r;
     struct 
@@ -12,11 +12,6 @@ Tree (E) {
     };
     Childs _childs;
     Tree*  parent;
-    E      e;
-
-    this (E e) {
-        this.e = e;
-    }
 
     mixin tree_functions;
 }
@@ -41,7 +36,7 @@ tree_functions () {
     }
 
     void
-    remove_child (Tree* c) {
+    remove_child (TTree* c) {
         auto t = &this;
 
         auto l = c.l;
@@ -76,7 +71,6 @@ tree_functions () {
         cloned._childs.l = null;
         cloned._childs.r = null;
         cloned.parent    = null;
-        cloned.e         = this.e;
 
         // childs
         foreach (c; (&this).childs)
@@ -90,12 +84,12 @@ tree_functions () {
 // t.childs ~= a
 // foreach (t; t.childs) ...
 auto 
-childs (TTree) (TTree* t) {
-    return _Childs!TTree (t);
+childs (TTree) (TTree* t) if (is(typeof(t._super) == Tree) || is(TTree == Tree)) {
+    return _Childs!TTree (cast (Tree*) t);
 }
 struct
 _Childs (TTree) {
-    TTree* t;
+    Tree* t;
     //alias t this;
 
     //auto ref l () {return t._childs.l; }
@@ -104,7 +98,7 @@ _Childs (TTree) {
     int
     opApply (int delegate (TTree* t) dg) {
         foreach (_t; t._childs) {
-            int result = dg (_t);
+            int result = dg (cast (TTree*) _t);
             if (result)
                 return result;                
         }
@@ -113,36 +107,41 @@ _Childs (TTree) {
     }
 
     void 
-    opOpAssign (string op: "~") (TTree* c) { 
+    opOpAssign (string op: "~") (Tree* c) { 
         t.add_child (c);
+    }
+
+    void 
+    opOpAssign (string op: "~") (TTree* c) { 
+        t.add_child (cast (Tree*) c);
     }
 }
 
 
 // in depth
 auto 
-WalkTree (Tree,Skip) (Tree* t, Skip skip) {
-    return _WalkTree!(Tree,Skip) (t,skip);
+WalkTree (TTree,Skip) (TTree* t, Skip skip) {
+    return _WalkTree!(TTree,Skip) (t,skip);
 }
 
 struct
-_WalkTree (Tree,Skip) {
-    Tree* t;
-    Skip  skip;
+_WalkTree (TTree,Skip) {
+    TTree* t;
+    Skip   skip;
 
     int
-    opApply (int delegate (Tree* t) dg) {
-        Tree*  next = t;
-        Tree* _next = t;
+    opApply (int delegate (TTree* t) dg) {
+        Tree*  next = cast (Tree*) t;
+        Tree* _next = cast (Tree*) t;
         int    result;
 
         loop:
-            if (skip (next)) {
+            if (skip (cast (TTree*) next)) {
                 _next = next;
                 goto go_right;
             }
 
-            result = dg (next);
+            result = dg (cast (TTree*) next);
             if (result)
                 return result;
 
@@ -170,17 +169,17 @@ _WalkTree (Tree,Skip) {
 
 // ito left
 auto 
-WalkLeft (Tree,Skip) (Tree* t, Skip skip) {
-    return _WalkLeft!(Tree,Skip) (t,skip);
+WalkLeft (TTree,Skip) (TTree* t, Skip skip) {
+    return _WalkLeft!(TTree,Skip) (cast (Tree*) t,skip);
 }
 
 struct
-_WalkLeft (Tree,Skip) {
+_WalkLeft (TTree,Skip) {
     Tree* t;
     Skip  skip;
 
     int
-    opApply (int delegate (Tree* t) dg) {
+    opApply (int delegate (TTree* t) dg) {
         Tree*  next = t.l;
         int    result;
 
@@ -188,11 +187,11 @@ _WalkLeft (Tree,Skip) {
             if (next is null)
                 return 0;
 
-            if (skip (next)) {
+            if (skip (cast (TTree*) next)) {
                 goto go_left;
             }
 
-            result = dg (next);
+            result = dg (cast (TTree*) next);
             if (result)
                 return result;
 
@@ -207,29 +206,29 @@ _WalkLeft (Tree,Skip) {
 
 // ito left
 auto 
-WalkChilds (Tree,Skip) (Tree* t, Skip skip) {
-    return _WalkChilds!(Tree,Skip) (t,skip);
+WalkChilds (TTree,Skip) (TTree* t, Skip skip) {
+    return _WalkChilds!(TTree,Skip) (t,skip);
 }
 
 struct
-_WalkChilds (Tree,Skip) {
-    Tree* t;
-    Skip  skip;
+_WalkChilds (TTree,Skip) {
+    TTree* t;
+    Skip   skip;
 
     int
-    opApply (int delegate (Tree* t) dg) {
-        Tree*  next = t._childs.l;
+    opApply (int delegate (TTree* t) dg) {
+        Tree*  next = (cast (Tree*) t)._childs.l;
         int    result;
 
         loop:
             if (next is null)
                 return 0;
 
-            if (skip (next)) {
+            if (skip (cast (TTree*) next)) {
                 goto go_right;
             }
 
-            result = dg (next);
+            result = dg (cast (TTree*) next);
             if (result)
                 return result;
 
@@ -244,30 +243,30 @@ _WalkChilds (Tree,Skip) {
 
 //
 auto 
-FindDeepest (Tree,Skip,Cond) (Tree* t, Skip skip, Cond cond) {
-    return _FindDeepest!(Tree,Skip,Cond) (t,skip,cond);
+FindDeepest (TTree,Skip,Cond) (TTree* t, Skip skip, Cond cond) {
+    return _FindDeepest!(TTree,Skip,Cond) (t,skip,cond);
 }
 
 struct
-_FindDeepest (Tree,Skip,Cond) {
-    Tree* t;
-    Skip  skip;
-    Cond  cond;
+_FindDeepest (TTree,Skip,Cond) {
+    TTree* t;
+    Skip   skip;
+    Cond   cond;
 
     int
-    opApply (int delegate (Tree* t) dg) {
-        Tree*  next = t;
+    opApply (int delegate (TTree* t) dg) {
+        Tree*  next = cast (Tree*) t;
         Tree* _next = next;
         int    result;
 
         loop:
-            if (skip (next)) {
+            if (skip (cast (TTree*) next)) {
                 _next = next;
                 goto go_right;
             }
 
-            if (cond (next)) {
-                result = dg (next);
+            if (cond (cast (TTree*) next)) {
+                result = dg (cast (TTree*) next);
                 if (result)
                     return result;
 
@@ -321,10 +320,10 @@ dump_tree (Tree) (Tree* t, int level=0) {
     //if (t.uni is null)
     //    writeln ("null");
     //else
-        writeln (t.e);
+        writeln (*t);
 
     // recursive
     foreach (_t; t.childs) {
-        dump_tree!Tree (_t, level+1);
+        dump_tree!Tree (cast (Tree*) _t, level+1);
     }
 }

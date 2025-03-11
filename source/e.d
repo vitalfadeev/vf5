@@ -12,7 +12,7 @@ import events;
 
 alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
 alias E_UPDATE_FN = void function (E* e, Doc* doc);
-alias E_SET_FN    = void function (E* e, Doc* doc, ETree* t, string field_id, TString[] values);
+alias E_SET_FN    = void function (E* e, Doc* doc, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
@@ -20,6 +20,8 @@ alias EPtr = E*;
 
 struct 
 E {
+    Tree    _super;
+    //alias   _super this;
     Klass*[] klasses;    // box green rounded
     Pos      pos;
     Size     size;
@@ -255,6 +257,14 @@ E {
     E_DRAW_FN   draw   = &.draw;
     E_DUP_FN    dup    = &._dup;
 
+    void
+    remove_child (E* c) {
+        _super.remove_child (cast (vf.tree.Tree*) c);
+    }
+
+    auto ref parent () { return cast (E*) _super.parent; }
+    //auto ref childs () { return (&_super).childs; }
+
     //
     string
     toString () {
@@ -285,7 +295,7 @@ update (E* e, Doc* doc) {
 }
 
 void
-set (E* e, Doc* doc, ETree* t, string field_id, TString[] values) {
+set (E* e, Doc* doc, string field_id, TString[] values) {
     //
 }
 

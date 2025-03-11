@@ -523,7 +523,7 @@ go (Doc* doc, string s) {
     string    name;
     TString[] values;
     Indent[]  indents;
-    ETree*    t;
+    E*        e;
     Klass*    kls;
     Field*    field;
 
@@ -545,10 +545,10 @@ go (Doc* doc, string s) {
 
         // e
         if (name == "e" && indent == 0) { 
-            t = new_e (doc,values);
-            doc.add_e (t);
+            e = new_e (doc,values);
+            doc.add_e (e);
             indents.length = 0;
-            indents ~= Indent (t,indent);
+            indents ~= Indent (e,indent);
         }
 
         // sub e
@@ -558,8 +558,8 @@ go (Doc* doc, string s) {
             assert (_ind !is null);
             switch (_ind.type) {
                 case Indent.Type.doc   : 
-                    t = new_child_e (doc,values);
-                    .doc.add_child (_ind.doc,t); 
+                    e = new_child_e (doc,values);
+                    .doc.add_child (_ind.doc,e); 
                     break;
                 case Indent.Type.klass : 
                     .klass.add_child (_ind.klass,new Field (name,values)); 
@@ -568,12 +568,12 @@ go (Doc* doc, string s) {
                     .field.add_child (_ind.field,new Field (name,values)); 
                     break;
                 case Indent.Type.e     : 
-                    t = new_child_e (doc,values);
-                    _ind.t.add_child (t); 
+                    e = new_child_e (doc,values);
+                    _ind.e.childs ~= e; 
                     break;
                 default: assert (0);
             }        
-            indents ~= Indent (t,indent);
+            indents ~= Indent (e,indent);
         }
 
         // klass
@@ -606,10 +606,10 @@ struct
 Indent {
     Type type;
     union {
-        Doc*      doc;
-        Klass*    klass;
-        Field*    field;
-        ETree*    t;
+        Doc*   doc;
+        Klass* klass;
+        Field* field;
+        E*     e;
     } 
     size_t indent;
 
@@ -639,9 +639,9 @@ Indent {
         this.indent = indent;
     }
 
-    this (ETree* t, size_t indent) {
+    this (E* e, size_t indent) {
         this.type   = Type.e;
-        this.t      = t;
+        this.e      = e;
         this.indent = indent;
     }
 
@@ -690,7 +690,7 @@ new_klass (Doc* doc, string name, TString[] values) {
 
 
 //ETree*
-//find_parent_t (ETree* current_t, size_t for_indent) {
+//find_parent_t (E* current_t, size_t for_indent) {
 //    if (current_t is null)
 //        return null;
 
@@ -698,15 +698,15 @@ new_klass (Doc* doc, string name, TString[] values) {
 //        return current_t;
 
 //    if (current_t.indent == for_indent)
-//        return current_t.parent;
+//        return current_e.parent;
 
 //    if (current_t.indent > for_indent) {
 //        loop:
-//            current_t = current_t.parent;
+//            current_t = current_e.parent;
 //            if (current_t is null) 
 //                return null;
 //            if (current_t.indent == for_indent)
-//                return current_t.parent;
+//                return current_e.parent;
 //            if (current_t.indent > for_indent)
 //                goto loop;
 

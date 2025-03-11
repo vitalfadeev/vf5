@@ -27,7 +27,7 @@ Generator {
 
 struct
 Template {
-    ETree*
+    E*
     apply (string[] line) {
         return null;
     }
@@ -39,7 +39,7 @@ GenTree {
     Template*  template_;
 
     int
-    opApply (int delegate (ETree* e) dg) {
+    opApply (int delegate (E* e) dg) {
         foreach (line; *generator) {
             auto e = template_.apply (line);
             if (e !is null) {
@@ -58,7 +58,7 @@ void
 go () {
     Generator g;
     Template  t;
-    ETree*    dst = new ETree ();
+    E*    dst = new E ();
 
     foreach (e; GenTree (&g,&t))
         dst.childs ~= e;

@@ -18,7 +18,7 @@ import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
 alias PIX_UPDATE_FN = void function (Pix* pix, Doc* doc);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, Doc* doc, ETree* t);
+alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, Doc* doc, E* e);
 alias PIX_GO_FN     = int  function (Pix* pix, Doc* doc);
 
 struct 
@@ -101,7 +101,7 @@ click_translate (Event* ev) {
 
 void
 _redraw (Pix* pix, SDL_Renderer* renderer, Doc* doc, RedrawUserEvent* ev) {
-    pix.draw (pix,renderer,doc,ev.t);
+    pix.draw (pix,renderer,doc,ev.e);
 }
 
 int
@@ -153,31 +153,31 @@ update (Pix* pix, Doc* doc) {
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, ETree* t) {
+draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, E* e) {
     // Clip to e
-    if (t !is null) {
+    if (e !is null) {
         SDL_Rect clip_rect;
-        clip_rect.x = t.e.pos.x;
-        clip_rect.y = t.e.pos.y;
-        clip_rect.w = t.e.size.w;
-        clip_rect.h = t.e.size.h;
+        clip_rect.x = e.pos.x;
+        clip_rect.y = e.pos.y;
+        clip_rect.w = e.size.w;
+        clip_rect.h = e.size.h;
         writeln (clip_rect);
         SDL_RenderSetClipRect (renderer,&clip_rect);
     }
 
     // clear
-    if (t is null) {
+    if (e is null) {
         SDL_SetRenderDrawColor (renderer, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear (renderer);
     }
 
     // draw
-    doc.draw (doc,renderer,t);
+    doc.draw (doc,renderer,e);
     // rasterize
     SDL_RenderPresent (renderer);
 
     // clear clip
-    if (t !is null) {
+    if (e !is null) {
         SDL_RenderSetClipRect (renderer,null);
     }
 }
@@ -323,8 +323,8 @@ redraw_window (SDL_Window* window) {
 }
 
 void
-redraw (ETree* t) {
-    send_user_event!RedrawUserEvent (t);
+redraw (E* e) {
+    send_user_event!RedrawUserEvent (e);
 }
 
 struct

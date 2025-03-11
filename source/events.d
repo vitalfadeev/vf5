@@ -4,6 +4,7 @@ import bindbc.sdl;
 import types : Pos;
 import etree;
 import doc : Doc;
+import e : E;
 
 
 struct
@@ -47,10 +48,10 @@ RedrawUserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.redraw;
-    ETree* t;
+    E*     e;
 
-    this (ETree* t) {
-        this.t = t;
+    this (E* e) {
+        this.e = e;
     }
 }
 
