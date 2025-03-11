@@ -21,6 +21,7 @@ E_Klass {
             "e", 
             [],  
             [],  
+            [],  
             &.event,     // event
             &.update,    // update
             &.set,       // set
@@ -854,7 +855,7 @@ set_on (Doc* doc, ETree* t, TString[] values) {
 //        // add child to t
 //        //   set classes
 //        auto _t = new ETree (new E ());
-//        t.add_child (_t);
+//        t.childs ~= _t;
 //        _t.e.added_from = kls;
 //        if (values.length >= 2) {
 //            foreach (kls_name; values[1..$]) {

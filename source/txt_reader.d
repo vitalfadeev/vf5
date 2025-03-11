@@ -142,18 +142,23 @@ playlist
  //   ...or childs under t
  //childs.src.tpl.src 1         2    3
  //childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
- childs.src.tpl.src 1
- childs.src.tpl.dst text
+ //childs.src.tpl.src 1
+ //childs.src.tpl.dst text
+ // generator cmd 'command' delimiter | skip 1  // -> string[]
+ // template template-name!(generator.output.lines.col[0])
+ // template template-name!(generator.output[*][0])
 
-list-template
-  e list-template-name
 
-list-template-name
+list-template (TEXT)
+  e list-template-name!(TEXT)
+
+list-template-name (TEXT)
   size         parent 32
   content.size e
   pad          1 1
   borders      1 solid #444
   pos.type     vbox b
+  text         TEXT
 
 info
  size         parent 64

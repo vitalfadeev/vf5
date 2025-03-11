@@ -32,6 +32,7 @@ Klass {
     string   name;
     Klass*[] parent_klasses;
     Field*[] fields;
+    string[] args;
 
     KLASS_EVENT_FN  event  = &.event;
     KLASS_UPDATE_FN update = &.update;

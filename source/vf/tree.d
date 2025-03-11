@@ -1,6 +1,5 @@
 module vf.tree;
 
-
 struct
 Tree (E) {
     Tree* l;
@@ -11,7 +10,7 @@ Tree (E) {
         Tree* r;
         mixin childs_op_apply;
     };
-    Childs childs;
+    Childs _childs;
     Tree*  parent;
     E      e;
 
@@ -24,25 +23,26 @@ Tree (E) {
 
 mixin template 
 tree_functions () {
+    alias TTree = typeof(this);
     void
-    add_child (Tree* c) {
-        alias t = this;
-        auto tr = t.childs.r;
+    add_child (TTree* c) {
+        auto t = &this;
+        auto tr = t._childs.r;
         if (tr is null) {
-            t.childs.r = c;
-            t.childs.l = c;
+            t._childs.r = c;
+            t._childs.l = c;
         }
         else {
             c.l = tr;
             tr.r = c;
-            t.childs.r = c;
+            t._childs.r = c;
         }
-        c.parent = &t;
+        c.parent = t;
     }
 
     void
     remove_child (Tree* c) {
-        alias t = this;
+        auto t = &this;
 
         auto l = c.l;
         auto r = c.r;
@@ -53,11 +53,11 @@ tree_functions () {
         if (r !is null)
             r.l = l;
 
-        if (t.childs.l is c)
-            t.childs.l = r;
+        if (t._childs.l is c)
+            t._childs.l = r;
 
-        if (t.childs.r is c)
-            t.childs.r = l;
+        if (t._childs.r is c)
+            t._childs.r = l;
 
         c.parent = null;
         c.l = null;
@@ -71,20 +71,53 @@ tree_functions () {
         //   dup childs
         auto cloned = new typeof(this) ();
 
-        cloned.l        = null;
-        cloned.r        = null;
-        cloned.childs.l = null;
-        cloned.childs.r = null;
-        cloned.parent   = null;
-        cloned.e        = this.e;
+        cloned.l         = null;
+        cloned.r         = null;
+        cloned._childs.l = null;
+        cloned._childs.r = null;
+        cloned.parent    = null;
+        cloned.e         = this.e;
 
         // childs
-        foreach (c; this.childs)
+        foreach (c; (&this).childs)
             cloned.add_child (c.dup);
 
         return cloned;
     }
 }
+
+// t.childs
+// t.childs ~= a
+// foreach (t; t.childs) ...
+auto 
+childs (TTree) (TTree* t) {
+    return _Childs!TTree (t);
+}
+struct
+_Childs (TTree) {
+    TTree* t;
+    //alias t this;
+
+    //auto ref l () {return t._childs.l; }
+    //auto ref r () {return t._childs.r; }
+
+    int
+    opApply (int delegate (TTree* t) dg) {
+        foreach (_t; t._childs) {
+            int result = dg (_t);
+            if (result)
+                return result;                
+        }
+
+        return 0;
+    }
+
+    void 
+    opOpAssign (string op: "~") (TTree* c) { 
+        t.add_child (c);
+    }
+}
+
 
 // in depth
 auto 
@@ -116,7 +149,7 @@ _WalkTree (Tree,Skip) {
             _next = next;
 
             go_down:   // v
-                next = _next.childs.l;
+                next = _next._childs.l;
                 if (next !is null)
                     goto loop;  // go_down
             go_right:  // >
@@ -185,7 +218,7 @@ _WalkChilds (Tree,Skip) {
 
     int
     opApply (int delegate (Tree* t) dg) {
-        Tree*  next = t.childs.l;
+        Tree*  next = t._childs.l;
         int    result;
 
         loop:
@@ -247,7 +280,7 @@ _FindDeepest (Tree,Skip,Cond) {
             }
 
             go_down:   // v
-                next = _next.childs.l;
+                next = _next._childs.l;
                 if (next !is null)
                     goto loop;  // go_down
                 else

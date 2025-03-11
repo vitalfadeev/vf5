@@ -130,7 +130,7 @@ add_e (Doc* doc, ETree* t) {
     if (doc.tree is null)
         doc.tree = t;
     else
-        doc.tree.add_child (t);
+        doc.tree.childs ~= t;
 }
 
 
@@ -315,7 +315,7 @@ add_sub_tree (Doc* doc, ETree* dest_t, Field* field) {
     // clone each t
     // add in dest_t
     auto t = doc.new_child_e (field.values);
-    dest_t.add_child (t);
+    dest_t.childs ~= t;
 
     // recursive
     foreach (_field; WalkFields (field)) {
@@ -549,7 +549,7 @@ load_childs_cmd (Doc* doc, ETree* t) {
                 foreach (field; WalkFields (kls)) {
                     if (field.name == "e") {
                         auto _t = doc.new_child_e (field.values);
-                        t.add_child (_t);
+                        t.childs ~= _t;
                         e_line ~= _t;
 
                         //
