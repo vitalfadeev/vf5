@@ -216,7 +216,7 @@ apply_klasses (E* e) {
     foreach (kls; e.klasses)
         apply_klass (e,kls);
 
-    write (format!"%60s" (e.toString)); time_step ("",0);
+    //write (format!"%-60s " (e.toString)); time_step ("",0);
 }
 
 // WIDGET_APPLY_KLASS_FN
@@ -1602,9 +1602,7 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
     auto cur = MonoTime.currTime ();
     auto dur = cur - last_time;
     if (file_name.length != 0)
-        writefln ("%20s: %s", file_name, dur);
-    else
-        writeln (dur);
+        writefln ("%16s: %s", file_name, dur);
     last_time = cur;
 }
 

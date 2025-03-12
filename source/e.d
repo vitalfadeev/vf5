@@ -57,6 +57,40 @@ E {
     Klass*[] defined_klasses;
 
     struct
+    Margin {
+        Form   form;
+        Border border;
+        R      r;
+        Color  color;
+    }
+    Margin margin;
+
+    struct
+    Aura {
+        Form   form;
+        Border border;
+        R      r;
+        Color  color;
+    }
+    Aura aura;
+
+    struct
+    Form {
+        Type type;
+        enum
+        Type {
+            none,
+            rect,
+            t3,
+            t4,
+            t5,
+            t6,
+            t7,
+            t8,
+        }
+    }
+
+    struct
     Border {
         W     w;     // 0..255
         Type  type;  // none, solid, dash
@@ -95,30 +129,43 @@ E {
 
     struct
     Content {
-        Pos  pos;
-        Size size;
-        Size childs_size;
-        enum 
-        SizeType {
-            e, // default
-            fixed, 
+        Form   form;
+        Border border;
+        R      r;
+        Color  color;
+        // childs
+        // image
+        // text
+
+        struct
+        Image {
+          string src;       // "abc"
+          Pos    pos;
+          Size   size = Size (100,100);
+          Color  bg;
+          SDL_Surface* ptr;
+          enum
+          SizeType {
+            fixed,
             image,
             text,
-            childs,
-            max,   // max (image,text)
+            content,
+          }
+          SizeType size_w_type;
+          SizeType size_h_type;
         }
-        SizeType size_w_type;
-        SizeType size_h_type;
+        Image image;
+
         struct
         Text {
           string s;     // "abc"
           struct 
           Font {
-            string    file;    // "abc"
-            string    family;  // "abc"
-            ubyte     size;    // 0..256
-            bool      bold;    // 0/1
-            bool      italic;  // 0/1
+            string     file;    // "abc"
+            string     family;  // "abc"
+            ubyte      size;    // 0..256
+            bool       bold;    // 0/1
+            bool       italic;  // 0/1
             TTF_Font*  ptr;    // ...
           }
           Font    font;
@@ -147,26 +194,22 @@ E {
         }
         Text text;
 
-        struct
-        Image {
-          string src;       // "abc"
-          Pos    pos;
-          Size   size = Size (100,100);
-          Color  bg;
-          SDL_Surface* ptr;
-          enum
-          SizeType {
-            fixed,
+        Pos  pos;
+        Size size;
+        Size childs_size;
+        enum 
+        SizeType {
+            e, // default
+            fixed, 
             image,
             text,
-            content,
-          }
-          SizeType size_w_type;
-          SizeType size_h_type;
+            childs,
+            max,   // max (image,text)
         }
-        Image image;
+        SizeType size_w_type;
+        SizeType size_h_type;
     }
-    Content content;
+    Content _content;
 
     bool    hidden;
     Klass*  from_klass;
@@ -308,6 +351,23 @@ E {
 }
 
 
+auto 
+content (E* e) {
+    return _Content (e,&e._content);
+}
+struct
+_Content {
+    E* e;
+    E.Content* _content;
+    alias _content this;
+
+    auto ref
+    childs () {
+        return e.childs;
+    }
+}
+
+
 void
 add_klass (E* e, Klass* kls) {
     e.klasses ~= kls;
@@ -335,10 +395,8 @@ event (E* e, Event* ev) {
 
 void
 update (E* e) {
-    time_step ();
-
-    // 0
-    time_step ();
+    writefln ("%-60s", e.toString);
+    time_step ("");
 
     // 1
     e.apply_klasses ();
@@ -370,9 +428,11 @@ update (E* e) {
     // 7
     e.update_pos ();
     time_step ("update_pos");
+
     // 8
     e.load_childs ();
     time_step ("load_childs");
+
     // 9
 
     // childs
@@ -414,7 +474,7 @@ _dup (EPtr _this) {
      cloned.bg            = _this.bg;
      cloned.borders       = _this.borders;
      cloned.corners       = _this.corners;
-     cloned.content       = _this.content;
+     cloned._content      = _this._content;
      cloned.content.text.rects 
                           = _this.content.text.rects.dup;
      cloned.hidden        = _this.hidden;
