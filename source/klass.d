@@ -8,8 +8,8 @@ import events : Event;
 import std.conv : to;
 
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
-alias KLASS_UPDATE_FN = void function (Klass* kls, Doc* doc, E* e);
-alias KLASS_SET_FN    = void function (Klass* kls, Doc* doc, E* e, string field, TString[] values);
+alias KLASS_UPDATE_FN = void function (Klass* kls, E* e);
+alias KLASS_SET_FN    = void function (Klass* kls, E* e, string field, TString[] values);
 alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, E* e);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
 alias KlassPtr = Klass*;
@@ -70,12 +70,12 @@ event (Klass* kls, Event* ev, E* e) {
 }
 
 void
-update (Klass* kls, Doc* doc, E* e) {
+update (Klass* kls, E* e) {
     //
 }
 
 void 
-set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
+set (Klass* kls, E* e, string field_id, TString[] values) {
     //
 }
 

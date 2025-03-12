@@ -17,9 +17,9 @@ import std.algorithm.searching : canFind;
 import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
-alias PIX_UPDATE_FN = void function (Pix* pix, Doc* doc);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, Doc* doc, E* e);
-alias PIX_GO_FN     = int  function (Pix* pix, Doc* doc);
+alias PIX_UPDATE_FN = void function (Pix* pix, E* e);
+alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, E* e);
+alias PIX_GO_FN     = int  function (Pix* pix, E* e);
 
 struct 
 Pix {
@@ -36,7 +36,7 @@ Pix {
 
 
 int 
-go (Pix* pix, Doc* doc) {
+go (Pix* pix, E* e) {
     // Window, Surface
     SDL_Window* window = new_window (__FILE_FULL_PATH__);
 
@@ -44,14 +44,14 @@ go (Pix* pix, Doc* doc) {
     SDL_Renderer* renderer = new_renderer (window);
 
     //
-    doc.window = new Window (window);
+    e.window = new Window (window);
 
     // Event "start"
     send_user_event!StartUserEvent ();
 
     // Event Loop
     foreach (Event* ev; Events ()) {
-        ev.doc        = doc;
+        ev.e          = e;
         ev.app_window = window;
         ev.renderer   = renderer;
 
@@ -100,8 +100,8 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 void
-_redraw (Pix* pix, SDL_Renderer* renderer, Doc* doc, RedrawUserEvent* ev) {
-    pix.draw (pix,renderer,doc,ev.e);
+_redraw (Pix* pix, SDL_Renderer* renderer, E* e, RedrawUserEvent* ev) {
+    pix.draw (pix,renderer,ev.e);
 }
 
 int
@@ -113,11 +113,11 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.doc,null); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.e); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.doc); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.e); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -136,24 +136,24 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.doc,cast (RedrawUserEvent*) ev); break;
-                default: auto result = ev.doc.event (ev.doc,ev); if (result) return result;
+                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.e,cast (RedrawUserEvent*) ev); break;
+                default: ev.e.event (ev.e,ev);
             }
             break;
-        case SDL_QUIT: auto result = ev.doc.event (ev.doc,ev); if (result) return result; else return 1;
-        default: auto result = ev.doc.event (ev.doc,ev); if (result) return result;
+        case SDL_QUIT: ev.e.event (ev.e,ev); return 1;
+        default: ev.e.event (ev.e,ev);
     }
 
     return 0;
 }
 
 void
-update (Pix* pix, Doc* doc) {
-    doc.update (doc); 
+update (Pix* pix, E* root) {
+    root.update (root); 
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, E* e) {
+draw (Pix* pix, SDL_Renderer* renderer, E* e) {
     // Clip to e
     if (e !is null) {
         SDL_Rect clip_rect;
@@ -172,7 +172,7 @@ draw (Pix* pix, SDL_Renderer* renderer, Doc* doc, E* e) {
     }
 
     // draw
-    doc.draw (doc,renderer,e);
+    e.draw (e,renderer);
     // rasterize
     SDL_RenderPresent (renderer);
 

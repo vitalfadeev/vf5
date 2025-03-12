@@ -66,11 +66,6 @@ _WalkFields (T) {
 
 
 auto 
-WalkTree (Doc* doc) {
-    return WalkTree (doc.tree);
-}
-
-auto 
 WalkTree (E* e) {
     return vf.tree.WalkTree (e,&skip_hidden);
 }

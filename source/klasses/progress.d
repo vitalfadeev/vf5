@@ -79,7 +79,7 @@ event (Klass* kls, Event* ev, E* e) {
                         percent_from_click (e, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
                         writeln ("progress.position: ", percent);
                         string[string] env = ["PROGRESS_POSITION" : percent.to!string];
-                        go_on_event (ev.doc,e,"progress.position",env);
+                        go_on_event (e,"progress.position",env);
                         // total = audtool current-song-length-seconds
                         // now   = audtool current-song-output-length-seconds
                         // seek  = total * precent
@@ -98,19 +98,19 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Doc* doc, E* e) {
+update (Klass* kls, E* e) {
     // progress.position
     //   e e e
 }
 
 // KLASS_SET_FN
 void 
-set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
+set (Klass* kls, E* e, string field_id, TString[] values) {
     
 
     switch (field_id) {
-        case "progress"            : set_progress_position (doc,e,values); break;
-        case "progress.position"   : set_progress_position (doc,e,values); break;
+        case "progress"            : set_progress_position (e,values); break;
+        case "progress.position"   : set_progress_position (e,values); break;
         default:
     }
 }
@@ -130,7 +130,7 @@ percent_from_click (E* e, int click_x, int click_y, int* percent) {
 }
 
 void
-set_progress_position (Doc* doc, E* e, TString[] values) {
+set_progress_position (E* e, TString[] values) {
     if (values.length) {
         string percent = values[0].s;
         percent = percent.stripRight ("%");

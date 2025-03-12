@@ -518,7 +518,7 @@ forms
 ";
 
 void 
-go (Doc* doc, string s) {
+go (E* root, string s) {
     size_t    indent;
     string    name;
     TString[] values;
@@ -545,8 +545,8 @@ go (Doc* doc, string s) {
 
         // e
         if (name == "e" && indent == 0) { 
-            e = new_e (doc,values);
-            doc.add_e (e);
+            e = new_e (root,values);
+            root.add_e (e);
             indents.length = 0;
             indents ~= Indent (e,indent);
         }
@@ -557,10 +557,6 @@ go (Doc* doc, string s) {
             auto _ind = indents.find_parent (indent);
             assert (_ind !is null);
             switch (_ind.type) {
-                case Indent.Type.doc   : 
-                    e = new_child_e (doc,values);
-                    .doc.add_child (_ind.doc,e); 
-                    break;
                 case Indent.Type.klass : 
                     .klass.add_child (_ind.klass,new Field (name,values)); 
                     break;
@@ -568,7 +564,7 @@ go (Doc* doc, string s) {
                     .field.add_child (_ind.field,new Field (name,values)); 
                     break;
                 case Indent.Type.e     : 
-                    e = new_child_e (doc,values);
+                    e = new_child_e (root,values);
                     _ind.e.childs ~= e; 
                     break;
                 default: assert (0);
@@ -579,7 +575,7 @@ go (Doc* doc, string s) {
         // klass
         else
         if (name != "e" && indent == 0) { 
-            kls = new_klass (doc,name,values);
+            kls = new_klass (root,name,values);
             // added
             indents.length = 0;
             indents ~= Indent (kls,indent);
@@ -606,7 +602,6 @@ struct
 Indent {
     Type type;
     union {
-        Doc*   doc;
         Klass* klass;
         Field* field;
         E*     e;
@@ -615,16 +610,9 @@ Indent {
 
     enum 
     Type {
-        doc,
         klass,
         field,
         e,
-    }
-
-    this (Doc* doc, size_t indent) {
-        this.type   = Type.doc;
-        this.doc    = doc;
-        this.indent = indent;
     }
 
     this (Klass* kls, size_t indent) {
@@ -668,19 +656,21 @@ find_parent (ref Indent[] indents, size_t for_indent) {
 }
 
 auto
-new_doc () {
-    return new Doc ();
+new_root () {
+    auto root = new E ();
+    root.event = &doc.event;
+    return root;
 }
 
 auto
-new_e (Doc* doc, TString[] values) {
-    return new_child_e (doc,values);
+new_e (E* root, TString[] values) {
+    return new_child_e (root,values);
 }
 
 
 Klass*
-new_klass (Doc* doc, string name, TString[] values) {
-    auto kls = find_klass_or_create (doc,name);
+new_klass (E* root, string name, TString[] values) {
+    auto kls = find_klass_or_create (root,name);
 
     // setup parents
     //   values

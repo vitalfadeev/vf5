@@ -15,37 +15,37 @@ main () {
 	pix.setup ();
 
 	 //UTree
-	Doc* doc = new_doc ();
-	doc.setup ();
-	doc.update (doc);
+	E* root = new_root ();
+	root.setup ();
+	root.update (root);
 
 	// Check
 	//dump_tree (doc);
 	//dump_klasses (doc);
 
 	//
-	pix.go (pix,doc);
+	pix.go (pix,root);
 }
 
 void
-setup (Doc* doc) {
-	create_reserved_classes (doc);
-	txt_reader.go (doc, txt_reader.text);
+setup (E* root) {
+	create_reserved_classes (root);
+	txt_reader.go (root, txt_reader.text);
 }
 
 void
-create_reserved_classes (Doc* doc) {
+create_reserved_classes (E* root) {
 	import klasses.e        : E_Klass;
 	import klasses.progress : Progress;
 	import klasses.button   : Button;
 	import klasses.check    : Check;
 	import klasses.edit     : Edit;
 
-	doc.add_child (new_reserved_klass!E_Klass ());
-	doc.add_child (new_reserved_klass!Progress ());
-	doc.add_child (new_reserved_klass!Button ());
-	doc.add_child (new_reserved_klass!Check ());
-	doc.add_child (new_reserved_klass!Edit ());
+	root.add_child (new_reserved_klass!E_Klass ());
+	root.add_child (new_reserved_klass!Progress ());
+	root.add_child (new_reserved_klass!Button ());
+	root.add_child (new_reserved_klass!Check ());
+	root.add_child (new_reserved_klass!Edit ());
 }
 
 Klass*

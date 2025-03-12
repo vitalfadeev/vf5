@@ -9,8 +9,12 @@ import etree;
 //             name (A)
 //               text = A 
 
+alias GENERATE_FN = void function (Generator* g);
+
 struct
 Generator {
+    GENERATE_FN generate;
+
     int
     opApply (int delegate (string[] s) dg) {
         string[][] lines;
@@ -58,7 +62,7 @@ void
 go () {
     Generator g;
     Template  t;
-    E*    dst = new E ();
+    E*        dst = new E ();
 
     foreach (e; GenTree (&g,&t))
         dst.childs ~= e;

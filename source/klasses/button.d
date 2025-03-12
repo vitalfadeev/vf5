@@ -34,8 +34,6 @@ Button {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, E* e) {
-    
-
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("BUTTON.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
@@ -43,16 +41,16 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                e.add_class (ev.doc,"button.pressed");
-                ev.doc.update (ev.doc);
+                ev.e.add_class ("button.pressed");
+                ev.e.update (ev.e);
                 e.redraw ();
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
-                e.remove_class (ev.doc,"button.pressed");
-                ev.doc.update (ev.doc);
+                ev.e.remove_class ("button.pressed");
+                ev.e.update (ev.e);
                 e.redraw ();
             }
             break;
@@ -62,13 +60,13 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Doc* doc, E* e) {
+update (Klass* kls, E* e) {
     //
 }
 
 // KLASS_SET_FN
 void 
-set (Klass* kls, Doc* doc, E* e, string field_id, TString[] values) {
+set (Klass* kls, E* e, string field_id, TString[] values) {
     //
 }
 

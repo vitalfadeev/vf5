@@ -3,7 +3,6 @@ module events;
 import bindbc.sdl;
 import types : Pos;
 import etree;
-import doc : Doc;
 import e : E;
 
 
@@ -15,7 +14,7 @@ Event {
 
     SDL_Window*   app_window;
     SDL_Renderer* renderer;
-    Doc*          doc;
+    E*            e;  // root
 }
 
 enum 

@@ -1,18 +1,19 @@
 import std.stdio;
+import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
 import tstring;
-import doc;
 import etree;
 import klass;
 import types;
 import events;
+import pix : Window;
 
 
-alias E_EVENT_FN  = void function (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer);
-alias E_UPDATE_FN = void function (E* e, Doc* doc);
-alias E_SET_FN    = void function (E* e, Doc* doc, string field_id, TString[] values);
+alias E_EVENT_FN  = void function (E* e, Event* ev);
+alias E_UPDATE_FN = void function (E* e);
+alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
@@ -25,8 +26,15 @@ E {
     Klass*[] klasses;    // box green rounded
     Pos      pos;
     Size     size;
+    //   Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
     Pad      pad;
     BG       bg;
+
+    // root
+    Klass*   hotkeys;
+    Window*  window;
+    E*       focused;
+    Klass*[] defined_klasses;
 
     struct
     Border {
@@ -185,6 +193,9 @@ E {
     //   childs.tpl.klass list-template
     //   childs.tpl.src   1         2    3
     //   childs.tpl.dst   image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+
+    //Generator* generator; // none, cmd, fs, csv
+    //string     template;  // klass name
     struct
     ChildsSrc {
         Type     type;      // cmd `command` delimiter | skip 1
@@ -284,18 +295,18 @@ add_klass (E* e, Klass* kls) {
 
 
 void
-event (E* e, Doc* doc, Event* ev, SDL_Window* window, SDL_Renderer* renderer) {
+event (E* e, Event* ev) {
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 }
 
 void
-update (E* e, Doc* doc) {
+update (E* e) {
     //
 }
 
 void
-set (E* e, Doc* doc, string field_id, TString[] values) {
+set (E* e, string field_id, TString[] values) {
     //
 }
 
