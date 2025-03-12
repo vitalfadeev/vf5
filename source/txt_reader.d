@@ -661,7 +661,6 @@ new_root () {
     auto root = new E ();
     root.size   = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
     root.event  = &doc.event;
-    root.update = &doc.update;
     return root;
 }
 

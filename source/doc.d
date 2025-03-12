@@ -200,7 +200,6 @@ doc_apply_klasses (E* root) {
 
 void
 apply_klasses (E* e) {
-    
     e.on.length = 0;
     global_font_files.length = 0;
 
@@ -391,38 +390,41 @@ FONTPTR default_ptr;
 
 void
 load_fonts (E* root) {
+    foreach (e; WalkTree (root))
+        load_font (e);
+}
+
+void
+load_font (E* e) {
     auto default_file = DEFAULT_FONT_FILE;
     auto default_size = DEFAULT_FONT_SIZE;
     if (default_ptr is null)
         default_ptr  = open_font (default_file,default_size);
 
-    foreach (e; WalkTree (root)) {
-        if (e.content.text.s.length) {
-            string  font_file = e.content.text.font.file;
-            ubyte   font_size = e.content.text.font.size;
-            FONTPTR font_ptr  = e.content.text.font.ptr;
-            FONTPTR* _ptr = font_file in global_fonts;
+    if (e.content.text.s.length) {
+        string  font_file = e.content.text.font.file;
+        ubyte   font_size = e.content.text.font.size;
+        FONTPTR font_ptr  = e.content.text.font.ptr;
+        FONTPTR* _ptr = font_file in global_fonts;
 
-            if (font_file.length >= 1) {
-                if (_ptr is null || font_ptr != *_ptr) {
-                    auto ptr = open_font (font_file,font_size);
-                    if (ptr is null)
-                        throw new Exception ("open_font");
+        if (font_file.length >= 1) {
+            if (_ptr is null || font_ptr != *_ptr) {
+                auto ptr = open_font (font_file,font_size);
+                if (ptr is null)
+                    throw new Exception ("open_font");
 
-                    global_fonts[font_file] = ptr;
-                    e.content.text.font.ptr = ptr;
-                }
+                global_fonts[font_file] = ptr;
+                e.content.text.font.ptr = ptr;
             }
         }
-    }
+    }    
 
-    foreach (e; WalkTree (root))
-        if (e.content.text.s.length) {
-            if (e.content.text.font.file.length)
-                e.content.text.font.ptr = global_fonts[e.content.text.font.file];
-            else
-                e.content.text.font.ptr = default_ptr;
-        }
+    if (e.content.text.s.length) {
+        if (e.content.text.font.file.length)
+            e.content.text.font.ptr = global_fonts[e.content.text.font.file];
+        else
+            e.content.text.font.ptr = default_ptr;
+    }
 }
 
 void
@@ -431,19 +433,19 @@ load_colors (E* root) {
 }
 
 void
-load_childs (E* root) {
-    foreach (E* e; WalkTree (root))
-        final
-        switch (e.childs_src.type) {
-            case E.ChildsSrc.Type.none : break;
-            case E.ChildsSrc.Type.cmd  : load_childs_cmd (e); break;
-            case E.ChildsSrc.Type.fs   : break;
-            case E.ChildsSrc.Type.csv  : break;
-        }
+load_childs (E* e) {
+    final
+    switch (e.childs_src.type) {
+        case E.ChildsSrc.Type.none : break;
+        case E.ChildsSrc.Type.cmd  : load_childs_cmd (e); break;
+        case E.ChildsSrc.Type.fs   : break;
+        case E.ChildsSrc.Type.csv  : break;
+    }
 }
 
 void
 load_childs_cmd (E* e) {
+    return;
     auto cmd = e.childs_src.cmd.command.s;
     auto dlm = e.childs_src.cmd.delimiter.s;
     auto skp = e.childs_src.cmd.skip;
@@ -491,22 +493,7 @@ load_childs_cmd (E* e) {
                         foreach (_kls; _e.klasses)
                             _kls.set (_kls,_e,"text",values);
 
-                        // images
-                        if (_e.content.image.src.length)
-                            load_e_image (e);
-
-                        // fonts
-                        load_fonts (e);
-
-                        // text
-                        if (_e.content.text.s.length)
-                            load_e_text (e);
-
-                        // size
-                        update_size (_e); // recursive
-
-                        // pos
-                        update_pos (_e);
+                        _e.update (_e);
 
                         // limit height
                         if (_e.pos.y > e.pos.y + e.size.h)
@@ -678,11 +665,11 @@ update_size (E* e) {
     }
 
     // recursive
-    foreach (_e; WalkChilds (e))
-        update_size (_e);
+    //foreach (_e; WalkChilds (e))
+    //    update_size (_e);
 
     // fix size`s
-    e_fix_size_w (e);
+    //e_fix_size_w (e);
 }
 
 void
@@ -1568,8 +1555,8 @@ update (E* root) {
     time_step ();
 
     // 0
-    if (root.window !is null)
-        root.size = root.window.size;
+    //if (root.window !is null)
+    //    root.size = root.window.size;
     time_step ();
     // 1
     root.doc_apply_klasses ();
@@ -1596,6 +1583,10 @@ update (E* root) {
     root.load_childs ();
     time_step ();
     // 9
+
+    // childs
+    foreach (_e; WalkChilds (root)) 
+        _e.update (_e);
 }
 
 void

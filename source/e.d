@@ -9,6 +9,9 @@ import klass;
 import types;
 import events;
 import pix : Window;
+import doc : apply_klasses,
+    load_font,load_colors,load_e_text,load_e_image,time_step,
+    update_size,update_pos,load_childs;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -302,7 +305,52 @@ event (E* e, Event* ev) {
 
 void
 update (E* e) {
-    //
+    time_step ();
+
+    // 0
+    time_step ();
+
+    // 1
+    e.apply_klasses ();
+    time_step ();
+
+    // 2
+    if (e.content.image.src.length)
+        load_e_image (e);
+    time_step ();
+
+    // 3
+    if (e.content.text.s.length)
+        e.load_font ();
+    time_step ();
+    
+    // 4
+    e.load_colors ();
+    time_step ();
+
+    // 5
+    if (e.content.text.s.length)
+        e.load_e_text ();
+    time_step ();
+
+    // 6
+    e.update_size ();
+    time_step ();
+
+    // 7
+    e.update_pos ();
+    time_step ();
+    // 8
+    e.load_childs ();
+    time_step ();
+    // 9
+
+    // childs
+    foreach (_e; WalkChilds (e)) 
+        _e.update (_e);
+
+    // custom update
+    // ...
 }
 
 void
