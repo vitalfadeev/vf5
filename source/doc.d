@@ -19,6 +19,7 @@ import types;
 import events;
 import draws : get_text_size;
 import std.stdio : writeln;
+import std.stdio : writefln;
 import std.stdio : write;
 import pix : open_font;
 import pix : Window;
@@ -192,11 +193,11 @@ remove_class (E* e, Klass* kls) {
         e.klasses = e.klasses.remove (i);
 }
 
-void
-doc_apply_klasses (E* root) {
-    foreach (e; WalkTree (root)) 
-        apply_klasses (e);
-}
+//void
+//doc_apply_klasses (E* root) {
+//    foreach (e; WalkTree (root)) 
+//        apply_klasses (e);
+//}
 
 void
 apply_klasses (E* e) {
@@ -388,11 +389,11 @@ FONTPTR[string] global_fonts;
 static
 FONTPTR default_ptr;
 
-void
-load_fonts (E* root) {
-    foreach (e; WalkTree (root))
-        load_font (e);
-}
+//void
+//load_fonts (E* root) {
+//    foreach (e; WalkTree (root))
+//        load_font (e);
+//}
 
 void
 load_font (E* e) {
@@ -513,12 +514,12 @@ load_childs_cmd (E* e) {
     }
 }
 
-void
-load_images (E* root) {
-    foreach (E* e; WalkTree (root))
-        if (e.content.image.src.length)
-            load_e_image (e);
-}
+//void
+//load_images (E* root) {
+//    foreach (E* e; WalkTree (root))
+//        if (e.content.image.src.length)
+//            load_e_image (e);
+//}
 
 alias IMGPTR = SDL_Surface*;
 static
@@ -549,12 +550,12 @@ load_e_image (E* e) {
     }
 }
 
-void
-load_texts (E* root) {
-    foreach (e; WalkTree (root))
-        if (e.content.text.s.length)
-            load_e_text (e);
-}
+//void
+//load_texts (E* root) {
+//    foreach (e; WalkTree (root))
+//        if (e.content.text.s.length)
+//            load_e_text (e);
+//}
 
 void
 load_e_text (E* e) {
@@ -582,16 +583,16 @@ load_e_text (E* e) {
     e.content.text.size.h = max_h.to!H;
 }
 
-void
-update_sizes (E* root) {
-    update_size (root); // recursive
-}
+//void
+//update_sizes (E* root) {
+//    update_size (root); // recursive
+//}
 
-void
-update_poses (E* root) {
-    foreach (E* e; WalkTree (root))
-        update_pos (e);
-}
+//void
+//update_poses (E* root) {
+//    foreach (E* e; WalkTree (root))
+//        update_pos (e);
+//}
 
 void
 dump_sizes (E* root) {
@@ -792,7 +793,7 @@ e_size_h_fixed (E* e) {
 void
 e_size_h_content (E* e) {
     e_content_size_h (e);
-    update_pos (e);
+    //update_pos (e);
     e.size.h = (e.borders.t.w + e.pad.t + e.content.size.h + e.pad.b + e.borders.b.w).to!H;
 }
 
@@ -860,11 +861,13 @@ e_content_size_w_fixed (E* e) {
 
 void
 e_content_size_w_image (E* e) {
+    e_content_image_size_w (e);
     e.content.size.w = e.content.image.size.w;
 }
 
 void
 e_content_size_w_text (E* e) {
+    e_content_text_size_w (e);
     e.content.size.w = e.content.text.size.w;
 }
 
@@ -878,7 +881,9 @@ void
 e_content_childs_size (E* e) {
     Size max_sz;
     foreach (_e; WalkChilds (e)) {
-        update_size (_e);
+        if (_e.update !is null)
+            _e.update (_e);
+        //update_size (_e);
         max_sz.w = max (max_sz.w, _e.pos.x + _e.size.w).to!W;
         max_sz.h = max (max_sz.h, _e.pos.y + _e.size.h).to!H;
     }
@@ -893,7 +898,6 @@ e_content_childs_size (E* e) {
     else
         e.content.childs_size.h = 0;
 }
-
 
 
 void
@@ -926,11 +930,13 @@ e_content_size_h_fixed (E* e) {
 
 void
 e_content_size_h_image (E* e) {
+    e_content_image_size_h (e);
     e.content.size.h = e.content.image.size.h;
 }
 
 void
 e_content_size_h_text (E* e) {
+    e_content_text_size_h (e);
     e.content.size.h = e.content.text.size.h;
 }
 
@@ -1054,6 +1060,7 @@ e_content_text_size_w_text (E* e) {
 
 void 
 e_content_text_size_w_content (E* e) {
+    //e_content_text_size_w (e);
     e.content.text.size.w = e.content.size.w;
 }
 
@@ -1095,7 +1102,6 @@ e_content_text_size_h_content (E* e) {
 
 void
 update_pos (E* e) {
-    //
     final
     switch (e.pos_type) {
         case E.PosType.t9      : pos_type_t9   (e); break;
@@ -1279,7 +1285,6 @@ pos_type_vbox (E* e) {
 void
 pos_type_hbox (E* e) {
     // e e e
-    
 
     E* prev = find_last_with_type (e, e.pos_type);
     if (prev !is null) {
@@ -1345,7 +1350,7 @@ find_last_in_group (E* e, ubyte pos_group) {
 
 E*
 find_last_with_type (E* e, E.PosType pos_type) {
-    foreach (E* _e; WalkLeft (e))
+    foreach (_e; WalkLeft (e))
         if (_e.pos_type == pos_type)
             return _e;
 
@@ -1551,44 +1556,44 @@ event (E* root, Event* ev) {
     return;
 }
 
-void
-update (E* root) {
-    time_step ();
+//void
+//update (E* root) {
+//    time_step ();
 
-    // 0
-    //if (root.window !is null)
-    //    root.size = root.window.size;
-    time_step ();
-    // 1
-    root.doc_apply_klasses ();
-    time_step ();
-    // 2
-    root.load_images ();
-    time_step ();
-    // 3
-    root.load_fonts ();
-    time_step ();
-    // 4
-    root.load_colors ();
-    time_step ();
-    // 5
-    root.load_texts ();
-    time_step ();
-    // 6
-    root.update_sizes ();
-    time_step ();
-    // 7
-    root.update_poses ();
-    time_step ();
-    // 8
-    root.load_childs ();
-    time_step ();
-    // 9
+//    // 0
+//    //if (root.window !is null)
+//    //    root.size = root.window.size;
+//    time_step ();
+//    // 1
+//    root.doc_apply_klasses ();
+//    time_step ();
+//    // 2
+//    root.load_images ();
+//    time_step ();
+//    // 3
+//    root.load_fonts ();
+//    time_step ();
+//    // 4
+//    root.load_colors ();
+//    time_step ();
+//    // 5
+//    root.load_texts ();
+//    time_step ();
+//    // 6
+//    root.update_sizes ();
+//    time_step ();
+//    // 7
+//    root.update_poses ();
+//    time_step ();
+//    // 8
+//    root.load_childs ();
+//    time_step ();
+//    // 9
 
-    // childs
-    foreach (_e; WalkChilds (root)) 
-        _e.update (_e);
-}
+//    // childs
+//    foreach (_e; WalkChilds (root)) 
+//        _e.update (_e);
+//}
 
 void
 time_step (string file_name=__FILE__, size_t line=__LINE__) {
@@ -1597,7 +1602,7 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
     auto cur = MonoTime.currTime ();
     auto dur = cur - last_time;
     if (file_name.length != 0)
-        writeln (file_name, ": ", line, ": ", dur);
+        writefln ("%20s: %s", file_name, dur);
     else
         writeln (dur);
     last_time = cur;

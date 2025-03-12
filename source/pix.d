@@ -99,11 +99,6 @@ click_translate (Event* ev) {
 //      foreach (kls; klasses)  // widget
 //        kls.event (ev)
 
-void
-_redraw (Pix* pix, Event* ev) {
-    pix.draw (pix,ev);
-}
-
 int
 event (Pix* pix, Event* ev) {
     //if (ev.type != SDL_MOUSEMOTION)
@@ -123,7 +118,9 @@ event (Pix* pix, Event* ev) {
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: pix.update (pix,ev.e); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED: 
+                    pix.update (pix,ev.e); 
+                    break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -143,8 +140,8 @@ event (Pix* pix, Event* ev) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 //case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
-                case USER_EVENT.redraw : _redraw (pix,ev); break;
-                case USER_EVENT.draw : pix.draw (pix,ev); break;
+                case USER_EVENT.redraw : if (pix.draw !is null) pix.draw (pix,ev); break;
+                case USER_EVENT.draw   : if (pix.draw !is null) pix.draw (pix,ev); break;
                 default: ev.e.event (ev.e,ev);
             }
             break;
@@ -157,7 +154,8 @@ event (Pix* pix, Event* ev) {
 
 void
 update (Pix* pix, E* root) {
-    root.update (root); 
+    if (root.update !is null)
+        root.update (root); 
 }
 
 void
