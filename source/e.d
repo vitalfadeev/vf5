@@ -323,9 +323,10 @@ event (E* e, Event* ev) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.draw : 
-                    e.draw (e,ev);   // DrawUserEvent
+                    if (e.draw !is null)
+                        e.draw (e,ev);
                     break;
-                default: ev.e.event (ev.e,ev);
+                default:
             }
             break;
         default: 
@@ -389,8 +390,6 @@ set (E* e, string field_id, TString[] values) {
 
 void
 draw (E* e, Event* ev) {
-    auto renderer = ev.renderer;
-
     foreach (Klass* kls; e.klasses) {
         if (kls.draw !is null)
             kls.draw (kls,ev,e);
@@ -398,7 +397,7 @@ draw (E* e, Event* ev) {
 
     // childs
     foreach (_e; WalkChilds (e))
-        _e.draw (_e,ev);
+        _e.event (_e,ev);
 
     // custom draw
     // ...

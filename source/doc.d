@@ -1536,8 +1536,9 @@ event (E* root, Event* ev) {
         case SDL_KEYUP: break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.start : send_event_in_tree (ev); break;
-                case USER_EVENT.click : on_click (ev); break;
+                case USER_EVENT.start  : send_event_in_tree (ev); break;
+                case USER_EVENT.draw   : if (root.draw !is null) root.draw (root,ev); break;
+                case USER_EVENT.click  : on_click (ev); break;
                 default:
             }
             break;

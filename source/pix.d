@@ -114,12 +114,11 @@ event (Pix* pix, Event* ev) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED: 
-                    //DrawUserEvent _ev;
-                    //_ev.timestamp = ev.window.timestamp;
-                    //_ev.windowID  = ev.window.windowID;
-                    //_ev.e         = ev.e;
-                    //_ev.renderer  = ev.renderer;
-                    pix.draw (pix,ev); 
+                    Event _ev = *ev;
+                    DrawUserEvent __ev;
+                    _ev.type      = cast (SDL_EventType) __ev.type;
+                    _ev.user.code = __ev.code;
+                    pix.event (pix,&_ev); 
                     break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
@@ -145,6 +144,7 @@ event (Pix* pix, Event* ev) {
             switch (ev.user.code) {
                 //case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
                 case USER_EVENT.redraw : _redraw (pix,ev); break;
+                case USER_EVENT.draw : pix.draw (pix,ev); break;
                 default: ev.e.event (ev.e,ev);
             }
             break;
@@ -184,8 +184,7 @@ draw (Pix* pix, Event* ev) {
 
     // draw
     if (e !is null)
-    if (e.draw !is null)
-        e.draw (e,ev);
+        e.event (e,ev);
 
     // rasterize
     SDL_RenderPresent (renderer);

@@ -29,9 +29,11 @@ USER_EVENT : Sint32 {
 union
 UserEvent {
     Uint32 type; // SDL_USEREVENT
-    SDL_UserEvent  user;
-    StartUserEvent start;
-    ClickUserEvent click;
+    SDL_UserEvent   user;
+    StartUserEvent  start;
+    DrawUserEvent   draw;
+    RedrawUserEvent redraw;
+    ClickUserEvent  click;
 }
 
 struct
@@ -40,6 +42,16 @@ StartUserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.start;
+}
+
+struct
+DrawUserEvent {
+    Uint32        type = SDL_USEREVENT;
+    Uint32        timestamp;
+    Uint32        windowID;
+    Sint32        code = USER_EVENT.draw;
+    E*            e;
+    SDL_Renderer* renderer;;
 }
 
 struct
@@ -53,16 +65,6 @@ RedrawUserEvent {
     this (E* e) {
         this.e = e;
     }
-}
-
-struct
-DrawUserEvent {
-    Uint32        type = SDL_USEREVENT;
-    Uint32        timestamp;
-    Uint32        windowID;
-    Sint32        code = USER_EVENT.draw;
-    E*            e;
-    SDL_Renderer* renderer;;
 }
 
 struct
