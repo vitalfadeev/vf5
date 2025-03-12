@@ -18,7 +18,7 @@ import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
 alias PIX_UPDATE_FN = void function (Pix* pix, E* e);
-alias PIX_DRAW_FN   = void function (Pix* pix, SDL_Renderer* renderer, E* e);
+alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev);
 alias PIX_GO_FN     = int  function (Pix* pix, E* e);
 
 struct 
@@ -100,8 +100,8 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 void
-_redraw (Pix* pix, SDL_Renderer* renderer, RedrawUserEvent* ev) {
-    pix.draw (pix,renderer,ev.e);
+_redraw (Pix* pix, Event* ev) {
+    pix.draw (pix,ev);
 }
 
 int
@@ -113,7 +113,14 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: pix.draw (pix,ev.renderer,ev.e); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED: 
+                    //DrawUserEvent _ev;
+                    //_ev.timestamp = ev.window.timestamp;
+                    //_ev.windowID  = ev.window.windowID;
+                    //_ev.e         = ev.e;
+                    //_ev.renderer  = ev.renderer;
+                    pix.draw (pix,ev); 
+                    break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
@@ -136,7 +143,8 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
+                //case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
+                case USER_EVENT.redraw : _redraw (pix,ev); break;
                 default: ev.e.event (ev.e,ev);
             }
             break;
@@ -153,7 +161,10 @@ update (Pix* pix, E* root) {
 }
 
 void
-draw (Pix* pix, SDL_Renderer* renderer, E* e) {
+draw (Pix* pix, Event* ev) {
+    auto renderer = ev.renderer;
+    auto e = ev.e;
+
     // Clip to e
     if (e !is null) {
         SDL_Rect clip_rect;
@@ -174,7 +185,7 @@ draw (Pix* pix, SDL_Renderer* renderer, E* e) {
     // draw
     if (e !is null)
     if (e.draw !is null)
-        e.draw (e,renderer);
+        e.draw (e,ev);
 
     // rasterize
     SDL_RenderPresent (renderer);

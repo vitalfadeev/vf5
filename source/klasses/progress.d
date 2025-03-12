@@ -117,7 +117,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, SDL_Renderer* renderer, E* e) {
+draw (Klass* kls, Event* ev, E* e) {
     //
 }
 

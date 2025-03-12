@@ -20,6 +20,7 @@ Event {
 enum 
 USER_EVENT : Sint32 {
     start = 1,
+    draw,
     redraw,
     click,
 }
@@ -52,6 +53,16 @@ RedrawUserEvent {
     this (E* e) {
         this.e = e;
     }
+}
+
+struct
+DrawUserEvent {
+    Uint32        type = SDL_USEREVENT;
+    Uint32        timestamp;
+    Uint32        windowID;
+    Sint32        code = USER_EVENT.draw;
+    E*            e;
+    SDL_Renderer* renderer;;
 }
 
 struct

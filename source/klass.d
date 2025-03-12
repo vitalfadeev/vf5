@@ -9,7 +9,7 @@ import std.conv : to;
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
 alias KLASS_UPDATE_FN = void function (Klass* kls, E* e);
 alias KLASS_SET_FN    = void function (Klass* kls, E* e, string field, TString[] values);
-alias KLASS_DRAW_FN   = void function (Klass* kls, SDL_Renderer* renderer, E* e);
+alias KLASS_DRAW_FN   = void function (Klass* kls, Event* ev, E* e);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
 alias KlassPtr = Klass*;
 
@@ -79,8 +79,8 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 }
 
 void
-draw (Klass* kls, SDL_Renderer* renderer, E* e) {
-    //
+draw (Klass* kls, Event* ev, E* e) {
+    // auto renderer = ev.renderer;
 }
 
 KlassPtr

@@ -17,10 +17,27 @@ import doc : apply_klasses,
 alias E_EVENT_FN  = void function (E* e, Event* ev);
 alias E_UPDATE_FN = void function (E* e);
 alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
-alias E_DRAW_FN   = void function (E* e, SDL_Renderer* renderer);
+alias E_DRAW_FN   = void function (E* e, Event* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
 
+// form
+//   type none, rect, 3, 4, 5, 6, 7, 8
+//
+// margin
+//   aura
+//     content
+//       bg
+//       image
+//       text
+//       childs
+//
+// margin
+//   borders
+//   aura
+//     borders
+//     content
+//       borders
 
 struct 
 E {
@@ -301,6 +318,18 @@ void
 event (E* e, Event* ev) {
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+
+    switch (ev.type) {
+        case SDL_USEREVENT:
+            switch (ev.user.code) {
+                case USER_EVENT.draw : 
+                    e.draw (e,ev);   // DrawUserEvent
+                    break;
+                default: ev.e.event (ev.e,ev);
+            }
+            break;
+        default: 
+    }
 }
 
 void
@@ -359,15 +388,17 @@ set (E* e, string field_id, TString[] values) {
 }
 
 void
-draw (E* e, SDL_Renderer* renderer) {
+draw (E* e, Event* ev) {
+    auto renderer = ev.renderer;
+
     foreach (Klass* kls; e.klasses) {
         if (kls.draw !is null)
-            kls.draw (kls,renderer,e);
+            kls.draw (kls,ev,e);
     }
 
     // childs
     foreach (_e; WalkChilds (e))
-        _e.draw (_e,renderer);
+        _e.draw (_e,ev);
 
     // custom draw
     // ...
