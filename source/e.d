@@ -312,7 +312,17 @@ set (E* e, string field_id, TString[] values) {
 
 void
 draw (E* e, SDL_Renderer* renderer) {
-    //
+    foreach (Klass* kls; e.klasses) {
+        if (kls.draw !is null)
+            kls.draw (kls,renderer,e);
+    }
+
+    // childs
+    foreach (_e; WalkChilds (e))
+        _e.draw (_e,renderer);
+
+    // custom draw
+    // ...
 }
 
 EPtr

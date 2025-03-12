@@ -36,49 +36,6 @@ const DEFAULT_FONT_SIZE = 12;
 
 alias DOC_EVENT_FN  = void   function (E* root, Event* ev);
 alias DOC_UPDATE_FN = void   function (E* root);
-alias DOC_DRAW_FN   = void   function (E* root,SDL_Renderer* renderer, E* e);
-alias DOC_DUP_FN    = DocPtr function (DocPtr _this);
-alias DocPtr = Doc*;
-
-struct
-Doc {
-    Klass*   hotkeys;
-    Window*  window;
-    Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    E*       focused;
-    E*       tree;
-    Klass*[] klasses;
-
-    DOC_EVENT_FN  event  = &.event;
-    DOC_UPDATE_FN update = &.update;
-    DOC_DRAW_FN   draw   = &.draw;
-    DOC_DUP_FN    dup    = &._dup;
-}
-
-void
-add_child (E* root, Klass* kls) {
-    root.defined_klasses ~= kls;
-}
-
-E*
-find_e_at_pos (Doc* doc, Pos pos) {
-    E* found;
-
-    bool 
-    valid_e (E* e) {
-        return pos_in_rect (pos, e.pos, e.size);
-    }
-
-    import etree : WalkChilds;
-    import etree : FindDeepest;
-    foreach (_e_tree; doc.tree.childs) {
-        foreach (t; FindDeepest (_e_tree,&valid_e)) {
-            found = t;
-        }
-    }
-
-    return found;
-}
 
 Klass*
 find_klass_or_create (E* root, string s) {
@@ -119,15 +76,6 @@ create_klass (E* root, string s) {
 void
 add_defined_klass (E* root, Klass* kls) {
     root.defined_klasses ~= kls;
-}
-
-
-void
-add_e (ref E* root, E* e) {
-    if (root is null)
-        root = e;
-    else
-        root.childs ~= e;
 }
 
 
@@ -648,19 +596,6 @@ load_e_text (E* e) {
 }
 
 void
-update_text_size (Doc* doc) {
-    //foreach (E* e; WalkTree (doc.tree))
-    //    if (e.content.text.s.length)
-    //        update_e_text_size (t.e);
-}
-
-//void
-//update_e_text_size (E* e) {
-//    foreach (ref rec; e.content.text.rects)
-//        rec.pos
-//}
-
-void
 update_sizes (E* root) {
     update_size (root); // recursive
 }
@@ -672,15 +607,12 @@ update_poses (E* root) {
 }
 
 void
-dump_sizes (Doc* doc) {
-    foreach (E* e; WalkChilds (doc.tree))
-        dump_size (doc,e); // recursive
+dump_sizes (E* root) {
+    foreach (E* e; WalkChilds (root))
+        dump_size (e); // recursive
 }
-
 void
-dump_size (Doc* doc, E* e, int level=0) {
-    
-
+dump_size (E* e, int level=0) {
     for (auto i=0; i<level; i++) write ("  ");
     writeln (*e);
 
@@ -697,7 +629,7 @@ dump_size (Doc* doc, E* e, int level=0) {
 
     // recursive
     foreach (_e; WalkChilds (e))
-        dump_size (doc,_e,level+1);
+        dump_size (_e,level+1);
 }
 
 
@@ -1576,8 +1508,8 @@ pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
 
 
 void
-dump_klasses (Doc* doc) {
-    foreach (kls; doc.klasses) {
+dump_klasses (E* root) {
+    foreach (kls; root.defined_klasses) {
         writeln (*kls);
     }
 }
@@ -1679,45 +1611,24 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
     last_time = cur;
 }
 
-void
-draw (E* root, SDL_Renderer* renderer, E* e) {
-    time_step ();
+//void
+//draw (E* root, SDL_Renderer* renderer) {
+//    //time_step ();
+//    foreach (_e; WalkTree (root))
+//        _draw_one (_e,renderer);
+//    //time_step ();
+//}
 
-    auto e_tree = 
-        (e is null) ? 
-            root : 
-            e;
+//void
+//_draw_one (E* e, SDL_Renderer* renderer) {
+//    foreach (Klass* kls; e.klasses) {
+//        if (kls.draw !is null)
+//            kls.draw (kls,renderer,e);
+//    }
+//    if (e.draw !is null)
+//        e.draw (e,renderer);    
+//}
 
-    foreach (_e; WalkTree (e_tree))
-        _draw_one (renderer,_e);
-    time_step ();
-}
-
-void
-_draw_one (SDL_Renderer* renderer, E* e) {
-    foreach (Klass* kls; e.klasses) {
-        if (kls.draw !is null)
-            kls.draw (kls,renderer,e);
-    }
-    if (e.draw !is null)
-        e.draw (e,renderer);    
-}
-
-
-DocPtr
-_dup (DocPtr _this) {
-    auto cloned = new Doc ();
-
-    cloned.hotkeys = _this.hotkeys;
-    cloned.window  = _this.window;
-    cloned.size    = _this.size;
-    cloned.focused = _this.focused;
-    cloned.event   = _this.event;
-    cloned.update  = _this.update;
-    cloned.draw    = _this.draw;
-
-    return cloned;
-}
 
 
 auto

@@ -20,8 +20,8 @@ main () {
 	root.update (root);
 
 	// Check
-	//dump_tree (doc);
-	//dump_klasses (doc);
+	//dump_tree (root);
+	//dump_klasses (root);
 
 	//
 	pix.go (pix,root);
@@ -41,11 +41,11 @@ create_reserved_classes (E* root) {
 	import klasses.check    : Check;
 	import klasses.edit     : Edit;
 
-	root.add_child (new_reserved_klass!E_Klass ());
-	root.add_child (new_reserved_klass!Progress ());
-	root.add_child (new_reserved_klass!Button ());
-	root.add_child (new_reserved_klass!Check ());
-	root.add_child (new_reserved_klass!Edit ());
+	root.defined_klasses ~= new_reserved_klass!E_Klass ();
+	root.defined_klasses ~= new_reserved_klass!Progress ();
+	root.defined_klasses ~= new_reserved_klass!Button ();
+	root.defined_klasses ~= new_reserved_klass!Check ();
+	root.defined_klasses ~= new_reserved_klass!Edit ();
 }
 
 Klass*
@@ -54,8 +54,8 @@ new_reserved_klass (KLASS) () {
 }
 
 void
-dump_tree (Doc* doc) {
-    vf.tree.dump_tree (doc.tree);
+dump_tree (E* root) {
+    vf.tree.dump_tree (root);
 }
 
 

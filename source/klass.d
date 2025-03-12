@@ -1,7 +1,6 @@
 import bindbc.sdl;
 import tstring;
 import etree;
-import doc : Doc;
 import e : E;
 import field : Field;
 import events : Event;
@@ -59,10 +58,10 @@ Klass {
     }
 }
 
-void
-add_child (Klass* kls, Field* field) {
-    kls.fields ~= field;
-}
+//void
+//add_child (Klass* kls, Field* field) {
+//    kls.fields ~= field;
+//}
 
 void
 event (Klass* kls, Event* ev, E* e) {

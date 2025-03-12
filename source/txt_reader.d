@@ -10,6 +10,7 @@ import e;
 import etree;
 import klass;
 import field;
+import types;
 
 // RESERVED
 // e
@@ -546,7 +547,7 @@ go (E* root, string s) {
         // e
         if (name == "e" && indent == 0) { 
             e = new_e (root,values);
-            root.add_e (e);
+            root.childs ~= e;
             indents.length = 0;
             indents ~= Indent (e,indent);
         }
@@ -558,10 +559,10 @@ go (E* root, string s) {
             assert (_ind !is null);
             switch (_ind.type) {
                 case Indent.Type.klass : 
-                    .klass.add_child (_ind.klass,new Field (name,values)); 
+                    _ind.klass.fields ~= new Field (name,values);
                     break;
                 case Indent.Type.field : 
-                    .field.add_child (_ind.field,new Field (name,values)); 
+                    _ind.field.fields ~= new Field (name,values);
                     break;
                 case Indent.Type.e     : 
                     e = new_child_e (root,values);
@@ -589,8 +590,8 @@ go (E* root, string s) {
 
             field = new Field (name,values);
             switch (parent_ind.type) {
-                case Indent.Type.klass : .klass.add_child (parent_ind.klass,field); break;
-                case Indent.Type.field : .field.add_child (parent_ind.field,field); break;
+                case Indent.Type.klass : parent_ind.klass.fields ~= field; break;
+                case Indent.Type.field : parent_ind.field.fields ~= field; break;
                 default: writeln (parent_ind.type); assert (0);
             }        
             indents ~= Indent (field,indent);
@@ -658,7 +659,9 @@ find_parent (ref Indent[] indents, size_t for_indent) {
 auto
 new_root () {
     auto root = new E ();
-    root.event = &doc.event;
+    root.size   = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    root.event  = &doc.event;
+    root.update = &doc.update;
     return root;
 }
 

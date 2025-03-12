@@ -100,7 +100,7 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 void
-_redraw (Pix* pix, SDL_Renderer* renderer, E* e, RedrawUserEvent* ev) {
+_redraw (Pix* pix, SDL_Renderer* renderer, RedrawUserEvent* ev) {
     pix.draw (pix,renderer,ev.e);
 }
 
@@ -136,7 +136,7 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : _redraw (pix,ev.renderer,ev.e,cast (RedrawUserEvent*) ev); break;
+                case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
                 default: ev.e.event (ev.e,ev);
             }
             break;
@@ -172,7 +172,10 @@ draw (Pix* pix, SDL_Renderer* renderer, E* e) {
     }
 
     // draw
-    e.draw (e,renderer);
+    if (e !is null)
+    if (e.draw !is null)
+        e.draw (e,renderer);
+
     // rasterize
     SDL_RenderPresent (renderer);
 

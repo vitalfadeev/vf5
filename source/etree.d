@@ -3,7 +3,6 @@ module etree;
 import std.conv;
 public import vf.tree;
 import tstring;
-import doc   : Doc;
 import e     : E;
 import klass : Klass;
 import field : Field;
@@ -11,27 +10,6 @@ import field : Field;
 auto
 new_e () {
     return new E ();
-}
-
-auto 
-WalkKlasses (Doc* doc) {
-    return _WalkKlasses (doc);
-}
-struct 
-_WalkKlasses {
-    Doc* doc;
-
-    int
-    opApply (int delegate (Klass* kls) dg) {
-        int result;
-
-        foreach (kls; doc.klasses)
-            result = dg (kls);
-            if (result)
-                return result;
-
-        return 0;
-    }
 }
 
 
