@@ -60,7 +60,7 @@ E {
     Margin {
         Form   form;
         Border border;
-        R      r;
+        Size   size;
         Color  color;
     }
     Margin margin;
@@ -69,69 +69,16 @@ E {
     Aura {
         Form   form;
         Border border;
-        R      r;
+        Size   size;
         Color  color;
     }
     Aura aura;
 
     struct
-    Form {
-        Type type;
-        enum
-        Type {
-            none,
-            rect,
-            t3,
-            t4,
-            t5,
-            t6,
-            t7,
-            t8,
-        }
-    }
-
-    struct
-    Border {
-        W     w;     // 0..255
-        Type  type;  // none, solid, dash
-        Color color; // RGBA
-
-        enum
-        Type {
-            none,
-            solid,
-            dash
-        }
-    }
-    struct
-    Borders {
-        Border t = Border (1, Border.Type.solid);
-        Border r = Border (1, Border.Type.solid);
-        Border b = Border (1, Border.Type.solid);
-        Border l = Border (1, Border.Type.solid);
-        Pos pos;
-    }
-    Borders borders;
-
-    struct 
-    Corner {
-        R     r;
-        Color color; // RGBA
-    }
-    struct 
-    Corners {
-        Corner tl;
-        Corner tr;
-        Corner br;
-        Corner bl;
-    }
-    Corners corners;
-
-    struct
     Content {
         Form   form;
         Border border;
-        R      r;
+        Size   size;
         Color  color;
         // childs
         // image
@@ -195,7 +142,6 @@ E {
         Text text;
 
         Pos  pos;
-        Size size;
         Size childs_size;
         enum 
         SizeType {
@@ -210,6 +156,60 @@ E {
         SizeType size_h_type;
     }
     Content _content;
+
+    struct
+    Form {
+        Type type;
+        enum
+        Type {
+            none,
+            rect,
+            custom,
+            t3,
+            t4,
+            t5,
+            t6,
+            t7,
+            t8,
+        }
+    }
+
+    struct
+    Border {
+        W     w;     // 0..255
+        Type  type;  // none, solid, dash
+        Color color; // RGBA
+
+        enum
+        Type {
+            none,
+            solid,
+            dash
+        }
+    }
+    struct
+    Borders {
+        Border t = Border (1, Border.Type.solid);
+        Border r = Border (1, Border.Type.solid);
+        Border b = Border (1, Border.Type.solid);
+        Border l = Border (1, Border.Type.solid);
+        Pos pos;
+    }
+    Borders borders;
+
+    struct 
+    Corner {
+        R     r;
+        Color color; // RGBA
+    }
+    struct 
+    Corners {
+        Corner tl;
+        Corner tr;
+        Corner br;
+        Corner bl;
+    }
+    Corners corners;
 
     bool    hidden;
     Klass*  from_klass;
