@@ -352,7 +352,6 @@ E {
         pos           = pos.init;
         size          = size.init;
         hotkeys       = hotkeys.init;
-        window        = window.init;
         focused       = focused.init;
         margin        = margin.init;
         aura          = aura.init;

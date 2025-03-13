@@ -54,7 +54,6 @@ go (Pix* pix, E* e) {
 
     // Event "start"
     send_user_event!StartUserEvent ();
-
     e.update ();
 
     // Event Loop
@@ -116,19 +115,11 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED: 
-                    Event _ev = *ev;
-                    DrawUserEvent __ev;
-                    _ev.type      = cast (SDL_EventType) __ev.type;
-                    _ev.user.code = __ev.code;
-                    pix.event (pix,&_ev); 
-                    break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED:  direct_event!DrawUserEvent (pix,ev); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED: 
-                    pix.update (pix,ev.e); 
-                    break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED:  pix.update (pix,ev.e); direct_event!DrawUserEvent (pix,ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -180,7 +171,6 @@ draw (Pix* pix, Event* ev) {
         clip_rect.y = e.pos.y;
         clip_rect.w = e.size.w;
         clip_rect.h = e.size.h;
-        writeln (clip_rect);
         SDL_RenderSetClipRect (renderer,&clip_rect);
     }
 
@@ -326,7 +316,7 @@ Window {
     size () {
         int w,h;
         SDL_GetWindowSize (_super, &w, &h);
-        return Size (w.to!W,h.to!H);
+        return Size (w,h);
     }
 }
 
@@ -335,6 +325,15 @@ void
 send_user_event (EVT,ARGS...) (ARGS args) {
     auto evt = EVT (args);
     SDL_PushEvent (cast(SDL_Event*)&evt);
+}
+
+void
+direct_event (EVENT) (Pix* pix, Event* ev) {
+    Event _ev = *ev;
+    EVENT __ev;
+    _ev.type      = cast (SDL_EventType) __ev.type;
+    _ev.user.code = __ev.code;
+    pix.event (pix,&_ev); 
 }
 
 
