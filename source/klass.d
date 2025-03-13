@@ -63,29 +63,11 @@ Klass {
         if (fn.draw !is null) fn.draw (&this,ev,e);
     }
 
-    //void
-    //add_child (Field* field) {
-    //    //
-    //}
-    //void
-    //add_child (Switch_* switch_) {
-    //    //
-    //}
-    //void
-    //add_child (E* e) {
-    //    //
-    //}
-
     string
     toString () {
         return "Klass ("~ name ~")";
     }
 }
-
-//void
-//add_child (Klass* kls, Field* field) {
-//    kls.fields ~= field;
-//}
 
 void
 event (Klass* kls, Event* ev, E* e) {

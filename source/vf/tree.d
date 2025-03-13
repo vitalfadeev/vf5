@@ -8,7 +8,6 @@ Tree {
     Childs {
         Tree* l;
         Tree* r;
-        mixin childs_op_apply;
     };
     Childs _childs;
     Tree*  parent;
@@ -18,9 +17,8 @@ Tree {
 
 mixin template 
 tree_functions () {
-    alias TTree = typeof(this);
     void
-    add_child (TTree* c) {
+    add_child (Tree* c) {
         auto t = &this;
         auto tr = t._childs.r;
         if (tr is null) {
@@ -36,7 +34,7 @@ tree_functions () {
     }
 
     void
-    remove_child (TTree* c) {
+    remove_child (Tree* c) {
         auto t = &this;
 
         auto l = c.l;
@@ -97,9 +95,9 @@ _Childs (TTree) {
 
     int
     opApply (int delegate (TTree* t) dg) {
-        foreach (_t; t._childs)
+        for (auto _t = this.t._childs.l; _t !is null; _t = _t.r)
             if (auto result = dg (cast (TTree*) _t))
-                return result;                
+                return result;
 
         return 0;
     }
@@ -119,18 +117,18 @@ _Childs (TTree) {
 // in depth
 auto 
 WalkTree (TTree,Skip) (TTree* t, Skip skip) {
-    return _WalkTree!(TTree,Skip) (t,skip);
+    return _WalkTree!(TTree,Skip) (cast (Tree*) t,skip);
 }
 
 struct
 _WalkTree (TTree,Skip) {
-    TTree* t;
-    Skip   skip;
+    Tree* t;
+    Skip  skip;
 
     int
     opApply (int delegate (TTree* t) dg) {
-        Tree*  next = cast (Tree*) t;
-        Tree* _next = cast (Tree*) t;
+        Tree*  next = t;
+        Tree* _next = t;
 
         loop:
             if (skip (cast (TTree*) next)) {
@@ -201,17 +199,17 @@ _WalkLeft (TTree,Skip) {
 // ito left
 auto 
 WalkChilds (TTree,Skip) (TTree* t, Skip skip) {
-    return _WalkChilds!(TTree,Skip) (t,skip);
+    return _WalkChilds!(TTree,Skip) (cast (Tree*) t,skip);
 }
 
 struct
 _WalkChilds (TTree,Skip) {
-    TTree* t;
-    Skip   skip;
+    Tree* t;
+    Skip  skip;
 
     int
     opApply (int delegate (TTree* t) dg) {
-        Tree* next = (cast (Tree*) t)._childs.l;
+        Tree* next = t._childs.l;
 
         loop:
             if (next is null)
@@ -236,18 +234,18 @@ _WalkChilds (TTree,Skip) {
 //
 auto 
 FindDeepest (TTree,Skip,Cond) (TTree* t, Skip skip, Cond cond) {
-    return _FindDeepest!(TTree,Skip,Cond) (t,skip,cond);
+    return _FindDeepest!(TTree,Skip,Cond) (cast (Tree*) t,skip,cond);
 }
 
 struct
 _FindDeepest (TTree,Skip,Cond) {
-    TTree* t;
-    Skip   skip;
-    Cond   cond;
+    Tree* t;
+    Skip  skip;
+    Cond  cond;
 
     int
     opApply (int delegate (TTree* t) dg) {
-        Tree*  next = cast (Tree*) t;
+        Tree*  next = t;
         Tree* _next = next;
 
         loop:
@@ -290,10 +288,9 @@ mixin template
 childs_op_apply () {
     int
     opApply (int delegate (Tree* t) dg) {
-        for (auto t = this.l; t !is null; t = t.r) {
+        for (auto t = this.l; t !is null; t = t.r)
             if (auto result = dg (t))
                 return result;                
-        }
 
         return 0;
     }

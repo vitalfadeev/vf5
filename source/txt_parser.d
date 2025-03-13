@@ -1,13 +1,13 @@
 module txt_parser;
 
 import tstring;
-import types;
-import klass;
+import color : update_tcb;
+import color : ColorBit;
 import std.stdio : writeln;
 
 
 bool 
-parse_color (TString[] tss, Color* color) {
+parse_color (Color) (TString[] tss, Color* color) {
     import std.string : startsWith;
 
     if (tss[0].s.startsWith ("#"))
@@ -28,7 +28,7 @@ parse_color (TString[] tss, Color* color) {
 }
 
 bool 
-parse_color_hex (string s, Color* color) {
+parse_color_hex (Color) (string s, Color* color) {
     import std.algorithm : startsWith;
     import std.string : strip;
 
@@ -42,7 +42,7 @@ parse_color_hex (string s, Color* color) {
 }
 
 bool 
-parse_color_hex3 (string s, Color* color) {
+parse_color_hex3 (Color) (string s, Color* color) {
     // #CCC
 
     import std.conv : to;
@@ -60,7 +60,7 @@ parse_color_hex3 (string s, Color* color) {
 
 
 bool 
-parse_color_hex6 (string s, Color* color) {
+parse_color_hex6 (Color) (string s, Color* color) {
     // #CCDDEE
 
     import std.conv : to;
@@ -77,7 +77,7 @@ parse_color_hex6 (string s, Color* color) {
 }
 
 bool 
-parse_color_tcb (TString[] tss, Color* color) {
+parse_color_tcb (Color) (TString[] tss, Color* color) {
     // tcb +0 +0 -25
     // read tcb
     // loop:

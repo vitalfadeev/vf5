@@ -338,7 +338,7 @@ E {
 
     void
     remove_child (E* c) {
-        _super.remove_child (cast (vf.tree.Tree*) c);
+        etree.remove_child (&this, c);
     }
 
     auto ref parent () { return cast (E*) _super.parent; }

@@ -40,8 +40,7 @@ Token_line_reader {
 
         // last line without cr
         if (t_line.length > 0) {
-            int result = dg (t_line);
-            if (result)
+            if (auto result = dg (t_line))
                 return result;
         }
 

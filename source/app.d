@@ -53,14 +53,6 @@ new_reserved_klass (KLASS) () {
 	return cast (Klass*) new KLASS ();
 }
 
-void
-dump_tree (E* root) {
-    vf.tree.dump_tree (root);
-}
-
-
-
-
 
 //e
 // e

@@ -92,6 +92,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "text.font.size"    : set_content_text_font_size   (e,values); break;
         case "text.font.file"    : set_content_text_font_file   (e,values); break;
         case "bg"                : set_bg                 (e,values); break;
+        case "generator"         : set_generator          (e,values); break;
         //case "childs.src"        : set_childs_src         (e,values); break;
         //case "childs.src.tpl"    : set_childs_src_tpl     (e,values); break;
         //case "childs.src.tpl.src": set_childs_src_tpl_src (e,values); break;
@@ -99,6 +100,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "on"                : set_on                 (e,values); break;
         //case "e"                : set_e                  (e,kls,values); break;
         default:
+            writefln ("IGNORED: %s: %s", field_id, values);
     }
 }
 
@@ -616,6 +618,11 @@ set_bg (E* e, TString[] values) {
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }
+}
+
+void
+set_generator (E* e, TString[] values) {
+    //
 }
 
 //void

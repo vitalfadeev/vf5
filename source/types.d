@@ -96,16 +96,3 @@ Size {
         h -= b.h;
     }
 }
-
-struct
-Pad {
-    Y t;
-    X r;
-    Y b;
-    X l;
-    Color bg;
-    Pos   pos;
-    Size  size;
-}
-
-

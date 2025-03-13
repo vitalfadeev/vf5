@@ -10,13 +10,6 @@ import std.stdio : writeln;
 //   SDL_PIXELFORMAT_RGBA8888 on big-endian systems
 alias Color = SDL_Color;
 
-enum
-ColorBit {
-    none,
-    plus,
-    minus
-}
-
 // HSL
 struct
 Color_tcb {
@@ -232,3 +225,10 @@ up_contrast (ubyte *r, ubyte *g, ubyte *b) {
 
 double dmax (double a, double b)  { return (a > b) ? a : b; }
 double dmin (double a, double b)  { return (a < b) ? a : b; }
+
+enum
+ColorBit {
+    none,
+    plus,
+    minus
+}
