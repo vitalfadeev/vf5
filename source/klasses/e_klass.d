@@ -70,7 +70,8 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "aura.borders.color": set_aura_borders_color (e,values); break;
         case "borders.color"     : set_aura_borders_color (e,values); break;
         case "aura"              : set_aura               (e,values); break;
-        case "aura.bg"           : set_aura_bg            (e,values); break;
+        case "aura.bg"           : set_aura_color         (e,values); break;
+        case "aura.color"        : set_aura_color         (e,values); break;
         case "content.image"     : set_content_image      (e,values); break;
         case "content.text"      : set_content_text       (e,values); break;
         case "content"           : set_content            (e,values); break;
@@ -365,7 +366,7 @@ set_aura (E* e, TString[] values) {
 }
 
 void
-set_aura_bg (E* e, TString[] values) {
+set_aura_color (E* e, TString[] values) {
     if (values.length) {
         Color c = e.aura.color;
         if (doc_parse_color (e, values, &c))

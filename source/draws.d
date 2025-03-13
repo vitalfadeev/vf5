@@ -176,7 +176,6 @@ content_size (E* e) {
 
 void
 draw_e (SDL_Renderer* renderer, E* e) {
-    draw_borders (renderer,e);
     draw_content_with_aura (renderer,e);
     draw_click_decoration (renderer,e);
 }
@@ -220,7 +219,7 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
 }
 
 void
-draw_borders (SDL_Renderer* renderer, E* e) {
+draw_aura_borders (SDL_Renderer* renderer, E* e) {
     SDL_SetRenderDrawColor (
         renderer, 
         e.aura.border.color.r,
@@ -254,6 +253,7 @@ draw_content_with_aura (SDL_Renderer* renderer, E* e) {
     auto _content_size = content_size (e);
 
     draw_aura (renderer,e,_aura_pos,_aura_size);
+    draw_aura_borders (renderer,e);
     draw_content (renderer,e,_content_pos,_content_size);
 }
 

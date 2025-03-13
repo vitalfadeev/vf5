@@ -772,8 +772,8 @@ update_size_h_content (E* e) {
 
     auto eh = e.content.size.h + e.aura.size.h + e.aura.size.h;
     auto ch = e.content.size.h;
-    e.size.w         = (eh > 0) ? eh : 0;
-    e.content.size.w = (ch > 0) ? ch : 0;
+    e.size.h         = (eh > 0) ? eh : 0;
+    e.content.size.h = (ch > 0) ? ch : 0;
 }
 
 void
@@ -1334,8 +1334,7 @@ pos_type_percent (E* e) {
 }
 
 void
-pos_type_none (E* e) {
-    
+pos_type_none (E* e) {    
     e.pos = Pos (0,0);
 }
 

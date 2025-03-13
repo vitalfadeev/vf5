@@ -146,6 +146,7 @@ E {
 
         Pos  pos;
         Size childs_size;
+        
         enum 
         SizeType {
             e, // default
@@ -155,8 +156,8 @@ E {
             childs,
             max,   // max (image,text)
         }
-        SizeType size_w_type;
-        SizeType size_h_type;
+        SizeType size_w_type = SizeType.e;
+        SizeType size_h_type = SizeType.e;
     }
     Content _content;
 
@@ -195,7 +196,7 @@ E {
     Klass*  from_klass;
     Klass*  from_template;
 
-    PosType pos_type;
+    PosType pos_type = PosType.none;
     ubyte   pos_group;
     PosDir  pos_dir;
     byte    pos_percent;
@@ -226,8 +227,8 @@ E {
         window,
         max,
     }
-    SizeType size_w_type;
-    SizeType size_h_type;
+    SizeType size_w_type = SizeType.parent;
+    SizeType size_h_type = SizeType.parent;
 
     // e-list
     //   childs.src       fs

@@ -211,7 +211,7 @@ _WalkChilds (TTree,Skip) {
 
     int
     opApply (int delegate (TTree* t) dg) {
-        Tree*  next = (cast (Tree*) t)._childs.l;
+        Tree* next = (cast (Tree*) t)._childs.l;
 
         loop:
             if (next is null)

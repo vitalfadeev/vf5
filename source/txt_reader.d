@@ -44,16 +44,50 @@ e root
   e rect
 
 rect
-  pos          10 10
-  size         200 64
-  content.size 200 64
-  aura         10
+  aura         20
   aura.color   #008
   borders      2 solid #ccc
-  text         `123 abc`
+  text         `echo 123 abc`
   text.fg      #ccc
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 //comment
+";
+
+string text2 = "
+e root
+  e vbox rect
+  e vbox rect
+
+rect
+  size         parent 128
+  aura         20
+  aura.color   #008
+  borders      2 solid #ccc
+  text         `echo 123 abc`
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+
+vbox
+  pos.type  vbox b
+";
+
+string text3 = "
+e root
+  e hbox rect
+  e hbox rect
+  e hbox rect
+
+rect
+  size         128 128
+  aura         20
+  aura.color   #008
+  borders      2 solid #ccc
+  text         a
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+
+hbox
+  pos.type  hbox r
 ";
 
 string text = "
@@ -95,8 +129,6 @@ e root
 
 root
  bg           #000
- size         parent
- content.size e
  on start     commands.player.start
 
 menubar
