@@ -1,3 +1,5 @@
+module pix;
+
 import std.conv;
 import std.format;
 import std.stdio;
@@ -20,6 +22,10 @@ alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
 alias PIX_UPDATE_FN = void function (Pix* pix, E* e);
 alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev);
 alias PIX_GO_FN     = int  function (Pix* pix, E* e);
+
+alias IMAGE_PTR = SDL_Surface*;
+alias FONT_PTR  = TTF_Font*;
+alias TEXT_PTR  = SDL_Texture*;
 
 struct 
 Pix {

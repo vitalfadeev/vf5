@@ -26,7 +26,6 @@ import pix : Window;
 import pix : IMGException;
 import pix : redraw_window;
 import draws : e_pos, e_size, content_pos;
-import klasses.e : global_font_files;
 import field : Field;
 import pix : redraw;
 
@@ -192,17 +191,6 @@ remove_class (E* e, Klass* kls) {
 
 void
 apply_e_klasses (E* e) {
-    e.on.length = 0;
-    global_font_files.length = 0;
-
-    // remove e added from klass
-    E*[] for_remove;
-    foreach (_e; WalkChilds (e))
-        if (_e.from_klass !is null)
-            for_remove ~= _e;
-    foreach (_e; for_remove)
-        e.remove_child (_e);
-
     // set . each e klass
     foreach (kls; e.klasses)
         apply_klass (e,kls);

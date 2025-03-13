@@ -570,14 +570,9 @@ set_content_text_font (E* e, TString[] values) {
     }
 }
 
-static 
-string[] global_font_files;
-
 void
 set_content_text_font_file (E* e, TString[] values) {
     if (values.length) {
-        // collect font names
-        global_font_files ~= values[0].s;
         e.content.text.font.file = values[0].s;
     }
 }
@@ -601,7 +596,7 @@ set_bg (E* e, TString[] values) {
     if (values.length) {
         Color c;
         if (doc_parse_color (e,values, &c))
-            e.bg = c;
+            e.content.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }

@@ -267,7 +267,7 @@ draw_aura (SDL_Renderer* renderer, E* e, Pos _aura_pos, Size _aura_size) {
 
 void
 draw_content_bg (SDL_Renderer* renderer, E* e, Pos _content_pos, Size _content_size) {
-    auto color = e.bg;
+    auto color = e.content.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, _content_pos.x, _content_pos.y, _content_size.w, _content_size.h);
 }

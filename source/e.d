@@ -8,7 +8,7 @@ import etree;
 import klass;
 import types;
 import events;
-import pix : Window;
+import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
 import generator : Generator;
 import doc : apply_e_klasses,
     load_e_font,load_e_colors,load_e_text,load_e_image,time_step,
@@ -42,20 +42,35 @@ alias EPtr = E*;
 
 struct 
 E {
-    Tree    _super;
-    //alias   _super this;
-    Klass*[] klasses;    // box green rounded
-    Pos      pos;        // relative from parent
-    Size     size;       // = content.size + aura.size
-    //   Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    BG       bg;
+    Tree      _super;
+    Klass*[]   klasses;    // box green rounded
+
+    Margin     margin;
+    Aura       aura;
+    Content   _content;
+
+    Pos        pos;        // relative from parent
+    PosType    pos_type = PosType.none;
+    ubyte      pos_group;
+    PosDir     pos_dir;
+    byte       pos_percent;
+    Size       size;       // = content.size + aura.size
+    SizeType   size_w_type = SizeType.parent;
+    SizeType   size_h_type = SizeType.parent;
+    bool       hidden;
+    Klass*     from_klass;
+    Klass*     from_template;
+    _Generator generator;
+    On[]       on;
+    Fn         fn;
 
     // root
-    Klass*   hotkeys;
-    Window*  window;
-    E*       focused;
     Klass*[] defined_klasses;
+    Window*  window;
+    Klass*   hotkeys;
+    E*       focused;
 
+    //
     struct
     Margin {
         Form   form;
@@ -65,7 +80,6 @@ E {
 
         Pos    pos;
     }
-    Margin margin;
 
     struct
     Aura {
@@ -76,25 +90,33 @@ E {
 
         Pos    pos;
     }
-    Aura aura;
 
     struct
     Content {
-        Form   form;
-        Border border;
-        Size   size;
-        Color  color;
+        Form     form;
+        Border   border;
+        Size     size;
+        Color    color;
+        Pos      pos;
+        Size     childs_size;
+        SizeType size_w_type = SizeType.e;
+        SizeType size_h_type = SizeType.e;
+        Image    image;
+        Text     text;
+
         // childs
         // image
         // text
-
         struct
         Image {
-          string src;       // "abc"
-          Pos    pos;
-          Size   size = Size (100,100);
-          Color  bg;
-          SDL_Surface* ptr;
+          string    src;       // "abc"
+          Color     bg;
+          Pos       pos;
+          Size      size = Size (100,100);
+          SizeType  size_w_type;
+          SizeType  size_h_type;
+          IMAGE_PTR ptr;
+
           enum
           SizeType {
             fixed,
@@ -102,65 +124,58 @@ E {
             text,
             content,
           }
-          SizeType size_w_type;
-          SizeType size_h_type;
         }
-        Image image;
 
         struct
         Text {
-          string s;     // "abc"
-          struct 
-          Font {
-            string     file;    // "abc"
-            string     family;  // "abc"
-            ubyte      size;    // 0..256
-            bool       bold;    // 0/1
-            bool       italic;  // 0/1
-            TTF_Font*  ptr;    // ...
-          }
-          Font    font;
-          Pos     pos;
-          Size    size;
-          Color   fg;
-          Color   bg;
-          PosType pos_type;
-          enum
-          SizeType {
-            fixed,
-            image,
-            text,
-            content,
-          }
-          SizeType size_w_type;
-          SizeType size_h_type;
-          struct
-          TextRect {
-              Pos    pos;
-              Size   size;
-              string s;  // chars[a..b]
-              SDL_Texture* ptr;
-          }
-          TextRect[] rects;
-        }
-        Text text;
+            string     s;            // "abc"
+            Font       font;
+            Color      fg;
+            Color      bg;
+            Pos        pos;
+            PosType    pos_type;
+            Size       size;
+            SizeType   size_w_type;
+            SizeType   size_h_type;
+            TextRect[] rects;
 
-        Pos  pos;
-        Size childs_size;
-        
+            struct 
+            Font {
+                string    file;    // "abc"
+                string    family;  // "abc"
+                ubyte     size;    // 0..256
+                bool      bold;    // 0/1
+                bool      italic;  // 0/1
+                FONT_PTR  ptr;     // ...
+            }
+  
+            enum
+            SizeType {
+                fixed,
+                image,
+                text,
+                content,
+            }
+  
+            struct
+            TextRect {
+                Pos      pos;
+                Size     size;
+                string   s;  // chars[a..b]
+                TEXT_PTR ptr;
+            }
+        }
+
         enum 
         SizeType {
-            e, // default
+            e,
             fixed, 
             image,
             text,
             childs,
             max,   // max (image,text)
         }
-        SizeType size_w_type = SizeType.e;
-        SizeType size_h_type = SizeType.e;
     }
-    Content _content;
 
     struct
     Form {
@@ -180,7 +195,7 @@ E {
     }
 
     struct
-    Border {
+    Border {         // brush
         W     w;     // 0..255
         Type  type;  // none, solid, dash
         Color color; // RGBA
@@ -193,14 +208,6 @@ E {
         }
     }
 
-    bool    hidden;
-    Klass*  from_klass;
-    Klass*  from_template;
-
-    PosType pos_type = PosType.none;
-    ubyte   pos_group;
-    PosDir  pos_dir;
-    byte    pos_percent;
 
     enum
     PosType : ubyte {
@@ -228,16 +235,12 @@ E {
         window,
         max,
     }
-    SizeType size_w_type = SizeType.parent;
-    SizeType size_h_type = SizeType.parent;
 
     // e-list
-    //   childs.src       fs
-    //   childs.src       cmd `command` delimiter |
-    //   childs.src       csv /path/to/file.csv
-    //   childs.tpl.klass list-template
-    //   childs.tpl.src   1         2    3
-    //   childs.tpl.dst   image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+    //   generator       fs
+    //   generator       cmd `command` delimiter |
+    //   generator       csv /path/to/file.csv
+    //   generator.klass list-template
 
     struct
     _Generator {
@@ -297,14 +300,12 @@ E {
             }
         }
     }
-    _Generator generator;
 
     struct
     On {
         string    event;  // click
-        TString[] action; // exec audacious --play-pause
+        TString[] action; // audacious --play-pause
     }
-    On[] on;
 
     struct
     Fn {
@@ -314,7 +315,6 @@ E {
         E_DRAW_FN   draw   = &.draw;
         E_DUP_FN    dup    = &._dup;        
     }
-    Fn fn;
 
     void 
     event (Event* ev) { 
@@ -341,8 +341,42 @@ E {
         etree.remove_child (&this, c);
     }
 
-    auto ref parent () { return cast (E*) _super.parent; }
-    //auto ref childs () { return (&_super).childs; }
+    auto ref 
+    parent () { 
+        return cast (E*) _super.parent; 
+    }
+
+
+    void
+    reset () {
+        pos           = pos.init;
+        size          = size.init;
+        hotkeys       = hotkeys.init;
+        window        = window.init;
+        focused       = focused.init;
+        margin        = margin.init;
+        aura          = aura.init;
+        _content      = _content.init;
+        hidden        = hidden.init;
+        from_klass    = from_klass.init;
+        from_template = from_template.init;
+        pos_type      = PosType.none; //
+        pos_group     = pos_group.init;
+        pos_dir       = pos_dir.init;
+        pos_percent   = pos_percent.init;
+        size_w_type   = SizeType.parent; //
+        size_h_type   = SizeType.parent; //
+        generator     = generator.init;
+        on.length     = 0;
+
+        // remove e added from klass
+        E*[] for_remove;
+        foreach (_e; WalkChilds (&this))
+            if (_e.from_klass !is null)
+                for_remove ~= _e;
+        foreach (_e; for_remove)
+            (&this).remove_child (_e);
+    }
 
     //
     string
@@ -398,10 +432,12 @@ event (E* e, Event* ev) {
 void
 update (E* e) {
     writefln ("%-60s", e.toString);
+    e.reset ();
     time_step ("");
 
     // 1
-    e.apply_e_klasses ();
+    if (e.klasses.length)
+        e.apply_e_klasses ();
     time_step ("apply_e_klasses");
 
     // 2
@@ -424,15 +460,18 @@ update (E* e) {
     time_step ("load_e_text");
 
     // 6
-    e.update_e_size ();
+    if (1)
+        e.update_e_size ();
     time_step ("update_e_size");
 
     // 7
-    e.update_e_pos ();
+    if (1)
+        e.update_e_pos ();
     time_step ("update_e_pos");
 
     // 8
-    e.load_e_childs ();
+    if (e.generator.type != E._Generator.Type.none)
+        e.load_e_childs ();
     time_step ("load_e_childs");
 
     // 9
@@ -471,7 +510,6 @@ _dup (EPtr _this) {
      cloned.pos           = _this.pos;
      cloned.size          = _this.size;
      cloned.aura          = _this.aura;
-     cloned.bg            = _this.bg;
      cloned._content      = _this._content;
      cloned.content.text.rects 
                           = _this.content.text.rects.dup;
