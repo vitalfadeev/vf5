@@ -1441,7 +1441,7 @@ event (E* root, Event* ev) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
                 //ev.doc.update (ev.doc);
                 //redraw_window (ev.app_window);
             }
@@ -1450,7 +1450,7 @@ event (E* root, Event* ev) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x.to!X,ev.button.y.to!Y), deepest);
+                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
                 //remove_class_from_all (doc,"button-pressed");
                 //ev.doc.update (ev.doc);
                 //redraw_window (ev.app_window);
@@ -1462,6 +1462,7 @@ event (E* root, Event* ev) {
             switch (ev.user.code) {
                 case USER_EVENT.start  : send_event_in_tree (ev); break;
                 case USER_EVENT.draw   : root.draw (ev); break;
+                case USER_EVENT.redraw : root.draw (ev); break;
                 case USER_EVENT.click  : on_click (ev); break;
                 default:
             }

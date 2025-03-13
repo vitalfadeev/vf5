@@ -159,8 +159,8 @@ toolbar-item
 // borders      1 solid colors.gray_border
 
 button.pressed
- aura.color   tcb +0 +0 -32
- content.bg   tcb +0 +0 -32
+ aura.color    tcb +0 +0 -32
+ content.color tcb +0 +0 -32
 
 button-hover
  aura.color   tcb +0 +0 +32

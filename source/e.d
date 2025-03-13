@@ -423,7 +423,8 @@ event (E* e, Event* ev) {
     switch (ev.type) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.draw : e.draw (ev); break;
+                case USER_EVENT.draw   : e.draw (ev); break;
+                case USER_EVENT.redraw : e.draw (ev); break;
                 default:
             }
             break;

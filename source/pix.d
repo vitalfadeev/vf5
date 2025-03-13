@@ -147,7 +147,6 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                //case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
                 case USER_EVENT.redraw : if (pix.draw !is null) pix.draw (pix,ev); break;
                 case USER_EVENT.draw   : if (pix.draw !is null) pix.draw (pix,ev); break;
                 default: ev.e.event (ev);
@@ -169,6 +168,10 @@ void
 draw (Pix* pix, Event* ev) {
     auto renderer = ev.renderer;
     auto e = ev.e;
+
+    if (ev.type == SDL_USEREVENT)
+    if (ev.user.code == USER_EVENT.redraw)
+        e = (cast (RedrawUserEvent*) ev).e;
 
     // Clip to e
     if (e !is null) {

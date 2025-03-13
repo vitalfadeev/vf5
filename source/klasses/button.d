@@ -44,16 +44,16 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                ev.e.add_class ("button.pressed");
-                ev.e.update ();
+                e.add_class ("button.pressed");
+                e.update ();
                 e.redraw ();
             }
             break;
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
-                ev.e.remove_class ("button.pressed");
-                ev.e.update ();
+                e.remove_class ("button.pressed");
+                e.update ();
                 e.redraw ();
             }
             break;

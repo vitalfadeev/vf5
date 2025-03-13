@@ -92,6 +92,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "text.font.size"    : set_content_text_font_size   (e,values); break;
         case "text.font.file"    : set_content_text_font_file   (e,values); break;
         case "bg"                : set_bg                 (e,values); break;
+        case "content.color"     : set_bg                 (e,values); break;
         case "generator"         : set_generator          (e,values); break;
         case "on"                : set_on                 (e,values); break;
         default:
