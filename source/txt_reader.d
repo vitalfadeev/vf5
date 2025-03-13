@@ -93,12 +93,12 @@ hbox
 string text = "
 e root
  e vbox menubar
-  e menubar-item border hbox file  
-  e menubar-item border hbox play 
-  e menubar-item border hbox list 
-  e menubar-item border hbox services 
-  e menubar-item border hbox output
-  e menubar-item border hbox view
+  e menubar-item hbox file  
+  e menubar-item hbox play 
+  e menubar-item hbox list 
+  e menubar-item hbox services 
+  e menubar-item hbox output
+  e menubar-item hbox view
 
  e vbox toolbar
   e toolbar-item hbox button tb-search
@@ -134,27 +134,29 @@ root
 menubar
  size         parent content
  content.size childs
- borders      10 solid colors.warn
+ bg           colors.bg
+ borders      1 solid colors.gray_border
 
 menubar-item
  size         content
  content.size text
  aura         20 5
- aura.color   colors.pad_bg
+ aura.color   colors.bg
  text.fg      colors.fg
  text.bg      colors.bg
 
 toolbar
  size         parent content
  content.size e childs
- borders      10 solid colors.error
+ bg           colors.bg
+ borders      1 solid colors.gray_border
 
 toolbar-item
  size         content
  content.size 32 32
  aura         5 5
- aura.color   colors.pad_bg
- borders      1 solid colors.fg+1
+ aura.color   colors.bg
+ borders      1 solid colors.gray_border
 
 button.pressed
  aura.color   tcb +0 +0 -32
@@ -168,7 +170,7 @@ button-hover
 
 playlist
  size               parent 240
- borders            10 solid #ccc
+ borders            1 solid colors.gray_border
  //childs             cmd `command`  splitter |  tpl list-template  src 1 2 3  dst image.src text text
  childs.src         cmd commands.test delimiter | skip 0
  childs.src.tpl     list-template
@@ -195,7 +197,7 @@ list-template-name (TEXT)
 
 info
  size         parent 64
- borders      1 solid #888
+ borders      1 solid colors.gray_border
  aura         10 5
  text         `commands.player.current-song`
  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
@@ -203,7 +205,8 @@ info
 statusbar
  size         parent 32
  content.size e
- borders      1 solid #444
+ bg           colors.bg
+ borders      1 solid colors.gray_border
 
 song-file-format
  size         content
@@ -270,24 +273,18 @@ tb-next
   on click commands.player.next
 
 tb-position
-  //text position
   content.size.w childs
 
 progress
   size max parent
-  //progress.position `player.current-song-output-length`
-  //on position `audtool playback-seek %s` total*position
-  //on position `audtool-playback-seek.sh %s` position
-  //env position = ...
-  //  on position `audtool-playback-seek.sh`
   on progress.position /home/vf/src/vf5/bin/audtool-playback-seek.sh
-  borders       8 solid colors.blue
+  borders       2 solid colors.blue
 
 progress-current
   size          16 parent
   pos           `commands.player.audtool-playback-position`%
   bg            colors.blue
-  borders       2 solid colors.blue
+  borders       2 solid colors.warn
 
 tb-time 
   content.size.w text
@@ -352,7 +349,7 @@ hidden
  hidden 1
 
 border
- borders 2 solid colors.fg+1
+ borders 2 solid colors.gray_border
 
 focused
  borders.color colors.focused
@@ -366,7 +363,7 @@ colors
   fg       #eee
   fg+1     #e8e8e8
   fg-1     #d8d8d8
-  bg       #222
+  bg       #33393b
   bg+1     #282828
   bg-1     #181818
   pad_bg   #282
@@ -377,6 +374,7 @@ colors
   red      #c00 
   green    #0c0 
   blue     #00c 
+  gray_border  #999
 
 commands
   player.start                      audacious

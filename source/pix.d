@@ -49,6 +49,8 @@ go (Pix* pix, E* e) {
     // Event "start"
     send_user_event!StartUserEvent ();
 
+    e.update ();
+
     // Event Loop
     foreach (Event* ev; Events ()) {
         ev.e          = e;
