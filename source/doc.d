@@ -191,7 +191,7 @@ remove_class (E* e, Klass* kls) {
 
 
 void
-apply_klasses (E* e) {
+apply_e_klasses (E* e) {
     e.on.length = 0;
     global_font_files.length = 0;
 
@@ -373,7 +373,7 @@ static
 FONTPTR default_ptr;
 
 void
-load_font (E* e) {
+load_e_font (E* e) {
     auto default_file = DEFAULT_FONT_FILE;
     auto default_size = DEFAULT_FONT_SIZE;
     if (default_ptr is null)
@@ -406,12 +406,12 @@ load_font (E* e) {
 }
 
 void
-load_colors (E* root) {
+load_e_colors (E* root) {
     // after load all classes, because able color 'class.field'
 }
 
 void
-load_childs (E* e) {
+load_e_childs (E* e) {
     final
     switch (e.generator.type) {
         case E._Generator.Type.none : break;
@@ -542,7 +542,7 @@ dump_size (E* e, int level=0) {
 //       image
 //       content
 void
-update_size (E* e) {
+update_e_size (E* e) {
     final
     switch (e.size_w_type) {
         case E.SizeType.fixed   : update_size_w_fixed   (e); break;
@@ -602,7 +602,7 @@ update_fix_size_w (E* e) {
 
                 // recursive update childs
                 foreach (__e; WalkChilds (_e))
-                    update_size (__e);
+                    update_e_size (__e);
             }
         }
     }
@@ -763,7 +763,7 @@ update_content_size_w (E* e) {
         case E.Content.SizeType.max    : update_content_size_w_max    (e); break;
     }
 
-    update_pos (e);
+    update_e_pos (e);
 }
 
 void
@@ -1037,7 +1037,7 @@ update_content_text_size_h_content (E* e) {
 
 
 void
-update_pos (E* e) {
+update_e_pos (E* e) {
     final
     switch (e.pos_type) {
         case E.PosType.t9      : pos_type_t9   (e); break;

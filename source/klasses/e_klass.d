@@ -93,12 +93,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "text.font.file"    : set_content_text_font_file   (e,values); break;
         case "bg"                : set_bg                 (e,values); break;
         case "generator"         : set_generator          (e,values); break;
-        //case "childs.src"        : set_childs_src         (e,values); break;
-        //case "childs.src.tpl"    : set_childs_src_tpl     (e,values); break;
-        //case "childs.src.tpl.src": set_childs_src_tpl_src (e,values); break;
-        //case "childs.src.tpl.dst": set_childs_src_tpl_dst (e,values); break;
         case "on"                : set_on                 (e,values); break;
-        //case "e"                : set_e                  (e,kls,values); break;
         default:
             writefln ("IGNORED: %s: %s", field_id, values);
     }
@@ -115,8 +110,6 @@ draw (Klass* kls, Event* ev, E* e) {
 //
 void
 set_pos (E* e, TString[] values) {
-    
-    
     if (values.length >= 2) {
         if (values[1].type == TString.Type.string && values[1].s == "%") {
             set_pos_x_percent (e, values[0..1]);
@@ -136,8 +129,6 @@ set_pos (E* e, TString[] values) {
 
 void
 set_pos_type (E* e, TString[] values) {
-    
-
     if (values.length >= 2) {
         switch (values[0].s) {
             case "9"       : e.pos_type = E.PosType.t9; break;
@@ -210,8 +201,6 @@ is_numeric (string s, int* num) {
 
 void
 set_pos_group (E* e, TString[] values) {
-    
-    
     if (values.length >= 1) {
         e.pos_group = values[0].s.to!ubyte;
     }
@@ -219,8 +208,6 @@ set_pos_group (E* e, TString[] values) {
 
 void
 set_pos_dir (E* e, TString[] values) {
-    
-
     if (values.length >= 1) {
         switch (values[0].s) {
             case "r": e.pos_dir = E.PosDir.r; break;
@@ -711,20 +698,3 @@ set_on (E* e, TString[] values) {
         }
     }
 }
-
-//void
-//set_e (E* e, Klass* kls, TString[] values) {
-//    
-//    if (values.length) {
-//        // add child to t
-//        //   set classes
-//        auto _t = new ETree (new E ());
-//        t.childs ~= _t;
-//        _e.added_from = kls;
-//        if (values.length >= 2) {
-//            foreach (kls_name; values[1..$]) {
-//                _e.klasses ~= doc.find_klass_or_create (kls_name);
-//            }
-//        }
-//    }
-//}

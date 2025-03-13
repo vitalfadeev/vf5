@@ -10,9 +10,9 @@ import types;
 import events;
 import pix : Window;
 import generator : Generator;
-import doc : apply_klasses,
-    load_font,load_colors,load_e_text,load_e_image,time_step,
-    update_size,update_pos,load_childs;
+import doc : apply_e_klasses,
+    load_e_font,load_e_colors,load_e_text,load_e_image,time_step,
+    update_e_size,update_e_pos,load_e_childs;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -401,8 +401,8 @@ update (E* e) {
     time_step ("");
 
     // 1
-    e.apply_klasses ();
-    time_step ("apply_klasses");
+    e.apply_e_klasses ();
+    time_step ("apply_e_klasses");
 
     // 2
     if (e.content.image.src.length)
@@ -411,12 +411,12 @@ update (E* e) {
 
     // 3
     if (e.content.text.s.length)
-        e.load_font ();
-    time_step ("load_font");
+        e.load_e_font ();
+    time_step ("load_e_font");
     
     // 4
-    e.load_colors ();
-    time_step ("load_colors");
+    e.load_e_colors ();
+    time_step ("load_e_colors");
 
     // 5
     if (e.content.text.s.length)
@@ -424,16 +424,16 @@ update (E* e) {
     time_step ("load_e_text");
 
     // 6
-    e.update_size ();
-    time_step ("update_size");
+    e.update_e_size ();
+    time_step ("update_e_size");
 
     // 7
-    e.update_pos ();
-    time_step ("update_pos");
+    e.update_e_pos ();
+    time_step ("update_e_pos");
 
     // 8
-    e.load_childs ();
-    time_step ("load_childs");
+    e.load_e_childs ();
+    time_step ("load_e_childs");
 
     // 9
 
