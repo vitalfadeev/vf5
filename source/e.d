@@ -239,67 +239,65 @@ E {
     //   childs.tpl.src   1         2    3
     //   childs.tpl.dst   image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
 
-    Generator* generator; // none, cmd, fs, csv
-    string     generator_template;  // klass name
+    struct
+    _Generator {
+        Type       type;      // cmd `command` delimiter | skip 1
+        union {
+            None   none;
+            Cmd    cmd;
+            Fs     fs;
+            Csv    csv;
+        }
+        Tpl        tpl;
+        size_t     offset;
+        size_t     limit;
+        Generator* ptr;
 
-    //struct
-    //ChildsSrc {
-    //    Type     type;      // cmd `command` delimiter | skip 1
-    //    union {
-    //        None none;
-    //        Cmd  cmd;
-    //        Fs   fs;
-    //        Csv  csv;
-    //    }
-    //    Tpl      tpl;
-    //    size_t   offset;
-    //    size_t   limit;
+        enum 
+        Type {
+            none,
+            cmd,
+            fs,
+            csv,
+        }
+        struct 
+        None {
+            //
+        }
+        struct 
+        Cmd {
+            TString command;   // `command`
+            TString delimiter; // |
+            size_t  skip;      // 1 (header line)
+        }
+        struct 
+        Fs {
+            //
+        }
+        struct 
+        Csv {
+            //
+        }
 
-    //    enum 
-    //    Type {
-    //        none,
-    //        cmd,
-    //        fs,
-    //        csv,
-    //    }
-    //    struct 
-    //    None {
-    //        //
-    //    }
-    //    struct 
-    //    Cmd {
-    //        TString command;   // `command`
-    //        TString delimiter; // |
-    //        size_t  skip;      // 1 (header line)
-    //    }
-    //    struct 
-    //    Fs {
-    //        //
-    //    }
-    //    struct 
-    //    Csv {
-    //        //
-    //    }
+        struct
+        Tpl {
+            string   klass;  // klass-name
+            size_t[] src;    // 1         2    3
+            string[] dst;    // image.src text text            
+        }
 
-    //    struct
-    //    Tpl {
-    //        string   klass;  // klass-name
-    //        size_t[] src;    // 1         2    3
-    //        string[] dst;    // image.src text text            
-    //    }
-
-    //    string
-    //    toString () {
-    //        final
-    //        switch (type) {
-    //            case Type.none: return "ChildsSrc ("~ type.to!string ~")";
-    //            case Type.cmd : return "ChildsSrc ("~ type.to!string ~ "," ~ cmd.to!string ~")";
-    //            case Type.fs  : return "ChildsSrc ("~ type.to!string ~")";
-    //            case Type.csv : return "ChildsSrc ("~ type.to!string ~")";
-    //        }
-    //    }
-    //}
-    //ChildsSrc childs_src;
+        string
+        toString () {
+            final
+            switch (type) {
+                case Type.none: return "Generator ("~ type.to!string ~")";
+                case Type.cmd : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
+                case Type.fs  : return "Generator ("~ type.to!string ~")";
+                case Type.csv : return "Generator ("~ type.to!string ~")";
+            }
+        }
+    }
+    _Generator generator;
 
     struct
     On {

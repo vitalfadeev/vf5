@@ -9,22 +9,33 @@ import etree;
 //             name (A)
 //               text = A 
 
-alias GENERATE_FN = void function (Generator* g);
+alias GENERATE_DG = int delegate (string[] ss);
+alias GENERATE_FN = int function (Generator* g, E* e, GENERATE_DG dg);
+
 
 struct
 Generator {
-    GENERATE_FN generate;
+    GENERATE_FN generate = &.generate;
+    E* e;
 
     int
-    opApply (int delegate (string[] s) dg) {
-        string[][] lines;
-
-        foreach (line; lines)
-            if (auto result = dg (line))
-                return result;
-
-        return 0;
+    opApply (GENERATE_DG dg) {
+        if (this.generate !is null)
+            return this.generate (&this,e,dg);
+        else
+            return 0;
     }
+}
+
+int
+generate (Generator* g, E* e, GENERATE_DG dg) {
+    string[][] lines;
+
+    foreach (line; lines)
+        if (auto result = dg (line))
+            return result;
+
+    return 0;    
 }
 
 struct
