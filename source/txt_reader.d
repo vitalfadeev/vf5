@@ -93,12 +93,12 @@ hbox
 string text = "
 e root
  e vbox menubar
-  e menubar-item hbox file  
-  e menubar-item hbox play 
-  e menubar-item hbox list 
-  e menubar-item hbox services 
-  e menubar-item hbox output
-  e menubar-item hbox view
+  e menubar-item hbox button file  
+  e menubar-item hbox button play 
+  e menubar-item hbox button list 
+  e menubar-item hbox button services 
+  e menubar-item hbox button output
+  e menubar-item hbox button view
 
  e vbox toolbar
   e toolbar-item hbox button tb-search
