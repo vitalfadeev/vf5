@@ -17,7 +17,7 @@ main () {
 	 //UTree
 	E* root = new_root ();
 	root.setup ();
-	root.update (root);
+	root.update ();
 
 	// Check
 	//dump_tree (root);

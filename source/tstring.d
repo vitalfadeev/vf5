@@ -79,11 +79,9 @@ _to_tstrings {
         immutable len = s.length;
         size_t i = 0, next = 0;
         size_t i_start;
-        int result;
 
         while (next < len) {
-            result = _split (decode (s, next),i,next,dg,i_start);
-            if (result)
+            if (auto result = _split (decode (s, next),i,next,dg,i_start))
                 return result;
 
             i = next;

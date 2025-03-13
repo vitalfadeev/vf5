@@ -44,10 +44,9 @@ E {
     Tree    _super;
     //alias   _super this;
     Klass*[] klasses;    // box green rounded
-    Pos      pos;
-    Size     size;
+    Pos      pos;        // relative from parent
+    Size     size;       // = content.size + aura.size
     //   Size     size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    Pad      pad;
     BG       bg;
 
     // root
@@ -62,15 +61,19 @@ E {
         Border border;
         Size   size;
         Color  color;
+
+        Pos    pos;
     }
     Margin margin;
 
     struct
     Aura {
         Form   form;
-        Border border;
+        Border border = Border (1, Border.Type.solid);;
         Size   size;
         Color  color;
+
+        Pos    pos;
     }
     Aura aura;
 
@@ -159,7 +162,7 @@ E {
 
     struct
     Form {
-        Type type;
+        Type type = Type.rect;
         enum
         Type {
             none,
@@ -187,29 +190,6 @@ E {
             dash
         }
     }
-    struct
-    Borders {
-        Border t = Border (1, Border.Type.solid);
-        Border r = Border (1, Border.Type.solid);
-        Border b = Border (1, Border.Type.solid);
-        Border l = Border (1, Border.Type.solid);
-        Pos pos;
-    }
-    Borders borders;
-
-    struct 
-    Corner {
-        R     r;
-        Color color; // RGBA
-    }
-    struct 
-    Corners {
-        Corner tl;
-        Corner tr;
-        Corner br;
-        Corner bl;
-    }
-    Corners corners;
 
     bool    hidden;
     Klass*  from_klass;
@@ -325,11 +305,35 @@ E {
     }
     On[] on;
 
-    E_EVENT_FN  event  = &.event;
-    E_UPDATE_FN update = &.update;
-    E_SET_FN    set    = &.set;
-    E_DRAW_FN   draw   = &.draw;
-    E_DUP_FN    dup    = &._dup;
+    struct
+    FN {
+        E_EVENT_FN  event  = &.event;
+        E_UPDATE_FN update = &.update;
+        E_SET_FN    set    = &.set;
+        E_DRAW_FN   draw   = &.draw;
+        E_DUP_FN    dup    = &._dup;        
+    }
+    FN fn;
+
+    void 
+    event (Event* ev) { 
+        if (fn.event !is null) fn.event (&this,ev); 
+    }
+
+    void 
+    update () { 
+        if (fn.update !is null) fn.update (&this); 
+    }
+
+    void 
+    set (string field_id, TString[] values) {
+        if (fn.set !is null) fn.set (&this,field_id,values); 
+    }
+
+    void 
+    draw (Event* ev) {
+        if (fn.draw !is null) fn.draw (&this,ev);
+    }
 
     void
     remove_child (E* c) {
@@ -382,10 +386,7 @@ event (E* e, Event* ev) {
     switch (ev.type) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.draw : 
-                    if (e.draw !is null)
-                        e.draw (e,ev);
-                    break;
+                case USER_EVENT.draw : e.draw (ev); break;
                 default:
             }
             break;
@@ -437,7 +438,7 @@ update (E* e) {
 
     // childs
     foreach (_e; WalkChilds (e)) 
-        _e.update (_e);
+        _e.update ();
 
     // custom update
     // ...
@@ -457,7 +458,7 @@ draw (E* e, Event* ev) {
 
     // childs
     foreach (_e; WalkChilds (e))
-        _e.event (_e,ev);
+        _e.event (ev);
 
     // custom draw
     // ...
@@ -470,10 +471,8 @@ _dup (EPtr _this) {
      cloned.klasses       = _this.klasses.dup;
      cloned.pos           = _this.pos;
      cloned.size          = _this.size;
-     cloned.pad           = _this.pad;
+     cloned.aura          = _this.aura;
      cloned.bg            = _this.bg;
-     cloned.borders       = _this.borders;
-     cloned.corners       = _this.corners;
      cloned._content      = _this._content;
      cloned.content.text.rects 
                           = _this.content.text.rects.dup;
@@ -494,10 +493,7 @@ _dup (EPtr _this) {
      cloned.on            = _this.on.dup;
      foreach (ref _on; cloned.on)
         _on.action = _on.action.dup;
-     cloned.event         = _this.event;
-     cloned.update        = _this.update;
-     cloned.set           = _this.set;
-     cloned.draw          = _this.draw;
+     cloned.fn         = _this.fn;
 
      return cloned;
 }

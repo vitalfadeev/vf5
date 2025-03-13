@@ -43,7 +43,7 @@ event (Klass* kls, Event* ev, E* e) {
                 case USER_EVENT.click : 
                     e.trigger_class ("check.pressed");
                     //emit ("on check.pressed", doc_t, e_t);
-                    ev.e.update (ev.e);
+                    ev.e.update ();
                     e.redraw ();
                     break;
                 default:

@@ -47,8 +47,8 @@ rect
   pos          10 10
   size         200 64
   content.size 200 64
-  pad          10
-  pad.bg       #008
+  aura         10
+  aura.color   #008
   borders      2 solid #ccc
   text         `123 abc`
   text.fg      #ccc
@@ -107,8 +107,8 @@ menubar
 menubar-item
  size         content
  content.size text
- pad          20 5
- pad.bg       colors.pad_bg
+ aura         20 5
+ aura.color   colors.pad_bg
  text.fg      colors.fg
  text.bg      colors.bg
 
@@ -120,16 +120,16 @@ toolbar
 toolbar-item
  size         content
  content.size 32 32
- pad          5 5
- pad.bg       colors.pad_bg
+ aura         5 5
+ aura.color   colors.pad_bg
  borders      1 solid colors.fg+1
 
 button.pressed
- pad.bg       tcb +0 +0 -32
+ aura.color   tcb +0 +0 -32
  content.bg   tcb +0 +0 -32
 
 button-hover
- pad.bg       tcb +0 +0 +32
+ aura.color   tcb +0 +0 +32
  content.bg   tcb +0 +0 +32
  //content.bg   tcb +0 +0 +25 fast
  //content.bg   tcb +0 +0 +25 slow
@@ -156,7 +156,7 @@ list-template (TEXT)
 list-template-name (TEXT)
   size         parent 32
   content.size e
-  pad          1 1
+  aura         1 1
   borders      1 solid #444
   pos.type     vbox b
   text         TEXT
@@ -164,7 +164,7 @@ list-template-name (TEXT)
 info
  size         parent 64
  borders      1 solid #888
- pad          10 5
+ aura         10 5
  text         `commands.player.current-song`
  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
@@ -659,8 +659,8 @@ find_parent (ref Indent[] indents, size_t for_indent) {
 auto
 new_root () {
     auto root = new E ();
-    root.size   = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    root.event  = &doc.event;
+    root.size     = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    root.fn.event = &doc.event;
     return root;
 }
 

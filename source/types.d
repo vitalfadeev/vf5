@@ -5,11 +5,11 @@ import bindbc.sdl;
 public import color;
 
 
-alias ushort X;
-alias ushort Y;
-alias ushort W;
-alias ushort H;
-alias ushort R; // radius
+alias Uint32 X;
+alias Uint32 Y;
+alias Uint32 W;
+alias Uint32 H;
+alias Uint32 R; // radius
 
 struct 
 Pos {

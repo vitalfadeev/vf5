@@ -65,14 +65,12 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "size"              : set_size               (e,values); break;
         case "hidden"            : set_hidden             (e,values); break;
         case "popup"             : set_popup              (e,values); break;
-        case "borders"           : set_borders            (e,values); break;
-        case "borders.t"         : set_border_t           (e,values); break;
-        case "borders.r"         : set_border_r           (e,values); break;
-        case "borders.b"         : set_border_b           (e,values); break;
-        case "borders.l"         : set_border_l           (e,values); break;
-        case "borders.color"     : set_borders_color      (e,values); break;
-        case "pad"               : set_pad                (e,values); break;
-        case "pad.bg"            : set_pad_bg             (e,values); break;
+        case "aura.borders"      : set_aura_borders       (e,values); break;
+        case "borders"           : set_aura_borders       (e,values); break;
+        case "aura.borders.color": set_aura_borders_color (e,values); break;
+        case "borders.color"     : set_aura_borders_color (e,values); break;
+        case "aura"              : set_aura               (e,values); break;
+        case "aura.bg"           : set_aura_bg            (e,values); break;
         case "content.image"     : set_content_image      (e,values); break;
         case "content.text"      : set_content_text       (e,values); break;
         case "content"           : set_content            (e,values); break;
@@ -289,8 +287,8 @@ set_size_w (E* e, TString[] values) {
             case "max"     : e.size_w_type = E.SizeType.max;  break;
             default : 
                 if (values[0].s.isNumeric ()) {
-                    e.size.w = values[0].s.to!W;
                     e.size_w_type = E.SizeType.fixed;
+                    e.size.w = values[0].s.to!W;
                 }
                 else {
                     throw new Exception ("unsupported size.w: " ~ values[0].s);
@@ -310,8 +308,8 @@ set_size_h (E* e, TString[] values) {
             case "max"     : e.size_w_type = E.SizeType.max;  break;
             default : 
                 if (values[0].s.isNumeric ()) {
-                    e.size.h      = values[0].s.to!H;
                     e.size_h_type = E.SizeType.fixed;
+                    e.size.h      = values[0].s.to!H;
                 }
                 else {
                     throw new Exception ("unsupported size.h: " ~ values[0].s);
@@ -334,111 +332,44 @@ set_popup (E* e, TString[] values) {
 }
 
 void
-set_borders (E* e, TString[] values) {
-    if (values.length >= 3) {
-        set_border (e, &e.borders.t, values[0..$]);
-        set_border (e, &e.borders.r, values[0..$]);
-        set_border (e, &e.borders.b, values[0..$]);
-        set_border (e, &e.borders.l, values[0..$]);
-    }
-    else
-    if (values.length >= 2) {
-        set_border (e, &e.borders.t, values[0..$]);
-        set_border (e, &e.borders.r, values[0..$]);
-        set_border (e, &e.borders.b, values[0..$]);
-        set_border (e, &e.borders.l, values[0..$]);
-    }
-    else
-    if (values.length == 1) {
-        set_border (e, &e.borders.t, values[0..$]);
-        set_border (e, &e.borders.r, values[0..$]);
-        set_border (e, &e.borders.b, values[0..$]);
-        set_border (e, &e.borders.l, values[0..$]);
-    }
-}
-
-void
-set_border_t (E* e, TString[] values) {
-    if (values.length >= 3) {
-        set_border (e, &e.borders.t, values);
-    }
-}
-
-void
-set_border_r (E* e, TString[] values) {
-    if (values.length >= 3) {
-        set_border (e, &e.borders.r, values);
-    }
-}
-
-void
-set_border_b (E* e, TString[] values) {
-    if (values.length >= 3) {
-        set_border (e, &e.borders.b, values);
-    }
-}
-
-void
-set_border_l (E* e, TString[] values) {
-    if (values.length >= 3) {
-        set_border (e, &e.borders.l, values);
-    }
-}
-
-void
-set_borders_color (E* e, TString[] values) {
+set_aura_borders (E* e, TString[] values) {
     if (values.length >= 1) {
-        set_border_color (e, &e.borders.t, values);
-        set_border_color (e, &e.borders.t, values);
-        set_border_color (e, &e.borders.b, values);
-        set_border_color (e, &e.borders.l, values);
+        set_border (e, &e.aura.border, values[0..$]);
+    }
+}
+
+
+void
+set_aura_borders_color (E* e, TString[] values) {
+    if (values.length >= 1) {
+        set_border_color (e, &e.aura.border, values);
     }
 }
 
 void
-set_pad (E* e, TString[] values) {
-    if (values.length >= 4) {
-        if (values[0].s.isNumeric) {
-            e.pad.t = values[0].s.to!Y;
-        }
-        if (values[1].s.isNumeric) {
-            e.pad.r = values[1].s.to!X;
-        }
-        if (values[2].s.isNumeric) {
-            e.pad.b = values[1].s.to!Y;
-        }
-        if (values[3].s.isNumeric) {
-            e.pad.l = values[1].s.to!X;
-        }
-    }
-    else
-    if (values.length >= 3) {
-        //
-    }
-    else
+set_aura (E* e, TString[] values) {
     if (values.length >= 2) {
-        if (values[0].s.isNumeric) {
-            e.pad.r = e.pad.l = values[0].s.to!X;
-        }
-        if (values[1].s.isNumeric) {
-            e.pad.t = e.pad.b = values[1].s.to!Y;
-        }
+        if (values[0].s.isNumeric)
+            e.aura.size.w = values[0].s.to!X;
+
+        if (values[1].s.isNumeric)
+            e.aura.size.h = values[1].s.to!Y;
     }
     else
     if (values.length == 1) {
         if (values[0].s.isNumeric) {
-            e.pad.r = e.pad.l = values[0].s.to!X;
-            e.pad.t = e.pad.b = values[0].s.to!Y;
+            e.aura.size.w = values[0].s.to!X;
+            e.aura.size.h = values[0].s.to!Y;
         }
     }
 }
 
 void
-set_pad_bg (E* e, TString[] values) {
+set_aura_bg (E* e, TString[] values) {
     if (values.length) {
-        Color c = e.pad.bg;
+        Color c = e.aura.color;
         if (doc_parse_color (e, values, &c))
-            e.pad.bg = c;
+            e.aura.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }

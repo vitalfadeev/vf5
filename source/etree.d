@@ -30,13 +30,9 @@ _WalkFields (T) {
 
     int
     opApply (int delegate (Field* field) dg) {
-        int result;
-
-        foreach (_field; klass_or_field.fields) {
-            result = dg (_field);
-            if (result)
+        foreach (_field; klass_or_field.fields)
+            if (auto result = dg (_field))
                 return result;
-        }
 
         return 0;
     }

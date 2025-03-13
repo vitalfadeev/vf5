@@ -19,11 +19,9 @@ Generator {
     opApply (int delegate (string[] s) dg) {
         string[][] lines;
 
-        foreach (line; lines) {
-            int result = dg (line);
-            if (result)
+        foreach (line; lines)
+            if (auto result = dg (line))
                 return result;
-        }
 
         return 0;
     }
@@ -46,11 +44,9 @@ GenTree {
     opApply (int delegate (E* e) dg) {
         foreach (line; *generator) {
             auto e = template_.apply (line);
-            if (e !is null) {
-                int result = dg (e);
-                if (result)
-                    return result;
-            }
+            if (e !is null)
+            if (auto result = dg (e))
+                return result;
         }
 
         return 0;

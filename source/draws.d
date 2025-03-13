@@ -126,25 +126,25 @@ e_pos (E* e) {
 }
 
 Pos
-borders_pos (E* e) {
-    return e.pos;
+aura_borders_pos (E* e) {
+    return aura_pos (e);
 }
 
 Size
-borders_size (E* e) {
-    return e_size (e);
+aura_borders_size (E* e) {
+    return aura_size (e);
 }
 
 Pos
-pad_pos (E* e) {
-    return e.pad.pos;
+aura_pos (E* e) {
+    return e.aura.pos;
 }
 
 Size
-pad_size (E* e) {
+aura_size (E* e) {
     return Size (
-        (e.pad.l + e.content.size.w + e.pad.r).to!W,
-        (e.pad.t + e.content.size.h + e.pad.b).to!H,
+        e.aura.size.w + e.content.size.w + e.aura.size.w,
+        e.aura.size.h + e.content.size.h + e.aura.size.h
     );
 }
 
@@ -177,7 +177,7 @@ content_size (E* e) {
 void
 draw_e (SDL_Renderer* renderer, E* e) {
     draw_borders (renderer,e);
-    draw_content_with_pad (renderer,e);
+    draw_content_with_aura (renderer,e);
     draw_click_decoration (renderer,e);
 }
 
@@ -223,14 +223,14 @@ void
 draw_borders (SDL_Renderer* renderer, E* e) {
     SDL_SetRenderDrawColor (
         renderer, 
-        e.borders.t.color.r,
-        e.borders.t.color.g,
-        e.borders.t.color.b,
-        e.borders.t.color.a,
+        e.aura.border.color.r,
+        e.aura.border.color.g,
+        e.aura.border.color.b,
+        e.aura.border.color.a,
     );
 
-    auto pos  = borders_pos  (e);
-    auto size = borders_size (e);
+    auto pos  = aura_borders_pos  (e);
+    auto size = aura_borders_size (e);
 
     if (size.w > 0 && size.h > 0)
     draw8 (
@@ -239,29 +239,29 @@ draw_borders (SDL_Renderer* renderer, E* e) {
         pos.y, 
         size.w, 
         size.h, 
-        e.borders.t.w,
-        e.borders.r.w,
-        e.borders.b.w,
-        e.borders.l.w
+        e.aura.border.w,
+        e.aura.border.w,
+        e.aura.border.w,
+        e.aura.border.w
     );
 }
 
 void
-draw_content_with_pad (SDL_Renderer* renderer, E* e) {
-    auto _pad_pos      = pad_pos (e);
-    auto _pad_size     = pad_size (e);
+draw_content_with_aura (SDL_Renderer* renderer, E* e) {
+    auto _aura_pos     = aura_pos (e);
+    auto _aura_size    = aura_size (e);
     auto _content_pos  = content_pos (e);
     auto _content_size = content_size (e);
 
-    draw_pad (renderer,e,_pad_pos,_pad_size);
+    draw_aura (renderer,e,_aura_pos,_aura_size);
     draw_content (renderer,e,_content_pos,_content_size);
 }
 
 void
-draw_pad (SDL_Renderer* renderer, E* e, Pos _pad_pos, Size _pad_size) {
-    auto color = e.pad.bg;
+draw_aura (SDL_Renderer* renderer, E* e, Pos _aura_pos, Size _aura_size) {
+    auto color = e.aura.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, _pad_pos.x, _pad_pos.y, _pad_size.w, _pad_size.h);
+    fill_rect (renderer, _aura_pos.x, _aura_pos.y, _aura_size.w, _aura_size.h);
 }
 
 void

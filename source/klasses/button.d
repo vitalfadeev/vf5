@@ -42,7 +42,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 ev.e.add_class ("button.pressed");
-                ev.e.update (ev.e);
+                ev.e.update ();
                 e.redraw ();
             }
             break;
@@ -50,7 +50,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED) {
                 ev.e.remove_class ("button.pressed");
-                ev.e.update (ev.e);
+                ev.e.update ();
                 e.redraw ();
             }
             break;

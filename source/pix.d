@@ -55,8 +55,8 @@ go (Pix* pix, E* e) {
         ev.app_window = window;
         ev.renderer   = renderer;
 
-        if (pix.event (pix,ev) == 1)
-            break;
+        if (auto result = pix.event (pix,ev))
+            return result;
     }
 
     return 0;
@@ -142,11 +142,11 @@ event (Pix* pix, Event* ev) {
                 //case USER_EVENT.redraw : _redraw (pix,ev.renderer,cast (RedrawUserEvent*) ev); break;
                 case USER_EVENT.redraw : if (pix.draw !is null) pix.draw (pix,ev); break;
                 case USER_EVENT.draw   : if (pix.draw !is null) pix.draw (pix,ev); break;
-                default: ev.e.event (ev.e,ev);
+                default: ev.e.event (ev);
             }
             break;
-        case SDL_QUIT: ev.e.event (ev.e,ev); return 1;
-        default: ev.e.event (ev.e,ev);
+        case SDL_QUIT: ev.e.event (ev); return 1;
+        default: ev.e.event (ev);
     }
 
     return 0;
@@ -154,8 +154,7 @@ event (Pix* pix, Event* ev) {
 
 void
 update (Pix* pix, E* root) {
-    if (root.update !is null)
-        root.update (root); 
+    root.update (); 
 }
 
 void
@@ -182,7 +181,7 @@ draw (Pix* pix, Event* ev) {
 
     // draw
     if (e !is null)
-        e.event (e,ev);
+        e.event (ev);
 
     // rasterize
     SDL_RenderPresent (renderer);
@@ -347,8 +346,7 @@ Events {
     opApply (int delegate (Event* ev) dg) {
         while (_go) {
             while (SDL_WaitEvent (&ev.sdl) > 0) {
-                int result = dg (&ev);
-                if (result)
+                if (auto result = dg (&ev))
                     return result;
             }
         }        

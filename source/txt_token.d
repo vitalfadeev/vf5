@@ -27,8 +27,7 @@ Token_line_reader {
                     }
                     else
                     if (t_line.length >= 1) {
-                        int result = dg (t_line);
-                        if (result)
+                        if (auto result = dg (t_line))
                             return result;
                     }
                     t_line.length = 0;

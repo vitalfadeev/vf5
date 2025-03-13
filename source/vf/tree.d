@@ -97,11 +97,9 @@ _Childs (TTree) {
 
     int
     opApply (int delegate (TTree* t) dg) {
-        foreach (_t; t._childs) {
-            int result = dg (cast (TTree*) _t);
-            if (result)
+        foreach (_t; t._childs)
+            if (auto result = dg (cast (TTree*) _t))
                 return result;                
-        }
 
         return 0;
     }
@@ -133,7 +131,6 @@ _WalkTree (TTree,Skip) {
     opApply (int delegate (TTree* t) dg) {
         Tree*  next = cast (Tree*) t;
         Tree* _next = cast (Tree*) t;
-        int    result;
 
         loop:
             if (skip (cast (TTree*) next)) {
@@ -141,8 +138,7 @@ _WalkTree (TTree,Skip) {
                 goto go_right;
             }
 
-            result = dg (cast (TTree*) next);
-            if (result)
+            if (auto result = dg (cast (TTree*) next))
                 return result;
 
             _next = next;
@@ -181,7 +177,6 @@ _WalkLeft (TTree,Skip) {
     int
     opApply (int delegate (TTree* t) dg) {
         Tree*  next = t.l;
-        int    result;
 
         loop:
             if (next is null)
@@ -191,8 +186,7 @@ _WalkLeft (TTree,Skip) {
                 goto go_left;
             }
 
-            result = dg (cast (TTree*) next);
-            if (result)
+            if (auto result = dg (cast (TTree*) next))
                 return result;
 
             go_left: 
@@ -218,7 +212,6 @@ _WalkChilds (TTree,Skip) {
     int
     opApply (int delegate (TTree* t) dg) {
         Tree*  next = (cast (Tree*) t)._childs.l;
-        int    result;
 
         loop:
             if (next is null)
@@ -228,8 +221,7 @@ _WalkChilds (TTree,Skip) {
                 goto go_right;
             }
 
-            result = dg (cast (TTree*) next);
-            if (result)
+            if (auto result = dg (cast (TTree*) next))
                 return result;
 
             go_right:  // >
@@ -257,7 +249,6 @@ _FindDeepest (TTree,Skip,Cond) {
     opApply (int delegate (TTree* t) dg) {
         Tree*  next = cast (Tree*) t;
         Tree* _next = next;
-        int    result;
 
         loop:
             if (skip (cast (TTree*) next)) {
@@ -266,8 +257,7 @@ _FindDeepest (TTree,Skip,Cond) {
             }
 
             if (cond (cast (TTree*) next)) {
-                result = dg (cast (TTree*) next);
-                if (result)
+                if (auto result = dg (cast (TTree*) next))
                     return result;
 
                 _next = next;
@@ -301,8 +291,7 @@ childs_op_apply () {
     int
     opApply (int delegate (Tree* t) dg) {
         for (auto t = this.l; t !is null; t = t.r) {
-            int result = dg (t);
-            if (result)
+            if (auto result = dg (t))
                 return result;                
         }
 
