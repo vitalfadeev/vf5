@@ -2,7 +2,6 @@ import std.stdio;
 import std.stdio;
 import std.string;
 import std.conv;
-import bindbc.sdl;
 import tstring;
 import etree;
 import klass;
@@ -95,14 +94,15 @@ E {
     Content {
         Form     form;
         Border   border;
-        Size     size;
         Color    color;
-        Pos      pos;
+        Image    image;
+        Text     text;
+
+        Size     size;
         Size     childs_size;
         SizeType size_w_type = SizeType.e;
         SizeType size_h_type = SizeType.e;
-        Image    image;
-        Text     text;
+        Pos      pos;
 
         // childs
         // image
@@ -415,6 +415,8 @@ add_klass (E* e, Klass* kls) {
 
 void
 event (E* e, Event* ev) {
+    import bindbc.sdl;
+
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
