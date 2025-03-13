@@ -156,7 +156,7 @@ toolbar-item
  content.size 32 32
  aura         5 5
  aura.color   colors.bg
- borders      1 solid colors.gray_border
+// borders      1 solid colors.gray_border
 
 button.pressed
  aura.color   tcb +0 +0 -32
@@ -170,6 +170,8 @@ button-hover
 
 playlist
  size               parent 240
+ bg                 colors.info_bg
+ text.bg            colors.info_bg
  borders            1 solid colors.gray_border
  //childs             cmd `command`  splitter |  tpl list-template  src 1 2 3  dst image.src text text
  childs.src         cmd commands.test delimiter | skip 0
@@ -199,6 +201,9 @@ info
  size         parent 64
  borders      1 solid colors.gray_border
  aura         10 5
+ aura.bg      colors.info_bg
+ bg           colors.info_bg
+ text.bg      colors.info_bg
  text         `commands.player.current-song`
  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
@@ -211,11 +216,13 @@ statusbar
 song-file-format
  size         content
  content.size text
+ text.bg      colors.bg
  text         `commands.player.current-song-frequency-khz` kHz `commands.player.current-song-bitrate-kbps` kbit/sec
 
 song-time
  size         content
  content.size text
+ text.bg      colors.bg
  text         `commands.player.current-song-length`
 
 file
@@ -288,6 +295,7 @@ progress-current
 
 tb-time 
   content.size.w text
+  text.bg        colors.bg
   text `commands.player.current-song-output-length` / `commands.player.current-song-length`
 
 tb-loop
@@ -375,6 +383,7 @@ colors
   green    #0c0 
   blue     #00c 
   gray_border  #999
+  info_bg  #232729
 
 commands
   player.start                      audacious

@@ -254,6 +254,7 @@ draw_content_with_aura (SDL_Renderer* renderer, E* e) {
 
     draw_aura (renderer,e,_aura_pos,_aura_size);
     draw_aura_borders (renderer,e);
+    draw_content_bg (renderer,e,_content_pos,_content_size);
     draw_content (renderer,e,_content_pos,_content_size);
 }
 
@@ -262,6 +263,13 @@ draw_aura (SDL_Renderer* renderer, E* e, Pos _aura_pos, Size _aura_size) {
     auto color = e.aura.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, _aura_pos.x, _aura_pos.y, _aura_size.w, _aura_size.h);
+}
+
+void
+draw_content_bg (SDL_Renderer* renderer, E* e, Pos _content_pos, Size _content_size) {
+    auto color = e.bg;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    fill_rect (renderer, _content_pos.x, _content_pos.y, _content_size.w, _content_size.h);
 }
 
 void
