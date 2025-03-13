@@ -548,18 +548,10 @@ update_e_size (E* e) {
         case E.SizeType.window  : update_size_h_window  (e); break;
         case E.SizeType.max     : update_size_h_max     (e); break;
     }
-
-    // recursive
-    //foreach (_e; WalkChilds (e))
-        //update_size (_e);
-
-    // fix size`s
-    update_fix_size_w (e);
 }
 
 void
-update_fix_size_w (E* e) {
-    W parent_w;
+update_fix_size_w_max (E* e) {
     W other_w;
     size_t max_cnt;
 
@@ -574,19 +566,16 @@ update_fix_size_w (E* e) {
     // has max
     if (max_cnt >= 1) {
         // divide
-        assert (e.parent !is null);
         auto total_w = e.content.size.w;
 
         W one_max_w = (total_w - other_w) / max_cnt;
+
         foreach (_e; WalkChilds (e)) {
             if (_e.size_w_type == E.SizeType.max)  {
-                _e.size.w = one_max_w;
-                _e.content.size.w = _e.size.w - _e.aura.size.w - _e.aura.size.w;
-                //writeln ("XXX: ", _t.e, ": ", one_max_w);
-                //writeln ("   : ", max_cnt);
-                //writeln ("   : ", total_w);
-                //writeln ("   : ", other_w);
-                //writeln ("   : ", one_max_w); // 456
+                auto ew = one_max_w;
+                auto cw = ew - e.aura.size.w - e.aura.size.w;
+                _e.size.w         = (ew > 0) ? ew : 0;
+                _e.content.size.w = (cw > 0) ? cw : 0;
 
                 // recursive update childs
                 foreach (__e; WalkChilds (_e))
@@ -595,20 +584,6 @@ update_fix_size_w (E* e) {
         }
     }
 }
-
-//void
-//update_content_size_w_from_size_w (E* e, int w) {
-//    w = (w > 0) ? w : 0;
-//    e.size.w = w;
-//    e.content.size.w = w - e.aura.size.w - e.aura.size.w;
-//}
-
-//void
-//update_size_w_from_content_size_w (E* e, int w) {
-//    w = (w > 0) ? w : 0;
-//    e.size.w = w + e.aura.size.w + e.aura.size.w;
-//    e.content.size.w = w;
-//}
 
 void
 update_size_w_fixed (E* e) {
@@ -660,20 +635,37 @@ update_size_w_window (E* e) {
 
 void
 update_size_w_max (E* e) {
-    //e.size.w = 0;
-    //e.content.size.w = 0;
-    //W all_left;
-    //foreach (_t; WalkLeft (t))
-    //    all_left += _e.size.w;
+    assert (e.parent !is null);
+    W parent_w = e.parent.content.size.w;
+    W other_w;
+    size_t max_cnt;
 
-    //if (e.parent.content.size.w > all_left) {
-    //    e.size.w = (e.parent.content.size.w - all_left).to!W;
-    //    e.content.size.w = (-e.borders.l.w - e.pad.l + e.size.w - e.borders.r.w - e.pad.r).to!W;
-    //}
-    //else {
-    //    e.size.w = 0;
-    //    e.content.size.w = 0;
-    //}
+    // total
+    foreach (_e; WalkChilds (e.parent)) {
+        if (_e.size_w_type == E.SizeType.max)
+            max_cnt ++;
+        else {
+            _e.update_e_size ();
+            other_w += _e.size.w;
+        }
+    }
+
+    // has max
+    if (max_cnt >= 1) {
+        // divide
+        auto total_w = parent_w;
+
+        W one_max_w = (total_w - other_w) / max_cnt;
+
+        foreach (_e; WalkChilds (e.parent)) {
+            if (_e.size_w_type == E.SizeType.max)  {
+                auto ew = one_max_w;
+                auto cw = ew - e.aura.size.w - e.aura.size.w;
+                _e.size.w         = (ew > 0) ? ew : 0;
+                _e.content.size.w = (cw > 0) ? cw : 0;
+            }
+        }
+    }
 }
 
 auto
@@ -734,9 +726,8 @@ update_size_h_window (E* e) {
 }
 
 void
-update_size_h_max (E* e) {    
-    // e.size.h = 
-    // e.content.size.h = ;
+update_size_h_max (E* e) {
+    //
 }
 
 void

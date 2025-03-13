@@ -283,14 +283,15 @@ tb-position
   content.size.w childs
 
 progress
-  size max parent
-  on progress.position /home/vf/src/vf5/bin/audtool-playback-seek.sh
-  borders       2 solid colors.blue
+  size      max parent
+  bg        colors.bg
+  on        progress.position /home/vf/src/vf5/bin/audtool-playback-seek.sh
+  //borders 2 solid colors.blue
 
 progress-current
   size          16 parent
   pos           `commands.player.audtool-playback-position`%
-  bg            colors.blue
+  bg            colors.warn
   borders       2 solid colors.warn
 
 tb-time 
