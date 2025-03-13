@@ -22,10 +22,12 @@ E_Klass {
             [],  
             [],  
             [],  
-            &.event,     // event
-            &.update,    // update
-            &.set,       // set
-            &.draw,      // draw
+            Klass.Fn (
+                &.event,     // event
+                &.update,    // update
+                &.set,       // set
+                &.draw,      // draw
+            )
         );
     alias _super this;
 }
@@ -90,10 +92,10 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "text.font.size"    : set_content_text_font_size   (e,values); break;
         case "text.font.file"    : set_content_text_font_file   (e,values); break;
         case "bg"                : set_bg                 (e,values); break;
-        case "childs.src"        : set_childs_src         (e,values); break;
-        case "childs.src.tpl"    : set_childs_src_tpl     (e,values); break;
-        case "childs.src.tpl.src": set_childs_src_tpl_src (e,values); break;
-        case "childs.src.tpl.dst": set_childs_src_tpl_dst (e,values); break;
+        //case "childs.src"        : set_childs_src         (e,values); break;
+        //case "childs.src.tpl"    : set_childs_src_tpl     (e,values); break;
+        //case "childs.src.tpl.src": set_childs_src_tpl_src (e,values); break;
+        //case "childs.src.tpl.dst": set_childs_src_tpl_dst (e,values); break;
         case "on"                : set_on                 (e,values); break;
         //case "e"                : set_e                  (e,kls,values); break;
         default:
@@ -616,71 +618,71 @@ set_bg (E* e, TString[] values) {
     }
 }
 
-void
-set_childs_src (E* e, TString[] values) {
-    // childs.src cmd `command` delimiter |
+//void
+//set_childs_src (E* e, TString[] values) {
+//    // childs.src cmd `command` delimiter |
 
-    if (values.length >= 1) {
-        E.ChildsSrc.Type type;
-        switch (values[0].s) {
-            case "cmd"  : type = E.ChildsSrc.Type.cmd;  break;
-            case "gs"   : type = E.ChildsSrc.Type.fs;   break;
-            case "csv"  : type = E.ChildsSrc.Type.csv;  break;
-            case "none" : type = E.ChildsSrc.Type.none; break;
-            default     : type = E.ChildsSrc.Type.none; break;
-        }
-        e.childs_src.type = type;
+//    if (values.length >= 1) {
+//        E.ChildsSrc.Type type;
+//        switch (values[0].s) {
+//            case "cmd"  : type = E.ChildsSrc.Type.cmd;  break;
+//            case "gs"   : type = E.ChildsSrc.Type.fs;   break;
+//            case "csv"  : type = E.ChildsSrc.Type.csv;  break;
+//            case "none" : type = E.ChildsSrc.Type.none; break;
+//            default     : type = E.ChildsSrc.Type.none; break;
+//        }
+//        e.childs_src.type = type;
 
-        //
-        final
-        switch (type) {
-            case E.ChildsSrc.Type.none: break;
-            case E.ChildsSrc.Type.cmd : 
-                e.childs_src.cmd.command = values[1];
-                for (size_t i=2; i < values.length; i++) {
-                    switch (values[i].s) {
-                        case "delimiter" : 
-                            i++; 
-                            if (i < values.length) {
-                                e.childs_src.cmd.delimiter = values[i];
-                            }
-                            break;
-                        case "skip":
-                            i++; 
-                            if (i < values.length) {
-                                if (values[i].s.isNumeric)
-                                    e.childs_src.cmd.skip = values[i].s.to!size_t; 
-                            }
-                            break;
-                        default:
-                    }
-                }
-                break;
-            case E.ChildsSrc.Type.fs  : break;
-            case E.ChildsSrc.Type.csv : break;
-        }
-    }
-}
+//        //
+//        final
+//        switch (type) {
+//            case E.ChildsSrc.Type.none: break;
+//            case E.ChildsSrc.Type.cmd : 
+//                e.childs_src.cmd.command = values[1];
+//                for (size_t i=2; i < values.length; i++) {
+//                    switch (values[i].s) {
+//                        case "delimiter" : 
+//                            i++; 
+//                            if (i < values.length) {
+//                                e.childs_src.cmd.delimiter = values[i];
+//                            }
+//                            break;
+//                        case "skip":
+//                            i++; 
+//                            if (i < values.length) {
+//                                if (values[i].s.isNumeric)
+//                                    e.childs_src.cmd.skip = values[i].s.to!size_t; 
+//                            }
+//                            break;
+//                        default:
+//                    }
+//                }
+//                break;
+//            case E.ChildsSrc.Type.fs  : break;
+//            case E.ChildsSrc.Type.csv : break;
+//        }
+//    }
+//}
 
-void
-set_childs_src_tpl (E* e, TString[] values) {
-    // childs.src.tpl list-template  ...or childs under t
+//void
+//set_childs_src_tpl (E* e, TString[] values) {
+//    // childs.src.tpl list-template  ...or childs under t
         
-    if (values.length >= 1) {
-        e.childs_src.tpl.klass = values[0].s;
-    }
-}
+//    if (values.length >= 1) {
+//        e.childs_src.tpl.klass = values[0].s;
+//    }
+//}
 
-void
-set_childs_src_tpl_src (E* e, TString[] values) {
-    // childs.src.tpl.src 1 2 3
+//void
+//set_childs_src_tpl_src (E* e, TString[] values) {
+//    // childs.src.tpl.src 1 2 3
     
-}
+//}
 
-void
-set_childs_src_tpl_dst (E* e, TString[] values) {
-    // childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
-}
+//void
+//set_childs_src_tpl_dst (E* e, TString[] values) {
+//    // childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
+//}
 
 void
 set_content (E* e, TString[] values) {

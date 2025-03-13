@@ -22,10 +22,12 @@ Check {
             [], 
             [], 
             [], 
-            &.event,
-            &.update,
-            &.set, 
-            &.draw, 
+            Klass.Fn (
+                &.event,
+                &.update,
+                &.set, 
+                &.draw, 
+            )
         );
     alias _super this;
 }

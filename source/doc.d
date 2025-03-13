@@ -92,8 +92,7 @@ send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* 
     // klass event
     foreach (_e; etree.FindDeepest (e,&valid_e)) {
         foreach (kls; _e.klasses)
-            if (kls.event !is null)
-                kls.event (kls,ev,_e);
+            kls.event (ev,_e);
     }
 }
 
@@ -110,8 +109,7 @@ send_click_in_deep (Event* ev, E* e, Pos down_pos, Pos up_pos, ref E* deepest) {
     // klass event
     foreach (_e; FindDeepest (e,&valid_e)) {
         foreach (kls; _e.klasses)
-            if (kls.event !is null)
-                kls.event (kls,ev,_e);
+            kls.event (ev,_e);
         deepest = _e;
     }
 }
@@ -129,8 +127,7 @@ send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
     foreach (_e; FindDeepest (e,&valid_e)) {
         //writeln (*_t);
         foreach (kls; _e.klasses)
-            if (kls.event !is null)
-                kls.event (kls,ev,_e);
+            kls.event (ev,_e);
         deepest = _e;
     }
 }
@@ -140,8 +137,7 @@ send_event_in_tree (Event* ev) {
     // klass event
     foreach (_e; WalkTree (ev.e)) {
         foreach (kls; _e.klasses)
-            if (kls.event !is null)
-                kls.event (kls,ev,_e);
+            kls.event (ev,_e);
     }
 }
 
@@ -235,8 +231,7 @@ set_field (E* e, Field* field) {
 
     // klasses set
     foreach (kls; e.klasses) {
-        if (kls.set !is null)
-            kls.set (kls,e,field.name,values);
+            kls.set (e,field.name,values);
     }
 }
 
@@ -417,84 +412,84 @@ load_colors (E* root) {
 
 void
 load_childs (E* e) {
-    final
-    switch (e.childs_src.type) {
-        case E.ChildsSrc.Type.none : break;
-        case E.ChildsSrc.Type.cmd  : load_childs_cmd (e); break;
-        case E.ChildsSrc.Type.fs   : break;
-        case E.ChildsSrc.Type.csv  : break;
-    }
+    //final
+    //switch (e.childs_src.type) {
+    //    case E.ChildsSrc.Type.none : break;
+    //    case E.ChildsSrc.Type.cmd  : load_childs_cmd (e); break;
+    //    case E.ChildsSrc.Type.fs   : break;
+    //    case E.ChildsSrc.Type.csv  : break;
+    //}
 }
 
-void
-load_childs_cmd (E* e) {
-    return;
-    auto cmd = e.childs_src.cmd.command.s;
-    auto dlm = e.childs_src.cmd.delimiter.s;
-    auto skp = e.childs_src.cmd.skip;
+//void
+//load_childs_cmd (E* e) {
+//    return;
+//    auto cmd = e.childs_src.cmd.command.s;
+//    auto dlm = e.childs_src.cmd.delimiter.s;
+//    auto skp = e.childs_src.cmd.skip;
 
-    if (cmd.length) {
-        auto converted = extract_class_field_value (e,cmd);
-        auto ret = executeShell (converted);
-        writeln ("RET: ", ret);
+//    if (cmd.length) {
+//        auto converted = extract_class_field_value (e,cmd);
+//        auto ret = executeShell (converted);
+//        writeln ("RET: ", ret);
         
-        load_childs_add_lines:
-        foreach (line; ret.output.splitLines) {
-            if (skp > 0) {
-                skp--;
-                continue;
-            }
+//        load_childs_add_lines:
+//        foreach (line; ret.output.splitLines) {
+//            if (skp > 0) {
+//                skp--;
+//                continue;
+//            }
 
-            auto splits = line.split (dlm);
-            TString[] values;
-            foreach (s; splits) {
-                values ~= TString (TString.Type.string,s);
-            }
+//            auto splits = line.split (dlm);
+//            TString[] values;
+//            foreach (s; splits) {
+//                values ~= TString (TString.Type.string,s);
+//            }
 
-            // map
-            //   to template
-            auto tpl_klass = e.childs_src.tpl.klass;
-            auto tpl_src   = e.childs_src.tpl.src;
-            auto tpl_dst   = e.childs_src.tpl.dst;
+//            // map
+//            //   to template
+//            auto tpl_klass = e.childs_src.tpl.klass;
+//            auto tpl_src   = e.childs_src.tpl.src;
+//            auto tpl_dst   = e.childs_src.tpl.dst;
 
-            // tpl
-            auto kls = e.find_klass (tpl_klass);
-            if (kls !is null) {
-                E*[] e_line;
+//            // tpl
+//            auto kls = e.find_klass (tpl_klass);
+//            if (kls !is null) {
+//                E*[] e_line;
 
-                load_childs_add_fields:
-                foreach (field; WalkFields (kls)) {
-                    if (field.name == "e") {
-                        auto _e = e.new_child_e (field.values);
-                        e.childs ~= _e;
-                        e_line ~= _e;
+//                load_childs_add_fields:
+//                foreach (field; WalkFields (kls)) {
+//                    if (field.name == "e") {
+//                        auto _e = e.new_child_e (field.values);
+//                        e.childs ~= _e;
+//                        e_line ~= _e;
 
-                        //
-                        apply_klasses (_e);
+//                        //
+//                        apply_klasses (_e);
 
-                        // set text
-                        foreach (_kls; _e.klasses)
-                            _kls.set (_kls,_e,"text",values);
+//                        // set text
+//                        foreach (_kls; _e.klasses)
+//                            _kls.set (_kls,_e,"text",values);
 
-                        _e.update ();
+//                        _e.update ();
 
-                        // limit height
-                        if (_e.pos.y > e.pos.y + e.size.h)
-                            break load_childs_add_lines;
-                    }
-                }
+//                        // limit height
+//                        if (_e.pos.y > e.pos.y + e.size.h)
+//                            break load_childs_add_lines;
+//                    }
+//                }
 
-                // set fields
-                //foreach (i; tpl_src) {
-                //    auto field_name = tpl_dst[i];
-                //    auto _t = e_line[i];
-                //    foreach (_kls; _e.klasses)
-                //        _kls.set (_kls,doc,_t,field_name,values);
-                //}
-            }
-        }
-    }
-}
+//                // set fields
+//                //foreach (i; tpl_src) {
+//                //    auto field_name = tpl_dst[i];
+//                //    auto _t = e_line[i];
+//                //    foreach (_kls; _e.klasses)
+//                //        _kls.set (_kls,doc,_t,field_name,values);
+//                //}
+//            }
+//        }
+//    }
+//}
 
 alias IMGPTR = SDL_Surface*;
 static

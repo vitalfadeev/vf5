@@ -33,11 +33,35 @@ Klass {
     Field*[] fields;
     string[] args;
 
-    KLASS_EVENT_FN  event  = &.event;
-    KLASS_UPDATE_FN update = &.update;
-    KLASS_SET_FN    set    = &.set;
-    KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
-    KLASS_DUP_FN    dup    = &._dup; // simple, bordered, bordered-titled, custom
+    struct
+    Fn {
+        KLASS_EVENT_FN  event  = &.event;
+        KLASS_UPDATE_FN update = &.update;
+        KLASS_SET_FN    set    = &.set;
+        KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
+        KLASS_DUP_FN    dup    = &._dup; // simple, bordered, bordered-titled, custom
+    }
+    Fn fn;
+
+    void 
+    event (Event* ev, E* e) { 
+        if (fn.event !is null) fn.event (&this,ev,e); 
+    }
+
+    void 
+    update (E* e) { 
+        if (fn.update !is null) fn.update (&this,e); 
+    }
+
+    void 
+    set (E* e, string field_id, TString[] values) {
+        if (fn.set !is null) fn.set (&this,e,field_id,values); 
+    }
+
+    void 
+    draw (Event* ev, E* e) {
+        if (fn.draw !is null) fn.draw (&this,ev,e);
+    }
 
     //void
     //add_child (Field* field) {
@@ -89,10 +113,7 @@ _dup (KlassPtr _this) {
 
     cloned.name           = _this.name;
     cloned.parent_klasses = _this.parent_klasses.dup;
-    cloned.event          = _this.event;
-    cloned.update         = _this.update;
-    cloned.set            = _this.set;
-    cloned.draw           = _this.draw;
+    cloned.fn             = _this.fn;
 
     return cloned;
 }

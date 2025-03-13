@@ -22,10 +22,13 @@ Button {
             [], 
             [], 
             [], 
-            &.event,
-            &.update,
-            &.set, 
-            &.draw, 
+            Klass.Fn (
+                &.event,
+                &.update,
+                &.set, 
+                &.draw, 
+                null
+            )
         );
     alias _super this;
 }

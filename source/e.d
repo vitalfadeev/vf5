@@ -9,6 +9,7 @@ import klass;
 import types;
 import events;
 import pix : Window;
+import generator : Generator;
 import doc : apply_klasses,
     load_font,load_colors,load_e_text,load_e_image,time_step,
     update_size,update_pos,load_childs;
@@ -238,66 +239,67 @@ E {
     //   childs.tpl.src   1         2    3
     //   childs.tpl.dst   image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
 
-    //Generator* generator; // none, cmd, fs, csv
-    //string     template;  // klass name
-    struct
-    ChildsSrc {
-        Type     type;      // cmd `command` delimiter | skip 1
-        union {
-            None none;
-            Cmd  cmd;
-            Fs   fs;
-            Csv  csv;
-        }
-        Tpl      tpl;
-        size_t   offset;
-        size_t   limit;
+    Generator* generator; // none, cmd, fs, csv
+    string     generator_template;  // klass name
 
-        enum 
-        Type {
-            none,
-            cmd,
-            fs,
-            csv,
-        }
-        struct 
-        None {
-            //
-        }
-        struct 
-        Cmd {
-            TString command;   // `command`
-            TString delimiter; // |
-            size_t  skip;      // 1 (header line)
-        }
-        struct 
-        Fs {
-            //
-        }
-        struct 
-        Csv {
-            //
-        }
+    //struct
+    //ChildsSrc {
+    //    Type     type;      // cmd `command` delimiter | skip 1
+    //    union {
+    //        None none;
+    //        Cmd  cmd;
+    //        Fs   fs;
+    //        Csv  csv;
+    //    }
+    //    Tpl      tpl;
+    //    size_t   offset;
+    //    size_t   limit;
 
-        struct
-        Tpl {
-            string   klass;  // klass-name
-            size_t[] src;    // 1         2    3
-            string[] dst;    // image.src text text            
-        }
+    //    enum 
+    //    Type {
+    //        none,
+    //        cmd,
+    //        fs,
+    //        csv,
+    //    }
+    //    struct 
+    //    None {
+    //        //
+    //    }
+    //    struct 
+    //    Cmd {
+    //        TString command;   // `command`
+    //        TString delimiter; // |
+    //        size_t  skip;      // 1 (header line)
+    //    }
+    //    struct 
+    //    Fs {
+    //        //
+    //    }
+    //    struct 
+    //    Csv {
+    //        //
+    //    }
 
-        string
-        toString () {
-            final
-            switch (type) {
-                case Type.none: return "ChildsSrc ("~ type.to!string ~")";
-                case Type.cmd : return "ChildsSrc ("~ type.to!string ~ "," ~ cmd.to!string ~")";
-                case Type.fs  : return "ChildsSrc ("~ type.to!string ~")";
-                case Type.csv : return "ChildsSrc ("~ type.to!string ~")";
-            }
-        }
-    }
-    ChildsSrc childs_src;
+    //    struct
+    //    Tpl {
+    //        string   klass;  // klass-name
+    //        size_t[] src;    // 1         2    3
+    //        string[] dst;    // image.src text text            
+    //    }
+
+    //    string
+    //    toString () {
+    //        final
+    //        switch (type) {
+    //            case Type.none: return "ChildsSrc ("~ type.to!string ~")";
+    //            case Type.cmd : return "ChildsSrc ("~ type.to!string ~ "," ~ cmd.to!string ~")";
+    //            case Type.fs  : return "ChildsSrc ("~ type.to!string ~")";
+    //            case Type.csv : return "ChildsSrc ("~ type.to!string ~")";
+    //        }
+    //    }
+    //}
+    //ChildsSrc childs_src;
 
     struct
     On {
@@ -307,14 +309,14 @@ E {
     On[] on;
 
     struct
-    FN {
+    Fn {
         E_EVENT_FN  event  = &.event;
         E_UPDATE_FN update = &.update;
         E_SET_FN    set    = &.set;
         E_DRAW_FN   draw   = &.draw;
         E_DUP_FN    dup    = &._dup;        
     }
-    FN fn;
+    Fn fn;
 
     void 
     event (Event* ev) { 
@@ -452,10 +454,8 @@ set (E* e, string field_id, TString[] values) {
 
 void
 draw (E* e, Event* ev) {
-    foreach (Klass* kls; e.klasses) {
-        if (kls.draw !is null)
-            kls.draw (kls,ev,e);
-    }
+    foreach (Klass* kls; e.klasses)
+        kls.draw (ev,e);
 
     // childs
     foreach (_e; WalkChilds (e))
@@ -486,11 +486,11 @@ _dup (EPtr _this) {
      cloned.pos_percent   = _this.pos_percent;
      cloned.size_w_type   = _this.size_w_type;
      cloned.size_h_type   = _this.size_h_type;
-     cloned.childs_src    = _this.childs_src;
-     cloned.childs_src.tpl.src 
-                          = _this.childs_src.tpl.src.dup;
-     cloned.childs_src.tpl.dst 
-                          = _this.childs_src.tpl.dst.dup;
+     //cloned.childs_src    = _this.childs_src;
+     //cloned.childs_src.tpl.src 
+     //                     = _this.childs_src.tpl.src.dup;
+     //cloned.childs_src.tpl.dst 
+     //                     = _this.childs_src.tpl.dst.dup;
      cloned.on            = _this.on.dup;
      foreach (ref _on; cloned.on)
         _on.action = _on.action.dup;
