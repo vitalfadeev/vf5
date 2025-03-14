@@ -11,6 +11,7 @@ import klass;
 import types;
 import tstring;
 import events;
+import pix : send_e_redraw;
 
 
 struct 
@@ -88,6 +89,8 @@ event (Klass* kls, Event* ev, E* e) {
                             // seek  = total * precent
                             //         udtool playback-seek seek
                             // exec (`audtool playback-seek %s`, precent_to_time (precent));
+                            e.send_e_update ();
+                            e.send_e_redraw ();
                         }
                     }
                     break;
@@ -110,8 +113,6 @@ update (Klass* kls, Event* ev, E* e) {
 // KLASS_SET_FN
 void 
 set (Klass* kls, E* e, string field_id, TString[] values) {
-    
-
     switch (field_id) {
         case "progress"            : set_progress_position (e,values); break;
         case "progress.position"   : set_progress_position (e,values); break;
@@ -127,7 +128,6 @@ draw (Klass* kls, Event* ev, E* e) {
 
 void
 percent_from_click (E* e, int click_x, int click_y, int* percent) {
-    
     auto offset_x = click_x - e.content.pos.x;
     int  w = e.size.w;
     *percent = 100 * offset_x / w;
