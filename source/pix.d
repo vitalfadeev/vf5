@@ -29,10 +29,43 @@ alias TEXT_PTR  = SDL_Texture*;
 
 struct 
 Pix {
-    PIX_EVENT_FN  event  = &.event;
-    PIX_UPDATE_FN update = &.update;
-    PIX_DRAW_FN   draw   = &.draw;
-    PIX_GO_FN     go     = &.go;
+    Fn fn;
+
+    struct
+    Fn {
+        PIX_EVENT_FN  event  = &.event;
+        PIX_UPDATE_FN update = &.update;
+        PIX_DRAW_FN   draw   = &.draw;
+        PIX_GO_FN     go     = &.go;        
+    }
+
+    int
+    event (Event* ev) {
+        if (fn.event !is null)
+            return fn.event (&this,ev);
+        else
+            return 0;
+    }
+
+    void
+    draw (Event* ev) {
+        if (fn.draw !is null)
+            fn.draw (&this,ev);
+    }
+
+    void
+    update (E* e) {
+        if (fn.update !is null)
+            fn.update (&this,e);
+    }
+
+    int
+    go (E* e) {
+        if (fn.go !is null)
+            return fn.go (&this,e);
+        else
+            return 0;
+    }
 
     void
     setup () {
@@ -62,7 +95,7 @@ go (Pix* pix, E* e) {
         ev.app_window = window;
         ev.renderer   = renderer;
 
-        if (auto result = pix.event (pix,ev))
+        if (auto result = pix.event (ev))
             return result;
     }
 
@@ -119,7 +152,7 @@ event (Pix* pix, Event* ev) {
                 case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED:  pix.update (pix,ev.e); direct_event!DrawUserEvent (pix,ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED:  pix.update (ev.e); direct_event!DrawUserEvent (pix,ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
@@ -138,8 +171,8 @@ event (Pix* pix, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : if (pix.draw !is null) pix.draw (pix,ev); break;
-                case USER_EVENT.draw   : if (pix.draw !is null) pix.draw (pix,ev); break;
+                case USER_EVENT.redraw : pix.draw (ev); break;
+                case USER_EVENT.draw   : pix.draw (ev); break;
                 default: ev.e.event (ev);
             }
             break;
@@ -333,7 +366,7 @@ direct_event (EVENT) (Pix* pix, Event* ev) {
     EVENT __ev;
     _ev.type      = cast (SDL_EventType) __ev.type;
     _ev.user.code = __ev.code;
-    pix.event (pix,&_ev); 
+    pix.event (&_ev); 
 }
 
 

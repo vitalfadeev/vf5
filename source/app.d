@@ -25,7 +25,7 @@ main () {
 	//dump_klasses (root);
 
 	//
-	pix.go (pix,root);
+	pix.go (root);
 }
 
 void
