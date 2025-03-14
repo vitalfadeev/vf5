@@ -56,7 +56,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, E* e) {
+update (Klass* kls, Event* ev, E* e) {
     //
 }
 

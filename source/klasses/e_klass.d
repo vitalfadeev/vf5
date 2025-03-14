@@ -7,6 +7,7 @@ import bindbc.sdl;
 import etree;
 import e;
 import e_update;
+import e_klass_draw;
 import klass;
 import events;
 import tstring;
@@ -40,16 +41,67 @@ event (Klass* kls, Event* ev, E* e) {
 
     switch (ev.type) {
         case SDL_USEREVENT:
-            go_on_event (e,(cast(USER_EVENT)ev.user.code).to!string);
+            switch (ev.user.code) {
+                case USER_EVENT.update : kls.update (ev,e); break;
+                case USER_EVENT.draw   : kls.draw   (ev,e); break;
+                case USER_EVENT.redraw : kls.draw   (ev,e); break;
+                case USER_EVENT.start  : go_on_event (e,"start"); break;
+                default                :
+            }
+
             break;
-        default:
+        default: 
     }
 }
 
+
 // KLASS_UPDATE_FN
 void
-update (Klass* kls, E* e) {
-    //
+update (Klass* kls, Event* ev, E* e) {
+    writefln ("%-60s", e.toString);
+    e.reset ();
+    time_step ("");
+
+    // 1
+    if (e.klasses.length)
+        e.apply_e_klasses ();
+    time_step ("apply_e_klasses");
+
+    // 2
+    if (e.content.image.src.length)
+        load_e_image (e);
+    time_step ("load_e_image");
+
+    // 3
+    if (e.content.text.s.length)
+        e.load_e_font ();
+    time_step ("load_e_font");
+    
+    // 4
+    e.load_e_colors ();
+    time_step ("load_e_colors");
+
+    // 5
+    if (e.content.text.s.length)
+        e.load_e_text ();
+    time_step ("load_e_text");
+
+    // 6
+    if (1)
+        e.update_e_size ();
+    time_step ("update_e_size");
+
+    // 7
+    if (1)
+        e.update_e_pos ();
+    time_step ("update_e_pos");
+
+    // 8
+    if (e.generator.type != E._Generator.Type.none)
+        e.load_e_childs ();
+    time_step ("load_e_childs");
+
+    writefln ("%s: size: %s, content.size: %s", e.toString, e.size, e.content.size);
 }
 
 // KLASS_SET_FN
@@ -103,9 +155,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 // KLASS_DRAW_FN
 void
 draw (Klass* kls, Event* ev, E* e) {
-    import e_draw : draw_e;
-
-    draw_e (ev.renderer,e);
+    e_klass_draw.draw (ev.renderer,e);
 }
 
 //
@@ -297,8 +347,8 @@ set_size_h (E* e, TString[] values) {
             case "fixed"   : e.size_h_type = E.SizeType.fixed;  break;
             case "content" : e.size_h_type = E.SizeType.content; break;
             case "parent"  : e.size_h_type = E.SizeType.parent;  break;
-            case "window"  : e.size_w_type = E.SizeType.window;  break;
-            case "max"     : e.size_w_type = E.SizeType.max;  break;
+            case "window"  : e.size_h_type = E.SizeType.window;  break;
+            case "max"     : e.size_h_type = E.SizeType.max;  break;
             default : 
                 if (values[0].s.isNumeric ()) {
                     e.size_h_type = E.SizeType.fixed;

@@ -7,7 +7,7 @@ import field : Field;
 import events : Event;
 
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
-alias KLASS_UPDATE_FN = void function (Klass* kls, E* e);
+alias KLASS_UPDATE_FN = void function (Klass* kls, Event* ev, E* e);
 alias KLASS_SET_FN    = void function (Klass* kls, E* e, string field, TString[] values);
 alias KLASS_DRAW_FN   = void function (Klass* kls, Event* ev, E* e);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
@@ -49,8 +49,8 @@ Klass {
     }
 
     void 
-    update (E* e) { 
-        if (fn.update !is null) fn.update (&this,e); 
+    update (Event* ev, E* e) { 
+        if (fn.update !is null) fn.update (&this,ev,e); 
     }
 
     void 
@@ -84,7 +84,7 @@ event (Klass* kls, Event* ev, E* e) {
 }
 
 void
-update (Klass* kls, E* e) {
+update (Klass* kls, Event* ev, E* e) {
     //
 }
 

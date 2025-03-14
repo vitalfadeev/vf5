@@ -42,6 +42,10 @@ string text1 = "
 e root
   e rect
 
+root
+  size parent
+  content.size e
+
 rect
   aura         20
   aura.color   #008

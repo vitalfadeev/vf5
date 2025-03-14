@@ -11,7 +11,7 @@ import klass;
 import types;
 import tstring;
 import events;
-import pix : redraw;
+import pix : send_e_redraw;
 
 
 struct 
@@ -45,8 +45,8 @@ event (Klass* kls, Event* ev, E* e) {
                 case USER_EVENT.click : 
                     e.trigger_class ("check.pressed");
                     //emit ("on check.pressed", doc_t, e_t);
-                    e.update ();
-                    e.redraw ();
+                    e.send_e_update ();
+                    e.send_e_redraw ();
                     break;
                 default:
             }
@@ -57,7 +57,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, E* e) {
+update (Klass* kls, Event* ev, E* e) {
     //
 }
 

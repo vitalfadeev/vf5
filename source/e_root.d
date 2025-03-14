@@ -16,44 +16,8 @@ import types;
 auto
 new_root () {
     auto root = new E ();
-    root.size     = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    root.fn.event = &.event;
+    root.size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
     return root;
-}
-
-void
-on_click (E* root, Event* ev) {
-    auto click_ev = cast (ClickUserEvent*) ev;
-    _on_click (
-        root,
-        ev,
-        click_ev.down_pos, 
-        click_ev.up_pos, 
-    );
-}
-
-void
-_on_click (E* root, Event* ev, Pos down_pos, Pos up_pos) {
-    //
-    E* deepest;
-    foreach (E* _e_tree; WalkChilds (root)) {
-        send_click_in_deep (
-            _e_tree, 
-            ev, 
-            down_pos,
-            up_pos,
-            deepest);
-
-            // focused
-            //remove_class_from_all (_e_tree,"focused");
-            //if (deepest !is null)
-                //deepest.add_class (ev.doc,"focused");
-    }
-
-    //
-    root.update ();
-    if (deepest !is null)
-        deepest.redraw ();
 }
 
 void
@@ -64,7 +28,6 @@ send_event_in_tree (E* root, Event* ev) {
             kls.event (ev,_e);
     }
 }
-
 
 void
 send_click_in_deep (E* e, Event* ev, Pos down_pos, Pos up_pos, ref E* deepest) {
@@ -122,17 +85,18 @@ event (E* root, Event* ev) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.start  : root.send_event_in_tree (ev); break;
-                case USER_EVENT.draw   : root.draw (ev); break;
-                case USER_EVENT.redraw : root.draw (ev); break;
-                case USER_EVENT.click  : root.on_click (ev); break;
+                case USER_EVENT.start  : root.event (ev); break;
+                case USER_EVENT.update : root.event (ev); break;
+                case USER_EVENT.draw   : root.event (ev); break;
+                case USER_EVENT.redraw : root.event (ev); break;
+                case USER_EVENT.click  : root.event (ev); break;
                 default:
             }
             break;
         case SDL_QUIT:
             break;
         default:
-            root.send_event_in_tree (ev); break;
+            root.event (ev); break;
     }
 
     return;

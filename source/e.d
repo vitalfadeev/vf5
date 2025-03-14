@@ -3,9 +3,6 @@ import std.stdio;
 import std.string;
 import std.conv;
 import etree;
-import e_update : apply_e_klasses,
-    load_e_font,load_e_colors,load_e_text,load_e_image,time_step,
-    update_e_size,update_e_pos,load_e_childs;
 import klass;
 import types;
 import tstring;
@@ -15,7 +12,7 @@ import generator : Generator;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
-alias E_UPDATE_FN = void function (E* e);
+alias E_UPDATE_FN = void function (E* e, Event* ev);
 alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
 alias E_DRAW_FN   = void function (E* e, Event* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
@@ -322,8 +319,8 @@ E {
     }
 
     void 
-    update () { 
-        if (fn.update !is null) fn.update (&this); 
+    update (Event* ev) { 
+        if (fn.update !is null) fn.update (&this,ev); 
     }
 
     void 
@@ -419,75 +416,29 @@ dump_klasses (E* e) {
 }
 
 void
+send_event_in_childs (E* e, Event* ev) {
+    foreach (_e; WalkChilds (e))
+        _e.event (ev);
+}
+
+
+void
 event (E* e, Event* ev) {
     import bindbc.sdl;
 
     if (ev.type != SDL_MOUSEMOTION)
         writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
-    switch (ev.type) {
-        case SDL_USEREVENT:
-            switch (ev.user.code) {
-                case USER_EVENT.draw   : e.draw (ev); break;
-                case USER_EVENT.redraw : e.draw (ev); break;
-                default:
-            }
-            break;
-        default: 
-    }
+    // via klasses
+    foreach (Klass* kls; e.klasses)
+        kls.event (ev,e);
+
+    // to childs
+    e.send_event_in_childs (ev);
 }
 
 void
-update (E* e) {
-    writefln ("%-60s", e.toString);
-    e.reset ();
-    time_step ("");
-
-    // 1
-    if (e.klasses.length)
-        e.apply_e_klasses ();
-    time_step ("apply_e_klasses");
-
-    // 2
-    if (e.content.image.src.length)
-        load_e_image (e);
-    time_step ("load_e_image");
-
-    // 3
-    if (e.content.text.s.length)
-        e.load_e_font ();
-    time_step ("load_e_font");
-    
-    // 4
-    e.load_e_colors ();
-    time_step ("load_e_colors");
-
-    // 5
-    if (e.content.text.s.length)
-        e.load_e_text ();
-    time_step ("load_e_text");
-
-    // 6
-    if (1)
-        e.update_e_size ();
-    time_step ("update_e_size");
-
-    // 7
-    if (1)
-        e.update_e_pos ();
-    time_step ("update_e_pos");
-
-    // 8
-    if (e.generator.type != E._Generator.Type.none)
-        e.load_e_childs ();
-    time_step ("load_e_childs");
-
-    // 9
-
-    // childs
-    foreach (_e; WalkChilds (e)) 
-        _e.update ();
-
+update (E* e, Event* ev) {
     // custom update
     // ...
 }
@@ -499,13 +450,6 @@ set (E* e, string field_id, TString[] values) {
 
 void
 draw (E* e, Event* ev) {
-    foreach (Klass* kls; e.klasses)
-        kls.draw (ev,e);
-
-    // childs
-    foreach (_e; WalkChilds (e))
-        _e.event (ev);
-
     // custom draw
     // ...
 }

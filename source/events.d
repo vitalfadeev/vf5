@@ -19,6 +19,7 @@ Event {
 enum 
 USER_EVENT : Sint32 {
     start = 1,
+    update,
     draw,
     redraw,
     click,
@@ -30,6 +31,7 @@ UserEvent {
     Uint32 type; // SDL_USEREVENT
     SDL_UserEvent   user;
     StartUserEvent  start;
+    UpdateUserEvent update;
     DrawUserEvent   draw;
     RedrawUserEvent redraw;
     ClickUserEvent  click;
@@ -41,6 +43,19 @@ StartUserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.start;
+}
+
+struct
+UpdateUserEvent {
+    Uint32        type = SDL_USEREVENT;
+    Uint32        timestamp;
+    Uint32        windowID;
+    Sint32        code = USER_EVENT.update;
+    E*            e;
+
+    this (E* e) {
+        this.e = e;
+    }
 }
 
 struct

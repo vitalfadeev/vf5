@@ -16,7 +16,7 @@ import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import etree;
 import e;
-import e_draw : get_text_size;
+import e_klass_draw : get_text_size;
 import klass;
 import field : Field;
 import types;
@@ -26,8 +26,9 @@ import pix : open_font;
 import pix : Window;
 import pix : IMGException;
 import pix : redraw_window;
-import pix : redraw;
+import pix : send_e_redraw;
 import pix : IMAGE_PTR;
+import pix : send_user_event;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -476,40 +477,40 @@ update_e_size (E* e) {
     }
 }
 
-void
-update_fix_size_w_max (E* e) {
-    W other_w;
-    size_t max_cnt;
+//void
+//update_fix_size_w_max (E* e) {
+//    W other_w;
+//    size_t max_cnt;
 
-    // total
-    foreach (_e; WalkChilds (e)) {
-        if (_e.size_w_type == E.SizeType.max)
-            max_cnt ++;
-        else
-            other_w += _e.size.w;
-    }
+//    // total
+//    foreach (_e; WalkChilds (e)) {
+//        if (_e.size_w_type == E.SizeType.max)
+//            max_cnt ++;
+//        else
+//            other_w += _e.size.w;
+//    }
 
-    // has max
-    if (max_cnt >= 1) {
-        // divide
-        auto total_w = e.content.size.w;
+//    // has max
+//    if (max_cnt >= 1) {
+//        // divide
+//        auto total_w = e.content.size.w;
 
-        W one_max_w = (total_w - other_w) / max_cnt;
+//        W one_max_w = (total_w - other_w) / max_cnt;
 
-        foreach (_e; WalkChilds (e)) {
-            if (_e.size_w_type == E.SizeType.max)  {
-                auto ew = one_max_w;
-                auto cw = ew - e.aura.size.w - e.aura.size.w;
-                _e.size.w         = (ew > 0) ? ew : 0;
-                _e.content.size.w = (cw > 0) ? cw : 0;
+//        foreach (_e; WalkChilds (e)) {
+//            if (_e.size_w_type == E.SizeType.max)  {
+//                auto ew = one_max_w;
+//                auto cw = ew - e.aura.size.w - e.aura.size.w;
+//                _e.size.w         = (ew > 0) ? ew : 0;
+//                _e.content.size.w = (cw > 0) ? cw : 0;
 
-                // recursive update childs
-                foreach (__e; WalkChilds (_e))
-                    update_e_size (__e);
-            }
-        }
-    }
-}
+//                // recursive update childs
+//                //foreach (__e; WalkChilds (_e))
+//                //    update_e_size (__e);
+//            }
+//        }
+//    }
+//}
 
 void
 update_size_w_fixed (E* e) {
@@ -717,7 +718,7 @@ void
 update_content_childs_size (E* e) {
     Size max_sz;
     foreach (_e; WalkChilds (e)) {
-        _e.update ();
+        _e.force_e_update ();
         max_sz.w = max (max_sz.w, _e.pos.x + _e.size.w);
         max_sz.h = max (max_sz.h, _e.pos.y + _e.size.h);
     }
@@ -1133,7 +1134,6 @@ pos_type_hbox (E* e) {
     else {
         if (e.parent !is null) {
             auto parent_content_pos = e.parent.content.pos;
-            //writeln ("parent_content_pos: ", parent_content_pos);
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
         }
@@ -1270,6 +1270,20 @@ extract_class_field_value (E* e, string s) {
         return cmd.join (" ");
     else
         return s;
+}
+
+
+void
+force_e_update (E* e) {
+    Event ev;
+    ev.type      = SDL_USEREVENT;
+    ev.user.code = USER_EVENT.update;
+    e.event (&ev);
+}
+
+void
+send_e_update (E* e) {
+    send_user_event!UpdateUserEvent (e);
 }
 
 

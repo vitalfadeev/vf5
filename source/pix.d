@@ -11,15 +11,13 @@ import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import bindbc.sdlgfx;
 import etree;
-import e : E;
+import e : E,content;
 import e_update;
-import e_draw;
 import klass;
 import events;
 import types;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, E* root);
-alias PIX_UPDATE_FN = void function (Pix* pix, E* root);
 alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev, E* root);
 alias PIX_GO_FN     = int  function (Pix* pix, E* root);
 
@@ -34,7 +32,6 @@ Pix {
     struct
     Fn {
         PIX_EVENT_FN  event  = &.event;
-        PIX_UPDATE_FN update = &.update;
         PIX_DRAW_FN   draw   = &.draw;
         PIX_GO_FN     go     = &.go;        
     }
@@ -51,12 +48,6 @@ Pix {
     draw (Event* ev, E* root) {
         if (fn.draw !is null)
             fn.draw (&this,ev,root);
-    }
-
-    void
-    update (E* root) {
-        if (fn.update !is null)
-            fn.update (&this,root);
     }
 
     int
@@ -84,10 +75,14 @@ go (Pix* pix, E* root) {
 
     //
     root.window = new Window (window);
+    root.size   = root.window.size;
+    root.content.size = root.size - root.aura.size - root.aura.size;
+
+    // Event "update"
+    send_user_event!UpdateUserEvent (root);
 
     // Event "start"
     send_user_event!StartUserEvent ();
-    root.update ();
 
     // Event Loop
     foreach (Event* ev; Events ()) {
@@ -152,7 +147,7 @@ event (Pix* pix, Event* ev, E* root) {
                 case SDL_WINDOWEVENT_SHOWN        : break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN       : break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED        : break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED      : pix.update (root); direct_event!DrawUserEvent (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED      : direct_event!UpdateUserEvent (pix,ev,root); direct_event!DrawUserEvent (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED : break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED    : break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED    : break;    // event.window.windowID
@@ -169,8 +164,8 @@ event (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : pix.draw (ev,root); break;
-                case USER_EVENT.draw   : pix.draw (ev,root); break;
+                case USER_EVENT.draw   : pix.draw   (ev,root); break;
+                case USER_EVENT.redraw : pix.draw   (ev,root); break;
                 default                : root.event (ev);
             }
             break;
@@ -182,11 +177,6 @@ event (Pix* pix, Event* ev, E* root) {
     }
 
     return 0;
-}
-
-void
-update (Pix* pix, E* root) {
-    root.update (); 
 }
 
 void
@@ -411,7 +401,7 @@ redraw_window (SDL_Window* window) {
 }
 
 void
-redraw (E* e) {
+send_e_redraw (E* e) {
     send_user_event!RedrawUserEvent (e);
 }
 

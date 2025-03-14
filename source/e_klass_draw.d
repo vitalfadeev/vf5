@@ -1,4 +1,4 @@
-module e_draw;
+module e_klass_draw;
 
 import std.stdio;
 import std.string;
@@ -181,7 +181,7 @@ content_size (E* e) {
 }
 
 void
-draw_e (SDL_Renderer* renderer, E* e) {
+draw (SDL_Renderer* renderer, E* e) {
     draw_content_with_aura (renderer,e);
     draw_click_decoration (renderer,e);
 }
