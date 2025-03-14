@@ -8,7 +8,7 @@ import bindbc.sdl.image;
 import e;
 import e_update : max;
 import types;
-import pix : SDLException, TTFException;
+import pix : FONT_PTR, SDLException, TTFException;
 
 
 void
@@ -42,8 +42,19 @@ fill_rect (SDL_Renderer* renderer, int x, int y, int w, int h) {
 }
 
 void
-image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
-    SDL_Surface* surface = cast (SDL_Surface*) ptr;
+draw_rect (SDL_Renderer* renderer, int x, int y, int w, int h, int bold) {
+    SDL_Rect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.w = w;
+    rect.h = h;
+    // bold
+    SDL_RenderDrawRect (renderer, &rect);
+}
+
+void
+image (SDL_Renderer* renderer, IMAGE_PTR ptr, X x, Y y, W w, H h) {
+    SDL_Surface* surface = ptr;
     SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
 
     //
@@ -57,7 +68,7 @@ image (SDL_Renderer* renderer, void* ptr, X x, Y y, W w, H h) {
 
 
 void
-_text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, Color color, X x, Y y, W w, H h) {
+_text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, FONT_PTR font, Color color, X x, Y y, W w, H h) {
     // clip w h
     // from text.rects
     foreach (ref rec; rects)
@@ -69,7 +80,7 @@ _text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, TTF_Font* font, 
 }
 
 Size
-get_text_size (string s, TTF_Font* font, Color color) {
+get_text_size (string s, FONT_PTR font, Color color) {
     int w, h;
     auto ret = TTF_SizeUTF8 (font, s.toStringz, &w, &h);
     
@@ -78,14 +89,13 @@ get_text_size (string s, TTF_Font* font, Color color) {
 
 
 void
-one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color, int x, int y, int w, int h) {
-    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color, int x, int y, int w, int h) {
     auto image = _one_string (renderer,s,font,color);
-    render_texture (renderer,image,x,y,w,h);
+    _render_texture (renderer,image,x,y,w,h);
 }
 
 SDL_Texture*
-_one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color) {
+_one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
@@ -105,17 +115,17 @@ _one_string (SDL_Renderer* renderer, string s, TTF_Font* font, Color color) {
 }
 
 void 
-render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst) {
-    SDL_RenderCopy (renderer, tex, null, &dst);
-}
-void 
-render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, int h) {
+_render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, int h) {
     SDL_Rect dst;
     dst.x = x;
     dst.y = y;
     dst.w = w;
     dst.h = h;
-    render_texture (renderer, tex, dst);
+    _render_texture (renderer, tex, dst);
+}
+void 
+_render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst) {
+    SDL_RenderCopy (renderer, tex, null, &dst);
 }
 
 // e.pos  = border + pad + content
@@ -127,25 +137,21 @@ e_pos (E* e) {
 
 Pos
 aura_borders_pos (E* e) {
-    return aura_pos (e);
-}
-
-Size
-aura_borders_size (E* e) {
-    return aura_size (e);
-}
-
-Pos
-aura_pos (E* e) {
     return e.aura.pos;
 }
 
 Size
-aura_size (E* e) {
-    return Size (
-        e.aura.size.w + e.content.size.w + e.aura.size.w,
-        e.aura.size.h + e.content.size.h + e.aura.size.h
-    );
+aura_borders_size (E* e) {
+    auto _content_size = e.content.size;
+    auto _aura_size    = _content_size + e.aura.size + e.aura.size;
+    return _aura_size;
+}
+
+Size
+aura_real_size (E* e) {
+    auto _content_size = e.content.size;
+    auto _aura_size    = _content_size + e.aura.size + e.aura.size;
+    return _aura_size;
 }
 
 Pos
@@ -220,40 +226,43 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
 
 void
 draw_aura_borders (SDL_Renderer* renderer, E* e) {
-    SDL_SetRenderDrawColor (
-        renderer, 
-        e.aura.border.color.r,
-        e.aura.border.color.g,
-        e.aura.border.color.b,
-        e.aura.border.color.a,
-    );
+    auto color = e.aura.border.color;
+    SDL_SetRenderDrawColor (renderer, color.r,color.g,color.b,color.a,);
 
     auto pos  = aura_borders_pos  (e);
     auto size = aura_borders_size (e);
 
     if (size.w > 0 && size.h > 0)
-    draw8 (
-        renderer, 
-        pos.x, 
-        pos.y, 
-        size.w, 
-        size.h, 
-        e.aura.border.w,
-        e.aura.border.w,
-        e.aura.border.w,
-        e.aura.border.w
-    );
+        switch (e.aura.form.type) {
+            case E.Form.Type.rect: 
+                draw_rect (renderer, pos.x, pos.y, size.w, size.h, e.aura.border.w);
+                //draw8 (
+                //    renderer, 
+                //    pos.x, 
+                //    pos.y, 
+                //    size.w, 
+                //    size.h, 
+                //    e.aura.border.w,
+                //    e.aura.border.w,
+                //    e.aura.border.w,
+                //    e.aura.border.w
+                //);
+                break;
+            default:
+        }
 }
 
 void
 draw_content_with_aura (SDL_Renderer* renderer, E* e) {
-    auto _aura_pos     = aura_pos (e);
-    auto _aura_size    = aura_size (e);
     auto _content_pos  = content_pos (e);
     auto _content_size = content_size (e);
+    auto _aura_pos     = e.aura.pos;
+    auto _aura_size    = aura_real_size (e);
 
-    draw_aura (renderer,e,_aura_pos,_aura_size);
-    draw_aura_borders (renderer,e);
+    if (e.aura.size.w != 0 && e.aura.size.h != 0 && e.aura.color.a != 0)
+        draw_aura (renderer,e,_aura_pos,_aura_size);
+    if (e.aura.border.type != E.Border.Type.none && e.aura.border.color.a != 0)
+        draw_aura_borders (renderer,e);
     draw_content_bg (renderer,e,_content_pos,_content_size);
     draw_content (renderer,e,_content_pos,_content_size);
 }

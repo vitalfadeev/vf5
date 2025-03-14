@@ -130,7 +130,7 @@ E {
         Text {
             string     s;            // "abc"
             Font       font;
-            Color      fg;
+            Color      fg = Color (0xFF, 0xFF, 0xFF, 0xFF);
             Color      bg;
             Pos        pos;
             PosType    pos_type;
@@ -411,6 +411,12 @@ add_klass (E* e, Klass* kls) {
     e.klasses ~= kls;
 }
 
+void
+dump_klasses (E* e) {
+    foreach (kls; e.defined_klasses) {
+        writeln (*kls);
+    }
+}
 
 void
 event (E* e, Event* ev) {

@@ -697,14 +697,6 @@ find_parent (ref Indent[] indents, size_t for_indent) {
 }
 
 auto
-new_root () {
-    auto root = new E ();
-    root.size     = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    root.fn.event = &e_update.event;
-    return root;
-}
-
-auto
 new_e (E* root, TString[] values) {
     return new_child_e (root,values);
 }

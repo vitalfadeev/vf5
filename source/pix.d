@@ -337,6 +337,32 @@ direct_event (EVENT) (Pix* pix, Event* ev) {
 }
 
 
+bool
+pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
+    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
+    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
+        return true;
+
+    return false;
+}
+
+
+void
+send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
+    bool 
+    valid_e (E* e) {
+        return (
+            pos_in_rect (pos, e.pos, e.size)
+        );
+    }
+
+    // klass event
+    foreach (_e; etree.FindDeepest (e,&valid_e)) {
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+    }
+}
+
 void
 send_click_in_deep (Event* ev, E* e, Pos down_pos, Pos up_pos, ref E* deepest) {
     bool 

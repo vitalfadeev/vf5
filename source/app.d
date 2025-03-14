@@ -2,6 +2,7 @@ import std.stdio;
 import etree;
 import e;
 import e_update;
+import e_root;
 import klass;
 import pix;
 import txt_reader;

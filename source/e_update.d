@@ -14,14 +14,13 @@ import std.stdio : write;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
-import tstring;
 import etree;
 import e;
-import e_draw : e_pos, e_size, content_pos;
 import e_draw : get_text_size;
 import klass;
 import field : Field;
 import types;
+import tstring;
 import events;
 import pix : open_font;
 import pix : Window;
@@ -31,26 +30,24 @@ import pix : send_click_in_deep;
 import pix : send_mouse_event_in_deep;
 import pix : send_event_in_tree;
 import pix : redraw;
+import pix : IMAGE_PTR;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
 const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
-alias DOC_EVENT_FN  = void   function (E* root, Event* ev);
-alias DOC_UPDATE_FN = void   function (E* root);
-
 Klass*
-find_klass_or_create (E* root, string s) {
-    auto kls = find_klass (root,s);
+find_klass_or_create (E* e, string s) {
+    auto kls = find_klass (e,s);
     if (kls is null)
-        kls = create_klass (root,s);
+        kls = create_klass (e,s);
     return kls;
 }
 
 Klass*
-find_klass (E* root, string s) {
-    for (auto _e=root; _e !is null; _e = _e.parent) {
+find_klass (E* e, string s) {
+    for (auto _e=e; _e !is null; _e = _e.parent) {
         foreach (kls; _e.defined_klasses)
             if (kls.name == s)
                 return kls;
@@ -60,34 +57,18 @@ find_klass (E* root, string s) {
 }
 
 Klass*
-create_klass (E* root, string s) {
+create_klass (E* e, string s) {
     Klass* kls = new Klass (s);
-    add_defined_klass (root,kls);
+    add_defined_klass (e,kls);
     return kls;
 }
 
 
 void
-add_defined_klass (E* root, Klass* kls) {
-    root.defined_klasses ~= kls;
+add_defined_klass (E* e, Klass* kls) {
+    e.defined_klasses ~= kls;
 }
 
-
-void
-send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
-    bool 
-    valid_e (E* e) {
-        return (
-            pos_in_rect (pos, e.pos, e.size)
-        );
-    }
-
-    // klass event
-    foreach (_e; etree.FindDeepest (e,&valid_e)) {
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-    }
-}
 
 void
 add_class (E* e, string s) {
@@ -113,10 +94,10 @@ trigger_class (E* e, string s) {
 
 
 void
-remove_class_from_all (E* root, string s) {
-    Klass* kls = root.find_klass (s);
+remove_class_from_all (E* e, string s) {
+    Klass* kls = e.find_klass (s);
     if (kls !is null)
-        foreach (e; WalkTree (root))
+        foreach (e; WalkTree (e))
             remove_class (e, kls);
 }
 
@@ -173,25 +154,25 @@ set_field (E* e, Field* field) {
 }
 
 void
-add_sub_tree (E* dest_t, Field* field) {
+add_sub_tree (E* e, Field* field) {
     // clone each t
-    // add in dest_t
-    auto e = dest_t.new_child_e (field.values);
-    dest_t.childs ~= e;
+    // add in e
+    auto _e = e.new_child_e (field.values);
+    e.childs ~= _e;
 
     // recursive
     foreach (_field; WalkFields (field)) {
         switch (_field.name) {
-            case "e"      : add_sub_tree (e,_field); break; // add e
-            case "switch" : set_switch   (e,_field); break; // set field
-            default       : set_field    (e,_field); break; // set field
+            case "e"      : add_sub_tree (_e,_field); break; // add e
+            case "switch" : set_switch   (_e,_field); break; // set field
+            default       : set_field    (_e,_field); break; // set field
         }
     }
 }
 
 void
-set_switch (E* dest_t, Field* field) {
-    auto evaluated = evaluate_switch_cond (dest_t,field.values);
+set_switch (E* e, Field* field) {
+    auto evaluated = evaluate_switch_cond (e,field.values);
 
     // switch value
     //   case value1
@@ -203,7 +184,7 @@ set_switch (E* dest_t, Field* field) {
     if (evaluated.length >= 1)
     foreach (_field; WalkFields (field)) {
         if (_field.name == evaluated[0].s) {
-            set_case (dest_t,_field);
+            set_case (e,_field);
             return;
         }
     }
@@ -211,15 +192,15 @@ set_switch (E* dest_t, Field* field) {
     // default
     foreach (_field; WalkFields (field)) {
         if (_field.name == "default") {
-            set_case (dest_t,_field);
+            set_case (e,_field);
             return;
         }
     }
 }
 
 void
-set_case (E* dest_t, Field* field) {
-    apply_case (dest_t,field);
+set_case (E* e, Field* field) {
+    apply_case (e,field);
 }
 
 void
@@ -237,27 +218,27 @@ apply_case (E* e, Field* field) {
 
 
 auto
-new_child_e (E* root, TString[] values) {
+new_child_e (E* e, TString[] values) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
     //   add classes
 
-    auto e = etree.new_e ();
+    auto _e = etree.new_e ();
 
-    e.add_klass (root.find_klass_or_create ("e"));
+    _e.add_klass (e.find_klass_or_create ("e"));
 
     // klasses
     foreach (ts; values)
         switch (ts.type) {
             case TString.Type.name   : 
             case TString.Type.string : 
-                e.add_klass (root.find_klass_or_create (ts.s));
+                _e.add_klass (e.find_klass_or_create (ts.s));
                 break;
             default:
         }
 
-    return e;
+    return _e;
 }
 
 
@@ -290,12 +271,12 @@ clone_tree (E* e) {
 
 
 TString[]
-extract_quoted (E* root, TString[] values) {
+extract_quoted (E* e, TString[] values) {
     TString[] vs;
     vs.reserve (values.length);
     foreach (v; values) 
         if (v.type == TString.Type.bquoted) 
-            vs ~= TString (TString.Type.string, extract_value (root,v.s));
+            vs ~= TString (TString.Type.string, extract_value (e,v.s));
         else
             vs ~= v;
 
@@ -343,7 +324,7 @@ load_e_font (E* e) {
 }
 
 void
-load_e_colors (E* root) {
+load_e_colors (E* e) {
     // after load all classes, because able color 'class.field'
 }
 
@@ -372,17 +353,16 @@ load_childs_cmd (E* e) {
     }
 }
 
-alias IMGPTR = SDL_Surface*;
 static
-IMGPTR[string] global_images;
+IMAGE_PTR[string] global_images;
 
 void
 load_e_image (E* e) {
     string img_file = e.content.image.src;
-    IMGPTR* ptr = img_file in global_images;
+    IMAGE_PTR* ptr = img_file in global_images;
 
     if (ptr is null || e.content.image.ptr != *ptr) {
-        IMGPTR img_surface;
+        IMAGE_PTR img_surface;
         if (ptr is null) {
             img_surface = IMG_Load (img_file.toStringz);
             if (img_surface is null)
@@ -428,9 +408,9 @@ load_e_text (E* e) {
 }
 
 void
-dump_sizes (E* root) {
-    foreach (E* e; WalkChilds (root))
-        dump_size (e); // recursive
+dump_sizes (E* e) {
+    foreach (_e; WalkChilds (e))
+        dump_size (_e); // recursive
 }
 void
 dump_size (E* e, int level=0) {
@@ -981,20 +961,7 @@ update_e_pos (E* e) {
     e.margin.pos  = Pos (e.pos.x - e.margin.size.w, e.pos.y - e.margin.size.h);
     e.aura.pos    = e.pos;
     e.content.pos = Pos (e.aura.pos.x + e.aura.size.w, e.aura.pos.y + e.aura.size.h);
-
-    //e.borders.pos = e.pos;
-    //e.pad.pos     = e.borders.pos + Pos (e.borders.l.w, e.borders.t.w);
-    //e.content.pos = e.pad.pos + Pos (e.pad.l, e.pad.t);
 }
-
-//void
-//update_text_rects_pos (E* e) {
-//    foreach (ref rec; e.content.text.rects) {
-//        if (rec.s.length)
-//            rec.pos += e.pos;
-//    }
-//}
-
 
 void
 pos_type_t9 (E* e) {
@@ -1002,7 +969,6 @@ pos_type_t9 (E* e) {
     // 8 9 4 
     // 7 6 5 
     
-
     if (e.pos_group == 1) {
         E* prev = find_last_in_group (e,e.pos_group);
         if (prev !is null) {
@@ -1042,7 +1008,6 @@ pos_type_t9 (E* e) {
 void
 pos_type_t3 (E* e) {
     // 1 2 3 
-    
 
     if (e.pos_group == 1) {
         E* prev = find_last_in_group (e, e.pos_group);
@@ -1121,7 +1086,6 @@ pos_type_vbox (E* e) {
     // e 
     // e
     
-
     E* prev = find_last_with_type (e, e.pos_type);
     if (prev !is null) {
         final
@@ -1129,8 +1093,8 @@ pos_type_vbox (E* e) {
             case E.PosDir.r: break;
             case E.PosDir.l: break;
             case E.PosDir.b: 
-                auto prev_pos  = e_pos  (prev);
-                auto prev_size = e_size (prev);
+                auto prev_pos  = prev.pos;
+                auto prev_size = prev.size;
                 e.pos.x = prev_pos.x;
                 e.pos.y = (prev_pos.y + prev_size.h).to!Y;
                 break;
@@ -1139,7 +1103,7 @@ pos_type_vbox (E* e) {
     }
     else {
         if (e.parent !is null) {
-            auto parent_content_pos = content_pos (e.parent);
+            auto parent_content_pos = e.parent.content.pos;
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
         }
@@ -1159,8 +1123,8 @@ pos_type_hbox (E* e) {
         final
         switch (e.pos_dir) {
             case E.PosDir.r:
-                auto prev_pos  = e_pos  (prev);
-                auto prev_size = e_size (prev);
+                auto prev_pos  = prev.pos;
+                auto prev_size = prev.size;
                 e.pos.x = (prev_pos.x + prev_size.w).to!X;
                 e.pos.y =  prev_pos.y;
                 break;
@@ -1171,7 +1135,7 @@ pos_type_hbox (E* e) {
     }
     else {
         if (e.parent !is null) {
-            auto parent_content_pos = content_pos (e.parent);
+            auto parent_content_pos = e.parent.content.pos;
             //writeln ("parent_content_pos: ", parent_content_pos);
             e.pos.x = parent_content_pos.x;
             e.pos.y = parent_content_pos.y;
@@ -1185,10 +1149,10 @@ pos_type_hbox (E* e) {
 
 void
 pos_type_percent (E* e) {
-    // e e e
+    // - e ---
     
     if (e.parent !is null) {
-        auto parent_content_pos = content_pos (e.parent);
+        auto parent_content_pos = e.parent.content.pos;
         auto parent_w = e.parent.size.w;
         auto percent = e.pos_percent;
         e.pos.x = (parent_content_pos.x + (cast(float)parent_w * percent / 100)).to!X;
@@ -1268,14 +1232,14 @@ exec_action (E* e, TString[] action, string[string] env=null) {
 }
 
 TString[] 
-doc_get_klass_field_value (E* root, string s) {
+doc_get_klass_field_value (E* e, string s) {
     auto dot = s.indexOf ('.');
     if (dot != -1) {
         // class field
         auto klass_name  = s[0..dot];
         auto klass_field = s[dot+1..$];
 
-        auto kls_t = root.find_klass (klass_name);
+        auto kls_t = e.find_klass (klass_name);
         if (kls_t !is null) {
             auto fret = find_field (kls_t, klass_field);
             if (fret)
@@ -1287,11 +1251,11 @@ doc_get_klass_field_value (E* root, string s) {
 }
 
 string
-extract_value (E* root, string bquoted) {
+extract_value (E* e, string bquoted) {
     //writeln ("extract_value: ", bquoted);
 
     auto stripped  = bquoted.strip ("`");
-    auto converted = extract_class_field_value (root,stripped);
+    auto converted = extract_class_field_value (e,stripped);
     //writeln ("converted: ", converted);
     auto ret = executeShell (converted);  // (int status, string output)
 
@@ -1303,117 +1267,12 @@ extract_value (E* root, string bquoted) {
 
 
 string
-extract_class_field_value (E* root, string s) {
-    TString[] cmd = doc_get_klass_field_value (root,s);
+extract_class_field_value (E* e, string s) {
+    TString[] cmd = doc_get_klass_field_value (e,s);
     if (cmd.length)
         return cmd.join (" ");
     else
         return s;
-}
-
-
-void
-on_click (Event* ev) {
-    auto click_ev = cast (ClickUserEvent*) ev;
-    _on_click (
-        ev,
-        click_ev.down_pos, 
-        click_ev.up_pos, 
-    );
-}
-
-void
-_on_click (Event* ev, Pos down_pos, Pos up_pos) {
-    //
-    E* deepest;
-    foreach (E* _e_tree; WalkChilds (ev.e)) {
-        send_click_in_deep (
-            ev, 
-            _e_tree, 
-            down_pos,
-            up_pos,
-            deepest);
-
-            // focused
-            //remove_class_from_all (_e_tree,"focused");
-            //if (deepest !is null)
-                //deepest.add_class (ev.doc,"focused");
-    }
-
-    //
-    ev.e.update ();
-    writeln ("deepest: ", *deepest);
-    writeln ("deepest: ", deepest.content.image);
-    if (deepest !is null)
-        deepest.redraw ();
-}
-
-bool
-pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
-    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
-    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
-        return true;
-
-    return false;
-}
-
-
-void
-dump_klasses (E* root) {
-    foreach (kls; root.defined_klasses) {
-        writeln (*kls);
-    }
-}
-
-
-void
-event (E* root, Event* ev) {
-    // event
-    //   KEYS  --> focused
-    //   CLICK --> if in x,y e.rect -> send -> in deep
-    //   MOUSE --> if in x,y e.rect -> send -> in deep
-    //   *     --> all
-    if (ev.type != SDL_MOUSEMOTION)
-        writeln ("ROOT.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
-
-    switch (ev.type) {
-        case SDL_MOUSEBUTTONDOWN:
-            if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_PRESSED) {
-                E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
-                //ev.doc.update (ev.doc);
-                //redraw_window (ev.app_window);
-            }
-            break;
-        case SDL_MOUSEBUTTONUP:
-            if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_RELEASED) {
-                E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
-                //remove_class_from_all (doc,"button-pressed");
-                //ev.doc.update (ev.doc);
-                //redraw_window (ev.app_window);
-            }
-            break;
-        case SDL_KEYDOWN: break;// SDL_KeyboardEvent
-        case SDL_KEYUP: break;
-        case SDL_USEREVENT:
-            switch (ev.user.code) {
-                case USER_EVENT.start  : send_event_in_tree (ev); break;
-                case USER_EVENT.draw   : root.draw (ev); break;
-                case USER_EVENT.redraw : root.draw (ev); break;
-                case USER_EVENT.click  : on_click (ev); break;
-                default:
-            }
-            break;
-        case SDL_QUIT:
-            return;
-            break;
-        default:
-    }
-
-    return;
 }
 
 
