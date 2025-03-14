@@ -1,10 +1,10 @@
 import std.stdio;
-import e;
 import etree;
+import e;
+import e_update;
 import klass;
 import pix;
 import txt_reader;
-import doc;
 import events;
 
 

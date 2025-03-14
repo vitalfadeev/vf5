@@ -4,12 +4,12 @@ import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
-import tstring;
-import events;
-import doc;
 import etree;
-import klass;
 import e;
+import e_update;
+import klass;
+import events;
+import tstring;
 import types;
 import txt_parser : parse_color_hex, parse_color, parse_color_tcb;
 
@@ -103,7 +103,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 // KLASS_DRAW_FN
 void
 draw (Klass* kls, Event* ev, E* e) {
-    import draws : draw_e;
+    import e_draw : draw_e;
 
     draw_e (ev.renderer,e);
 }

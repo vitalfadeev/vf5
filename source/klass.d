@@ -1,10 +1,10 @@
+import std.conv : to;
 import bindbc.sdl;
 import tstring;
 import etree;
 import e : E;
 import field : Field;
 import events : Event;
-import std.conv : to;
 
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
 alias KLASS_UPDATE_FN = void function (Klass* kls, E* e);
@@ -67,6 +67,15 @@ Klass {
     toString () {
         return "Klass ("~ name ~")";
     }
+}
+
+Field*
+find_field (Klass* kls, string s) {
+    foreach (field; WalkFields (kls))
+        if (field.name == s)
+            return field;
+
+    return null;
 }
 
 void

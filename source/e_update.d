@@ -1,4 +1,4 @@
-module doc;
+module e_update;
 
 import std.conv;
 import std.string;
@@ -8,25 +8,28 @@ import std.algorithm.searching : canFind;
 import std.algorithm.searching : countUntil;
 import std.algorithm.searching : find;
 import std.process : executeShell;
+import std.stdio : writeln;
+import std.stdio : writefln;
+import std.stdio : write;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import tstring;
 import etree;
-import klass;
 import e;
+import e_draw : e_pos, e_size, content_pos;
+import e_draw : get_text_size;
+import klass;
+import field : Field;
 import types;
 import events;
-import draws : get_text_size;
-import std.stdio : writeln;
-import std.stdio : writefln;
-import std.stdio : write;
 import pix : open_font;
 import pix : Window;
 import pix : IMGException;
 import pix : redraw_window;
-import draws : e_pos, e_size, content_pos;
-import field : Field;
+import pix : send_click_in_deep;
+import pix : send_mouse_event_in_deep;
+import pix : send_event_in_tree;
 import pix : redraw;
 
 const DEFAULT_WINDOW_W = 1024;
@@ -56,15 +59,6 @@ find_klass (E* root, string s) {
     return null;
 }
 
-Field*
-find_field (Klass* kls, string s) {
-    foreach (field; WalkFields (kls))
-        if (field.name == s)
-            return field;
-
-    return null;
-}
-
 Klass*
 create_klass (E* root, string s) {
     Klass* kls = new Klass (s);
@@ -90,51 +84,6 @@ send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* 
 
     // klass event
     foreach (_e; etree.FindDeepest (e,&valid_e)) {
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-    }
-}
-
-void
-send_click_in_deep (Event* ev, E* e, Pos down_pos, Pos up_pos, ref E* deepest) {
-    bool 
-    valid_e (E* e) {
-        return (
-            pos_in_rect (down_pos, e.pos, e.size) &&
-            pos_in_rect (up_pos,   e.pos, e.size)
-        );
-    }
-
-    // klass event
-    foreach (_e; FindDeepest (e,&valid_e)) {
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-        deepest = _e;
-    }
-}
-
-void
-send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
-    bool 
-    valid_e (E* e) {
-        return (
-            pos_in_rect (pos, e.pos, e.size)
-        );
-    }
-
-    // klass event
-    foreach (_e; FindDeepest (e,&valid_e)) {
-        //writeln (*_t);
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-        deepest = _e;
-    }
-}
-
-void
-send_event_in_tree (Event* ev) {
-    // klass event
-    foreach (_e; WalkTree (ev.e)) {
         foreach (kls; _e.klasses)
             kls.event (ev,_e);
     }

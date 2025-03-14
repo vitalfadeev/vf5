@@ -3,20 +3,20 @@ module pix;
 import std.conv;
 import std.format;
 import std.stdio;
+import std.string : fromStringz; 
+import std.string : toStringz;
+import std.algorithm.searching : canFind;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.sdl.ttf;
 import bindbc.sdlgfx;
-import doc;
 import etree;
+import e : E;
+import e_update;
+import e_draw;
 import klass;
 import events;
-import draws;
 import types;
-import std.string : fromStringz; 
-import std.string : toStringz;
-import std.algorithm.searching : canFind;
-import e : E;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
 alias PIX_UPDATE_FN = void function (Pix* pix, E* e);
@@ -334,6 +334,52 @@ direct_event (EVENT) (Pix* pix, Event* ev) {
     _ev.type      = cast (SDL_EventType) __ev.type;
     _ev.user.code = __ev.code;
     pix.event (pix,&_ev); 
+}
+
+
+void
+send_click_in_deep (Event* ev, E* e, Pos down_pos, Pos up_pos, ref E* deepest) {
+    bool 
+    valid_e (E* e) {
+        return (
+            pos_in_rect (down_pos, e.pos, e.size) &&
+            pos_in_rect (up_pos,   e.pos, e.size)
+        );
+    }
+
+    // klass event
+    foreach (_e; FindDeepest (e,&valid_e)) {
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+        deepest = _e;
+    }
+}
+
+void
+send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
+    bool 
+    valid_e (E* e) {
+        return (
+            pos_in_rect (pos, e.pos, e.size)
+        );
+    }
+
+    // klass event
+    foreach (_e; FindDeepest (e,&valid_e)) {
+        //writeln (*_t);
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+        deepest = _e;
+    }
+}
+
+void
+send_event_in_tree (Event* ev) {
+    // klass event
+    foreach (_e; WalkTree (ev.e)) {
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+    }
 }
 
 

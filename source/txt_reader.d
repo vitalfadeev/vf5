@@ -2,15 +2,14 @@ module txt_reader;
 
 import std.stdio;
 import std.conv;
-import tstring;
-import txt_token;
-import txt_syntax;
-import doc;
-import e;
 import etree;
+import e;
+import e_update;
 import klass;
 import field;
 import types;
+import tstring;
+import txt_token;
 
 // RESERVED
 // e
@@ -110,22 +109,23 @@ e root
   e toolbar-item hbox button tb-next
   e toolbar-item hbox progress tb-position
     e progress-current
-  e toolbar-item t3-right button tb-time 
-  e toolbar-item t3-right button tb-loop
-  e toolbar-item t3-right button tb-random
-  e toolbar-item t3-right button tb-volume
+  e toolbar-item 3-right button tb-time 
+  e toolbar-item 3-right button tb-loop
+  e toolbar-item 3-right button tb-random
+  e toolbar-item 3-right button tb-volume
 
  e vbox playlist
  e vbox info
 
  e vbox statusbar
-  e t3-left  song-file-format
-  e t3-right song-time
+  e 3-left  song-file-format
+  e 3-right song-time
 
  e popup file-popup hidden
   e open
   e open-url
   e quit
+
 
 root
  bg           #000
@@ -308,42 +308,42 @@ tb-random
 tb-volume
   image /home/vf/src/vf5/img/volume.png
 
-t3-left
+3-left
  pos.type  3
  pos.group 1
  pos.dir   r
 
-t3-center
+3-center
  pos.type  3
  pos.group 2
  pos.dir   r
 
-t3-right
+3-right
  pos.type  3
  pos.group 3
  pos.dir   r
 
-t9-top-left
+9-top-left
  pos.type  9
  pos.group 1
  pos.dir   r
 
-t9-top-right
+9-top-right
  pos.type  9
  pos.group 3
  pos.dir   r
 
-t9-center-left
+9-center-left
  pos.type  9
  pos.group 8
  pos.dir   r
 
-t9-bottom-left
+9-bottom-left
  pos.type  9
  pos.group 7
  pos.dir   r
 
-t9-bottom-right
+9-bottom-right
  pos.type  9
  pos.group 4
  pos.dir   r
@@ -700,7 +700,7 @@ auto
 new_root () {
     auto root = new E ();
     root.size     = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    root.fn.event = &doc.event;
+    root.fn.event = &e_update.event;
     return root;
 }
 

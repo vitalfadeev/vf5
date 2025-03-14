@@ -4,13 +4,13 @@ import std.stdio;
 import std.string;
 import std.conv;
 import bindbc.sdl;
+import etree;
+import e;
+import e_update;
+import klass;
+import types;
 import tstring;
 import events;
-import doc;
-import etree;
-import klass;
-import e;
-import types;
 import pix : redraw;
 
 

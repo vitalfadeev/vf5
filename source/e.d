@@ -2,16 +2,16 @@ import std.stdio;
 import std.stdio;
 import std.string;
 import std.conv;
-import tstring;
 import etree;
+import e_update : apply_e_klasses,
+    load_e_font,load_e_colors,load_e_text,load_e_image,time_step,
+    update_e_size,update_e_pos,load_e_childs;
 import klass;
 import types;
+import tstring;
 import events;
 import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
 import generator : Generator;
-import doc : apply_e_klasses,
-    load_e_font,load_e_colors,load_e_text,load_e_image,time_step,
-    update_e_size,update_e_pos,load_e_childs;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);

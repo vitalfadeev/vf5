@@ -4,9 +4,9 @@ import std.stdio : writeln;
 import std.string : splitLines;
 import std.process;
 import e;
+import e_update;
 import tstring;
 import generator;
-import doc;
 
 
 struct

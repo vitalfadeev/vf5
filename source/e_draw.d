@@ -1,4 +1,4 @@
-module draws;
+module e_draw;
 
 import std.stdio;
 import std.string;
@@ -6,8 +6,8 @@ import std.conv;
 import bindbc.sdl;
 import bindbc.sdl.image;
 import e;
+import e_update : max;
 import types;
-import doc : max;
 import pix : SDLException, TTFException;
 
 
