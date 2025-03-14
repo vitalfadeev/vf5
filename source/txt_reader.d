@@ -177,23 +177,14 @@ playlist
  bg                 colors.info_bg
  text.bg            colors.info_bg
  borders            1 solid colors.gray_border
- //childs             cmd `command`  splitter |  tpl list-template  src 1 2 3  dst image.src text text
- childs.src         cmd commands.test delimiter | skip 0
- childs.src.tpl     list-template
- //   ...or childs under t
- //childs.src.tpl.src 1         2    3
- //childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
- //childs.src.tpl.src 1
- //childs.src.tpl.dst text
- // generator cmd 'command' delimiter | skip 1  // -> string[]
- // template template-name!(generator.output.lines.col[0])
- // template template-name!(generator.output[*][0])
+ // generator          cmd commands.test delimiter | skip 1
+ // template           list-template
 
 
 list-template (TEXT)
-  e list-template-name!(TEXT)
+  e list-template-name
 
-list-template-name (TEXT)
+list-template-name
   size         parent 32
   content.size e
   aura         1 1
@@ -629,19 +620,19 @@ go (E* root, string s) {
             indents ~= Indent (kls,indent);
         }
 
-        // field swicth case
+        // field swicth case  ...subclass
         else
-        if (name != "e" && indent >= 1) { 
-            auto parent_ind = indents.find_parent (indent);
-            assert (parent_ind !is null);
+        if (name != "e" && indent >= 1) {
+              auto parent_ind = indents.find_parent (indent);
+              assert (parent_ind !is null);
 
-            field = new Field (name,values);
-            switch (parent_ind.type) {
-                case Indent.Type.klass : parent_ind.klass.fields ~= field; break;
-                case Indent.Type.field : parent_ind.field.fields ~= field; break;
-                default: writeln (parent_ind.type); assert (0);
-            }        
-            indents ~= Indent (field,indent);
+              field = new Field (name,values);
+              switch (parent_ind.type) {
+                  case Indent.Type.klass : parent_ind.klass.fields ~= field; break;
+                  case Indent.Type.field : parent_ind.field.fields ~= field; break;
+                  default: writeln (parent_ind.type); assert (0);
+              }        
+              indents ~= Indent (field,indent);
         }
     }
 }
