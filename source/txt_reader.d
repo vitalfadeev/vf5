@@ -140,7 +140,7 @@ menubar
 menubar-item
  size         content
  content.size text
- aura         20 5
+ aura         8
  aura.color   colors.bg
  text.fg      colors.fg
  text.bg      colors.bg
@@ -153,8 +153,8 @@ toolbar
 
 toolbar-item
  size         content
- content.size 32 32
- aura         5 5
+ content.size 40 40
+ aura         2
  aura.color   colors.bg
 // borders      1 solid colors.gray_border
 
