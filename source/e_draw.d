@@ -263,8 +263,10 @@ draw_content_with_aura (SDL_Renderer* renderer, E* e) {
         draw_aura (renderer,e,_aura_pos,_aura_size);
     if (e.aura.border.type != E.Border.Type.none && e.aura.border.color.a != 0)
         draw_aura_borders (renderer,e);
-    draw_content_bg (renderer,e,_content_pos,_content_size);
-    draw_content (renderer,e,_content_pos,_content_size);
+    if (e.content.size.w != 0 && e.content.size.h != 0 && e.content.color.a != 0)
+        draw_content_bg (renderer,e,_content_pos,_content_size);
+    if (e.content.size.w != 0 && e.content.size.h != 0)
+        draw_content (renderer,e,_content_pos,_content_size);
 }
 
 void
@@ -286,13 +288,13 @@ draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) 
     if (e.content.image.ptr !is null)
         draw_image_bg (renderer,e,content_pos,content_size);
     
-    if (e.content.text.s.length)
+    if (e.content.text.s.length && e.content.text.bg.a != 0)
         draw_text_bg  (renderer,e,content_pos,content_size);
 
     if (e.content.image.ptr !is null)
         image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
-    if (e.content.text.s.length)
+    if (e.content.text.s.length && e.content.text.fg.a != 0)
         draw_text (renderer,e,content_pos,content_size);
 }
 
