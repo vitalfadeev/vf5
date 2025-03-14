@@ -14,7 +14,6 @@ Event {
 
     SDL_Window*   app_window;
     SDL_Renderer* renderer;
-    E*            e;  // root
 }
 
 enum 
@@ -56,11 +55,12 @@ DrawUserEvent {
 
 struct
 RedrawUserEvent {
-    Uint32 type = SDL_USEREVENT;
-    Uint32 timestamp;
-    Uint32 windowID;
-    Sint32 code = USER_EVENT.redraw;
-    E*     e;
+    Uint32        type = SDL_USEREVENT;
+    Uint32        timestamp;
+    Uint32        windowID;
+    Sint32        code = USER_EVENT.redraw;
+    E*            e;
+    SDL_Renderer* renderer;;
 
     this (E* e) {
         this.e = e;

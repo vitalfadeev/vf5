@@ -96,3 +96,14 @@ Size {
         h -= b.h;
     }
 }
+
+bool
+pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
+    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
+    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
+        return true;
+
+    return false;
+}
+
+

@@ -18,10 +18,10 @@ import klass;
 import events;
 import types;
 
-alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
-alias PIX_UPDATE_FN = void function (Pix* pix, E* e);
-alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev);
-alias PIX_GO_FN     = int  function (Pix* pix, E* e);
+alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, E* root);
+alias PIX_UPDATE_FN = void function (Pix* pix, E* root);
+alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev, E* root);
+alias PIX_GO_FN     = int  function (Pix* pix, E* root);
 
 alias IMAGE_PTR = SDL_Surface*;
 alias FONT_PTR  = TTF_Font*;
@@ -40,29 +40,29 @@ Pix {
     }
 
     int
-    event (Event* ev) {
+    event (Event* ev, E* root) {
         if (fn.event !is null)
-            return fn.event (&this,ev);
+            return fn.event (&this,ev,root);
         else
             return 0;
     }
 
     void
-    draw (Event* ev) {
+    draw (Event* ev, E* root) {
         if (fn.draw !is null)
-            fn.draw (&this,ev);
+            fn.draw (&this,ev,root);
     }
 
     void
-    update (E* e) {
+    update (E* root) {
         if (fn.update !is null)
-            fn.update (&this,e);
+            fn.update (&this,root);
     }
 
     int
-    go (E* e) {
+    go (E* root) {
         if (fn.go !is null)
-            return fn.go (&this,e);
+            return fn.go (&this,root);
         else
             return 0;
     }
@@ -75,7 +75,7 @@ Pix {
 
 
 int 
-go (Pix* pix, E* e) {
+go (Pix* pix, E* root) {
     // Window, Surface
     SDL_Window* window = new_window (__FILE_FULL_PATH__);
 
@@ -83,19 +83,19 @@ go (Pix* pix, E* e) {
     SDL_Renderer* renderer = new_renderer (window);
 
     //
-    e.window = new Window (window);
+    root.window = new Window (window);
 
     // Event "start"
     send_user_event!StartUserEvent ();
-    e.update ();
+    root.update ();
 
     // Event Loop
     foreach (Event* ev; Events ()) {
-        ev.e          = e;
+        //ev.root       = root;
         ev.app_window = window;
         ev.renderer   = renderer;
 
-        if (auto result = pix.event (ev))
+        if (auto result = pix.event (ev,root))
             return result;
     }
 
@@ -117,14 +117,14 @@ click_translate (Event* ev) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
                 // save pos down
-                down_pos = Pos (ev.button.x.to!X, ev.button.y.to!Y);
+                down_pos = Pos (ev.button.x, ev.button.y);
             }
             break;
         case SDL_MOUSEBUTTONUP:
             // load pos down
             // get  pos up
             // send click (down_pos, up_pos)
-            Pos up_pos = Pos (ev.button.x.to!X, ev.button.y.to!Y);
+            Pos up_pos = Pos (ev.button.x, ev.button.y);
             send_user_event!ClickUserEvent (down_pos, up_pos);
             down_pos = Pos ();
             break;
@@ -140,7 +140,7 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 int
-event (Pix* pix, Event* ev) {
+event (Pix* pix, Event* ev, E* root) {
     //if (ev.type != SDL_MOUSEMOTION)
     //    writeln ("PIX.EVENT: ", ev.type);
     translate (ev);
@@ -148,36 +148,37 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED:  direct_event!DrawUserEvent (pix,ev); break; // event.window.windowID
-                case SDL_WINDOWEVENT_SHOWN: break;        // event.window.windowID
-                case SDL_WINDOWEVENT_HIDDEN: break;       // event.window.windowID
-                case SDL_WINDOWEVENT_MOVED: break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED:  pix.update (ev.e); direct_event!DrawUserEvent (pix,ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
-                case SDL_WINDOWEVENT_SIZE_CHANGED: break; // event.window.windowID event.window.data1 event.window.data2 (width height)
-                case SDL_WINDOWEVENT_MINIMIZED: break;    // event.window.windowID
-                case SDL_WINDOWEVENT_MAXIMIZED: break;    // event.window.windowID
-                case SDL_WINDOWEVENT_RESTORED: break;     // event.window.windowID
-                case SDL_WINDOWEVENT_ENTER: break;        // event.window.windowID
-                case SDL_WINDOWEVENT_LEAVE: break;        // event.window.windowID
-                case SDL_WINDOWEVENT_FOCUS_GAINED: break; // event.window.windowID
-                case SDL_WINDOWEVENT_FOCUS_LOST: break;   // event.window.windowID
-                case SDL_WINDOWEVENT_CLOSE: break;        // event.window.windowID
-                //case SDL_WINDOWEVENT_TAKE_FOCUS: break;   // event.window.windowID
-                //case SDL_WINDOWEVENT_HIT_TEST: break;     // event.window.windowID
-                default:
-                    SDL_Log ("Window %d got unknown event %d",
-                        ev.window.windowID, ev.window.event);
+                case SDL_WINDOWEVENT_EXPOSED      : direct_event!DrawUserEvent (pix,ev,root); break; // event.window.windowID
+                case SDL_WINDOWEVENT_SHOWN        : break;        // event.window.windowID
+                case SDL_WINDOWEVENT_HIDDEN       : break;       // event.window.windowID
+                case SDL_WINDOWEVENT_MOVED        : break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
+                case SDL_WINDOWEVENT_RESIZED      : pix.update (root); direct_event!DrawUserEvent (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_SIZE_CHANGED : break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_MINIMIZED    : break;    // event.window.windowID
+                case SDL_WINDOWEVENT_MAXIMIZED    : break;    // event.window.windowID
+                case SDL_WINDOWEVENT_RESTORED     : break;     // event.window.windowID
+                case SDL_WINDOWEVENT_ENTER        : break;        // event.window.windowID
+                case SDL_WINDOWEVENT_LEAVE        : break;        // event.window.windowID
+                case SDL_WINDOWEVENT_FOCUS_GAINED : break; // event.window.windowID
+                case SDL_WINDOWEVENT_FOCUS_LOST   : break;   // event.window.windowID
+                case SDL_WINDOWEVENT_CLOSE        : break;        // event.window.windowID
+                //case SDL_WINDOWEVENT_TAKE_FOCUS : break;   // event.window.windowID
+                //case SDL_WINDOWEVENT_HIT_TEST   : break;     // event.window.windowID
+                default                           : SDL_Log ("Window %d got unknown event %d",ev.window.windowID, ev.window.event);
             }
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.redraw : pix.draw (ev); break;
-                case USER_EVENT.draw   : pix.draw (ev); break;
-                default: ev.e.event (ev);
+                case USER_EVENT.redraw : pix.draw (ev,root); break;
+                case USER_EVENT.draw   : pix.draw (ev,root); break;
+                default                : root.event (ev);
             }
             break;
-        case SDL_QUIT: ev.e.event (ev); return 1;
-        default: ev.e.event (ev);
+        case SDL_QUIT: 
+            root.event (ev); 
+            return 1;
+        default: 
+            root.event (ev);
     }
 
     return 0;
@@ -189,9 +190,9 @@ update (Pix* pix, E* root) {
 }
 
 void
-draw (Pix* pix, Event* ev) {
+draw (Pix* pix, Event* ev, E* root) {
     auto renderer = ev.renderer;
-    auto e = ev.e;
+    auto e = root;
 
     if (ev.type == SDL_USEREVENT)
     if (ev.user.code == USER_EVENT.redraw)
@@ -361,22 +362,12 @@ send_user_event (EVT,ARGS...) (ARGS args) {
 }
 
 void
-direct_event (EVENT) (Pix* pix, Event* ev) {
+direct_event (EVENT) (Pix* pix, Event* ev, E* root) {
     Event _ev = *ev;
     EVENT __ev;
     _ev.type      = cast (SDL_EventType) __ev.type;
     _ev.user.code = __ev.code;
-    pix.event (&_ev); 
-}
-
-
-bool
-pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
-    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
-    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
-        return true;
-
-    return false;
+    pix.event (&_ev,root); 
 }
 
 
@@ -397,24 +388,6 @@ send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* 
 }
 
 void
-send_click_in_deep (Event* ev, E* e, Pos down_pos, Pos up_pos, ref E* deepest) {
-    bool 
-    valid_e (E* e) {
-        return (
-            pos_in_rect (down_pos, e.pos, e.size) &&
-            pos_in_rect (up_pos,   e.pos, e.size)
-        );
-    }
-
-    // klass event
-    foreach (_e; FindDeepest (e,&valid_e)) {
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-        deepest = _e;
-    }
-}
-
-void
 send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
     bool 
     valid_e (E* e) {
@@ -431,16 +404,6 @@ send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
         deepest = _e;
     }
 }
-
-void
-send_event_in_tree (Event* ev) {
-    // klass event
-    foreach (_e; WalkTree (ev.e)) {
-        foreach (kls; _e.klasses)
-            kls.event (ev,_e);
-    }
-}
-
 
 void
 redraw_window (SDL_Window* window) {

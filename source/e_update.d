@@ -26,9 +26,6 @@ import pix : open_font;
 import pix : Window;
 import pix : IMGException;
 import pix : redraw_window;
-import pix : send_click_in_deep;
-import pix : send_mouse_event_in_deep;
-import pix : send_event_in_tree;
 import pix : redraw;
 import pix : IMAGE_PTR;
 
@@ -81,7 +78,7 @@ bool
 has_class (E* e, string s) {
     Klass* kls = e.find_klass (s);
     assert (kls !is null);
-    return (!e.klasses.canFind (kls));
+    return (e.klasses.canFind (kls));
 }
 
 void

@@ -22,9 +22,10 @@ new_root () {
 }
 
 void
-on_click (Event* ev) {
+on_click (E* root, Event* ev) {
     auto click_ev = cast (ClickUserEvent*) ev;
     _on_click (
+        root,
         ev,
         click_ev.down_pos, 
         click_ev.up_pos, 
@@ -32,13 +33,13 @@ on_click (Event* ev) {
 }
 
 void
-_on_click (Event* ev, Pos down_pos, Pos up_pos) {
+_on_click (E* root, Event* ev, Pos down_pos, Pos up_pos) {
     //
     E* deepest;
-    foreach (E* _e_tree; WalkChilds (ev.e)) {
+    foreach (E* _e_tree; WalkChilds (root)) {
         send_click_in_deep (
-            ev, 
             _e_tree, 
+            ev, 
             down_pos,
             up_pos,
             deepest);
@@ -50,12 +51,39 @@ _on_click (Event* ev, Pos down_pos, Pos up_pos) {
     }
 
     //
-    ev.e.update ();
-    writeln ("deepest: ", *deepest);
-    writeln ("deepest: ", deepest.content.image);
+    root.update ();
     if (deepest !is null)
         deepest.redraw ();
 }
+
+void
+send_event_in_tree (E* root, Event* ev) {
+    // klass event
+    foreach (_e; WalkTree (root)) {
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+    }
+}
+
+
+void
+send_click_in_deep (E* e, Event* ev, Pos down_pos, Pos up_pos, ref E* deepest) {
+    bool 
+    valid_e (E* e) {
+        return (
+            pos_in_rect (down_pos, e.pos, e.size) &&
+            pos_in_rect (up_pos,   e.pos, e.size)
+        );
+    }
+
+    // klass event
+    foreach (_e; FindDeepest (e,&valid_e)) {
+        foreach (kls; _e.klasses)
+            kls.event (ev,_e);
+        deepest = _e;
+    }
+}
+
 
 void
 event (E* root, Event* ev) {
@@ -68,40 +96,43 @@ event (E* root, Event* ev) {
         writeln ("ROOT.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     switch (ev.type) {
-        case SDL_MOUSEBUTTONDOWN:
-            if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_PRESSED) {
-                E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
-                //ev.doc.update (ev.doc);
-                //redraw_window (ev.app_window);
-            }
+        //case SDL_MOUSEBUTTONDOWN:
+        //    if (ev.button.button == SDL_BUTTON_LEFT)
+        //    if (ev.button.state == SDL_PRESSED) {
+        //        E* deepest;
+        //        //send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
+        //        //ev.doc.update (ev.doc);
+        //        //redraw_window (ev.app_window);
+        //    }
+        //    break;
+        //case SDL_MOUSEBUTTONUP:
+        //    if (ev.button.button == SDL_BUTTON_LEFT)
+        //    if (ev.button.state == SDL_RELEASED) {
+        //        E* deepest;
+        //        //send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
+        //        root.remove_class_from_all ("button.pressed");
+        //        root.update ();
+        //        root.redraw ();
+        //        //redraw_window (ev.app_window);
+        //    }
+        //    break;
+        case SDL_KEYDOWN: 
+            break;// SDL_KeyboardEvent
+        case SDL_KEYUP: 
             break;
-        case SDL_MOUSEBUTTONUP:
-            if (ev.button.button == SDL_BUTTON_LEFT)
-            if (ev.button.state == SDL_RELEASED) {
-                E* deepest;
-                send_mouse_event_in_deep (ev, root, Pos (ev.button.x,ev.button.y), deepest);
-                //remove_class_from_all (doc,"button-pressed");
-                //ev.doc.update (ev.doc);
-                //redraw_window (ev.app_window);
-            }
-            break;
-        case SDL_KEYDOWN: break;// SDL_KeyboardEvent
-        case SDL_KEYUP: break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.start  : send_event_in_tree (ev); break;
+                case USER_EVENT.start  : root.send_event_in_tree (ev); break;
                 case USER_EVENT.draw   : root.draw (ev); break;
                 case USER_EVENT.redraw : root.draw (ev); break;
-                case USER_EVENT.click  : on_click (ev); break;
+                case USER_EVENT.click  : root.on_click (ev); break;
                 default:
             }
             break;
         case SDL_QUIT:
-            return;
             break;
         default:
+            root.send_event_in_tree (ev); break;
     }
 
     return;
