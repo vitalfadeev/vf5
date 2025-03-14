@@ -1,9 +1,10 @@
 import std.stdio;
-import std.stdio;
+import std.format;
 import std.string;
 import std.conv;
 import etree;
 import klass;
+import field : Field;
 import types;
 import tstring;
 import events;
@@ -40,6 +41,7 @@ struct
 E {
     Tree      _super;
     Klass*[]   klasses;    // box green rounded
+    Field*[]   fields;     //   text TEXT
 
     Margin     margin;
     Aura       aura;
@@ -380,8 +382,14 @@ E {
         string ks;
         foreach (Klass* kls; klasses)
             ks ~= kls.name ~ " ";
+        ks = ks.stripRight ();
+
+        string fs;
+        foreach (Field* f; fields)
+            fs ~= f.name ~ " ";
+        fs = fs.stripRight ();
         
-        return "E(" ~ ks ~ ")";
+        return format!"E(%s) (%s)" (ks,fs);
     }
 }
 
@@ -412,6 +420,12 @@ void
 dump_klasses (E* e) {
     foreach (kls; e.defined_klasses) {
         writeln (*kls);
+        foreach (fld; kls.fields) {
+            writefln ("  %s", *fld);
+            foreach (_fld; fld.fields) {
+                writefln ("    %s", *_fld);
+            }
+        }
     }
 }
 

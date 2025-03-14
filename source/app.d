@@ -20,8 +20,8 @@ main () {
 	root.setup ();
 
 	// Check
-	//dump_tree (root);
-	//dump_klasses (root);
+	dump_tree (root);
+	dump_klasses (root);
 
 	//
 	pix.go (root);

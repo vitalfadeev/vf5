@@ -126,6 +126,12 @@ apply_e_klasses (E* e) {
     //write (format!"%-60s " (e.toString)); time_step ("",0);
 }
 
+void
+apply_e_fields (E* e) {
+    foreach (field; e.fields)
+        set_field (e,field);
+}
+
 // WIDGET_APPLY_KLASS_FN
 void
 apply_klass (E* e, Klass* kls) {

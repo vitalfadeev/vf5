@@ -119,6 +119,7 @@ e root
   e toolbar-item 3-right button tb-volume
 
  e vbox playlist
+   text NO_ITEMS
  e vbox info
 
  e vbox statusbar
@@ -183,6 +184,7 @@ playlist
 
 list-template (TEXT)
   e list-template-name
+    text TEXT
 
 list-template-name
   size         parent 32
@@ -190,7 +192,6 @@ list-template-name
   aura         1 1
   borders      1 solid #444
   pos.type     vbox b
-  text         TEXT
 
 info
  size         parent 64
@@ -595,20 +596,36 @@ go (E* root, string s) {
         if (name == "e" && indent >= 1) { 
             auto _ind = indents.find_parent (indent);
             assert (_ind !is null);
+
+            final
             switch (_ind.type) {
-                case Indent.Type.klass : 
-                    _ind.klass.fields ~= new Field (name,values);
+                case Indent.Type.klass  : 
+                    field = new Field (name,values);
+                    _ind.klass.fields ~= field;
+                    indents ~= Indent (Indent.Type.klass_e,field,indent);
                     break;
-                case Indent.Type.field : 
-                    _ind.field.fields ~= new Field (name,values);
+                case Indent.Type.field  : 
+                    field = new Field (name,values);
+                    _ind.field.fields ~= field;
+                    indents ~= Indent (Indent.Type.field_e,field,indent);
                     break;
-                case Indent.Type.e     : 
+                case Indent.Type.klass_e: 
+                    field = new Field (name,values);
+                    _ind.field.fields ~= field;
+                    indents ~= Indent (Indent.Type.klass_e,field,indent);
+                    break;
+                case Indent.Type.field_e: 
+                    field = new Field (name,values);
+                    _ind.field.fields ~= field;
+                    indents ~= Indent (Indent.Type.field_e,field,indent);
+                    break;
+                case Indent.Type.e      : 
                     e = new_child_e (root,values);
                     _ind.e.childs ~= e; 
+                    indents ~= Indent (e,indent);
                     break;
-                default: assert (0);
             }        
-            indents ~= Indent (e,indent);
+
         }
 
         // klass
@@ -620,17 +637,21 @@ go (E* root, string s) {
             indents ~= Indent (kls,indent);
         }
 
-        // field swicth case  ...subclass
+        // field swicth case  e_fields
         else
         if (name != "e" && indent >= 1) {
               auto parent_ind = indents.find_parent (indent);
               assert (parent_ind !is null);
 
               field = new Field (name,values);
+              
+              final
               switch (parent_ind.type) {
-                  case Indent.Type.klass : parent_ind.klass.fields ~= field; break;
-                  case Indent.Type.field : parent_ind.field.fields ~= field; break;
-                  default: writeln (parent_ind.type); assert (0);
+                  case Indent.Type.klass   : parent_ind.klass.fields ~= field; break;
+                  case Indent.Type.field   : parent_ind.field.fields ~= field; break;
+                  case Indent.Type.e       : parent_ind.e    .fields ~= field; break;
+                  case Indent.Type.klass_e : parent_ind.field.fields ~= field; break;
+                  case Indent.Type.field_e : parent_ind.field.fields ~= field; break;
               }        
               indents ~= Indent (field,indent);
         }
@@ -652,6 +673,20 @@ Indent {
         klass,
         field,
         e,
+        klass_e,
+        field_e,
+    }
+
+    this (Type type, E* e, size_t indent) {
+        this.type   = type;
+        this.e      = e;
+        this.indent = indent;
+    }
+
+    this (Type type, Field* field, size_t indent) {
+        this.type   = type;
+        this.field  = field;
+        this.indent = indent;
     }
 
     this (Klass* kls, size_t indent) {

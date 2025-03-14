@@ -65,6 +65,8 @@ update (Klass* kls, Event* ev, E* e) {
     // 1
     if (e.klasses.length)
         e.apply_e_klasses ();
+    if (e.fields.length)
+        e.apply_e_fields ();
     time_step ("apply_e_klasses");
 
     // 2
