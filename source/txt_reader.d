@@ -624,8 +624,7 @@ go (E* root, string s) {
                     _ind.e.childs ~= e; 
                     indents ~= Indent (e,indent);
                     break;
-            }        
-
+            }
         }
 
         // klass
@@ -750,31 +749,3 @@ new_klass (E* root, string name, TString[] values, string args) {
 
     return kls;    
 }
-
-
-//ETree*
-//find_parent_t (E* current_t, size_t for_indent) {
-//    if (current_t is null)
-//        return null;
-
-//    if (current_t.indent < for_indent)
-//        return current_t;
-
-//    if (current_t.indent == for_indent)
-//        return current_e.parent;
-
-//    if (current_t.indent > for_indent) {
-//        loop:
-//            current_t = current_e.parent;
-//            if (current_t is null) 
-//                return null;
-//            if (current_t.indent == for_indent)
-//                return current_e.parent;
-//            if (current_t.indent > for_indent)
-//                goto loop;
-
-//        return current_t;
-//    }
-
-//    return null;
-//}
