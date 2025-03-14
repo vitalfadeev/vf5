@@ -75,18 +75,20 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_USEREVENT: {
             switch (ev.user.code) {
                 case USER_EVENT.click:
-                    auto click_ev = cast (ClickUserEvent*) ev;
-                    int percent;
-                    if (e !is null) {
-                        percent_from_click (e, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
-                        writeln ("progress.position: ", percent);
-                        string[string] env = ["PROGRESS_POSITION" : percent.to!string];
-                        go_on_event (e,"progress.position",env);
-                        // total = audtool current-song-length-seconds
-                        // now   = audtool current-song-output-length-seconds
-                        // seek  = total * precent
-                        //         udtool playback-seek seek
-                        // exec (`audtool playback-seek %s`, precent_to_time (precent));
+                    if (event_for_me (kls,cast (ClickUserEvent*) ev,e)) {
+                        auto click_ev = cast (ClickUserEvent*) ev;
+                        int percent;
+                        if (e !is null) {
+                            percent_from_click (e, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
+                            writeln ("progress.position: ", percent);
+                            string[string] env = ["PROGRESS_POSITION" : percent.to!string];
+                            go_on_event (e,"progress.position",env);
+                            // total = audtool current-song-length-seconds
+                            // now   = audtool current-song-output-length-seconds
+                            // seek  = total * precent
+                            //         udtool playback-seek seek
+                            // exec (`audtool playback-seek %s`, precent_to_time (precent));
+                        }
                     }
                     break;
                 default:

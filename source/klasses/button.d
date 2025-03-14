@@ -91,15 +91,3 @@ void
 draw (Klass* kls, Event* ev, E* e) {
     //
 }
-
-bool
-event_for_me (Klass* kls, Event* ev, E* e) {
-    Pos _pos = Pos (ev.button.x, ev.button.y);
-    return pos_in_rect (_pos, e.pos, e.size);
-}
-
-bool
-event_for_me (Klass* kls, ClickUserEvent* ev, E* e) {
-    Pos _pos = ev.up_pos;
-    return pos_in_rect (_pos, e.pos, e.size);
-}
