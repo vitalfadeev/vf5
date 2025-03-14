@@ -23,6 +23,7 @@ TString {
         string,
         dquoted,
         bquoted,
+        args,
         comment,
         cr
     }

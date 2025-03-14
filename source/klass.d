@@ -1,4 +1,6 @@
 import std.conv : to;
+import std.format;
+import std.string : join;
 import bindbc.sdl;
 import tstring;
 import etree;
@@ -65,7 +67,10 @@ Klass {
 
     string
     toString () {
-        return "Klass ("~ name ~")";
+        if (args.length) 
+            return format!"Klass (%s (%s))" (name, args.join);
+        else
+            return format!"Klass (%s)" (name);
     }
 }
 

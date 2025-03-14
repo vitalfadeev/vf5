@@ -56,11 +56,34 @@ Token_line_reader {
             if (ts.type == TString.Type.string)
                 ts.type = TString.Type.name;
         }
+
         else
         if (t_line.length == 1) {
             if (t_line[0].type == TString.Type.indent)
             if (ts.type == TString.Type.string)
                 ts.type = TString.Type.name;
+        }
+
+        if (t_line.length >= 1) {
+            if (ts.type == TString.Type.string) {
+                if (t_line[0].type == TString.Type.name) { // klass
+                    string name = t_line[0].s;
+                    // list-template (TEXT)
+                    //   e list-template-name!(TEXT)
+                    if (name.length > 0 && ts.s.length > 0 && ts.s[0] == '(' && ts.s[$-1] == ')') {
+                        if (name == "e") {
+                            // e (...)
+                        }
+                        else {
+                            // klass (ARGS)
+                            //string klass_args = ts.s[1..$-1];
+                            writefln ("klass_args: %s", ts.s);
+                            ts.type = TString.Type.args;
+                            //ts.s    = klass_args;
+                        }
+                    }
+                }
+            }
         }
 
     }

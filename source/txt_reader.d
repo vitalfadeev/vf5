@@ -566,6 +566,7 @@ void
 go (E* root, string s) {
     size_t    indent;
     string    name;
+    string    args;
     TString[] values;
     Indent[]  indents;
     E*        e;
@@ -576,11 +577,13 @@ go (E* root, string s) {
         // indent, name, values
         indent        = 0;
         name.length   = 0;
+        args.length   = 0;
         values.length = 0;
         foreach (ts; t_line) {
             switch (ts.type) {
                 case TString.Type.indent  : indent = ts.s.length; break;
                 case TString.Type.name    : name   = ts.s; break;
+                case TString.Type.args    : args   = ts.s; break;
                 case TString.Type.comment : continue;
                 case TString.Type.none    : continue;
                 case TString.Type.cr      : continue;
@@ -620,7 +623,7 @@ go (E* root, string s) {
         // klass
         else
         if (name != "e" && indent == 0) { 
-            kls = new_klass (root,name,values);
+            kls = new_klass (root,name,values,args);
             // added
             indents.length = 0;
             indents ~= Indent (kls,indent);
@@ -707,8 +710,14 @@ new_e (E* root, TString[] values) {
 
 
 Klass*
-new_klass (E* root, string name, TString[] values) {
+new_klass (E* root, string name, TString[] values, string args) {
     auto kls = find_klass_or_create (root,name);
+
+    // klass (args)
+    if (args.length) {
+      auto _args = args[1..$-1];  // strip ( )
+      kls.args = [_args];
+    }
 
     // setup parents
     //   values
