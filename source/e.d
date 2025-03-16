@@ -355,12 +355,24 @@ E {
         on.length     = 0;
 
         // remove e added from klass
-        E*[] for_remove;
-        foreach (_e; WalkChilds (&this))
-            if (_e.from_klass !is null)
-                for_remove ~= _e;
-        foreach (_e; for_remove)
-            (&this).remove_child (_e);
+        {
+            E*[] for_remove;
+            foreach (_e; WalkChilds (&this))
+                if (_e.from_klass !is null)
+                    for_remove ~= _e;
+            foreach (_e; for_remove)
+                (&this).remove_child (_e);
+        }
+
+        // remove e added from template
+        {
+            E*[] for_remove;
+            foreach (_e; WalkChilds (&this))
+                if (_e.from_template !is null)
+                    for_remove ~= _e;
+            foreach (_e; for_remove)
+                (&this).remove_child (_e);
+        }
     }
 
     //

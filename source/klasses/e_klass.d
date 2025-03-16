@@ -66,7 +66,7 @@ update (Klass* kls, Event* ev, E* e) {
     if (e.klasses.length)
         e.apply_e_klasses ();
     if (e.fields.length)
-        e.apply_e_fields ();
+        e.apply_e_fields (null,null);
     version (profile) time_step ("apply_e_klasses");
 
     // 2

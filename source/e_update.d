@@ -206,21 +206,21 @@ apply_klass (E* e, Klass* kls, TemplateArg[] template_args=null) {
     // each sub tree
     foreach (field; WalkFields (kls)) {
         switch (field.name) {
-            case "e"      : add_sub_tree (e,field,template_args); break; // add e
-            case "switch" : set_switch   (e,field,template_args); break; // set field
-            default       : set_field    (e,field,template_args); break; // set field
+            case "e"      : add_sub_tree (e,field,kls,kls,template_args); break; // add e
+            case "switch" : set_switch   (e,field,kls,kls,template_args); break; // set field
+            default       : set_field    (e,field,kls,kls,template_args); break; // set field
         }
     }
 }
 
 void
-apply_e_fields (E* e) {
+apply_e_fields (E* e, Klass* from_klass, Klass* from_template) {
     foreach (field; e.fields)
-        set_field (e,field);
+        set_field (e,field,from_klass,from_template,);
 }
 
 void
-set_field (E* e, Field* field, TemplateArg[] template_args=null) {
+set_field (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args=null) {
     // `command` -> exec command -> output
     auto values = extract_quoted (e,field.values);
 
@@ -263,24 +263,26 @@ extract_template_args (E* e, TString[] values, TemplateArg[] template_args) {
 }
 
 void
-add_sub_tree (E* e, Field* field, TemplateArg[] template_args) {
+add_sub_tree (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args) {
     // clone each t
     // add in e
     auto _e = e.new_child_e (field.values,template_args);
+    _e.from_klass = from_klass;
+    _e.from_template = from_klass;
     e.childs ~= _e;
 
     // recursive
     foreach (_field; WalkFields (field)) {
         switch (_field.name) {
-            case "e"      : add_sub_tree (_e,_field,template_args); break; // add e
-            case "switch" : set_switch   (_e,_field,template_args); break; // set field
-            default       : set_field    (_e,_field,template_args); break; // set field
+            case "e"      : add_sub_tree (_e,_field,from_klass,from_template,template_args); break; // add e
+            case "switch" : set_switch   (_e,_field,from_klass,from_template,template_args); break; // set field
+            default       : set_field    (_e,_field,from_klass,from_template,template_args); break; // set field
         }
     }
 }
 
 void
-set_switch (E* e, Field* field, TemplateArg[] template_args) {
+set_switch (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args) {
     auto evaluated = evaluate_switch_cond (e,field.values);
 
     // switch value
@@ -293,7 +295,7 @@ set_switch (E* e, Field* field, TemplateArg[] template_args) {
     if (evaluated.length >= 1)
     foreach (_field; WalkFields (field)) {
         if (_field.name == evaluated[0].s) {
-            set_case (e,_field,template_args);
+            set_case (e,_field,from_klass,from_template,template_args);
             return;
         }
     }
@@ -301,26 +303,26 @@ set_switch (E* e, Field* field, TemplateArg[] template_args) {
     // default
     foreach (_field; WalkFields (field)) {
         if (_field.name == "default") {
-            set_case (e,_field,template_args);
+            set_case (e,_field,from_klass,from_template,template_args);
             return;
         }
     }
 }
 
 void
-set_case (E* e, Field* field, TemplateArg[] template_args) {
-    apply_case (e,field,template_args);
+set_case (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args) {
+    apply_case (e,field,from_klass,from_template,template_args);
 }
 
 void
-apply_case (E* e, Field* field, TemplateArg[] template_args) {
+apply_case (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args) {
     // each field
     // each sub tree
     foreach (field; WalkFields (field)) {
         switch (field.name) {
-            case "e"      : add_sub_tree (e,field,template_args); break; // add e
-            case "switch" : set_switch   (e,field,template_args); break; // set field
-            default       : set_field    (e,field,template_args); break; // set field
+            case "e"      : add_sub_tree (e,field,from_klass,from_template,template_args); break; // add e
+            case "switch" : set_switch   (e,field,from_klass,from_template,template_args); break; // set field
+            default       : set_field    (e,field,from_klass,from_template,template_args); break; // set field
         }
     }
 }

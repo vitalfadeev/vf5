@@ -3,6 +3,7 @@ import etree;
 import e;
 import e_update : apply_klass;
 import e_update : TemplateArg;
+import e_update : force_e_update;
 import klass;
 
 // generator
@@ -65,8 +66,17 @@ gen_tree (E* e, Generator* generator, Klass* template_klass) {
 
         apply_klass (e,template_klass,template_args);
 
+        foreach (_e; WalkChildsReverse (e)) {
+            force_e_update (_e);
+
+            if (_e.pos.y + _e.size.h > e.pos.y + e.size.h)
+                return 1;
+            break;
+        }
+
         return 0;
     };
+
     generator.generate (generator,e,dg);
 }
 

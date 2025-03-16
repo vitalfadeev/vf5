@@ -231,6 +231,41 @@ _WalkChilds (TTree,Skip) {
 }
 
 
+auto 
+WalkChildsReverse (TTree,Skip) (TTree* t, Skip skip) {
+    return _WalkChildsReverse!(TTree,Skip) (cast (Tree*) t,skip);
+}
+
+struct
+_WalkChildsReverse (TTree,Skip) {
+    Tree* t;
+    Skip  skip;
+
+    int
+    opApply (int delegate (TTree* t) dg) {
+        Tree* prev = t._childs.r;
+
+        loop:
+            if (prev is null)
+                return 0;
+
+            if (skip (cast (TTree*) prev)) {
+                goto go_left;
+            }
+
+            if (auto result = dg (cast (TTree*) prev))
+                return result;
+
+            go_left:  // >
+                prev = prev.l;
+                goto loop;  // go_right
+
+        return 0;
+    }
+    
+}
+
+
 //
 auto 
 FindDeepest (TTree,Skip,Cond) (TTree* t, Skip skip, Cond cond) {

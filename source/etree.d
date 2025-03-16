@@ -73,6 +73,11 @@ WalkChilds (Tree) (Tree* t) {
     return vf.tree.WalkChilds (t, &skip_hidden!Tree);
 }
 
+auto 
+WalkChildsReverse (Tree) (Tree* t) {
+    return vf.tree.WalkChildsReverse (t, &skip_hidden!Tree);
+}
+
 void
 dump_tree (E* root) {
     vf.tree.dump_tree (root);
