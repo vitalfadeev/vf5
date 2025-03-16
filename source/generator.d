@@ -2,6 +2,7 @@ import std.stdio : writeln;
 import etree;
 import e;
 import e_update : apply_klass;
+import e_update : apply_template;
 import e_update : TemplateArg;
 import e_update : force_e_update;
 import klass;
@@ -46,25 +47,23 @@ generate (Generator* g, E* e, GENERATE_DG dg) {
 
 void
 gen_tree (E* e, Generator* generator, Klass* template_klass) {
-    writeln ("gen_tree");
+    auto fields = e.generator.fields;
 
     // template
     //   kls.args      = [TEXT]
     //   template_args = [abc,def]
     
     GENERATE_DG dg = (string[] line) {
-        writeln ("GENERATE_DG dg (ss): ", line);
-
         TemplateArg[] template_args;
 
-        foreach (i,kls_arg; template_klass.args) {
+        foreach (i,field; fields) {
             if (i < line.length)
-                template_args ~= TemplateArg (kls_arg,line[i]);
+                template_args ~= TemplateArg (field,line[i]);
             else
                 break;
         }
 
-        apply_klass (e,template_klass,template_args);
+        apply_template (e,template_klass,template_args);
 
         foreach (_e; WalkChildsReverse (e)) {
             force_e_update (_e);

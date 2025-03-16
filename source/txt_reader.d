@@ -177,20 +177,21 @@ playlist
  bg                 colors.info_bg
  text.bg            colors.info_bg
  borders            1 solid colors.gray_border
- generator          cmd commands.test delimiter | skip 0
+ //generator          cmd commands.test delimiter | skip 0 fields NAME
+ generator          cmd commands.player.playlist-display delimiter | skip 1 fields NUM,NAME,TIME
  template           list-template
 
 
-list-template (TEXT)
-  e list-template-name!(TEXT)
+list-template
+  e list-template-name
 
-list-template-name (TEXT)
+list-template-name
   size         parent 32
   content.size e
   aura         1 1
   borders      1 solid #444
   pos.type     vbox b
-  text         TEXT
+  text         NAME
 
 info
  size         parent 64

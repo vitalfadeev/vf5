@@ -8,6 +8,7 @@ import field : Field;
 import types;
 import tstring;
 import events;
+import e_update : TemplateArg;
 import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
 import generator : GENERATOR_PTR;
 
@@ -59,6 +60,7 @@ E {
     Klass*     from_klass;
     Klass*     from_template;
     Generator  generator;
+    TemplateArg[] template_args;
     On[]       on;
     Fn         fn;
 
@@ -250,9 +252,10 @@ E {
             Fs     fs; // list dir -> files, list file -> content: csv, image, dbf
                        // url
         }
+        string[]    fields;    // ICON,NUMBER,TITLE,TEXT
         string     _template;
-        size_t     offset;
-        size_t     limit;
+        size_t      offset;
+        size_t      limit;
         GENERATOR_PTR ptr;
 
         enum 
@@ -267,9 +270,9 @@ E {
         }
         struct 
         Cmd {
-            TString command;   // `command`
-            TString delimiter; // |
-            size_t  skip;      // 1 (header line)
+            TString   command;   // `command`
+            TString   delimiter; // |
+            size_t    skip;      // 1 (header line)
         }
         struct 
         Fs {
@@ -343,8 +346,6 @@ E {
         aura          = aura.init;
         _content      = _content.init;
         hidden        = hidden.init;
-        from_klass    = from_klass.init;
-        from_template = from_template.init;
         pos_type      = PosType.none; //
         pos_group     = pos_group.init;
         pos_dir       = pos_dir.init;

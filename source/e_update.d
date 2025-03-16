@@ -42,28 +42,6 @@ find_klass_or_create (E* e, string s) {
         kls = create_klass (e,s);
     return kls;
 }
-Klass*
-find_klass_or_create (E* e, string s, string[] args, TemplateArg[] template_args) {
-    auto kls = find_klass (e,s,args,template_args);
-    if (kls is null) {
-        // without template_args
-        writefln ("find_klass_or_create: %s, args: %s, template_args: %s", s, args, template_args);
-        auto _kls = find_klass (e,s,args);
-        assert (_kls !is null);
-        if (_kls !is null) {
-            kls = create_klass (e,s,args,template_args);
-            // dup Klass
-            kls.name           = _kls.name;
-            kls.parent_klasses = _kls.parent_klasses;
-            kls.fields         = _kls.fields;
-            writefln ("kls.fields: %s", kls.fields);
-            kls.fn             = _kls.fn;
-        }
-        else
-            kls = create_klass (e,s,args,template_args);
-    }
-    return kls;
-}
 
 Klass*
 find_klass (E* e, string s) {
@@ -75,52 +53,11 @@ find_klass (E* e, string s) {
 
     return null;
 }
-Klass*
-find_klass (E* e, string s, string[] args, TemplateArg[] template_args) {
-    for (auto _e=e; _e !is null; _e = _e.parent) {
-        foreach (kls; _e.defined_klasses)
-            if (kls.name == s && 
-                args !is null && 
-                args.length >= 1 && 
-                kls.args == args && 
-                template_args !is null && 
-                template_args.length >= 1 && 
-                kls.template_args == template_args
-            )
-                return kls;
-    }
-
-    return null;
-}
-Klass*
-find_klass (E* e, string s, string[] args) {
-    for (auto _e=e; _e !is null; _e = _e.parent) {
-        foreach (kls; _e.defined_klasses)
-            if (kls.name == s && 
-                args !is null && 
-                args.length >= 1 && 
-                kls.args == args && 
-                kls.template_args.length == 0
-            )
-                return kls;
-    }
-
-    return null;
-}
 
 Klass*
 create_klass (E* e, string s) {
     Klass* kls = new Klass (s);
     add_defined_klass (e,kls);
-    return kls;
-}
-Klass*
-create_klass (E* e, string s, string[] args, TemplateArg[] template_args) {
-    //writefln ("create_klass: %s, %s, %s", s, args, template_args);
-    Klass* kls = new Klass (s);
-    add_defined_klass (e,kls);
-    kls.args = args;
-    kls.template_args = template_args;
     return kls;
 }
 
@@ -198,9 +135,8 @@ TemplateArg {
 void
 apply_klass (E* e, Klass* kls, TemplateArg[] template_args=null) { 
     if (template_args is null)
-    if (kls.template_args.length >= 1)
-        template_args = kls.template_args; // instanced in generator
-    writefln ("apply_klass: %s: args: %s, template_args: %s", kls.name, kls.args, template_args);
+    if (e.template_args)
+        template_args = e.template_args;
 
     // each field
     // each sub tree
@@ -211,6 +147,11 @@ apply_klass (E* e, Klass* kls, TemplateArg[] template_args=null) {
             default       : set_field    (e,field,kls,kls,template_args); break; // set field
         }
     }
+}
+
+void
+apply_template (E* e, Klass* kls, TemplateArg[] template_args) { 
+    apply_klass (e,kls,template_args);
 }
 
 void
@@ -227,9 +168,6 @@ set_field (E* e, Field* field, Klass* from_klass, Klass* from_template, Template
     // TEXT -> abc
     if (template_args !is null ) {
         values = extract_template_args (e,values,template_args);
-        writeln ("field: ", *field);
-        writeln ("template_args: ", template_args);
-        writeln ("template_args: value: ", values);
     }
 
     // klasses set
@@ -266,9 +204,10 @@ void
 add_sub_tree (E* e, Field* field, Klass* from_klass, Klass* from_template, TemplateArg[] template_args) {
     // clone each t
     // add in e
-    auto _e = e.new_child_e (field.values,template_args);
-    _e.from_klass = from_klass;
-    _e.from_template = from_klass;
+    auto _e = e.new_child_e (field.values);
+    _e.from_klass    = from_klass;
+    _e.from_template = from_template;
+    _e.template_args = template_args;
     e.childs ~= _e;
 
     // recursive
@@ -329,7 +268,7 @@ apply_case (E* e, Field* field, Klass* from_klass, Klass* from_template, Templat
 
 
 auto
-new_child_e (E* e, TString[] values, TemplateArg[] template_args=null) {
+new_child_e (E* e, TString[] values) {
     // sub e
     // find parent e  in tree  from last e
     //   create sub e
@@ -344,18 +283,7 @@ new_child_e (E* e, TString[] values, TemplateArg[] template_args=null) {
         switch (ts.type) {
             case TString.Type.name   : 
             case TString.Type.string : 
-                // e klass!(template_args} ->  e klass .args=template_args
-                string k_name;
-                string k_args;
-                klass_name_with_args_to_klass_name_and_args (ts.s,k_name,k_args);
-                writeln ("k_name: ", k_name, ", k_args: ", k_args);
-                // template instantce
-                //   e list-template-name!(TEXT) -> 
-                //   e list-template-name (template_args=[[TEXT,abc]])
-                auto kls = 
-                    template_args is null ?
-                        e.find_klass_or_create (k_name) :
-                        e.find_klass_or_create (k_name,[k_args],template_args);
+                auto kls = e.find_klass_or_create (ts.s);
                 _e.add_klass (kls);
                 break;
             default:
@@ -1401,15 +1329,9 @@ doc_get_klass_field_value (E* e, string s) {
 
 string
 extract_value (E* e, string bquoted) {
-    //writeln ("extract_value: ", bquoted);
-
     auto stripped  = bquoted.strip ("`");
     auto converted = extract_class_field_value (e,stripped);
-    //writeln ("converted: ", converted);
     auto ret = executeShell (converted);  // (int status, string output)
-
-    //writeln (ret.status);
-    //writeln ("ret.output: ", ret.output);
 
    return ret.output.stripRight ();
 }

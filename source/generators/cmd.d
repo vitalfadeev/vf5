@@ -49,14 +49,5 @@ generate (Generator* g, E* e, GENERATE_DG dg) {
         }
     }
 
-
-    //string[][] lines = [
-    //    ["123","456"],
-    //];
-
-    //foreach (line; lines)
-    //    if (auto result = dg (line))
-    //        return result;
-
     return 0;    
 }

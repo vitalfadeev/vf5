@@ -148,6 +148,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "generator"         : set_generator          (e,values); break;
         case "template"          : set_generator_template (e,values); break;
         case "generator.template": set_generator_template (e,values); break;
+        case "generator.fields"  : set_generator_fields   (e,values); break;
         case "on"                : set_on                 (e,values); break;
         default:
             writefln ("IGNORED: %s: %s", field_id, values);
@@ -702,6 +703,12 @@ parse_generator_args_cmd (E* e, TString[] values) {
                         e.generator.cmd.skip = values[i].s.to!size_t; 
                 }
                 break;
+            case "fields":
+                i++; 
+                if (i < values.length) {
+                    set_generator_fields (e,values[i..i+1]);
+                }
+                break;
             default:
         }
     }
@@ -716,6 +723,13 @@ void
 set_generator_template (E* e, TString[] values) {
     if (values.length) {
         e.generator._template = values[0].s;
+    }
+}
+
+void
+set_generator_fields (E* e, TString[] values) {
+    if (values.length) {
+        e.generator.fields = values[0].s.split (",");
     }
 }
 

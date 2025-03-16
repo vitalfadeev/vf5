@@ -36,7 +36,6 @@ Klass {
     Field*[] fields;
     string[] args;
     Fn       fn;
-    TemplateArg[] template_args;
 
     struct
     Fn {
