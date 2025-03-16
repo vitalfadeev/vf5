@@ -270,9 +270,10 @@ E {
         }
         struct 
         Cmd {
-            TString   command;   // `command`
-            TString   delimiter; // |
-            size_t    skip;      // 1 (header line)
+            TString command;   // `command`
+            TString delimiter; // |
+            bool    require_delimiter; // require_delimiter
+            size_t  skip;      // 1 (header line)
         }
         struct 
         Fs {

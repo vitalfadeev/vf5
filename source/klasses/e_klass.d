@@ -696,6 +696,9 @@ parse_generator_args_cmd (E* e, TString[] values) {
                     e.generator.cmd.delimiter = values[i];
                 }
                 break;
+            case "require_delimiter" : 
+                e.generator.cmd.require_delimiter = true;
+                break;
             case "skip":
                 i++; 
                 if (i < values.length) {

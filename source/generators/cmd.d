@@ -24,6 +24,7 @@ int
 generate (Generator* g, E* e, GENERATE_DG dg) {
     auto cmd = e.generator.cmd.command.s;
     auto dlm = e.generator.cmd.delimiter.s;
+    auto rdl = e.generator.cmd.require_delimiter;
     auto skp = e.generator.cmd.skip;
 
     if (cmd.length) {
@@ -39,6 +40,11 @@ generate (Generator* g, E* e, GENERATE_DG dg) {
             }
 
             auto splits = line.split (dlm);
+
+            // require_delimiter
+            if (rdl && splits.length <= 1)
+                continue;
+
             string[] template_line;
             foreach (s; splits)
                 template_line ~= s;

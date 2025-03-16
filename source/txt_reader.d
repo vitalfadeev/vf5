@@ -178,7 +178,7 @@ playlist
  text.bg            colors.info_bg
  borders            1 solid colors.gray_border
  //generator          cmd commands.test delimiter | skip 0 fields NAME
- generator          cmd commands.player.playlist-display delimiter | skip 1 fields NUM,NAME,TIME
+ generator          cmd commands.player.playlist-display delimiter | require_delimiter skip 1 fields NUM,NAME,TIME
  template           list-template
 
 
