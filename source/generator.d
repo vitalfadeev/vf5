@@ -1,5 +1,9 @@
-import e;
+import std.stdio : writeln;
 import etree;
+import e;
+import e_update : apply_klass;
+import e_update : TemplateArg;
+import klass;
 
 // generator
 // template
@@ -9,8 +13,9 @@ import etree;
 //             name (A)
 //               text = A 
 
-alias GENERATE_DG = int delegate (string[] ss);
 alias GENERATE_FN = int function (Generator* g, E* e, GENERATE_DG dg);
+alias GENERATE_DG = int delegate (string[] line);
+alias GENERATOR_PTR = Generator*;
 
 
 struct
@@ -18,13 +23,13 @@ Generator {
     GENERATE_FN generate = &.generate;
     E* e;
 
-    int
-    opApply (GENERATE_DG dg) {
-        if (this.generate !is null)
-            return this.generate (&this,e,dg);
-        else
-            return 0;
-    }
+    //int
+    //opApply (GENERATE_DG dg) {
+    //    if (this.generate !is null)
+    //        return this.generate (&this,e,dg);
+    //    else
+    //        return 0;
+    //}
 }
 
 int
@@ -38,40 +43,40 @@ generate (Generator* g, E* e, GENERATE_DG dg) {
     return 0;    
 }
 
-struct
-Template {
-    E*
-    apply (string[] line) {
-        return null;
-    }
-}
+void
+gen_tree (E* e, Generator* generator, Klass* template_klass) {
+    writeln ("gen_tree");
 
-struct
-GenTree {
-    Generator* generator;
-    Template*  template_;
+    // template
+    //   kls.args      = [TEXT]
+    //   template_args = [abc,def]
+    
+    GENERATE_DG dg = (string[] line) {
+        writeln ("GENERATE_DG dg (ss): ", line);
 
-    int
-    opApply (int delegate (E* e) dg) {
-        foreach (line; *generator) {
-            auto e = template_.apply (line);
-            if (e !is null)
-            if (auto result = dg (e))
-                return result;
+        TemplateArg[] template_args;
+
+        foreach (i,kls_arg; template_klass.args) {
+            if (i < line.length)
+                template_args ~= TemplateArg (kls_arg,line[i]);
+            else
+                break;
         }
 
+        apply_klass (e,template_klass,template_args);
+
         return 0;
-    }
+    };
+    generator.generate (generator,e,dg);
 }
 
 
 void
-go () {
+_go () {
     Generator g;
-    Template  t;
+    Klass*    template_klass;
     E*        dst = new E ();
 
-    foreach (e; GenTree (&g,&t))
-        dst.childs ~= e;
+    gen_tree (dst,&g,template_klass);
 }
 

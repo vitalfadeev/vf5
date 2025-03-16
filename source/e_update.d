@@ -126,16 +126,21 @@ apply_e_klasses (E* e) {
     //write (format!"%-60s " (e.toString)); time_step ("",0);
 }
 
-// WIDGET_APPLY_KLASS_FN
+struct
+TemplateArg {
+    string name;
+    string value;
+}
+
 void
-apply_klass (E* e, Klass* kls) {
+apply_klass (E* e, Klass* kls, TemplateArg[] template_args=null) { 
     // each field
     // each sub tree
     foreach (field; WalkFields (kls)) {
         switch (field.name) {
-            case "e"      : add_sub_tree (e,field); break; // add e
-            case "switch" : set_switch   (e,field); break; // set field
-            default       : set_field    (e,field); break; // set field
+            case "e"      : add_sub_tree (e,field,template_args); break; // add e
+            case "switch" : set_switch   (e,field,template_args); break; // set field
+            default       : set_field    (e,field,template_args); break; // set field
         }
     }
 }
@@ -147,12 +152,17 @@ apply_e_fields (E* e) {
 }
 
 void
-set_field (E* e, Field* field) {
+set_field (E* e, Field* field, TemplateArg[] template_args=null) {
     // `command` -> exec command -> output
     auto values = extract_quoted (e,field.values);
 
     // TEXT -> abc
-    // auto values = extract_template_args (e,field.values,template_args);
+    if (template_args !is null ) {
+        values = extract_template_args (e,field.values,template_args);
+        writeln ("field: ", *field);
+        writeln ("template_args: ", template_args);
+        writeln ("template_args: value: ", values);
+    }
 
     // klasses set
     foreach (kls; e.klasses) {
@@ -160,8 +170,32 @@ set_field (E* e, Field* field) {
     }
 }
 
+
+TString[]
+extract_template_args (E* e, TString[] values, TemplateArg[] template_args) {
+    TString[] vs;
+    TString   new_v;
+    vs.reserve (values.length);
+
+    foreach (v; values) 
+        if (v.type == TString.Type.string) {
+            new_v = v;
+            foreach (targ; template_args) {
+                if (targ.name == v.s) {
+                    new_v.s = targ.value;
+                    break;
+                }
+            }
+            vs ~= new_v;
+        }
+        else
+            vs ~= v;
+
+    return vs;
+}
+
 void
-add_sub_tree (E* e, Field* field) {
+add_sub_tree (E* e, Field* field, TemplateArg[] template_args) {
     // clone each t
     // add in e
     auto _e = e.new_child_e (field.values);
@@ -170,15 +204,15 @@ add_sub_tree (E* e, Field* field) {
     // recursive
     foreach (_field; WalkFields (field)) {
         switch (_field.name) {
-            case "e"      : add_sub_tree (_e,_field); break; // add e
-            case "switch" : set_switch   (_e,_field); break; // set field
-            default       : set_field    (_e,_field); break; // set field
+            case "e"      : add_sub_tree (_e,_field,template_args); break; // add e
+            case "switch" : set_switch   (_e,_field,template_args); break; // set field
+            default       : set_field    (_e,_field,template_args); break; // set field
         }
     }
 }
 
 void
-set_switch (E* e, Field* field) {
+set_switch (E* e, Field* field, TemplateArg[] template_args) {
     auto evaluated = evaluate_switch_cond (e,field.values);
 
     // switch value
@@ -191,7 +225,7 @@ set_switch (E* e, Field* field) {
     if (evaluated.length >= 1)
     foreach (_field; WalkFields (field)) {
         if (_field.name == evaluated[0].s) {
-            set_case (e,_field);
+            set_case (e,_field,template_args);
             return;
         }
     }
@@ -199,26 +233,26 @@ set_switch (E* e, Field* field) {
     // default
     foreach (_field; WalkFields (field)) {
         if (_field.name == "default") {
-            set_case (e,_field);
+            set_case (e,_field,template_args);
             return;
         }
     }
 }
 
 void
-set_case (E* e, Field* field) {
-    apply_case (e,field);
+set_case (E* e, Field* field, TemplateArg[] template_args) {
+    apply_case (e,field,template_args);
 }
 
 void
-apply_case (E* e, Field* field) {
+apply_case (E* e, Field* field, TemplateArg[] template_args) {
     // each field
     // each sub tree
     foreach (field; WalkFields (field)) {
         switch (field.name) {
-            case "e"      : add_sub_tree (e,field); break; // add e
-            case "switch" : set_switch   (e,field); break; // set field
-            default       : set_field    (e,field); break; // set field
+            case "e"      : add_sub_tree (e,field,template_args); break; // add e
+            case "switch" : set_switch   (e,field,template_args); break; // set field
+            default       : set_field    (e,field,template_args); break; // set field
         }
     }
 }
@@ -240,12 +274,38 @@ new_child_e (E* e, TString[] values) {
         switch (ts.type) {
             case TString.Type.name   : 
             case TString.Type.string : 
-                _e.add_klass (e.find_klass_or_create (ts.s));
+                // e klass!(template_args} ->  e klass .args=template_args
+                string k_name;
+                string k_args;
+                klass_name_with_args_to_klass_name_and_args (ts.s,k_name,k_args);
+                auto kls = e.find_klass_or_create (k_name);
+                kls.args = [k_args];
+                _e.add_klass (kls);
                 break;
             default:
         }
 
     return _e;
+}
+
+
+void
+klass_name_with_args_to_klass_name_and_args (string klass_name, ref string name, ref string args) {
+    // klass_name!(TEXT) -> klass_name (TEXT)
+    auto splitter_pos = klass_name.indexOf ('!');
+    if (splitter_pos != -1) {
+        name = klass_name[0..splitter_pos];
+        args = klass_name[splitter_pos+1..$];
+        // (TEXT) -> TEXT
+        if (args.length && args[0] == '(')
+            args = args[1..$];
+        if (args.length && args[$-1] == ')')
+            args = args[0..$-1];
+    }
+    else {
+        name = klass_name;
+        args = "";
+    }
 }
 
 
@@ -337,27 +397,34 @@ load_e_colors (E* e) {
 
 void
 load_e_childs (E* e) {
+    writeln ("load_e_childs");
     final
     switch (e.generator.type) {
-        case E._Generator.Type.none : break;
-        case E._Generator.Type.cmd  : load_childs_cmd (e); break;
-        case E._Generator.Type.fs   : break;
-        case E._Generator.Type.csv  : break;
+        case E.Generator.Type.none : break;
+        case E.Generator.Type.cmd  : load_childs_cmd (e); break;
+        case E.Generator.Type.fs   : load_childs_fs (e); break;
     }
 }
 
 void
 load_childs_cmd (E* e) {
+    writeln ("load_hilds_cmd");
     import generator;
     import generators.cmd;
 
-    if (e.generator.ptr !is null) {
-        e.generator.ptr = cast (Generator*) new CmdGenerator ();
-        generator.Template t;
+    if (e.generator.ptr is null) {
+        e.generator.ptr = cast (GENERATOR_PTR) new CmdGenerator ();
+        assert (e.generator._template.length > 0);
+        Klass* template_klass = find_klass (e,e.generator._template);  // template
+        assert (template_klass !is null);
 
-        foreach (_e; GenTree (e.generator.ptr,&t))
-            e.childs ~= _e;
+        gen_tree (e,e.generator.ptr,template_klass);
     }
+}
+
+void
+load_childs_fs (E* e) {
+    //
 }
 
 static

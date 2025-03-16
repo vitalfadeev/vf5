@@ -60,50 +60,48 @@ void
 update (Klass* kls, Event* ev, E* e) {
     writefln ("%-60s", e.toString);
     e.reset ();
-    time_step ("");
+    version (profile) time_step ("");
 
     // 1
     if (e.klasses.length)
         e.apply_e_klasses ();
     if (e.fields.length)
         e.apply_e_fields ();
-    time_step ("apply_e_klasses");
+    version (profile) time_step ("apply_e_klasses");
 
     // 2
     if (e.content.image.src.length)
         load_e_image (e);
-    time_step ("load_e_image");
+    version (profile) time_step ("load_e_image");
 
     // 3
     if (e.content.text.s.length)
         e.load_e_font ();
-    time_step ("load_e_font");
+    version (profile) time_step ("load_e_font");
     
     // 4
     e.load_e_colors ();
-    time_step ("load_e_colors");
+    version (profile) time_step ("load_e_colors");
 
     // 5
     if (e.content.text.s.length)
         e.load_e_text ();
-    time_step ("load_e_text");
+    version (profile) time_step ("load_e_text");
 
     // 6
     if (1)
         e.update_e_size ();
-    time_step ("update_e_size");
+    version (profile) time_step ("update_e_size");
 
     // 7
     if (1)
         e.update_e_pos ();
-    time_step ("update_e_pos");
+    version (profile) time_step ("update_e_pos");
 
     // 8
-    if (e.generator.type != E._Generator.Type.none)
+    if (e.generator.type != E.Generator.Type.none)
         e.load_e_childs ();
-    time_step ("load_e_childs");
-
-    writefln ("%s: size: %s, content.size: %s", e.toString, e.size, e.content.size);
+    version (profile) time_step ("load_e_childs");
 }
 
 // KLASS_SET_FN
@@ -148,6 +146,8 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "bg"                : set_bg                 (e,values); break;
         case "content.color"     : set_bg                 (e,values); break;
         case "generator"         : set_generator          (e,values); break;
+        case "template"          : set_generator_template (e,values); break;
+        case "generator.template": set_generator_template (e,values); break;
         case "on"                : set_on                 (e,values); break;
         default:
             writefln ("IGNORED: %s: %s", field_id, values);
@@ -657,74 +657,67 @@ set_bg (E* e, TString[] values) {
 
 void
 set_generator (E* e, TString[] values) {
-    //
+    if (values.length >= 1) {
+        E.Generator.Type type;
+
+        switch (values[0].s) {
+            case "none" : type = E.Generator.Type.none; break;
+            case "cmd"  : type = E.Generator.Type.cmd;  break;
+            case "fs"   : type = E.Generator.Type.fs;   break;
+            default     : type = E.Generator.Type.none; break;
+        }
+        e.generator.type = type;
+
+        //
+        parse_generator_args (e,type,values);
+    }
 }
 
-//void
-//set_childs_src (E* e, TString[] values) {
-//    // childs.src cmd `command` delimiter |
+void
+parse_generator_args (E* e, E.Generator.Type type, TString[] values) {
+    final
+    switch (type) {
+        case E.Generator.Type.none : break;
+        case E.Generator.Type.cmd  : parse_generator_args_cmd (e,values); break;
+        case E.Generator.Type.fs   : parse_generator_args_fs  (e,values); break;
+    }
+}
 
-//    if (values.length >= 1) {
-//        E.ChildsSrc.Type type;
-//        switch (values[0].s) {
-//            case "cmd"  : type = E.ChildsSrc.Type.cmd;  break;
-//            case "gs"   : type = E.ChildsSrc.Type.fs;   break;
-//            case "csv"  : type = E.ChildsSrc.Type.csv;  break;
-//            case "none" : type = E.ChildsSrc.Type.none; break;
-//            default     : type = E.ChildsSrc.Type.none; break;
-//        }
-//        e.childs_src.type = type;
-
-//        //
-//        final
-//        switch (type) {
-//            case E.ChildsSrc.Type.none: break;
-//            case E.ChildsSrc.Type.cmd : 
-//                e.childs_src.cmd.command = values[1];
-//                for (size_t i=2; i < values.length; i++) {
-//                    switch (values[i].s) {
-//                        case "delimiter" : 
-//                            i++; 
-//                            if (i < values.length) {
-//                                e.childs_src.cmd.delimiter = values[i];
-//                            }
-//                            break;
-//                        case "skip":
-//                            i++; 
-//                            if (i < values.length) {
-//                                if (values[i].s.isNumeric)
-//                                    e.childs_src.cmd.skip = values[i].s.to!size_t; 
-//                            }
-//                            break;
-//                        default:
-//                    }
-//                }
-//                break;
-//            case E.ChildsSrc.Type.fs  : break;
-//            case E.ChildsSrc.Type.csv : break;
-//        }
-//    }
-//}
-
-//void
-//set_childs_src_tpl (E* e, TString[] values) {
-//    // childs.src.tpl list-template  ...or childs under t
-        
-//    if (values.length >= 1) {
-//        e.childs_src.tpl.klass = values[0].s;
-//    }
-//}
-
-//void
-//set_childs_src_tpl_src (E* e, TString[] values) {
-//    // childs.src.tpl.src 1 2 3
+void
+parse_generator_args_cmd (E* e, TString[] values) {
+    e.generator.cmd.command = values[1];
     
-//}
+    for (size_t i=2; i < values.length; i++) {
+        switch (values[i].s) {
+            case "delimiter" : 
+                i++; 
+                if (i < values.length) {
+                    e.generator.cmd.delimiter = values[i];
+                }
+                break;
+            case "skip":
+                i++; 
+                if (i < values.length) {
+                    if (values[i].s.isNumeric)
+                        e.generator.cmd.skip = values[i].s.to!size_t; 
+                }
+                break;
+            default:
+        }
+    }
+}
 
-//void
-//set_childs_src_tpl_dst (E* e, TString[] values) {
-//    // childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
-//}
+void
+parse_generator_args_fs (E* e, TString[] values) {
+    e.generator.fs.path = values[1].s;
+}
+
+void
+set_generator_template (E* e, TString[] values) {
+    if (values.length) {
+        e.generator._template = values[0].s;
+    }
+}
 
 void
 set_content (E* e, TString[] values) {

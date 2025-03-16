@@ -96,7 +96,7 @@ hbox
 string text = "
 e root
  e vbox menubar
-  e menubar-item hbox button file  
+  e menubar-item hbox button file
   e menubar-item hbox button play 
   e menubar-item hbox button list 
   e menubar-item hbox button services 
@@ -178,20 +178,20 @@ playlist
  bg                 colors.info_bg
  text.bg            colors.info_bg
  borders            1 solid colors.gray_border
- // generator          cmd commands.test delimiter | skip 1
- // template           list-template
+ generator          cmd commands.test delimiter | skip 0
+ template           list-template
 
 
 list-template (TEXT)
-  e list-template-name
-    text TEXT
+  e list-template-name!(TEXT)
 
-list-template-name
+list-template-name (TEXT)
   size         parent 32
   content.size e
   aura         1 1
   borders      1 solid #444
   pos.type     vbox b
+  text         TEXT
 
 info
  size         parent 64
@@ -287,8 +287,9 @@ progress
 progress-current
   size          16 parent
   pos           `commands.player.audtool-playback-position`%
-  bg            colors.warn
-  borders       2 solid colors.warn
+  bg            colors.bg-1
+  aura          1
+  borders       1 solid colors.black
 
 tb-time 
   content.size.w text
@@ -379,6 +380,7 @@ colors
   red      #c00 
   green    #0c0 
   blue     #00c 
+  black    #000
   gray_border  #999
   info_bg  #232729
 

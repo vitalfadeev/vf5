@@ -9,7 +9,7 @@ import types;
 import tstring;
 import events;
 import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
-import generator : Generator;
+import generator : GENERATOR_PTR;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -41,7 +41,7 @@ struct
 E {
     Tree      _super;
     Klass*[]   klasses;    // box green rounded
-    Field*[]   fields;     //   text TEXT
+    Field*[]   fields;     //   text abc
 
     Margin     margin;
     Aura       aura;
@@ -58,7 +58,7 @@ E {
     bool       hidden;
     Klass*     from_klass;
     Klass*     from_template;
-    _Generator generator;
+    Generator  generator;
     On[]       on;
     Fn         fn;
 
@@ -242,25 +242,24 @@ E {
     //   generator.klass list-template
 
     struct
-    _Generator {
+    Generator {
         Type       type;      // cmd `command` delimiter | skip 1
         union {
             None   none;
             Cmd    cmd;
-            Fs     fs;
-            Csv    csv;
+            Fs     fs; // list dir -> files, list file -> content: csv, image, dbf
+                       // url
         }
-        Tpl        tpl;
+        string     _template;
         size_t     offset;
         size_t     limit;
-        Generator* ptr;
+        GENERATOR_PTR ptr;
 
         enum 
         Type {
             none,
             cmd,
             fs,
-            csv,
         }
         struct 
         None {
@@ -274,18 +273,7 @@ E {
         }
         struct 
         Fs {
-            //
-        }
-        struct 
-        Csv {
-            //
-        }
-
-        struct
-        Tpl {
-            string   klass;  // klass-name
-            size_t[] src;    // 1         2    3
-            string[] dst;    // image.src text text            
+            string path;
         }
 
         string
@@ -295,7 +283,6 @@ E {
                 case Type.none: return "Generator ("~ type.to!string ~")";
                 case Type.cmd : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
                 case Type.fs  : return "Generator ("~ type.to!string ~")";
-                case Type.csv : return "Generator ("~ type.to!string ~")";
             }
         }
     }
