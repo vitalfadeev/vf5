@@ -119,7 +119,6 @@ e root
   e toolbar-item 3-right button tb-volume
 
  e vbox playlist
-   text NO_ITEMS
  e vbox info
 
  e vbox statusbar
@@ -742,8 +741,8 @@ new_klass (E* root, string name, TString[] values, string args) {
 
     // klass (args)
     if (args.length) {
-      auto _args = args[1..$-1];  // strip ( )
-      kls.args = [_args];
+        auto _args = args[1..$-1];  // strip ( )
+        kls.args = [_args];
     }
 
     // setup parents

@@ -5,6 +5,7 @@ import bindbc.sdl;
 import tstring;
 import etree;
 import e : E;
+import e_update : TemplateArg;
 import field : Field;
 import events : Event;
 
@@ -34,6 +35,8 @@ Klass {
     Klass*[] parent_klasses;
     Field*[] fields;
     string[] args;
+    Fn       fn;
+    TemplateArg[] template_args;
 
     struct
     Fn {
@@ -43,7 +46,6 @@ Klass {
         KLASS_DRAW_FN   draw   = &.draw; // simple, bordered, bordered-titled, custom
         KLASS_DUP_FN    dup    = &._dup; // simple, bordered, bordered-titled, custom
     }
-    Fn fn;
 
     void 
     event (Event* ev, E* e) { 
