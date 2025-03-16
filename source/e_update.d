@@ -278,6 +278,7 @@ new_child_e (E* e, TString[] values) {
                 string k_name;
                 string k_args;
                 klass_name_with_args_to_klass_name_and_args (ts.s,k_name,k_args);
+                writeln ("k_name: ", k_name, ", k_args: ", k_args);
                 auto kls = e.find_klass_or_create (k_name);
                 kls.args = [k_args];
                 _e.add_klass (kls);
