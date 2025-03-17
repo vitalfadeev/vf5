@@ -31,7 +31,8 @@ void
 setup (E* root) {
 	import std.file;
 	create_reserved_classes (root);
-	txt_reader.go (root, "test_audacious.txt".readText);
+	//txt_reader.go (root, "test_audacious.txt".readText);
+	txt_reader.go (root, "test_file_manager.txt".readText);
 }
 
 void

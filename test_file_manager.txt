@@ -1,0 +1,65 @@
+e root
+ e hbox left hot-list
+ e hbox right dir-list
+
+root
+ bg         colors.black
+
+hbox
+  pos.type  hbox r
+
+left
+  size 240 parent
+  content.size text
+  aura 1
+  aura.color colors.gray_border
+  bg colors.bg
+  text 1
+
+right
+  size max parent
+  content.size text
+  bg colors.bg-1
+  aura 1
+  aura.color colors.gray_border
+  text 2
+
+hot-list
+  //
+
+dir-list
+  generator  fs . fields NAME
+  template   dir-list-template
+
+dir-list-template
+  e dir-list-template-name
+
+dir-list-template-name
+  size         parent 32
+  content.size e
+  aura         1 1
+  borders      1 solid #444
+  pos.type     vbox b
+  text         NAME
+
+colors
+  fg       #eee
+  fg+1     #e8e8e8
+  fg-1     #d8d8d8
+  bg       #33393b
+  bg+1     #282828
+  bg-1     #181818
+  pad_bg   #282
+  focused  #0F0DBF
+  info     #0c0
+  warn     #cc0
+  error    #c00
+  red      #c00 
+  green    #0c0 
+  blue     #00c 
+  black    #000
+  gray_border  #999
+  info_bg  #232729
+
+commands
+  test                              ls -1

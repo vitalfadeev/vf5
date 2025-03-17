@@ -428,7 +428,18 @@ load_childs_cmd (E* e) {
 
 void
 load_childs_fs (E* e) {
-    //
+    writeln ("load_hilds_fs");
+    import generator;
+    import generators.fs;
+
+    if (e.generator.ptr is null) {
+        e.generator.ptr = cast (GENERATOR_PTR) new FsGenerator ();
+        assert (e.generator._template.length > 0);
+        Klass* template_klass = find_klass (e,e.generator._template);  // template
+        assert (template_klass !is null);
+
+        gen_tree (e,e.generator.ptr,template_klass);
+    }
 }
 
 static

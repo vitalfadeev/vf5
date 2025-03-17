@@ -720,6 +720,18 @@ parse_generator_args_cmd (E* e, TString[] values) {
 void
 parse_generator_args_fs (E* e, TString[] values) {
     e.generator.fs.path = values[1].s;
+
+    for (size_t i=2; i < values.length; i++) {
+        switch (values[i].s) {
+            case "fields":
+                i++; 
+                if (i < values.length) {
+                    set_generator_fields (e,values[i..i+1]);
+                }
+                break;
+            default:
+        }
+    }
 }
 
 void
