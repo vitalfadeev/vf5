@@ -461,7 +461,6 @@ event (E* e, Event* ev) {
         writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
-    writefln ("e.event: klasses: %s", e.klasses);
     foreach (Klass* kls; e.klasses)
         kls.event (ev,e);
 }
@@ -472,9 +471,7 @@ update (E* e, UpdateUserEvent* ev) {
     // ...
 
     // via klasses
-    writefln ("e.update: klasses: %s", e.klasses);
     foreach (kls; e.klasses) {
-        writefln ("e.update: klass: %s", kls.name);
         //import klasses.e;
         //if (kls.name == "e")
         //    klasses.e.update (kls,ev,e);
@@ -483,9 +480,7 @@ update (E* e, UpdateUserEvent* ev) {
     }
 
     // to childs
-    writefln ("update childs: %s", *ev);
     foreach (_e; WalkChilds (e)) {
-        writeln ("child _e: ", *_e);
         _e.update (ev);
     }
 }
@@ -501,14 +496,11 @@ draw (E* e, DrawUserEvent* ev) {
     // ...
 
     // via klasses
-    writefln ("e.draw: klasses: %s", e.klasses);
     foreach (kls; e.klasses) {
-        writefln ("e.draw: klass: %s", kls.name);
         kls.draw (ev,e);
     }
 
     // to childs
-    writefln ("draw childs: %s", *ev);
     foreach (_e; WalkChilds (e))
         _e.draw (ev);
 }

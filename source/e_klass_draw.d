@@ -258,15 +258,6 @@ draw_content_with_aura (SDL_Renderer* renderer, E* e) {
     auto _content_size = content_size (e);
     auto _aura_pos     = e.aura.pos;
     auto _aura_size    = aura_real_size (e);
-    writefln (
-        "_content_pos: %s, _content_size: %s, _aura_pos: %s, _aura_size: %s", 
-        _content_pos, _content_size, _aura_pos, _aura_size);
-    writefln (
-        "e: %s, rendere: %s", 
-        *e, renderer);
-    writefln (
-        "e.aura.color: %s, e.content.color: %s, e.aura.border.color: %s", 
-        e.aura.color, e.content.color, e.aura.border.color);
 
     if (e.aura.size.w != 0 && e.aura.size.h != 0 && e.aura.color.a != 0)
         draw_aura (renderer,e,_aura_pos,_aura_size);

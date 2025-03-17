@@ -69,6 +69,3 @@ colors
   black    #000
   gray_border  #999
   info_bg  #232729
-
-commands
-  test                              ls -1

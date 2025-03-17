@@ -38,7 +38,6 @@ const DEFAULT_FONT_SIZE = 12;
 Klass*
 find_klass_or_create (E* e, string s) {
     auto kls = find_klass (e,s);
-    writefln ("find_klass: %s, kls: %s", s, kls);
     if (kls is null)
         kls = create_klass (e,s);
     return kls;

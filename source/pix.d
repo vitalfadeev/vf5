@@ -78,8 +78,8 @@ go (Pix* pix, E* root) {
     root.size   = root.window.size;
     root.content.size = root.size - root.aura.size - root.aura.size;
 
-    // Event "update"
-    send_user_event!UpdateUserEvent (root);
+    // update
+    update_tree (root);
 
     // Event "start"
     send_user_event!StartUserEvent ();
