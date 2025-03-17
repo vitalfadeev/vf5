@@ -43,7 +43,19 @@ event (Klass* kls, Event* ev, E* e) {
 
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN: break;
-        case SDL_KEYDOWN: break;
+        case SDL_KEYDOWN: {  // SDL_KeyboardEvent
+            if (ev.key.keysym.sym == SDLK_UP) {
+                // go up
+            }
+            if (ev.key.keysym.sym == SDLK_DOWN) {
+                // go down
+                //   find selected
+                //   select next 
+                //   update
+                //   redraw
+            }
+            break;
+        }
         case SDL_KEYUP: break;
         default:
     }

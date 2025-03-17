@@ -37,7 +37,7 @@ E_Klass {
 void
 event (Klass* kls, Event* ev, E* e) {
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("KLASS: ", kls.name, ".EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writefln ("KLASS(%s).event: %s %s", kls.name, ev.type, (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     switch (ev.type) {
         case SDL_USEREVENT:

@@ -15,24 +15,34 @@ main () {
 	auto pix = new Pix ();
 	pix.setup ();
 
-	 //UTree
-	E* root = new_root ();
-	root.setup ();
+	//UTree
+	E* root = open ("test_1.txt");
+	//E* root = open ("test_file_manager.txt");
 
 	// Check
-	//dump_tree (root);
+	dump_tree (root);
 	dump_klasses (root);
+	dump_sizes (root);
 
 	//
 	pix.go (root);
 }
 
-void
-setup (E* root) {
+E*
+open (string file_name) {
 	import std.file;
-	create_reserved_classes (root);
-	//txt_reader.go (root, "test_audacious.txt".readText);
-	txt_reader.go (root, "test_file_manager.txt".readText);
+	E* root = new_root ();
+	txt_reader.go (root, file_name.readText);
+	return root;
+}
+
+E*
+new_root () {
+	import types;
+    auto root = new E ();
+    create_reserved_classes (root);
+    root.size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    return root;
 }
 
 void

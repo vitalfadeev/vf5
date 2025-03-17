@@ -64,7 +64,14 @@ create_klass (E* e, string s) {
 
 void
 add_defined_klass (E* e, Klass* kls) {
-    e.defined_klasses ~= kls;
+    // find root
+    for (auto _e = e; _e !is null; _e = _e.parent) {
+        if (_e.parent is null) {
+            auto root = _e;
+            root.defined_klasses ~= kls;
+            break;
+        }
+    }
 }
 
 
@@ -275,8 +282,14 @@ new_child_e (E* e, TString[] values) {
     //   add classes
 
     auto _e = etree.new_e ();
+    set_klasses_for_new_e (_e,values);
 
-    _e.add_klass (e.find_klass_or_create ("e"));
+    return _e;
+}
+
+void
+set_klasses_for_new_e (E* e, TString[] values) {
+    e.add_klass (e.find_klass_or_create ("e"));
 
     // klasses
     foreach (ts; values)
@@ -284,12 +297,10 @@ new_child_e (E* e, TString[] values) {
             case TString.Type.name   : 
             case TString.Type.string : 
                 auto kls = e.find_klass_or_create (ts.s);
-                _e.add_klass (kls);
+                e.add_klass (kls);
                 break;
             default:
-        }
-
-    return _e;
+        }    
 }
 
 
@@ -498,8 +509,7 @@ load_e_text (E* e) {
 
 void
 dump_sizes (E* e) {
-    foreach (_e; WalkChilds (e))
-        dump_size (_e); // recursive
+    dump_size (e); // recursive
 }
 void
 dump_size (E* e, int level=0) {

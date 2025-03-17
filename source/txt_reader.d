@@ -48,6 +48,7 @@ go (E* root, string s) {
     E*        e;
     Klass*    kls;
     Field*    field;
+    bool      root_e_found;
 
     foreach (t_line; Token_line_reader (s)) {
         // indent, name, values
@@ -69,10 +70,18 @@ go (E* root, string s) {
 
         // e
         if (name == "e" && indent == 0) { 
-            e = new_e (root,values);
-            root.childs ~= e;
+            // reuse root
+            // one e tree only
+            if (root.klasses.length == 0) {
+                root.set_klasses_for_new_e (values);
+                root_e_found = true;
+            }
+            else {
+                // ignoe 2nd root tree
+                // 1 e tree only
+            }
             indents.length = 0;
-            indents ~= Indent (e,indent);
+            indents ~= Indent (root,indent);
         }
 
         // sub e

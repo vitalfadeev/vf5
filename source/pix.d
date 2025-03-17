@@ -85,14 +85,18 @@ go (Pix* pix, E* root) {
     send_user_event!StartUserEvent ();
 
     // Event Loop
+    writefln ("\n======== PIX start event loop ========");
     foreach (Event* ev; Events ()) {
         //ev.root       = root;
         ev.app_window = window;
         ev.renderer   = renderer;
 
-        if (auto result = pix.event (ev,root))
+        if (auto result = pix.event (ev,root)) {
+            writefln ("\n======== PIX   end event loop ========");
             return result;
+        }
     }
+    writefln ("\n======== PIX   end event loop ========");
 
     return 0;
 }
@@ -136,8 +140,8 @@ click_translate (Event* ev) {
 
 int
 event (Pix* pix, Event* ev, E* root) {
-    //if (ev.type != SDL_MOUSEMOTION)
-    //    writeln ("PIX.EVENT: ", ev.type);
+    if (ev.type != SDL_MOUSEMOTION) 
+        writefln ("\nPIX.event:  %s", ev.type);
     translate (ev);
 
     switch (ev.type) {

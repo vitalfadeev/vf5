@@ -377,20 +377,25 @@ E {
         }
     }
 
-    //
     string
-    toString () {
+    e_klasses_to_string () {
         string ks;
         foreach (Klass* kls; klasses)
             ks ~= kls.name ~ " ";
         ks = ks.stripRight ();
 
+        return ks;
+    }
+
+    //
+    string
+    toString () {
         string fs;
         foreach (Field* f; fields)
             fs ~= f.name ~ " ";
         fs = fs.stripRight ();
         
-        return format!"E(%s) (%s)" (ks,fs);
+        return format!"E(%s) (%s)" (e_klasses_to_string,fs);
     }
 }
 
@@ -442,7 +447,7 @@ event (E* e, Event* ev) {
     import bindbc.sdl;
 
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("E.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writefln ("E(%s).event: %s %s", e.e_klasses_to_string, ev.type, (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
 
     // via klasses
     foreach (Klass* kls; e.klasses)

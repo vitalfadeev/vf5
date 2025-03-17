@@ -13,13 +13,6 @@ import events;
 import types;
 
 
-auto
-new_root () {
-    auto root = new E ();
-    root.size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    return root;
-}
-
 void
 send_event_in_tree (E* root, Event* ev) {
     // klass event
