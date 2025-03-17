@@ -76,8 +76,8 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_USEREVENT: {
             switch (ev.user.code) {
                 case USER_EVENT.click:
-                    if (event_for_me (kls,cast (ClickUserEvent*) ev,e)) {
-                        auto click_ev = cast (ClickUserEvent*) ev;
+                    if (event_for_me (kls,&ev._user.click,e)) {
+                        auto click_ev = ev._user.click;
                         int percent;
                         if (e !is null) {
                             percent_from_click (e, click_ev.down_pos.x, click_ev.down_pos.y, &percent);
@@ -89,7 +89,7 @@ event (Klass* kls, Event* ev, E* e) {
                             // seek  = total * precent
                             //         udtool playback-seek seek
                             // exec (`audtool playback-seek %s`, precent_to_time (precent));
-                            e.send_e_update ();
+                            e.force_e_update ();
                             e.send_e_redraw ();
                         }
                     }
@@ -105,7 +105,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Event* ev, E* e) {
+update (Klass* kls, UpdateUserEvent* ev, E* e) {
     // progress.position
     //   e e e
 }
@@ -122,7 +122,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, Event* ev, E* e) {
+draw (Klass* kls, DrawUserEvent* ev, E* e) {
     //
 }
 

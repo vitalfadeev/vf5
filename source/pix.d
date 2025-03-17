@@ -18,7 +18,7 @@ import events;
 import types;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, E* root);
-alias PIX_DRAW_FN   = void function (Pix* pix, Event* ev, E* root);
+alias PIX_DRAW_FN   = void function (Pix* pix, DrawUserEvent* ev, E* root);
 alias PIX_GO_FN     = int  function (Pix* pix, E* root);
 
 alias IMAGE_PTR = SDL_Surface*;
@@ -45,7 +45,7 @@ Pix {
     }
 
     void
-    draw (Event* ev, E* root) {
+    draw (DrawUserEvent* ev, E* root) {
         if (fn.draw !is null)
             fn.draw (&this,ev,root);
     }
@@ -141,17 +141,17 @@ click_translate (Event* ev) {
 int
 event (Pix* pix, Event* ev, E* root) {
     if (ev.type != SDL_MOUSEMOTION) 
-        writefln ("\nPIX.event:  %s", ev.type);
+        writefln ("\nPIX.event: %s", *ev);
     translate (ev);
 
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED      : direct_event!DrawUserEvent (pix,ev,root); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED      : draw_tree (pix,ev,root); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN        : break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN       : break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED        : break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED      : direct_event!UpdateUserEvent (pix,ev,root); direct_event!DrawUserEvent (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED      : update_tree (root); draw_tree (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED : break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED    : break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED    : break;    // event.window.windowID
@@ -168,9 +168,10 @@ event (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.draw   : pix.draw   (ev,root); break;
-                case USER_EVENT.redraw : pix.draw   (ev,root); break;
-                default                : root.event (ev);
+                case USER_EVENT.update : update_tree (&ev._user.update,root); break;
+                case USER_EVENT.draw   : draw_tree   (pix,ev,root); break;
+                case USER_EVENT.redraw : draw_tree   (pix,ev,root); break;
+                default                : root.event  (ev);
             }
             break;
         case SDL_QUIT: 
@@ -184,13 +185,29 @@ event (Pix* pix, Event* ev, E* root) {
 }
 
 void
-draw (Pix* pix, Event* ev, E* root) {
+update_tree (E* root) {
+    UpdateUserEvent ev;
+    root.update (&ev); 
+}
+void
+update_tree (UpdateUserEvent* ev, E* root) {
+    root.update (ev); 
+}
+
+void
+draw_tree (Pix* pix, Event* ev, E* root) {
+    DrawUserEvent draw_ev;
+    draw_ev.renderer = ev.renderer;
+    pix.draw (&draw_ev,root);
+}
+
+void
+draw (Pix* pix, DrawUserEvent* ev, E* root) {
     auto renderer = ev.renderer;
     auto e = root;
 
-    if (ev.type == SDL_USEREVENT)
-    if (ev.user.code == USER_EVENT.redraw)
-        e = (cast (RedrawUserEvent*) ev).e;
+    if (ev.code == USER_EVENT.redraw)
+        e = ev.e;
 
     // Clip to e
     if (e !is null) {
@@ -210,7 +227,7 @@ draw (Pix* pix, Event* ev, E* root) {
 
     // draw
     if (e !is null)
-        e.event (ev);
+        e.draw (ev);
 
     // rasterize
     SDL_RenderPresent (renderer);
@@ -351,17 +368,16 @@ Window {
 
 void
 send_user_event (EVT,ARGS...) (ARGS args) {
-    auto evt = EVT (args);
-    SDL_PushEvent (cast(SDL_Event*)&evt);
+    Event ev;
+    ev._user = UserEvent (EVT (args));
+    SDL_PushEvent (&ev.sdl);
 }
 
 void
-direct_event (EVENT) (Pix* pix, Event* ev, E* root) {
-    Event _ev = *ev;
-    EVENT __ev;
-    _ev.type      = cast (SDL_EventType) __ev.type;
-    _ev.user.code = __ev.code;
-    pix.event (&_ev,root); 
+direct_user_event (EVT,ARGS...) (Pix* pix, Event* ev, E* root, ARGS args) {
+    Event direct_ev = *ev;
+    direct_ev._user = UserEvent (EVT (args));
+    pix.event (&direct_ev,root); 
 }
 
 

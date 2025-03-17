@@ -77,7 +77,7 @@ go (E* root, string s) {
                 root_e_found = true;
             }
             else {
-                // ignoe 2nd root tree
+                // ignore 2nd root tree
                 // 1 e tree only
             }
             indents.length = 0;
@@ -113,8 +113,9 @@ go (E* root, string s) {
                     indents ~= Indent (Indent.Type.field_e,field,indent);
                     break;
                 case Indent.Type.e      : 
-                    e = new_child_e (root,values);
+                    e = new_child_e (e,values);
                     _ind.e.childs ~= e; 
+                    set_klasses_for_new_e (e,values);
                     indents ~= Indent (e,indent);
                     break;
             }
@@ -221,10 +222,10 @@ find_parent (ref Indent[] indents, size_t for_indent) {
     return null;
 }
 
-auto
-new_e (E* root, TString[] values) {
-    return new_child_e (root,values);
-}
+//auto
+//new_e (E* root, TString[] values) {
+//    return new_child_e (root,values);
+//}
 
 
 Klass*

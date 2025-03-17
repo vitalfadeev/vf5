@@ -18,7 +18,7 @@ Pos {
 
     Pos
     opBinary (string op : "+") (Size size) {
-        return Pos (cast(X)(x+size.w), cast(Y)(y+size.h));
+        return Pos (x+size.w, y+size.h);
     }
 
     Pos

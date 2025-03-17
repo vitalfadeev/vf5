@@ -5,10 +5,14 @@ import std.string;
 import std.conv;
 import bindbc.sdl;
 import etree;
-import e;
-import e_update;
+import e : E,content;
+import e_update : 
+    go_on_event, apply_e_klasses, apply_e_fields,
+    load_e_image, load_e_font, load_e_colors, load_e_text,
+    update_e_size, update_e_pos, load_e_childs,
+    doc_get_klass_field_value;
 import e_klass_draw;
-import klass;
+import klass : Klass;
 import events;
 import tstring;
 import types;
@@ -25,7 +29,7 @@ E_Klass {
             [],  
             Klass.Fn (
                 &.event,     // event
-                &.update,    // update
+                &.update2,    // update
                 &.set,       // set
                 &.draw,      // draw
             )
@@ -37,14 +41,14 @@ E_Klass {
 void
 event (Klass* kls, Event* ev, E* e) {
     if (ev.type != SDL_MOUSEMOTION)
-        writefln ("KLASS(%s).event: %s %s", kls.name, ev.type, (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writefln ("KLASS(%s).event: %s", kls.name, *ev);
 
     switch (ev.type) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.update : kls.update (ev,e); break;
-                case USER_EVENT.draw   : kls.draw   (ev,e); break;
-                case USER_EVENT.redraw : kls.draw   (ev,e); break;
+                case USER_EVENT.update : kls.update (&ev._user.update,e); break;
+                case USER_EVENT.draw   : kls.draw   (&ev._user.draw,e); break;
+                case USER_EVENT.redraw : kls.draw   (&ev._user.draw,e); break;
                 case USER_EVENT.start  : go_on_event (e,"start"); break;
                 default                :
             }
@@ -57,8 +61,9 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN
 void
-update (Klass* kls, Event* ev, E* e) {
-    writefln ("%-60s", e.toString);
+update2 (Klass* kls, UpdateUserEvent* ev, E* e) {
+    writefln ("KLASS(%s).update, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
+    version (profile) writefln ("%-60s", e.toString);
     e.reset ();
     version (profile) time_step ("");
 
@@ -157,7 +162,8 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, Event* ev, E* e) {
+draw (Klass* kls, DrawUserEvent* ev, E* e) {
+    writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     e_klass_draw.draw (ev.renderer,e);
 }
 

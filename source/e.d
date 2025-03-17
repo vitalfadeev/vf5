@@ -3,7 +3,7 @@ import std.format;
 import std.string;
 import std.conv;
 import etree;
-import klass;
+import klass : Klass;
 import field : Field;
 import types;
 import tstring;
@@ -14,11 +14,14 @@ import generator : GENERATOR_PTR;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
-alias E_UPDATE_FN = void function (E* e, Event* ev);
+alias E_UPDATE_FN = void function (E* e, UpdateUserEvent* ev);
 alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
-alias E_DRAW_FN   = void function (E* e, Event* ev);
+alias E_DRAW_FN   = void function (E* e, DrawUserEvent* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
+
+static
+Klass*[] reserved_klasses;
 
 // form
 //   type none, rect, 3, 4, 5, 6, 7, 8
@@ -312,7 +315,7 @@ E {
     }
 
     void 
-    update (Event* ev) { 
+    update (UpdateUserEvent* ev) { 
         if (fn.update !is null) fn.update (&this,ev); 
     }
 
@@ -322,7 +325,7 @@ E {
     }
 
     void 
-    draw (Event* ev) {
+    draw (DrawUserEvent* ev) {
         if (fn.draw !is null) fn.draw (&this,ev);
     }
 
@@ -447,20 +450,36 @@ event (E* e, Event* ev) {
     import bindbc.sdl;
 
     if (ev.type != SDL_MOUSEMOTION)
-        writefln ("E(%s).event: %s %s", e.e_klasses_to_string, ev.type, (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
+    writefln ("e.event: klasses: %s", e.klasses);
     foreach (Klass* kls; e.klasses)
         kls.event (ev,e);
-
-    // to childs
-    e.send_event_in_childs (ev);
 }
 
 void
-update (E* e, Event* ev) {
+update (E* e, UpdateUserEvent* ev) {
     // custom update
     // ...
+
+    // via klasses
+    writefln ("e.update: klasses: %s", e.klasses);
+    foreach (kls; e.klasses) {
+        writefln ("e.update: klass: %s", kls.name);
+        //import klasses.e;
+        //if (kls.name == "e")
+        //    klasses.e.update (kls,ev,e);
+        //else
+        kls.update (ev,e);
+    }
+
+    // to childs
+    writefln ("update childs: %s", *ev);
+    foreach (_e; WalkChilds (e)) {
+        writeln ("child _e: ", *_e);
+        _e.update (ev);
+    }
 }
 
 void
@@ -469,9 +488,21 @@ set (E* e, string field_id, TString[] values) {
 }
 
 void
-draw (E* e, Event* ev) {
+draw (E* e, DrawUserEvent* ev) {
     // custom draw
     // ...
+
+    // via klasses
+    writefln ("e.draw: klasses: %s", e.klasses);
+    foreach (kls; e.klasses) {
+        writefln ("e.draw: klass: %s", kls.name);
+        kls.draw (ev,e);
+    }
+
+    // to childs
+    writefln ("draw childs: %s", *ev);
+    foreach (_e; WalkChilds (e))
+        _e.draw (ev);
 }
 
 EPtr

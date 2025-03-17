@@ -20,9 +20,8 @@ main () {
 	//E* root = open ("test_file_manager.txt");
 
 	// Check
-	dump_tree (root);
-	dump_klasses (root);
-	dump_sizes (root);
+	//dump_tree (root);
+	//dump_klasses (root);
 
 	//
 	pix.go (root);
@@ -53,11 +52,11 @@ create_reserved_classes (E* root) {
 	import klasses.check    : Check;
 	import klasses.edit     : Edit;
 
-	root.defined_klasses ~= new_reserved_klass!E_Klass ();
-	root.defined_klasses ~= new_reserved_klass!Progress ();
-	root.defined_klasses ~= new_reserved_klass!Button ();
-	root.defined_klasses ~= new_reserved_klass!Check ();
-	root.defined_klasses ~= new_reserved_klass!Edit ();
+	reserved_klasses ~= new_reserved_klass!E_Klass ();
+	reserved_klasses ~= new_reserved_klass!Progress ();
+	reserved_klasses ~= new_reserved_klass!Button ();
+	reserved_klasses ~= new_reserved_klass!Check ();
+	reserved_klasses ~= new_reserved_klass!Edit ();
 }
 
 Klass*

@@ -1,5 +1,7 @@
 module events;
 
+import std.format : format;
+import std.conv : to;
 import bindbc.sdl;
 import types : Pos;
 import etree;
@@ -8,12 +10,27 @@ import e : E;
 
 struct
 Event {
-    SDL_Event _super;
+    union {
+        SDL_Event _super;
+        UserEvent _user;
+    }
     alias _super this;
     alias sdl = _super;
 
     SDL_Window*   app_window;
     SDL_Renderer* renderer;
+
+    string
+    toString () {
+        return 
+            format!
+                "Event(%s,%s)" 
+                (type, 
+                (type == SDL_USEREVENT) ? 
+                    (cast(USER_EVENT)user.code).to!string : 
+                    ""
+                );
+    }
 }
 
 enum 
@@ -28,13 +45,35 @@ USER_EVENT : Sint32 {
 
 union
 UserEvent {
-    Uint32 type; // SDL_USEREVENT
-    SDL_UserEvent   user;
-    StartUserEvent  start;
-    UpdateUserEvent update;
-    DrawUserEvent   draw;
-    RedrawUserEvent redraw;
-    ClickUserEvent  click;
+    Uint32 type = SDL_USEREVENT;
+    union {
+        SDL_UserEvent   user;
+        StartUserEvent  start;
+        UpdateUserEvent update;
+        DrawUserEvent   draw;
+        RedrawUserEvent redraw;
+        ClickUserEvent  click;
+    }
+
+    this (UpdateUserEvent ev) {
+        this.update = ev;
+    }
+
+    this (StartUserEvent ev) {
+        this.start = ev;
+    }
+
+    this (DrawUserEvent ev) {
+        this.draw = ev;
+    }
+
+    this (RedrawUserEvent ev) {
+        this.redraw = ev;
+    }
+
+    this (ClickUserEvent ev) {
+        this.click = ev;
+    }
 }
 
 struct

@@ -45,7 +45,7 @@ event (Klass* kls, Event* ev, E* e) {
                 case USER_EVENT.click : 
                     e.trigger_class ("check.pressed");
                     //emit ("on check.pressed", doc_t, e_t);
-                    e.send_e_update ();
+                    e.force_e_update ();
                     e.send_e_redraw ();
                     break;
                 default:
@@ -57,7 +57,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Event* ev, E* e) {
+update (Klass* kls, UpdateUserEvent* ev, E* e) {
     //
 }
 
@@ -69,7 +69,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, Event* ev, E* e) {
+draw (Klass* kls, DrawUserEvent* ev, E* e) {
     //
 }
 

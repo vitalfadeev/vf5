@@ -38,6 +38,7 @@ const DEFAULT_FONT_SIZE = 12;
 Klass*
 find_klass_or_create (E* e, string s) {
     auto kls = find_klass (e,s);
+    writefln ("find_klass: %s, kls: %s", s, kls);
     if (kls is null)
         kls = create_klass (e,s);
     return kls;
@@ -45,11 +46,17 @@ find_klass_or_create (E* e, string s) {
 
 Klass*
 find_klass (E* e, string s) {
+    // in e, in parents
     for (auto _e=e; _e !is null; _e = _e.parent) {
         foreach (kls; _e.defined_klasses)
             if (kls.name == s)
                 return kls;
     }
+
+    // in reserved
+    foreach (kls; reserved_klasses)
+        if (kls.name == s)
+            return kls;
 
     return null;
 }
@@ -65,7 +72,7 @@ create_klass (E* e, string s) {
 void
 add_defined_klass (E* e, Klass* kls) {
     // find root
-    for (auto _e = e; _e !is null; _e = _e.parent) {
+    for (auto _e=e; _e !is null; _e = _e.parent) {
         if (_e.parent is null) {
             auto root = _e;
             root.defined_klasses ~= kls;
@@ -216,6 +223,7 @@ add_sub_tree (E* e, Field* field, Klass* from_klass, Klass* from_template, Templ
     _e.from_template = from_template;
     _e.template_args = template_args;
     e.childs ~= _e;
+    set_klasses_for_new_e (_e,field.values);
 
     // recursive
     foreach (_field; WalkFields (field)) {
@@ -282,7 +290,6 @@ new_child_e (E* e, TString[] values) {
     //   add classes
 
     auto _e = etree.new_e ();
-    set_klasses_for_new_e (_e,values);
 
     return _e;
 }
@@ -1370,16 +1377,15 @@ extract_class_field_value (E* e, string s) {
 
 void
 force_e_update (E* e) {
-    Event ev;
-    ev.type      = SDL_USEREVENT;
-    ev.user.code = USER_EVENT.update;
-    e.event (&ev);
+    UpdateUserEvent ev;
+    ev.e = e;
+    e.update (&ev);
 }
 
-void
-send_e_update (E* e) {
-    send_user_event!UpdateUserEvent (e);
-}
+//void
+//send_e_update (E* e) {
+//    send_user_event!UpdateUserEvent (e);
+//}
 
 
 void

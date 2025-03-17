@@ -46,7 +46,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.state == SDL_PRESSED)
             if (event_for_me (kls,ev,e)) {
                 e.add_class ("button.pressed");
-                e.send_e_update ();
+                e.force_e_update ();
                 e.send_e_redraw ();
             }
             break;
@@ -56,7 +56,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.state == SDL_RELEASED)
             if (e.has_class ("button.pressed")) {
                 e.remove_class ("button.pressed");
-                e.send_e_update ();
+                e.force_e_update ();
                 e.send_e_redraw ();
             }
             break;
@@ -64,7 +64,7 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.click:
-                    if (event_for_me (kls,cast (ClickUserEvent*) ev,e))
+                    if (event_for_me (kls,&ev._user.click,e))
                         go_on_event (e,"click");
                     break;
                 default:
@@ -76,7 +76,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, Event* ev, E* e) {
+update (Klass* kls, UpdateUserEvent* ev, E* e) {
     //
 }
 
@@ -88,6 +88,6 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, Event* ev, E* e) {
+draw (Klass* kls, DrawUserEvent* ev, E* e) {
     //
 }
