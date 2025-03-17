@@ -1,0 +1,15 @@
+e root
+  e vbox rect
+  e vbox rect
+
+rect
+  size         parent 128
+  aura         20
+  aura.color   #008
+  borders      2 solid #ccc
+  text         `echo 123 abc`
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+
+vbox
+  pos.type  vbox b

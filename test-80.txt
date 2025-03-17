@@ -1,0 +1,140 @@
+image_folder /home/vf/src/vf5/img
+klass_folder /home/vf/src/vf5/klasses
+import_folder .
+import_folder `echo $PWD`
+import_folder `pwd`
+import_folder /home/vf/src/vf5
+
+image /home/vf/src/vf5/img/file.png
+image /home/vf/src/vf5/img/play.png
+image /home/vf/src/vf5/img/list.png
+
+window
+ title App
+ size 640 480
+ pos 10 10
+ pos center
+ fullscreen 1
+
+e
+ e file-browser
+  e file-browser-item
+  e file-browser-item
+  e file-browser-item
+  e file-browser-item
+
+file-browser-item
+ pos.type grid
+ pos.dir  r
+ size 32 32
+ borders 2 solid #cfc
+
+map
+       text image                         on
+ File  File /home/vf/src/vf5/img/file.png 
+ Play  Play /home/vf/src/vf5/img/play.png click player.play_pause
+ List  List /home/vf/src/vf5/img/list.png
+
+// a extend b extend c
+a b c
+ fg primary
+ bg bg
+
+b c
+ fg #ccc
+ bg #222
+
+c
+ fg #fff
+ bg #000
+
+e
+ e title
+ e button status
+
+title
+  text `audtool current-song`
+
+Play
+  pos      t9 1 r
+  text     play
+  text.pos t9 1 r  // comment. type t9, group 1, dir r
+
+input-text
+  hotkey ctr-+a select.all
+  hotkey ctrl-alt-x player.prev
+  hotkey ctrl-alt-c `audtool playback-playpause`
+  hotkey ctrl-alt-v player.stop
+  hotkey ctrl-alt-b player.next
+
+import ./other_colors
+import ./other_commands
+
+commands
+  player.prev                       audtool playlist-reverse
+  player.prev.undo                  player.next
+  player.next                       audtool playlist-advance
+  player.next.undo                  player.prev
+
+update.links
+  tb-play-pause
+    commands.player.play_pause
+    tb-stop
+
+forms
+  border-form    
+  border-form ┌─┐ │ │ └─┘
+  border-form ╓─╖ ║ ║ ╙─╜ 
+  border-form ╒═╕ │ │ ╘═╛
+  border-form ╔═╗ ║ ║ ╚═╝
+  border-form ░
+  border-form ▒
+  border-form ▓
+  border-form █
+  border-form ▄▄▄ ▌ ▐ ▀▀▀
+  border-form ▀
+  border-form ⊂ ⊃
+  border-form ( )
+  border-form [ ]
+  border-form { }
+  border-form / /
+  border-form | |
+  border-form ‿ ⁀
+  border-form 
+  border-form ⁐
+  border-form 
+  border-form ⁓
+  border-form ∿
+  border-form :
+  border-form ⁝
+  border-form ⁞
+  border-form ∏
+  border-form ∐
+  border-form ∧
+  border-form ∨
+  border-form ∩
+  border-form ∪
+  border-form ≈
+  border-form ⌇
+  border-form ⎛
+  border-form ⎝
+  border-form ⎞
+  border-form ⎠
+  border-form ⎨
+  border-form ⎬
+  border-form ◸
+  border-form ◺
+  border-form ◹
+  border-form ◿
+  border-form 
+  border-form-1 ┌─┐
+  border-form-2 │ │
+  border-form-3 └─┘
+  border-form-1 ╔═╗
+  border-form-2 ║ ║
+  border-form-3 ╚═╝
+  border-form-1 ╔═╗
+  border-form-2 ║ ║
+  border-form-3 ║ ║
+
+

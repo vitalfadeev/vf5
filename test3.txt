@@ -1,0 +1,16 @@
+e root
+  e hbox rect
+  e hbox rect
+  e hbox rect
+
+rect
+  size         128 128
+  aura         20
+  aura.color   #008
+  borders      2 solid #ccc
+  text         a
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+
+hbox
+  pos.type  hbox r

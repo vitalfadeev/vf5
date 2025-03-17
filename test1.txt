@@ -1,0 +1,15 @@
+e root
+  e rect
+
+root
+  size parent
+  content.size e
+
+rect
+  aura         20
+  aura.color   #008
+  borders      2 solid #ccc
+  text         `echo 123 abc`
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+//comment
