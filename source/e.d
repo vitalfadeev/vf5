@@ -174,10 +174,11 @@ E {
         SizeType {
             e,
             fixed, 
+            childs,
             image,
             text,
-            childs,
             max,   // max (image,text)
+            childs_image_text,
         }
     }
 

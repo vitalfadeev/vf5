@@ -78,6 +78,11 @@ tree_functions () {
     }
 }
 
+bool
+has_childs (TTree) (TTree* t) {
+    return (cast (Tree*) t)._childs.l !is null;
+}
+
 // t.childs
 // t.childs ~= a
 // foreach (t; t.childs) ...

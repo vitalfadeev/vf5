@@ -771,10 +771,11 @@ update_content_size_w (E* e) {
     switch (e.content.size_w_type) {
         case E.Content.SizeType.e      : update_content_size_w_e      (e); break;
         case E.Content.SizeType.fixed  : update_content_size_w_fixed  (e); break;
+        case E.Content.SizeType.childs : update_content_size_w_childs (e); break;
         case E.Content.SizeType.image  : update_content_size_w_image  (e); break;
         case E.Content.SizeType.text   : update_content_size_w_text   (e); break;
-        case E.Content.SizeType.childs : update_content_size_w_childs (e); break;
         case E.Content.SizeType.max    : update_content_size_w_max    (e); break;
+        case E.Content.SizeType.childs_image_text : update_content_size_w_childs_image_text    (e); break;
     }
 
     update_e_pos (e);
@@ -849,15 +850,36 @@ update_content_size_w_max (E* e) {
 }
 
 void
+update_content_size_w_childs_image_text (E* e) {
+    if (e.has_childs) {
+        e.content.size.w = e.content.childs_size.w;
+        return;
+    }
+
+    if (e.content.image.ptr) {
+        e.content.size.w = e.content.image.size.w;
+        return;
+    }
+
+    if (e.content.text.s.length) {
+        e.content.size.w = e.content.text.size.w;
+        return;
+    }
+
+    //e.content.size.w = 0;
+}
+
+void
 update_content_size_h (E* e) {
     final
     switch (e.content.size_h_type) {
         case E.Content.SizeType.e      : update_content_size_h_e      (e); break;
         case E.Content.SizeType.fixed  : update_content_size_h_fixed  (e); break;
+        case E.Content.SizeType.childs : update_content_size_h_childs (e); break;
         case E.Content.SizeType.image  : update_content_size_h_image  (e); break;
         case E.Content.SizeType.text   : update_content_size_h_text   (e); break;
-        case E.Content.SizeType.childs : update_content_size_h_childs (e); break;
         case E.Content.SizeType.max    : update_content_size_h_max    (e); break;
+        case E.Content.SizeType.childs_image_text : update_content_size_h_childs_image_text    (e); break;
     }
 }
 
@@ -899,6 +921,26 @@ update_content_size_h_childs (E* e) {
 
 void
 update_content_size_h_max (E* e) {
+    if (e.has_childs) {
+        e.content.size.h = e.content.childs_size.h;
+        return;
+    }
+
+    if (e.content.image.ptr) {
+        e.content.size.h = e.content.image.size.h;
+        return;
+    }
+
+    if (e.content.text.s.length) {
+        e.content.size.h = e.content.text.size.h;
+        return;
+    }
+
+    //e.content.size.h = 0;
+}
+
+void
+update_content_size_h_childs_image_text (E* e) {
     e.content.size.h = max (e.content.image.size.h, e.content.text.size.h);
 }
 

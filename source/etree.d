@@ -19,6 +19,11 @@ childs (Tree) (Tree* t)  {
     return vf.tree.childs (t);
 }
 
+auto 
+has_childs (Tree) (Tree* t)  {
+    return vf.tree.has_childs (t);
+}
+
 void
 remove_child (Tree) (Tree* t, Tree* c) {
     (cast (vf.tree.Tree*) t).remove_child (cast (vf.tree.Tree*) c);

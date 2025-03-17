@@ -553,10 +553,11 @@ set_content_size_w (E* e, TString[] values) {
         switch (values[0].s) {
             case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
-            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
+            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
             case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
             case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
-            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
+            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
+            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
             default: {
                 if (isNumeric (values[0].s)) {
                     e.content.size.w      = values[0].s.to!W;
@@ -575,10 +576,11 @@ set_content_size_h (E* e, TString[] values) {
         switch (values[0].s) {
             case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
             case "fixed"  : e.content.size_h_type = E.Content.SizeType.fixed; break;
-            case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
+            case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
             case "image"  : e.content.size_h_type = E.Content.SizeType.image; break;
             case "text"   : e.content.size_h_type = E.Content.SizeType.text; break;
-            case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
+            case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
+            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
             default:
             if (isNumeric (values[0].s)) {
                 e.content.size.h      = values[0].s.to!H;
