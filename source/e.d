@@ -249,12 +249,13 @@ E {
 
     struct
     Generator {
-        Type       type;      // cmd `command` delimiter | skip 1
+        Type       type;      
         union {
             None   none;
-            Cmd    cmd;
-            Fs     fs; // list dir -> files, list file -> content: csv, image, dbf
-                       // url
+            Cmd    cmd;    // cmd `command` delimiter | skip 1
+            Fs     fs;     // list dir -> files, list file -> content: csv, image, dbf
+                           // url
+            Kls    klass;  // klass fields
         }
         string[]    fields;    // ICON,NUMBER,TITLE,TEXT
         string     _template;
@@ -267,6 +268,7 @@ E {
             none,
             cmd,
             fs,
+            klass,
         }
         struct 
         None {
@@ -283,14 +285,19 @@ E {
         Fs {
             string path;
         }
+        struct 
+        Kls {
+            string klass; // klass fields
+        }
 
         string
         toString () {
             final
             switch (type) {
-                case Type.none: return "Generator ("~ type.to!string ~")";
-                case Type.cmd : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
-                case Type.fs  : return "Generator ("~ type.to!string ~")";
+                case Type.none  : return "Generator ("~ type.to!string ~")";
+                case Type.cmd   : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
+                case Type.fs    : return "Generator ("~ type.to!string ~")";
+                case Type.klass : return "Generator ("~ type.to!string ~")";
             }
         }
     }

@@ -422,9 +422,10 @@ load_e_childs (E* e) {
     writeln ("load_e_childs");
     final
     switch (e.generator.type) {
-        case E.Generator.Type.none : break;
-        case E.Generator.Type.cmd  : load_childs_cmd (e); break;
-        case E.Generator.Type.fs   : load_childs_fs (e); break;
+        case E.Generator.Type.none  : break;
+        case E.Generator.Type.cmd   : load_childs_cmd (e); break;
+        case E.Generator.Type.fs    : load_childs_fs (e); break;
+        case E.Generator.Type.klass : load_childs_klass (e); break;
     }
 }
 
@@ -452,6 +453,22 @@ load_childs_fs (E* e) {
 
     if (e.generator.ptr is null) {
         e.generator.ptr = cast (GENERATOR_PTR) new FsGenerator ();
+        assert (e.generator._template.length > 0);
+        Klass* template_klass = find_klass (e,e.generator._template);  // template
+        assert (template_klass !is null);
+
+        gen_tree (e,e.generator.ptr,template_klass);
+    }
+}
+
+void
+load_childs_klass (E* e) {
+    writeln ("load_hilds_klass");
+    import generator;
+    import generators.klass;
+
+    if (e.generator.ptr is null) {
+        e.generator.ptr = cast (GENERATOR_PTR) new KlassGenerator ();
         assert (e.generator._template.length > 0);
         Klass* template_klass = find_klass (e,e.generator._template);  // template
         assert (template_klass !is null);

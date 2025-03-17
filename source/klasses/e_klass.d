@@ -670,10 +670,11 @@ set_generator (E* e, TString[] values) {
         E.Generator.Type type;
 
         switch (values[0].s) {
-            case "none" : type = E.Generator.Type.none; break;
-            case "cmd"  : type = E.Generator.Type.cmd;  break;
-            case "fs"   : type = E.Generator.Type.fs;   break;
-            default     : type = E.Generator.Type.none; break;
+            case "none"  : type = E.Generator.Type.none;  break;
+            case "cmd"   : type = E.Generator.Type.cmd;   break;
+            case "fs"    : type = E.Generator.Type.fs;    break;
+            case "klass" : type = E.Generator.Type.klass; break;
+            default     : type = E.Generator.Type.none;   break;
         }
         e.generator.type = type;
 
@@ -686,9 +687,10 @@ void
 parse_generator_args (E* e, E.Generator.Type type, TString[] values) {
     final
     switch (type) {
-        case E.Generator.Type.none : break;
-        case E.Generator.Type.cmd  : parse_generator_args_cmd (e,values); break;
-        case E.Generator.Type.fs   : parse_generator_args_fs  (e,values); break;
+        case E.Generator.Type.none  : break;
+        case E.Generator.Type.cmd   : parse_generator_args_cmd   (e,values); break;
+        case E.Generator.Type.fs    : parse_generator_args_fs    (e,values); break;
+        case E.Generator.Type.klass : parse_generator_args_klass (e,values); break;
     }
 }
 
@@ -728,6 +730,23 @@ parse_generator_args_cmd (E* e, TString[] values) {
 void
 parse_generator_args_fs (E* e, TString[] values) {
     e.generator.fs.path = values[1].s;
+
+    for (size_t i=2; i < values.length; i++) {
+        switch (values[i].s) {
+            case "fields":
+                i++; 
+                if (i < values.length) {
+                    set_generator_fields (e,values[i..i+1]);
+                }
+                break;
+            default:
+        }
+    }
+}
+
+void
+parse_generator_args_klass (E* e, TString[] values) {
+    e.generator.klass.klass = values[1].s;
 
     for (size_t i=2; i < values.length; i++) {
         switch (values[i].s) {

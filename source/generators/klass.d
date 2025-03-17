@@ -1,4 +1,4 @@
-module generators.fs;
+module generators.klass;
 
 import std.stdio : writeln;
 import std.string : splitLines;
@@ -11,25 +11,25 @@ import generator;
 
 
 struct
-FsGenerator {
+KlassGenerator {
     Generator _super = {&.generate};
     alias _super this;
-
-    TString path;   // .
 }
 
 int
 generate (Generator* g, E* e, GENERATE_DG dg) {
-    import std.file : dirEntries,SpanMode;
+    auto _klass = e.generator.klass.klass;
 
-    auto path = e.generator.fs.path;
-
-    if (path.length) {
+    if (_klass.length) {
         //string[][] lines = [["123"], ["456"]];
         string[][] lines;
 
-        foreach (string name; dirEntries (path,SpanMode.shallow)) {
-            lines ~= [name];
+        auto kls = find_klass (e,_klass);
+        if (kls is null)
+            return 0;
+
+        foreach (field; kls.fields) {
+            lines ~= [field.name];
         }
 
         writeln ("RET: ", lines);
