@@ -16,8 +16,8 @@ main () {
 	pix.setup ();
 
 	//UTree
-	E* root = open ("test_1.txt");
-	//E* root = open ("test_file_manager.txt");
+	//E* root = open ("test_1.txt");
+	E* root = open ("test_file_manager.txt");
 
 	// Check
 	//dump_tree (root);
