@@ -44,7 +44,7 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED)
-            if (event_for_me (kls,ev,e)) {
+            if (event_for_me (kls,&ev.button,e)) {
                 e.add_class ("button.pressed");
                 e.force_e_update ();
                 e.send_e_redraw ();

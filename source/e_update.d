@@ -12,8 +12,6 @@ import std.stdio : writeln;
 import std.stdio : writefln;
 import std.stdio : write;
 import bindbc.sdl;
-import bindbc.sdl.image;
-import bindbc.sdl.ttf;
 import etree;
 import e;
 import e_klass_draw : get_text_size;
@@ -450,14 +448,14 @@ load_childs_fs (E* e) {
     import generator;
     import generators.fs;
 
-    if (e.generator.ptr is null) {
+//    if (e.generator.ptr is null) {
         e.generator.ptr = cast (GENERATOR_PTR) new FsGenerator ();
         assert (e.generator._template.length > 0);
         Klass* template_klass = find_klass (e,e.generator._template);  // template
         assert (template_klass !is null);
 
         gen_tree (e,e.generator.ptr,template_klass);
-    }
+//    }
 }
 
 void

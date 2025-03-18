@@ -1,8 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"bindbc-loader": "1.0.3",
-		"bindbc-sdl": "1.2.4",
+		"bindbc-common": "0.1.6",
+		"bindbc-loader": {"path":"deps/bindbc-loader"},
+		"bindbc-sdl": {"path":"deps/bindbc-sdl"},
 		"bindbc-sdlgfx": "0.0.1"
 	}
 }

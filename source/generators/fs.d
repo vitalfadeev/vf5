@@ -22,7 +22,9 @@ int
 generate (Generator* g, E* e, GENERATE_DG dg) {
     import std.file : dirEntries,SpanMode;
 
-    auto path = e.generator.fs.path;
+    auto path   = e.generator.fs.path;
+    auto offset = e.generator.offset;
+    auto limit  = e.generator.limit;
 
     if (path.length) {
         //string[][] lines = [["123"], ["456"]];
@@ -31,6 +33,10 @@ generate (Generator* g, E* e, GENERATE_DG dg) {
         foreach (string name; dirEntries (path,SpanMode.shallow)) {
             lines ~= [name];
         }
+
+        auto _offset = offset < lines.length ? offset : 0;
+        auto _limit  = _offset + limit < lines.length ? _offset + limit : lines.length;
+        lines = lines[_offset..$];
 
         writeln ("RET: ", lines);
         

@@ -8,7 +8,6 @@ import pix;
 import txt_reader;
 import events;
 
-
 void 
 main () {
 	//
@@ -52,12 +51,14 @@ create_reserved_classes (E* root) {
 	import klasses.button   : Button;
 	import klasses.check    : Check;
 	import klasses.edit     : Edit;
+	import klasses.list     : List;
 
 	reserved_klasses ~= new_reserved_klass!E_Klass ();
 	reserved_klasses ~= new_reserved_klass!Progress ();
 	reserved_klasses ~= new_reserved_klass!Button ();
 	reserved_klasses ~= new_reserved_klass!Check ();
 	reserved_klasses ~= new_reserved_klass!Edit ();
+	reserved_klasses ~= new_reserved_klass!List ();
 }
 
 Klass*

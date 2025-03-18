@@ -39,10 +39,42 @@ List {
 void 
 event (Klass* kls, Event* ev, E* e) {
     if (ev.type != SDL_MOUSEMOTION)
-        writeln ("LIST.EVENT: ", ev.type, " ", (ev.type == SDL_USEREVENT) ? (cast(USER_EVENT)ev.user.code).to!string : "");
+        writefln ("LIST.event: %s, for: %s", *ev, *e);
 
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN: break;
+        case SDL_MOUSEWHEEL: {
+            auto ev_wheel = &ev.wheel;
+
+            // ev_wheel
+            //   .x  >0 right    <0 left
+            //   .y  >0 forward  <0 back
+            //   .direction == SDL_MOUSEWHEEL_NORMAL
+            //   .direction == SDL_MOUSEWHEEL_FLIPPED
+            //   .mouseX
+            //   .mouseY
+
+            if (event_for_me (kls,ev_wheel,e)) {
+                writeln ("event_for_me");
+                if (ev_wheel.y < 0) {
+//                    e.fields ~= new Field ("generator.offset", TString (TString.Type.string,"1"));
+                    if (e.generator.offset < e.generator.offset.max) 
+                        e.generator.offset += 1;
+                }
+                else
+                if (ev_wheel.y > 0) {
+                    if (e.generator.offset >= 1)
+                        e.generator.offset -= 1;
+                }
+
+                import pix : update;
+                import pix : send_e_redraw;
+                update (e);
+                send_e_redraw (e);
+            }
+
+            break;
+        }
         case SDL_KEYDOWN: {  // SDL_KeyboardEvent
             if (ev.key.keysym.sym == SDLK_UP) {
                 // go up

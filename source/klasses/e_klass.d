@@ -29,7 +29,7 @@ E_Klass {
             [],  
             Klass.Fn (
                 &.event,     // event
-                &.update2,    // update
+                &.update,    // update
                 &.set,       // set
                 &.draw,      // draw
             )
@@ -61,7 +61,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN
 void
-update2 (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, UpdateUserEvent* ev, E* e) {
     writefln ("KLASS(%s).update, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     version (profile) writefln ("%-60s", e.toString);
     e.reset ();

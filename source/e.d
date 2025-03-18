@@ -2,6 +2,7 @@ import std.stdio;
 import std.format;
 import std.string;
 import std.conv;
+import bindbc.sdl;
 import etree;
 import klass : Klass;
 import field : Field;
@@ -364,7 +365,7 @@ E {
         pos_percent   = pos_percent.init;
         size_w_type   = SizeType.parent; //
         size_h_type   = SizeType.parent; //
-        generator     = generator.init;
+        //generator     = generator.init;
         on.length     = 0;
 
         // remove e added from klass
@@ -461,8 +462,22 @@ event (E* e, Event* ev) {
         writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
-    foreach (Klass* kls; e.klasses)
+    foreach (Klass* kls; e.klasses) {
+        writefln ("kls: %s", kls.name);        
         kls.event (ev,e);
+    }
+
+    // to childs
+    switch (ev.type) {
+        case SDL_MOUSEWHEEL: {
+            foreach (_e; WalkChilds (e)) {
+                _e.event (ev);
+            }
+            break;
+        }
+        default:
+    }
+
 }
 
 void
@@ -540,8 +555,14 @@ _dup (EPtr _this) {
 
 
 bool
-event_for_me (Klass* kls, Event* ev, E* e) {
-    Pos _pos = Pos (ev.button.x, ev.button.y);
+event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
+    Pos _pos = Pos (ev.mouseX, ev.mouseY);
+    return pos_in_rect (_pos, e.pos, e.size);
+}
+
+bool
+event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
+    Pos _pos = Pos (ev.x, ev.y);
     return pos_in_rect (_pos, e.pos, e.size);
 }
 

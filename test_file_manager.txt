@@ -1,6 +1,6 @@
 e root
  e hbox left hot-list
- e hbox right dir-list
+ e hbox right list dir-list
 
 root
  bg         colors.black

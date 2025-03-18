@@ -7,8 +7,6 @@ import std.string : fromStringz;
 import std.string : toStringz;
 import std.algorithm.searching : canFind;
 import bindbc.sdl;
-import bindbc.sdl.image;
-import bindbc.sdl.ttf;
 import bindbc.sdlgfx;
 import etree;
 import e : E,content;
@@ -252,7 +250,9 @@ init_sdl () {
     version (Windows)
         SDLSupport ret = loadSDL ("sdl2.dll");
     else
-        SDLSupport ret = loadSDL();
+        SDLSupport ret = loadSDL ();
+
+    writeln ("ret:", ret);
     
     if (ret != sdlSupport) {
         if (ret == SDLSupport.noLibrary) 
