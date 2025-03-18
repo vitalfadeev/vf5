@@ -50,6 +50,11 @@ Pix {
             fn.draw (&this,ev,root);
     }
 
+    void
+    draw (Event* ev, E* root) {
+        .draw (&this,ev,root);
+    }
+
     int
     go (E* root) {
         if (fn.go !is null)
@@ -79,7 +84,7 @@ go (Pix* pix, E* root) {
     root.content.size = root.size - root.aura.size - root.aura.size;
 
     // update
-    update_tree (root);
+    update (root);
 
     // Event "start"
     send_user_event!StartUserEvent ();
@@ -147,11 +152,11 @@ event (Pix* pix, Event* ev, E* root) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED      : draw_tree (pix,ev,root); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED      : pix.draw (ev,root); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN        : break;        // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN       : break;       // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED        : break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED      : update_tree (root); draw_tree (pix,ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED      : update (root); pix.draw (ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED : break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED    : break;    // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED    : break;    // event.window.windowID
@@ -168,9 +173,9 @@ event (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.update : update_tree (&ev._user.update,root); break;
-                case USER_EVENT.draw   : draw_tree   (pix,ev,root); break;
-                case USER_EVENT.redraw : draw_tree   (pix,ev,root); break;
+                case USER_EVENT.update : root.update (&ev._user.update); break;
+                case USER_EVENT.draw   : pix.draw    (ev,root); break;
+                case USER_EVENT.redraw : pix.draw    (ev,root); break;
                 default                : root.event  (ev);
             }
             break;
@@ -185,17 +190,17 @@ event (Pix* pix, Event* ev, E* root) {
 }
 
 void
-update_tree (E* root) {
+update (E* root) {
     UpdateUserEvent ev;
     root.update (&ev); 
 }
 void
-update_tree (UpdateUserEvent* ev, E* root) {
+update (UpdateUserEvent* ev, E* root) {
     root.update (ev); 
 }
 
 void
-draw_tree (Pix* pix, Event* ev, E* root) {
+draw (Pix* pix, Event* ev, E* root) {
     DrawUserEvent draw_ev;
     draw_ev.renderer = ev.renderer;
     pix.draw (&draw_ev,root);
