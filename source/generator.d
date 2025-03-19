@@ -1,4 +1,5 @@
 import std.stdio : writeln;
+import std.conv : to;
 import etree;
 import e;
 import e_update : apply_klass;
@@ -6,6 +7,9 @@ import e_update : apply_template;
 import e_update : TemplateArg;
 import e_update : force_e_update;
 import klass;
+import generators.cmd   : CmdGenerator;
+import generators.fs    : FsGenerator;
+import generators.klass : KlassGenerator;
 
 // generator
 // template
@@ -15,45 +19,74 @@ import klass;
 //             name (A)
 //               text = A 
 
-alias GENERATE_FN = int function (Generator* g, E* e, GENERATE_DG dg);
 alias GENERATE_DG = int delegate (string[] line);
-alias GENERATOR_PTR = Generator*;
 
 
 struct
-Generator {
-    GENERATE_FN generate = &.generate;
-    E* e;
+Generator {            // is part of E
+    Type       type;      
+    union {
+        NoneGenerator  none;   // 
+        CmdGenerator   cmd;    // cmd `command` delimiter | skip 1
+        FsGenerator    fs;     // list dir -> files, list file -> content: csv, image, dbf
+                               // url
+        KlassGenerator klass;  // klass name fields NAME
+    }
+    string     _template;
+    string[]    fields;    // ICON,NUMBER,TITLE,TEXT
 
-    //int
-    //opApply (GENERATE_DG dg) {
-    //    if (this.generate !is null)
-    //        return this.generate (&this,e,dg);
-    //    else
-    //        return 0;
-    //}
-}
+    enum 
+    Type {
+        none,
+        cmd,
+        fs,
+        klass,
+    }
 
-int
-generate (Generator* g, E* e, GENERATE_DG dg) {
-    string[][] lines;
+    auto ref
+    offset () {
+        final
+        switch (type) {
+            case Type.none  : return none .offset;
+            case Type.cmd   : return cmd  .offset;
+            case Type.fs    : return fs   .offset;
+            case Type.klass : return klass.offset;
+        }
+    }
 
-    foreach (line; lines)
-        if (auto result = dg (line))
-            return result;
+    int
+    opApply (GENERATE_DG dg) {
+        final
+        switch (type) {
+            case Type.none  : return 0;
+            case Type.cmd   : return cmd  .opApply (dg);
+            case Type.fs    : return fs   .opApply (dg);
+            case Type.klass : return klass.opApply (dg);
+        }
+    }
 
-    return 0;    
+    string
+    toString () {
+        final
+        switch (type) {
+            case Type.none  : return "Generator ("~ type.to!string ~")";
+            case Type.cmd   : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
+            case Type.fs    : return "Generator ("~ type.to!string ~")";
+            case Type.klass : return "Generator ("~ type.to!string ~")";
+        }
+    }
 }
 
 void
-gen_tree (E* e, Generator* generator, Klass* template_klass) {
-    auto fields = e.generator.fields;
+gen_tree (E* e, Klass* template_klass) {
+    auto generator = &e.generator;
+    auto fields    = e.generator.fields;
 
     // template
     //   kls.args      = [TEXT]
     //   template_args = [abc,def]
     
-    GENERATE_DG dg = (string[] line) {
+    foreach (line; *generator) {
         TemplateArg[] template_args;
 
         foreach (i,field; fields) {
@@ -69,23 +102,23 @@ gen_tree (E* e, Generator* generator, Klass* template_klass) {
             force_e_update (_e);
 
             if (_e.pos.y + _e.size.h > e.pos.y + e.size.h)
-                return 1;
-            break;
+                return;
         }
-
-        return 0;
-    };
-
-    generator.generate (generator,e,dg);
+    }
 }
 
 
 void
 _go () {
-    Generator g;
-    Klass*    template_klass;
     E*        dst = new E ();
+    Klass*    template_klass;
 
-    gen_tree (dst,&g,template_klass);
+    gen_tree (dst,template_klass);
 }
 
+
+struct
+NoneGenerator {
+    size_t offset;
+    size_t limit;
+}

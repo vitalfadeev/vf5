@@ -17,6 +17,7 @@ import events;
 import tstring;
 import types;
 import txt_parser : parse_color_hex, parse_color, parse_color_tcb;
+import generator : Generator;
 
 
 struct 
@@ -104,7 +105,7 @@ update (Klass* kls, UpdateUserEvent* ev, E* e) {
     version (profile) time_step ("update_e_pos");
 
     // 8
-    if (e.generator.type != E.Generator.Type.none)
+    if (e.generator.type != Generator.Type.none)
         e.load_e_childs ();
     version (profile) time_step ("load_e_childs");
 }
@@ -667,14 +668,14 @@ set_bg (E* e, TString[] values) {
 void
 set_generator (E* e, TString[] values) {
     if (values.length >= 1) {
-        E.Generator.Type type;
+        Generator.Type type;
 
         switch (values[0].s) {
-            case "none"  : type = E.Generator.Type.none;  break;
-            case "cmd"   : type = E.Generator.Type.cmd;   break;
-            case "fs"    : type = E.Generator.Type.fs;    break;
-            case "klass" : type = E.Generator.Type.klass; break;
-            default     : type = E.Generator.Type.none;   break;
+            case "none"  : type = Generator.Type.none;  break;
+            case "cmd"   : type = Generator.Type.cmd;   break;
+            case "fs"    : type = Generator.Type.fs;    break;
+            case "klass" : type = Generator.Type.klass; break;
+            default      : type = Generator.Type.none;   break;
         }
         e.generator.type = type;
 
@@ -684,13 +685,13 @@ set_generator (E* e, TString[] values) {
 }
 
 void
-parse_generator_args (E* e, E.Generator.Type type, TString[] values) {
+parse_generator_args (E* e, Generator.Type type, TString[] values) {
     final
     switch (type) {
-        case E.Generator.Type.none  : break;
-        case E.Generator.Type.cmd   : parse_generator_args_cmd   (e,values); break;
-        case E.Generator.Type.fs    : parse_generator_args_fs    (e,values); break;
-        case E.Generator.Type.klass : parse_generator_args_klass (e,values); break;
+        case Generator.Type.none  : break;
+        case Generator.Type.cmd   : parse_generator_args_cmd   (e,values); break;
+        case Generator.Type.fs    : parse_generator_args_fs    (e,values); break;
+        case Generator.Type.klass : parse_generator_args_klass (e,values); break;
     }
 }
 
@@ -729,7 +730,7 @@ parse_generator_args_cmd (E* e, TString[] values) {
 
 void
 parse_generator_args_fs (E* e, TString[] values) {
-    e.generator.fs.path = values[1].s;
+    e.generator.fs.path = values[1];
 
     for (size_t i=2; i < values.length; i++) {
         switch (values[i].s) {
@@ -746,7 +747,7 @@ parse_generator_args_fs (E* e, TString[] values) {
 
 void
 parse_generator_args_klass (E* e, TString[] values) {
-    e.generator.klass.klass = values[1].s;
+    e.generator.klass.klass = values[1];
 
     for (size_t i=2; i < values.length; i++) {
         switch (values[i].s) {

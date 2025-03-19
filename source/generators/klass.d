@@ -6,45 +6,44 @@ import std.string : split;
 import std.process;
 import e;
 import e_update;
+import klass;
 import tstring;
 import generator;
 
 
 struct
 KlassGenerator {
-    Generator _super = {&.generate};
-    alias _super this;
-}
+    TString klass;  // klass name
+    Klass* _klass;
+    size_t  offset;
+    size_t  limit;
 
-int
-generate (Generator* g, E* e, GENERATE_DG dg) {
-    auto _klass = e.generator.klass.klass;
+    int
+    opApply (GENERATE_DG dg) {
+        auto kls = this._klass;
 
-    if (_klass.length) {
-        //string[][] lines = [["123"], ["456"]];
-        string[][] lines;
+        if (_klass !is null) {
+            //string[][] lines = [["123"], ["456"]];
+            string[][] lines;
 
-        auto kls = find_klass (e,_klass);
-        if (kls is null)
-            return 0;
+            foreach (field; kls.fields) {
+                lines ~= [field.name];
+            }
 
-        foreach (field; kls.fields) {
-            lines ~= [field.name];
+            writeln ("RET: ", lines);
+            
+            load_childs_add_lines:
+            foreach (line; lines) {
+                string[] template_line;
+                foreach (s; line)
+                    template_line ~= s;
+
+                //
+                if (auto result = dg (template_line))
+                    return result;
+            }
         }
 
-        writeln ("RET: ", lines);
-        
-        load_childs_add_lines:
-        foreach (line; lines) {
-            string[] template_line;
-            foreach (s; line)
-                template_line ~= s;
-
-            //
-            if (auto result = dg (template_line))
-                return result;
-        }
+        return 0;    
     }
-
-    return 0;    
 }

@@ -27,6 +27,7 @@ import pix : redraw_window;
 import pix : send_e_redraw;
 import pix : IMAGE_PTR;
 import pix : send_user_event;
+import generator : Generator;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -419,10 +420,10 @@ load_e_childs (E* e) {
     writeln ("load_e_childs");
     final
     switch (e.generator.type) {
-        case E.Generator.Type.none  : break;
-        case E.Generator.Type.cmd   : load_childs_cmd (e); break;
-        case E.Generator.Type.fs    : load_childs_fs (e); break;
-        case E.Generator.Type.klass : load_childs_klass (e); break;
+        case Generator.Type.none  : break;
+        case Generator.Type.cmd   : load_childs_cmd (e); break;
+        case Generator.Type.fs    : load_childs_fs (e); break;
+        case Generator.Type.klass : load_childs_klass (e); break;
     }
 }
 
@@ -430,48 +431,45 @@ void
 load_childs_cmd (E* e) {
     writeln ("load_hilds_cmd");
     import generator;
-    import generators.cmd;
 
-    if (e.generator.ptr is null) {
-        e.generator.ptr = cast (GENERATOR_PTR) new CmdGenerator ();
-        assert (e.generator._template.length > 0);
-        Klass* template_klass = find_klass (e,e.generator._template);  // template
-        assert (template_klass !is null);
+    assert (e.generator._template.length > 0);
+    Klass* template_klass = find_klass (e,e.generator._template);  // template
+    assert (template_klass !is null);
 
-        gen_tree (e,e.generator.ptr,template_klass);
-    }
+    e.generator.cmd._command = extract_class_field_value (e,e.generator.cmd.command.s);
+
+    gen_tree (e,template_klass);
 }
 
 void
 load_childs_fs (E* e) {
     writeln ("load_hilds_fs");
     import generator;
-    import generators.fs;
 
-//    if (e.generator.ptr is null) {
-        e.generator.ptr = cast (GENERATOR_PTR) new FsGenerator ();
-        assert (e.generator._template.length > 0);
-        Klass* template_klass = find_klass (e,e.generator._template);  // template
-        assert (template_klass !is null);
+    assert (e.generator._template.length > 0);
+    Klass* template_klass = find_klass (e,e.generator._template);  // template
+    assert (template_klass !is null);
 
-        gen_tree (e,e.generator.ptr,template_klass);
-//    }
+    gen_tree (e,template_klass);
 }
 
 void
 load_childs_klass (E* e) {
     writeln ("load_hilds_klass");
     import generator;
-    import generators.klass;
 
-    if (e.generator.ptr is null) {
-        e.generator.ptr = cast (GENERATOR_PTR) new KlassGenerator ();
-        assert (e.generator._template.length > 0);
-        Klass* template_klass = find_klass (e,e.generator._template);  // template
-        assert (template_klass !is null);
+    assert (e.generator._template.length > 0);
+    Klass* template_klass = find_klass (e,e.generator._template);  // template
+    assert (template_klass !is null);
 
-        gen_tree (e,e.generator.ptr,template_klass);
-    }
+    assert (e.generator.klass.klass.type == TString.Type.string);
+    auto klass = e.generator.klass.klass.s;
+    assert (klass.length > 0);
+    e.generator.klass._klass = find_klass (e,klass);
+    if (e.generator.klass._klass is null)
+        return;
+
+    gen_tree (e,template_klass);
 }
 
 static

@@ -12,48 +12,48 @@ import generator;
 
 struct
 CmdGenerator {
-    Generator _super = {&.generate};
-    alias _super this;
-
     TString command;   // `command`
+    string _command;   // `command`
     TString delimiter; // |
+    bool    require_delimiter; // require_delimiter
     size_t  skip;      // 1 (header line)
-}
+    size_t  offset;
+    size_t  limit;
 
-int
-generate (Generator* g, E* e, GENERATE_DG dg) {
-    auto cmd = e.generator.cmd.command.s;
-    auto dlm = e.generator.cmd.delimiter.s;
-    auto rdl = e.generator.cmd.require_delimiter;
-    auto skp = e.generator.cmd.skip;
+    int
+    opApply (GENERATE_DG dg) {
+        auto cmd = this._command;
+        auto dlm = this.delimiter.s;
+        auto rdl = this.require_delimiter;
+        auto skp = this.skip;
 
-    if (cmd.length) {
-        auto converted = extract_class_field_value (e,cmd);
-        auto ret = executeShell (converted);
-        writeln ("RET: ", ret);
-        
-        load_childs_add_lines:
-        foreach (line; ret.output.splitLines) {
-            if (skp > 0) {
-                skp--;
-                continue;
+        if (cmd.length) {
+            auto ret = executeShell (cmd);
+            writeln ("RET: ", ret);
+            
+            load_childs_add_lines:
+            foreach (line; ret.output.splitLines) {
+                if (skp > 0) {
+                    skp--;
+                    continue;
+                }
+
+                auto splits = line.split (dlm);
+
+                // require_delimiter
+                if (rdl && splits.length <= 1)
+                    continue;
+
+                string[] template_line;
+                foreach (s; splits)
+                    template_line ~= s;
+
+                //
+                if (auto result = dg (template_line))
+                    return result;
             }
-
-            auto splits = line.split (dlm);
-
-            // require_delimiter
-            if (rdl && splits.length <= 1)
-                continue;
-
-            string[] template_line;
-            foreach (s; splits)
-                template_line ~= s;
-
-            //
-            if (auto result = dg (template_line))
-                return result;
         }
-    }
 
-    return 0;    
+        return 0;    
+    }
 }

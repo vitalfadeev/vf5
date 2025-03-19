@@ -29,9 +29,6 @@ List {
             )
         );
     alias _super this;
-
-    Generator!string _gen;
-    Template!string  _tpl;
 }
 
 
@@ -112,78 +109,3 @@ draw (Klass* kls, DrawUserEvent* ev, E* e) {
 }
 
 
-// list
-//   childs
-//   generator childs  <-- data + template
-//     select
-//       from generator
-//       offset A
-//       limit  B
-//   generator.s[a..b]
-struct
-Generator (T) {
-    T[] _impl;    // all
-
-    T[] 
-    opSlice (size_t dim: 0) (size_t a, size_t b) {
-        return _impl[a..b];
-    }
-
-    size_t
-    length () {
-        return _impl.length;
-    }
-}
-
-struct
-Template (T) {
-    auto
-    opCall () {
-        return "";
-    }
-}
-
-// list
-//   childs
-//     e vbox text-1
-//     e vbox text-2
-//     e vbox text-3
-
-// list
-//   list.generator  generator-1          // TString[] values
-//   list.template   list-template        // ETree*[]  e_tree
-//   list.map        image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)
-//   list.a          0
-//   list.b          10
-//   e items
-//   e progress
-//
-// generator-1
-//   type delimiter |
-//
-// generator-2
-//   type command delimiter |
-//   cmd  commands.player.playlist-display
-//
-// list-template
-//   e icon
-//   e number
-//   e name
-//   childs.map  image.src text text
-//
-// generator-3
-//   type csv 
-//   type pdf
-//   type json
-//   type file
-//   type desktop-icons
-//   type delimiter
-//   type fixed
-//
-// e-list
-//   childs.src         fs
-//   childs.src         cmd `command` delimiter |
-//   childs.src         csv /path/to/file.csv
-//   childs.src.tpl     list-template  ...or childs under t
-//   childs.src.tpl.src 1         2    3
-//   childs.src.tpl.dst image.src text text  // each e,m,v in (tree,map,values) e.set(m,v)

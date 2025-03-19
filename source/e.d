@@ -11,7 +11,7 @@ import tstring;
 import events;
 import e_update : TemplateArg;
 import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
-import generator : GENERATOR_PTR;
+import generator : Generator;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -247,61 +247,6 @@ E {
     //   generator       cmd `command` delimiter |
     //   generator       csv /path/to/file.csv
     //   generator.klass list-template
-
-    struct
-    Generator {
-        Type       type;      
-        union {
-            None   none;
-            Cmd    cmd;    // cmd `command` delimiter | skip 1
-            Fs     fs;     // list dir -> files, list file -> content: csv, image, dbf
-                           // url
-            Kls    klass;  // klass fields
-        }
-        string[]    fields;    // ICON,NUMBER,TITLE,TEXT
-        string     _template;
-        size_t      offset;
-        size_t      limit;
-        GENERATOR_PTR ptr;
-
-        enum 
-        Type {
-            none,
-            cmd,
-            fs,
-            klass,
-        }
-        struct 
-        None {
-            //
-        }
-        struct 
-        Cmd {
-            TString command;   // `command`
-            TString delimiter; // |
-            bool    require_delimiter; // require_delimiter
-            size_t  skip;      // 1 (header line)
-        }
-        struct 
-        Fs {
-            string path;
-        }
-        struct 
-        Kls {
-            string klass; // klass fields
-        }
-
-        string
-        toString () {
-            final
-            switch (type) {
-                case Type.none  : return "Generator ("~ type.to!string ~")";
-                case Type.cmd   : return "Generator ("~ type.to!string ~ "," ~ cmd.to!string ~")";
-                case Type.fs    : return "Generator ("~ type.to!string ~")";
-                case Type.klass : return "Generator ("~ type.to!string ~")";
-            }
-        }
-    }
 
     struct
     On {
