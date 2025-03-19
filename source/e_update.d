@@ -417,7 +417,6 @@ load_e_colors (E* e) {
 
 void
 load_e_childs (E* e) {
-    writeln ("load_e_childs");
     final
     switch (e.generator.type) {
         case Generator.Type.none  : break;
@@ -443,7 +442,6 @@ load_childs_cmd (E* e) {
 
 void
 load_childs_fs (E* e) {
-    writeln ("load_hilds_fs");
     import generator;
 
     assert (e.generator._template.length > 0);
@@ -455,7 +453,6 @@ load_childs_fs (E* e) {
 
 void
 load_childs_klass (E* e) {
-    writeln ("load_hilds_klass");
     import generator;
 
     assert (e.generator._template.length > 0);

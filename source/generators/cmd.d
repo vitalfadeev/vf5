@@ -19,6 +19,7 @@ CmdGenerator {
     size_t  skip;      // 1 (header line)
     size_t  offset;
     size_t  limit;
+    size_t  total;
 
     int
     opApply (GENERATE_DG dg) {
@@ -29,7 +30,6 @@ CmdGenerator {
 
         if (cmd.length) {
             auto ret = executeShell (cmd);
-            writeln ("RET: ", ret);
             
             load_childs_add_lines:
             foreach (line; ret.output.splitLines) {

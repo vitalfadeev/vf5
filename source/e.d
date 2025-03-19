@@ -403,12 +403,12 @@ void
 event (E* e, Event* ev) {
     import bindbc.sdl;
 
+    version (debug_event)
     if (ev.type != SDL_MOUSEMOTION)
         writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
     foreach (Klass* kls; e.klasses) {
-        writefln ("kls: %s", kls.name);        
         kls.event (ev,e);
     }
 

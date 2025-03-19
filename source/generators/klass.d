@@ -17,6 +17,7 @@ KlassGenerator {
     Klass* _klass;
     size_t  offset;
     size_t  limit;
+    size_t  total;
 
     int
     opApply (GENERATE_DG dg) {
@@ -30,8 +31,6 @@ KlassGenerator {
                 lines ~= [field.name];
             }
 
-            writeln ("RET: ", lines);
-            
             load_childs_add_lines:
             foreach (line; lines) {
                 string[] template_line;

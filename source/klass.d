@@ -54,7 +54,6 @@ Klass {
 
     void 
     update (UpdateUserEvent* ev, E* e) { 
-        writefln ("Klass.update: %s, for: %s, fn.update: %s", this.name, *e, fn.update);
         if (fn.update !is null) fn.update (&this,ev,e); 
     }
 

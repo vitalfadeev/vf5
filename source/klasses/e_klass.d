@@ -41,6 +41,7 @@ E_Klass {
 // KLASS_EVENT_FN
 void
 event (Klass* kls, Event* ev, E* e) {
+    version (debug_event)
     if (ev.type != SDL_MOUSEMOTION)
         writefln ("KLASS(%s).event: %s", kls.name, *ev);
 
@@ -63,6 +64,7 @@ event (Klass* kls, Event* ev, E* e) {
 // KLASS_UPDATE_FN
 void
 update (Klass* kls, UpdateUserEvent* ev, E* e) {
+    version (debug_event)
     writefln ("KLASS(%s).update, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     version (profile) writefln ("%-60s", e.toString);
     e.reset ();
@@ -164,6 +166,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 // KLASS_DRAW_FN
 void
 draw (Klass* kls, DrawUserEvent* ev, E* e) {
+    version (debug_event)
     writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     e_klass_draw.draw (ev.renderer,e);
 }

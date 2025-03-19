@@ -15,6 +15,7 @@ FsGenerator {
     TString path;   // .
     size_t  offset;
     size_t  limit;
+    size_t  total;
 
     int
     opApply (GENERATE_DG dg) {
@@ -31,13 +32,12 @@ FsGenerator {
             foreach (string name; dirEntries (path,SpanMode.shallow)) {
                 lines ~= [name];
             }
+            this.total = lines.length;
 
             auto _offset = offset < lines.length ? offset : 0;
             auto _limit  = _offset + limit < lines.length ? _offset + limit : lines.length;
             lines = lines[_offset..$];
 
-            writeln ("RET: ", lines);
-            
             load_childs_add_lines:
             foreach (line; lines) {
                 string[] template_line;

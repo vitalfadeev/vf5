@@ -35,6 +35,7 @@ List {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, E* e) {
+    version (debug_event)
     if (ev.type != SDL_MOUSEMOTION)
         writefln ("LIST.event: %s, for: %s", *ev, *e);
 
@@ -52,7 +53,6 @@ event (Klass* kls, Event* ev, E* e) {
             //   .mouseY
 
             if (event_for_me (kls,ev_wheel,e)) {
-                writeln ("event_for_me");
                 if (ev_wheel.y < 0) {
 //                    e.fields ~= new Field ("generator.offset", TString (TString.Type.string,"1"));
                     if (e.generator.offset < e.generator.offset.max) 
