@@ -32,6 +32,19 @@ List {
 }
 
 
+void
+update_scrollbar (E* list) {
+    // find scrollbar
+    //   set offset,limit,total
+    //   update
+    foreach (_e; WalkChilds (list)) {
+        if (_e.has_klass ("scrollbar")) {
+            // scrollbar found!
+        }
+    }
+}
+
+
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, E* e) {
@@ -55,19 +68,29 @@ event (Klass* kls, Event* ev, E* e) {
             if (event_for_me (kls,ev_wheel,e)) {
                 if (ev_wheel.y < 0) {
 //                    e.fields ~= new Field ("generator.offset", TString (TString.Type.string,"1"));
-                    if (e.generator.offset < e.generator.offset.max) 
+                    if (e.generator.offset < e.generator.offset.max) {
                         e.generator.offset += 1;
+
+                        import pix : update;
+                        import pix : send_e_redraw;
+                        update_scrollbar (e);
+                        update (e);
+                        send_e_redraw (e);
+                    }
                 }
                 else
                 if (ev_wheel.y > 0) {
-                    if (e.generator.offset >= 1)
+                    if (e.generator.offset >= 1) {
                         e.generator.offset -= 1;
-                }
 
-                import pix : update;
-                import pix : send_e_redraw;
-                update (e);
-                send_e_redraw (e);
+                        import pix : update;
+                        import pix : send_e_redraw;
+                        update_scrollbar (e);
+                        update (e);
+                        send_e_redraw (e);
+                    }
+                }
+                break;
             }
 
             break;

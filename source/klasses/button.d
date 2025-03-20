@@ -45,7 +45,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED)
             if (event_for_me (kls,&ev.button,e)) {
-                e.add_class ("button.pressed");
+                e.add_klass ("button.pressed");
                 e.force_e_update ();
                 e.send_e_redraw ();
             }
@@ -54,8 +54,8 @@ event (Klass* kls, Event* ev, E* e) {
         case SDL_MOUSEBUTTONUP:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_RELEASED)
-            if (e.has_class ("button.pressed")) {
-                e.remove_class ("button.pressed");
+            if (e.has_klass ("button.pressed")) {
+                e.remove_klass ("button.pressed");
                 e.force_e_update ();
                 e.send_e_redraw ();
             }

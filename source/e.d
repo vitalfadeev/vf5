@@ -379,6 +379,101 @@ add_klass (E* e, Klass* kls) {
     e.klasses ~= kls;
 }
 
+bool
+has_klass (E* e, Klass* kls) {
+    import std.algorithm.searching : canFind;
+    return e.klasses.canFind (kls);
+}
+
+bool
+has_klass (E* e, string s) {
+    auto kls = find_klass (e,s);
+    assert (kls !is null);
+    return has_klass (e,kls);
+}
+
+Klass*
+find_klass_or_create (E* e, string s) {
+    auto kls = find_klass (e,s);
+    if (kls is null)
+        kls = create_klass (e,s);
+    return kls;
+}
+
+Klass*
+find_klass (E* e, string s) {
+    // in e, in parents
+    for (auto _e=e; _e !is null; _e = _e.parent) {
+        foreach (kls; _e.defined_klasses)
+            if (kls.name == s)
+                return kls;
+    }
+
+    // in reserved
+    foreach (kls; reserved_klasses)
+        if (kls.name == s)
+            return kls;
+
+    return null;
+}
+
+Klass*
+create_klass (E* e, string s) {
+    Klass* kls = new Klass (s);
+    add_defined_klass (e,kls);
+    return kls;
+}
+
+
+void
+add_defined_klass (E* e, Klass* kls) {
+    // find root
+    for (auto _e=e; _e !is null; _e = _e.parent) {
+        if (_e.parent is null) {
+            auto root = _e;
+            root.defined_klasses ~= kls;
+            break;
+        }
+    }
+}
+
+
+void
+add_klass (E* e, string s) {
+    import std.algorithm.searching : canFind;
+    Klass* kls = e.find_klass_or_create (s);
+    if (!e.klasses.canFind (kls))
+        e.klasses ~= kls;
+}
+
+
+void
+trigger_class (E* e, string s) {
+    if (e.has_klass ("check.pressed"))
+        e.remove_klass ("check.pressed");
+    else
+        e.add_klass ("check.pressed");
+}
+
+
+void
+remove_klass (E* e, string s) {
+    auto kls = e.find_klass (s);
+    if (kls !is null)
+        e.remove_klass (kls);
+}
+
+void
+remove_klass (E* e, Klass* kls) {
+    import std.algorithm.searching : countUntil;
+    import std.algorithm : remove;
+
+    auto i = e.klasses.countUntil (kls);
+    if (i != -1)
+        e.klasses = e.klasses.remove (i);
+}
+
+
 void
 dump_klasses (E* e) {
     foreach (kls; e.defined_klasses) {
