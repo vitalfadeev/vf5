@@ -26,6 +26,7 @@ alias TEXT_PTR  = SDL_Texture*;
 struct 
 Pix {
     Fn fn;
+    E* focused;
 
     struct
     Fn {
@@ -151,37 +152,53 @@ event (Pix* pix, Event* ev, E* root) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED      : pix.draw (ev,root); break; // event.window.windowID
-                case SDL_WINDOWEVENT_SHOWN        : break;        // event.window.windowID
-                case SDL_WINDOWEVENT_HIDDEN       : break;       // event.window.windowID
-                case SDL_WINDOWEVENT_MOVED        : break;        // event.window.windowID event.window.data1 event.window.data2 (x y)
+                case SDL_WINDOWEVENT_SHOWN        : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_HIDDEN       : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_MOVED        : break;  // event.window.windowID event.window.data1 event.window.data2 (x y)
                 case SDL_WINDOWEVENT_RESIZED      : update (root); pix.draw (ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
-                case SDL_WINDOWEVENT_SIZE_CHANGED : break; // event.window.windowID event.window.data1 event.window.data2 (width height)
-                case SDL_WINDOWEVENT_MINIMIZED    : break;    // event.window.windowID
-                case SDL_WINDOWEVENT_MAXIMIZED    : break;    // event.window.windowID
-                case SDL_WINDOWEVENT_RESTORED     : break;     // event.window.windowID
-                case SDL_WINDOWEVENT_ENTER        : break;        // event.window.windowID
-                case SDL_WINDOWEVENT_LEAVE        : break;        // event.window.windowID
-                case SDL_WINDOWEVENT_FOCUS_GAINED : break; // event.window.windowID
-                case SDL_WINDOWEVENT_FOCUS_LOST   : break;   // event.window.windowID
-                case SDL_WINDOWEVENT_CLOSE        : break;        // event.window.windowID
-                //case SDL_WINDOWEVENT_TAKE_FOCUS : break;   // event.window.windowID
-                //case SDL_WINDOWEVENT_HIT_TEST   : break;     // event.window.windowID
+                case SDL_WINDOWEVENT_SIZE_CHANGED : break;  // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_MINIMIZED    : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_MAXIMIZED    : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_RESTORED     : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_ENTER        : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_LEAVE        : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_FOCUS_GAINED : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_FOCUS_LOST   : break;  // event.window.windowID
+                case SDL_WINDOWEVENT_CLOSE        : break;  // event.window.windowID
+                //case SDL_WINDOWEVENT_TAKE_FOCUS : break;  // event.window.windowID
+                //case SDL_WINDOWEVENT_HIT_TEST   : break;  // event.window.windowID
                 default                           : SDL_Log ("Window %d got unknown event %d",ev.window.windowID, ev.window.event);
             }
             break;
+        case SDL_MOUSEBUTTONDOWN : 
+        case SDL_MOUSEBUTTONUP :  {
+            focus (pix,ev,root);
+            send_to_focused (pix,ev); 
+            break;
+        }
+        case SDL_MOUSEWHEEL: {
+            focus (pix,ev,root);
+            send_to_focused (pix,ev); 
+            break;
+        }
+        case SDL_KEYDOWN         : 
+        case SDL_KEYUP           : {
+            send_to_focused (pix,ev); 
+            break;
+        }
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.update : root.update (&ev._user.update); break;
                 case USER_EVENT.draw   : pix.draw    (ev,root); break;
                 case USER_EVENT.redraw : pix.draw    (ev,root); break;
-                default                : root.event  (ev);
+                default                : //root.event  (ev);
             }
             break;
         case SDL_QUIT: 
-            root.event (ev); 
+            //root.event (ev); 
             return 1;
         default: 
-            root.event (ev);
+            //root.event (ev);
     }
 
     return 0;
@@ -242,6 +259,61 @@ draw (Pix* pix, DrawUserEvent* ev, E* root) {
 }
 
 
+void
+focus (Pix* pix, Event* ev, E* root) {
+    switch (ev.type) {
+        case SDL_WINDOWEVENT: 
+            break;
+        case SDL_USEREVENT:
+            switch (ev.user.code) {
+                case USER_EVENT.click : break;
+                default               : 
+            }
+            break;
+        case SDL_MOUSEBUTTONDOWN : 
+        case SDL_MOUSEBUTTONUP   : {
+            auto deepest = find_deepest (root, ev.button.x, ev.button.y);
+            pix.set_focus (deepest);
+            break;
+        }
+        case SDL_MOUSEWHEEL      : {
+            auto deepest = find_deepest (root, ev.wheel.mouseX, ev.wheel.mouseY);
+            pix.set_focus (deepest);
+            break;
+        }
+        case SDL_KEYDOWN         : break;
+        case SDL_KEYUP           : break;
+        default: 
+    }
+}
+
+void
+set_focus (Pix* pix, E* e) {
+    pix.focused = e;
+}
+
+void
+send_to_focused (Pix* pix, Event* ev) {
+    if (pix.focused !is null)
+        pix.focused.event (ev);
+}
+
+E*
+find_deepest (E* root, X x, Y y) {
+    E* deepest;
+    auto pos = Pos (x,y);
+
+    bool 
+    valid_e (E* e) {
+        return pos_in_rect (pos, e.pos, e.size);
+    }
+
+    // klass event
+    foreach (_e; WalkInDeep (root,&valid_e))
+        deepest = _e;
+
+    return deepest;
+}
 
 //
 void 
@@ -396,7 +468,7 @@ send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* 
     }
 
     // klass event
-    foreach (_e; etree.FindDeepest (e,&valid_e)) {
+    foreach (_e; etree.WalkInDeep (e,&valid_e)) {
         foreach (kls; _e.klasses)
             kls.event (ev,_e);
     }
@@ -412,7 +484,7 @@ send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
     }
 
     // klass event
-    foreach (_e; FindDeepest (e,&valid_e)) {
+    foreach (_e; WalkInDeep (e,&valid_e)) {
         //writeln (*_t);
         foreach (kls; _e.klasses)
             kls.event (ev,_e);

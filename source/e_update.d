@@ -27,7 +27,7 @@ import pix : redraw_window;
 import pix : send_e_redraw;
 import pix : IMAGE_PTR;
 import pix : send_user_event;
-import generator : Generator;
+import e_generator : Generator;
 
 const DEFAULT_WINDOW_W = 1024;
 const DEFAULT_WINDOW_H = 480;
@@ -429,7 +429,7 @@ load_e_childs (E* e) {
 void
 load_childs_cmd (E* e) {
     writeln ("load_hilds_cmd");
-    import generator;
+    import e_generator;
 
     assert (e.generator._template.length > 0);
     Klass* template_klass = find_klass (e,e.generator._template);  // template
@@ -442,7 +442,7 @@ load_childs_cmd (E* e) {
 
 void
 load_childs_fs (E* e) {
-    import generator;
+    import e_generator;
 
     assert (e.generator._template.length > 0);
     Klass* template_klass = find_klass (e,e.generator._template);  // template
@@ -453,7 +453,7 @@ load_childs_fs (E* e) {
 
 void
 load_childs_klass (E* e) {
-    import generator;
+    import e_generator;
 
     assert (e.generator._template.length > 0);
     Klass* template_klass = find_klass (e,e.generator._template);  // template

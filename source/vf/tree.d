@@ -273,12 +273,12 @@ _WalkChildsReverse (TTree,Skip) {
 
 //
 auto 
-FindDeepest (TTree,Skip,Cond) (TTree* t, Skip skip, Cond cond) {
-    return _FindDeepest!(TTree,Skip,Cond) (cast (Tree*) t,skip,cond);
+WalkInDeep (TTree,Skip,Cond) (TTree* t, Skip skip, Cond cond) {
+    return _WalkInDeep!(TTree,Skip,Cond) (cast (Tree*) t,skip,cond);
 }
 
 struct
-_FindDeepest (TTree,Skip,Cond) {
+_WalkInDeep (TTree,Skip,Cond) {
     Tree* t;
     Skip  skip;
     Cond  cond;

@@ -12,12 +12,12 @@ import e_update :
     update_e_size, update_e_pos, load_e_childs,
     doc_get_klass_field_value;
 import e_klass_draw;
+import e_generator : Generator;
 import klass : Klass;
 import events;
 import tstring;
 import types;
 import txt_parser : parse_color_hex, parse_color, parse_color_tcb;
-import generator : Generator;
 
 
 struct 

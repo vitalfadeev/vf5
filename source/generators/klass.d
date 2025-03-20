@@ -6,9 +6,9 @@ import std.string : split;
 import std.process;
 import e;
 import e_update;
+import e_generator;
 import klass;
 import tstring;
-import generator;
 
 
 struct

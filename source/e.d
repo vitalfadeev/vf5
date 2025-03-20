@@ -6,12 +6,12 @@ import bindbc.sdl;
 import etree;
 import klass : Klass;
 import field : Field;
+import e_update : TemplateArg;
+import e_generator : Generator;
 import types;
 import tstring;
 import events;
-import e_update : TemplateArg;
 import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
-import generator : Generator;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -392,11 +392,11 @@ dump_klasses (E* e) {
     }
 }
 
-void
-send_event_in_childs (E* e, Event* ev) {
-    foreach (_e; WalkChilds (e))
-        _e.event (ev);
-}
+//void
+//send_event_in_childs (E* e, Event* ev) {
+//    foreach (_e; WalkChilds (e))
+//        _e.event (ev);
+//}
 
 
 void
@@ -408,20 +408,12 @@ event (E* e, Event* ev) {
         writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
-    foreach (Klass* kls; e.klasses) {
+    foreach (Klass* kls; e.klasses)
         kls.event (ev,e);
-    }
 
-    // to childs
-    switch (ev.type) {
-        case SDL_MOUSEWHEEL: {
-            foreach (_e; WalkChilds (e)) {
-                _e.event (ev);
-            }
-            break;
-        }
-        default:
-    }
+    // to up
+    if (e.parent !is null)
+        e.parent.event (ev);
 
 }
 

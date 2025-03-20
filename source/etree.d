@@ -64,8 +64,8 @@ skip_hidden (Tree) (Tree* t) {
 }
 
 auto 
-FindDeepest (Tree,Cond) (Tree* t, Cond cond) {
-    return vf.tree.FindDeepest (t,&skip_hidden!Tree,cond);
+WalkInDeep (Tree,Cond) (Tree* t, Cond cond) {
+    return vf.tree.WalkInDeep (t,&skip_hidden!Tree,cond);
 }
 
 auto 

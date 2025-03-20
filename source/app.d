@@ -4,9 +4,10 @@ import e;
 import e_update;
 import e_root;
 import klass;
+import types;
 import pix;
-import txt_reader;
 import events;
+import txt_reader;
 
 void 
 main () {
@@ -18,6 +19,8 @@ main () {
 	//E* root = open ("test_1.txt");
 	//E* root = open ("test_generator_klass.txt");
 	E* root = open ("test_file_manager.txt");
+	writefln ("root: %s, %s", *root, root);
+	writefln ("root.parent: %s", root.parent);
 
 	// Check
 	//dump_tree (root);
@@ -37,7 +40,6 @@ open (string file_name) {
 
 E*
 new_root () {
-	import types;
     auto root = new E ();
     create_reserved_classes (root);
     root.size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
@@ -46,12 +48,13 @@ new_root () {
 
 void
 create_reserved_classes (E* root) {
-	import klasses.e        : E_Klass;
-	import klasses.progress : Progress;
-	import klasses.button   : Button;
-	import klasses.check    : Check;
-	import klasses.edit     : Edit;
-	import klasses.list     : List;
+	import klasses.e         : E_Klass;
+	import klasses.progress  : Progress;
+	import klasses.button    : Button;
+	import klasses.check     : Check;
+	import klasses.edit      : Edit;
+	import klasses.list      : List;
+	import klasses.scrollbar : Scrollbar;
 
 	reserved_klasses ~= new_reserved_klass!E_Klass ();
 	reserved_klasses ~= new_reserved_klass!Progress ();
@@ -59,6 +62,7 @@ create_reserved_classes (E* root) {
 	reserved_klasses ~= new_reserved_klass!Check ();
 	reserved_klasses ~= new_reserved_klass!Edit ();
 	reserved_klasses ~= new_reserved_klass!List ();
+	reserved_klasses ~= new_reserved_klass!Scrollbar ();
 }
 
 Klass*
@@ -113,4 +117,34 @@ new_reserved_klass (KLASS) () {
 //       offset A
 //       limit  B
 //   generator.s[a..b]
+
+// path
+//   tree + klasses
+//
+// list
+//   path
+//
+// generator
+//   path
+//     tree
+
+// TxtGenerator
+//   tree + klasses
+
+
+// App
+//   E
+//     E
+//
+// focus
+//   event -> from focused -> to up parent 
+//
+// MouseEvent  -> focus (x,y) -> deepest -> event() -> parent.event()
+// ClickEvent  -> focus (x,y) -> deepest -> event() -> parent.event()
+// KeyEvent    -> focused                -> event() -> parent.event()
+// ScrollEvent ->                        -> event() -> parent.event()
+// always up
+//
+// from up : focus -> deepest -> up
+// from dn :                  -> up
 

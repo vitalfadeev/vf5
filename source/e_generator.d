@@ -1,3 +1,5 @@
+module e_generator;
+
 import std.stdio : writeln;
 import std.conv : to;
 import etree;
