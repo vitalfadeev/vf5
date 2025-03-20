@@ -1,10 +1,6 @@
 e root
  e hbox left hot-list
  e hbox right dir-list
-   e scrollbar
-     e up
-     e cursor
-     e dn
 
 root
  bg         colors.black

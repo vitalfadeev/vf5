@@ -1,6 +1,10 @@
 e root
  e hbox left hot-list
  e hbox right list dir-list
+   e scrollbar
+     e scrollbar-up
+     e scrollbar-cursor
+     e scrollbar-dn
 
 root
  bg         colors.black
@@ -35,12 +39,39 @@ dir-list-template
   e dir-list-template-name
 
 dir-list-template-name
+  pos.type     vbox b
   size         parent 32
   content.size e
   aura         1 1
   borders      1 solid #444
-  pos.type     vbox b
   text         NAME
+
+scrollbar
+  pos.type  3
+  pos.group 3
+  pos.dir   r
+
+  size 32 parent
+  aura 2
+  aura.color #ccc
+
+scrollbar-up
+  pos.type vbox
+  size 24 24 
+  aura 2
+  aura.color #666
+
+scrollbar-dn
+  pos.type vbox
+  size 24 24 
+  aura 2
+  aura.color #777
+
+scrollbar-cursor
+  pos.type vbox
+  size 24 24 
+  aura 2
+  aura.color #888
 
 colors
   fg       #eee
