@@ -182,12 +182,14 @@ set_pos (E* e, TString[] values) {
         else {
             set_pos_x (e, values[0..1]);
             set_pos_y (e, values[1..$]);
+            //e.pos_type = E.PosType.fixed;
         }
     }
     else
     if (values.length == 1) {
         set_pos_x (e, values[0..1]);
         set_pos_y (e, values[0..1]);
+        //e.pos_type = E.PosType.fixed;
     }
 }
 

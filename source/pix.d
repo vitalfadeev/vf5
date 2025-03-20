@@ -324,8 +324,6 @@ init_sdl () {
     else
         SDLSupport ret = loadSDL ();
 
-    writeln ("ret:", ret);
-    
     if (ret != sdlSupport) {
         if (ret == SDLSupport.noLibrary) 
             throw new Exception ("The SDL shared library failed to load");
@@ -340,31 +338,31 @@ init_sdl () {
 
     SDL_version sdl_ver;
     SDL_GetVersion (&sdl_ver);
-    writeln ("SDL bindbc: ", ret, " lib: ", sdl_ver);
 
     // IMG
-    auto sdl_image_ret = loadSDLImage ();
-    writeln ("SDL_Image: ", sdl_image_ret);
-    if (sdl_image_ret < sdlImageSupport) // 2.6.3
-        throw new Exception ("The SDL_Image shared library failed to load");
-    
-    auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
-    if (IMG_Init (flags) != flags)
-        throw new IMGException ("The SDL_Image init failed");
+    if (bindSDLImage) {
+        auto sdl_image_ret = loadSDLImage ();
+        if (sdl_image_ret < sdlImageSupport) // 2.6.3
+            throw new Exception ("The SDL_Image shared library failed to load");
+        
+        auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
+        if (IMG_Init (flags) != flags)
+            throw new IMGException ("The SDL_Image init failed");
+    }
 
     // TTF
-    auto sdl_ttf_ret = loadSDLTTF (); // SDLTTFSupport
-    writeln ("SDL_TTF: ", sdl_ttf_ret);
-    if (sdl_ttf_ret < sdlTTFSupport) // 2.0.20
-        throw new TTFException ("The SDL_TTF shared library failed to load:");
-    
-    if (TTF_Init () == -1)
-        throw new TTFException ("Failed to initialise SDL_TTF");
+    if (bindSDLTTF) {
+        auto sdl_ttf_ret = loadSDLTTF (); // SDLTTFSupport
+        if (sdl_ttf_ret < sdlTTFSupport) // 2.0.20
+            throw new TTFException ("The SDL_TTF shared library failed to load:");
+        
+        if (TTF_Init () == -1)
+            throw new TTFException ("Failed to initialise SDL_TTF");
+    }
 
     // GFX
     // libSDL2_gfx.so
     auto sdl_gfx_ret = loadSDLgfx (); // SDLgfxSupport
-    writeln ("SDL_GFX: ", sdl_gfx_ret);
     if (sdl_gfx_ret != SDLgfxSupport.SDLgfx) {
         if (sdl_gfx_ret == SDLgfxSupport.noLibrary) 
             throw new Exception ("The SDL GFX shared library failed to load");

@@ -2,7 +2,6 @@ import std.stdio;
 import etree;
 import e;
 import e_update;
-import e_root;
 import klass;
 import types;
 import pix;

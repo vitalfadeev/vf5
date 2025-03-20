@@ -38,6 +38,9 @@ Klass {
     string[] args;
     Fn       fn;
 
+    //Field[] _fields; 
+    //   = Field ("pos.y", [TString (TString.Type.string,"120")]);
+
     struct
     Fn {
         KLASS_EVENT_FN  event  = &.event;
@@ -83,6 +86,17 @@ find_field (Klass* kls, string s) {
             return field;
 
     return null;
+}
+
+Field*
+add_field (Klass* kls, string name, string value) {
+    auto field = new Field (name, [TString (TString.Type.string,value)]);
+    kls.fields ~= field;
+    return field;
+}
+Field*
+add_field (Klass* kls, string name, int value) {
+    return add_field (kls,name,value.to!string);
 }
 
 void

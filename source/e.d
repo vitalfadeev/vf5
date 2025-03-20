@@ -473,16 +473,29 @@ remove_klass (E* e, Klass* kls) {
         e.klasses = e.klasses.remove (i);
 }
 
+E*
+find_child (E* e, string klass_name) {
+    foreach (_e; WalkChilds (e))
+        if (_e.has_klass (klass_name))
+            return _e; // found!
+
+    return null;
+}
+
 
 void
 dump_klasses (E* e) {
-    foreach (kls; e.defined_klasses) {
-        writeln (*kls);
-        foreach (fld; kls.fields) {
-            writefln ("  %s", *fld);
-            foreach (_fld; fld.fields) {
-                writefln ("    %s", *_fld);
-            }
+    foreach (kls; e.defined_klasses)
+        dump_klass (kls);
+}
+
+void
+dump_klass (Klass* kls) {
+    writeln (*kls);
+    foreach (fld; kls.fields) {
+        writefln ("  %s", *fld);
+        foreach (_fld; fld.fields) {
+            writefln ("    %s", *_fld);
         }
     }
 }

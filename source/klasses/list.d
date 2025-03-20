@@ -43,17 +43,14 @@ update_scrollbar (E* list) {
         auto total  = list.generator.total;
 
         import klasses.scrollbar : scrollbar_update;
-        scrollbar.scrollbar_update (offset,limit,total);
+        if (scrollbar !is null)
+            scrollbar.scrollbar_update (offset,limit,total);
     }
 }
 
 E*
 find_scrollbar (E* list) {
-    foreach (_e; WalkChilds (list))
-        if (_e.has_klass ("scrollbar"))
-            return _e; // scrollbar found!
-
-    return null;
+    return list.find_child ("scrollbar");
 }
 
 
