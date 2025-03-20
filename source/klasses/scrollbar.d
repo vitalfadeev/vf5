@@ -90,3 +90,8 @@ scrollbar
   changed ()       -> send "changed",e_scrollbar  
 */
 
+void 
+scrollbar_update (E* scrollbar, size_t offset, size_t limit, size_t total) {
+    //
+}
+

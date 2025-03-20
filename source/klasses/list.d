@@ -37,11 +37,23 @@ update_scrollbar (E* list) {
     // find scrollbar
     //   set offset,limit,total
     //   update
-    foreach (_e; WalkChilds (list)) {
-        if (_e.has_klass ("scrollbar")) {
-            // scrollbar found!
-        }
+    if (auto scrollbar = find_scrollbar (list)) {
+        auto offset = list.generator.offset;
+        auto limit  = list.generator.limit;
+        auto total  = list.generator.total;
+
+        import klasses.scrollbar : scrollbar_update;
+        scrollbar.scrollbar_update (offset,limit,total);
     }
+}
+
+E*
+find_scrollbar (E* list) {
+    foreach (_e; WalkChilds (list))
+        if (_e.has_klass ("scrollbar"))
+            return _e; // scrollbar found!
+
+    return null;
 }
 
 

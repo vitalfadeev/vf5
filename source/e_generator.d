@@ -56,6 +56,28 @@ Generator {            // is part of E
         }
     }
 
+    auto ref
+    limit () {
+        final
+        switch (type) {
+            case Type.none  : return none .limit;
+            case Type.cmd   : return cmd  .limit;
+            case Type.fs    : return fs   .limit;
+            case Type.klass : return klass.limit;
+        }
+    }
+
+    auto ref
+    total () {
+        final
+        switch (type) {
+            case Type.none  : return none .total;
+            case Type.cmd   : return cmd  .total;
+            case Type.fs    : return fs   .total;
+            case Type.klass : return klass.total;
+        }
+    }
+
     int
     opApply (GENERATE_DG dg) {
         final
@@ -123,4 +145,5 @@ struct
 NoneGenerator {
     size_t offset;
     size_t limit;
+    size_t total;
 }
