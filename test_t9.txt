@@ -1,0 +1,136 @@
+e root
+  e t9-left rect1
+  e t9-left rect1
+  e t9-left rect1
+
+  e t9-center rect2
+  e t9-center rect2
+  e t9-center rect2
+
+  e t9-right rect3
+  e t9-right rect3
+  e t9-right rect3
+
+  e t9-4 rect4
+  e t9-4 rect4
+  e t9-4 rect4
+
+  e t9-5 rect5
+  e t9-5 rect5
+  e t9-5 rect5
+
+  e t9-6 rect6
+  e t9-6 rect6
+  e t9-6 rect6
+
+  e t9-7 rect7
+  e t9-7 rect7
+  e t9-7 rect7
+
+  e t9-8 rect8
+  e t9-8 rect8
+  e t9-8 rect8
+
+rect1
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         1
+
+rect2
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         2
+
+rect3
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         3
+
+rect4
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         4
+
+rect5
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         5
+
+rect6
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         6
+
+rect7
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         7
+
+rect8
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         8
+
+t9-left
+  pos.type  t9
+  pos.group 1
+
+t9-center
+  pos.type  t9
+  pos.group 2
+
+t9-right
+  pos.type  t9
+  pos.group 3
+
+t9-4
+  pos.type  t9
+  pos.group 4
+
+t9-5
+  pos.type  t9
+  pos.group 5
+
+t9-6
+  pos.type  t9
+  pos.group 6
+
+t9-7
+  pos.type  t9
+  pos.group 7
+
+t9-8
+  pos.type  t9
+  pos.group 8

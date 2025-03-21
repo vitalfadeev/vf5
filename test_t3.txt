@@ -1,0 +1,52 @@
+e root
+  e t3-left rect1
+  e t3-left rect1
+  e t3-left rect1
+
+  e t3-center rect2
+  e t3-center rect2
+  e t3-center rect2
+
+  e t3-right rect3
+  e t3-right rect3
+  e t3-right rect3
+
+rect1
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         1
+
+rect2
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         2
+
+rect3
+  size         64 64
+  aura         16
+  aura.color   #008
+  borders      2 solid #ccc
+  text.fg      #ccc
+  text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
+  text         3
+
+t3-left
+  pos.type  t3
+  pos.group 1
+
+t3-center
+  pos.type  t3
+  pos.group 2
+
+t3-right
+  pos.type  t3
+  pos.group 3
+

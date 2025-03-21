@@ -1027,7 +1027,7 @@ update_e_pos (E* e) {
         case E.PosType.percent : pos_type_percent (e); break;
         case E.PosType.fixed   : pos_type_fixed (e); break;
         case E.PosType.none    : pos_type_none (e); break;
-   }
+    }
 
     //e.pos         = Pos (0,0);
     e.margin.pos  = Pos (e.pos.x - e.margin.size.w, e.pos.y - e.margin.size.h);
@@ -1036,113 +1036,179 @@ update_e_pos (E* e) {
 }
 
 void
-pos_type_t9 (E* e) {
-    // 1 2 3 
-    // 8 9 4 
-    // 7 6 5 
-    
-    if (e.pos_group == 1) {
-        E* prev = find_last_in_group (e,e.pos_group);
-        if (prev !is null) {
-            if (e.pos_dir == E.PosDir.r) {
-                e.pos.x = (prev.pos.x + prev.size.w).to!X;
-                e.pos.y = prev.pos.y;
-            }
-        }
-        else {
-            X parent_x;
-            Y parent_y;
-            if (e.parent !is null) {
-                parent_x = e.parent.content.pos.x;
-                parent_y = e.parent.content.pos.y;
-            }
+update_pos_fix (E* e) {
+    // update center group
+    auto center_w = e.t9_group_size[1].w;
+    auto center_h = e.t9_group_size[1].h;
+    if (center_w != 0) {
+        foreach (_e; WalkChilds (e)) {
+            if (_e.pos_type == E.PosType.t9 || _e.pos_type == E.PosType.t3)
+            {
+                if (_e.pos_group == 2) {
+                    _e.pos.x += (e.size.w - center_w)/2;
+                    _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+                    _e.aura.pos    = _e.pos;
+                    _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+                }
 
-            e.pos.x = parent_x;
-            e.pos.y = parent_y;
-        }
-    }
-    if (e.pos_group == 9) {
-        // Pass 1
-        //   pos = Pos (0,0)
-        //   _x += w
-        //   _w += w
-        //   _h = max (_h,h)
-        //   pos = Pos (_x,0)
-        // Pass 2
-        //   dx = (content.w - _w) / 2
-        //   dy = (content.h - _h) / 2
-        //   each (c; WalkLeft)
-        //     c.pos.x += dx
-        //     c.pos.y += dy
+                if (_e.pos_group == 4) {
+                    _e.pos.y += (e.size.h - center_h)/2;
+                    _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+                    _e.aura.pos    = _e.pos;
+                    _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+                }
+
+                if (_e.pos_group == 6) {
+                    _e.pos.x += (e.size.w - center_w)/2;
+                    _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+                    _e.aura.pos    = _e.pos;
+                    _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+                }
+
+                if (_e.pos_group == 8) {
+                    _e.pos.y += (e.size.h - center_h)/2;
+                    _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+                    _e.aura.pos    = _e.pos;
+                    _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+                }
+            }        
+        }        
     }
 }
 
 void
-pos_type_t3 (E* e) {
+pos_type_t9 (E* e) {
+    // 1 2 3 
+    // 8 9 4 
+    // 7 6 5 
+    auto _parent = e.parent;
+
+    switch (e.pos_group) {
+        case 1: {
+            auto _parent_content_pos = _parent.content.pos;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent.t9_group_size[0].w, 
+                    _parent_content_pos.y
+                );
+
+            _parent.t9_group_size[0].w += e.size.w;
+            _parent.t9_group_size[0].h += e.size.h;
+            break;
+        }
+
+        case 2: {
+            auto _parent_content_pos = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent.t9_group_size[1].w, 
+                    _parent_content_pos.y
+                );
+
+            _parent.t9_group_size[1].w += e.size.w;
+            _parent.t9_group_size[1].h += e.size.h;
+            break;
+        }
+
+        case 3: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent_content_size.w - _parent.t9_group_size[2].w - e.size.w,
+                    _parent_content_pos.y
+                );
+
+            _parent.t9_group_size[2].w += e.size.w;
+            _parent.t9_group_size[2].h += e.size.h;
+            break;
+        }
+
+        case 4: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent_content_size.w - e.size.w,
+                    _parent_content_pos.y + _parent.t9_group_size[3].h
+                );
+
+            _parent.t9_group_size[3].w += e.size.w;
+            _parent.t9_group_size[3].h += e.size.h;
+            break;
+        }
+
+        case 5: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent_content_size.w - _parent.t9_group_size[4].w - e.size.w,
+                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+                );
+
+            _parent.t9_group_size[4].w += e.size.w;
+            _parent.t9_group_size[4].h += e.size.h;
+            break;
+        }
+
+        case 6: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent.t9_group_size[5].w, 
+                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+                );
+
+            _parent.t9_group_size[5].w += e.size.w;
+            _parent.t9_group_size[5].h += e.size.h;
+            break;
+        }
+
+        case 7: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x + _parent.t9_group_size[6].w, 
+                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+                );
+
+            _parent.t9_group_size[6].w += e.size.w;
+            _parent.t9_group_size[6].h += e.size.h;
+            break;
+        }
+
+        case 8: {
+            auto _parent_content_pos  = _parent.content.pos;
+            auto _parent_content_size = _parent.content.size;
+            e.pos = 
+                Pos (
+                    _parent_content_pos.x, 
+                    _parent_content_pos.y + _parent.t9_group_size[7].h
+                );
+
+            _parent.t9_group_size[7].w += e.size.w;
+            _parent.t9_group_size[7].h += e.size.h;
+            break;
+        }
+
+        case 9: {
+            // center
+            break;
+        }
+
+        default:
+    }
+}
+
+void
+pos_type_t3 (E* e) {  // case of t9
     // 1 2 3 
 
-    if (e.pos_group == 1) {
-        E* prev = find_last_in_group (e, e.pos_group);
-        if (prev !is null) {
-            final
-            switch (e.pos_dir) {
-                case E.PosDir.r:
-                    e.pos.x = (prev.pos.x + prev.size.w).to!X;
-                    e.pos.y = prev.pos.y;
-                    break;
-                case E.PosDir.l: break;
-                case E.PosDir.t: break;
-                case E.PosDir.b: break;
-            }
-        }
-        else {
-            if (e.parent !is null) {
-                e.pos.x = e.parent.content.pos.x;
-                e.pos.y = e.parent.content.pos.y;
-            }
-            else {
-                e.pos.x = 0;
-                e.pos.y = 0;
-            }
-        }
-    }
-    else
-    if (e.pos_group == 2) {
-        //
-    }
-    else
-    if (e.pos_group == 3) {
-        final
-        switch (e.pos_dir) {
-            case E.PosDir.r:
-                if (e.parent !is null) {
-                    auto parent_e = e.parent;
-                    e.pos.x = 
-                        (parent_e.content.pos.x + parent_e.content.size.w > e.size.w) ? 
-                            (parent_e.content.pos.x + parent_e.content.size.w - e.size.w).to!X :
-                            0; 
-                    e.pos.y = parent_e.content.pos.y;
-                }
-                else {
-                    e.pos.x = 0;
-                    e.pos.y = 0;
-                }
-                // update prev posed
-                for (E* _e = find_last_in_group (e, e.pos_group); 
-                    _e !is null; 
-                    _e = find_last_in_group (_e, e.pos_group)) 
-                {
-                    _e.margin.pos.x  -= e.size.w;
-                    _e.pos.x         -= e.size.w;
-                    _e.aura.pos.x    -= e.size.w;
-                    _e.content.pos.x -= e.size.w;
-                }
-                break;
-            case E.PosDir.l: break;
-            case E.PosDir.t: break;
-            case E.PosDir.b: break;
-        }
-    }
+    pos_type_t9 (e);
 }
 
 void

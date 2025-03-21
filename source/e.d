@@ -74,6 +74,9 @@ E {
     Klass*   hotkeys;
     E*       focused;
 
+    // child's sizes for pos
+    Size[9] t9_group_size;
+
     //
     struct
     Margin {
@@ -313,6 +316,7 @@ E {
         size_h_type   = SizeType.parent; //
         //generator     = generator.init;
         on.length     = 0;
+        t9_group_size = t9_group_size.init;
 
         // remove e added from klass
         {
@@ -544,6 +548,9 @@ update (E* e, UpdateUserEvent* ev) {
     foreach (_e; WalkChilds (e)) {
         _e.update (ev);
     }
+
+    import e_update : update_pos_fix;
+    update_pos_fix (e);
 }
 
 void
