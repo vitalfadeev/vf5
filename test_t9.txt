@@ -1,35 +1,59 @@
 e root
   e t9-left rect1
+    text 1.a
   e t9-left rect1
+    text 1.b
   e t9-left rect1
+    text 1.c
 
   e t9-center rect2
+    text 2.a
   e t9-center rect2
+    text 2.b
   e t9-center rect2
+    text 2.c
 
   e t9-right rect3
+    text 3.a
   e t9-right rect3
+    text 3.b
   e t9-right rect3
+    text 3.c
 
   e t9-4 rect4
+    text 4.a
   e t9-4 rect4
+    text 4.b
   e t9-4 rect4
+    text 4.c
 
   e t9-5 rect5
+    text 5.a
   e t9-5 rect5
+    text 5.b
   e t9-5 rect5
+    text 5.c
 
   e t9-6 rect6
+    text 6.a
   e t9-6 rect6
+    text 6.b
   e t9-6 rect6
+    text 6.c
 
   e t9-7 rect7
+    text 7.a
   e t9-7 rect7
+    text 7.b
   e t9-7 rect7
+    text 7.c
 
   e t9-8 rect8
+    text 8.a
   e t9-8 rect8
+    text 8.b
   e t9-8 rect8
+    text 8.c
 
 rect1
   size         64 64

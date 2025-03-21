@@ -76,6 +76,8 @@ E {
 
     // child's sizes for pos
     Size[9] t9_group_size;
+    Size[9] _t9_group_size;
+    Size    total_childs_size;
 
     //
     struct
@@ -316,7 +318,9 @@ E {
         size_h_type   = SizeType.parent; //
         //generator     = generator.init;
         on.length     = 0;
-        t9_group_size = t9_group_size.init;
+        t9_group_size     = t9_group_size.init;
+        _t9_group_size    = _t9_group_size.init;
+        total_childs_size = total_childs_size.init;
 
         // remove e added from klass
         {
@@ -549,6 +553,7 @@ update (E* e, UpdateUserEvent* ev) {
         _e.update (ev);
     }
 
+    // sizes is ready. update epos
     import e_update : update_pos_fix;
     update_pos_fix (e);
 }
@@ -564,9 +569,8 @@ draw (E* e, DrawUserEvent* ev) {
     // ...
 
     // via klasses
-    foreach (kls; e.klasses) {
+    foreach (kls; e.klasses)
         kls.draw (ev,e);
-    }
 
     // to childs
     foreach (_e; WalkChilds (e))

@@ -11,6 +11,13 @@ import pix : FONT_PTR, SDLException, TTFException;
 
 
 void
+draw (SDL_Renderer* renderer, E* e) {
+    writefln ("draw: e: %s, pos: %s, size: %s", *e, e.pos, e.size);
+    draw_content_with_aura (renderer,e);
+    draw_click_decoration (renderer,e);
+}
+
+void
 line (Pos pos, Pos pos2, W wid) {
     // hickLineColor (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color)
 }
@@ -177,12 +184,6 @@ e_size (E* e) {
 Size
 content_size (E* e) {
     return e.content.size;
-}
-
-void
-draw (SDL_Renderer* renderer, E* e) {
-    draw_content_with_aura (renderer,e);
-    draw_click_decoration (renderer,e);
 }
 
 void

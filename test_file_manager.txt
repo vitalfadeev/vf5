@@ -10,19 +10,22 @@ root
  bg         colors.black
 
 hbox
-  pos.type  hbox r
+  //pos.type  hbox r
+  pos.type  t9
+  pos.group 1
 
 left
-  size 240 parent
-  content.size text
+  size 240 400
+  content.size 200 400
   aura 1
   aura.color colors.gray_border
   bg colors.bg
   text 1
 
 right
-  size max parent
-  content.size text
+  size 400 400
+  content.size.type fixed
+  content.size 400 400
   bg colors.bg-1
   aura 1
   aura.color colors.gray_border
@@ -39,36 +42,39 @@ dir-list-template
   e dir-list-template-name
 
 dir-list-template-name
-  pos.type     vbox b
-  size         parent 32
-  content.size e
-  aura         1 1
+  pos.type     vbox
+  pos.group    1
+  pos.dir      d
+  size         200 32
+  content.size 200 32
+  aura         1
   borders      1 solid #444
   text         NAME
 
 scrollbar
-  pos.type  3
-  pos.group 3
-  pos.dir   r
-
+  pos.type  9
+  pos.group 4
   size 32 parent
   aura 2
   aura.color #ccc
 
 scrollbar-up
-  pos.type vbox
+  pos.type  9
+  pos.group 3
   size 24 24 
   aura 2
   aura.color #666
 
 scrollbar-dn
-  pos.type vbox
+  pos.type  9
+  pos.group 5
   size 24 24 
   aura 2
   aura.color #777
 
 scrollbar-cursor
-  pos.type vbox
+  pos.type  t9
+  pos.group 4
   size 24 24 
   aura 2
   aura.color #888
@@ -91,6 +97,3 @@ colors
   black    #000
   gray_border  #999
   info_bg  #232729
-
-commands
-  test                              ls -1

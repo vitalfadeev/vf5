@@ -8,6 +8,7 @@ import e_update : apply_klass;
 import e_update : apply_template;
 import e_update : TemplateArg;
 import e_update : force_e_update;
+import e_update : dump_sizes;
 import klass;
 import generators.cmd   : CmdGenerator;
 import generators.fs    : FsGenerator;
@@ -122,13 +123,20 @@ gen_tree (E* e, Klass* template_klass) {
 
         apply_template (e,template_klass,template_args);
 
-        foreach (_e; WalkChildsReverse (e)) {
-            force_e_update (_e);
+        //foreach (_e; WalkChildsReverse (e)) {
+        //    //force_e_update (_e);
+        //    dump_sizes (_e);
 
-            if (_e.pos.y + _e.size.h > e.pos.y + e.size.h)
-                return;
-        }
+        //    if (_e.pos.y + _e.size.h > e.pos.y + e.size.h)
+        //        return;
+
+        //    break;
+        //}
     }
+
+    //force_e_update (e);
+    //import e_update : update_pos_fix;
+    //update_pos_fix (e);
 }
 
 

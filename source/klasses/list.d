@@ -82,8 +82,9 @@ event (Klass* kls, Event* ev, E* e) {
 
                         import pix : update;
                         import pix : send_e_redraw;
+                        import pix : send_user_event;
                         update_scrollbar (e);
-                        update (e);
+                        send_user_event!UpdateUserEvent ();
                         send_e_redraw (e);
                     }
                 }
@@ -94,8 +95,9 @@ event (Klass* kls, Event* ev, E* e) {
 
                         import pix : update;
                         import pix : send_e_redraw;
+                        import pix : send_user_event;
                         update_scrollbar (e);
-                        update (e);
+                        send_user_event!UpdateUserEvent ();
                         send_e_redraw (e);
                     }
                 }
