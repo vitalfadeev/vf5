@@ -12,7 +12,6 @@ import pix : FONT_PTR, SDLException, TTFException;
 
 void
 draw (SDL_Renderer* renderer, E* e) {
-    writefln ("draw: e: %s, pos: %s, size: %s", *e, e.pos, e.size);
     draw_content_with_aura (renderer,e);
     draw_click_decoration (renderer,e);
 }

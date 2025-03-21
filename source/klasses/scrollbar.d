@@ -117,17 +117,12 @@ scrollbar_update (E* e_scrollbar, size_t offset, size_t limit, size_t total) {
                 format!"scrollbar-cursor-%X" (e_scrollbar)
             );
 
-        writeln (e_scrollbar);
-        writeln (cursor);
-        writeln (_cursor_klass);
-        writeln (*_cursor_klass);
         if (!cursor.has_klass (_cursor_klass))
             cursor.add_klass (_cursor_klass);
 
         _cursor_klass.add_field ("pos.type", "fixed");
         _cursor_klass.add_field ("pos.x", _x.to!int);
         _cursor_klass.add_field ("pos.y", _y.to!int);
-        dump_klass (_cursor_klass);
     }
 }
 
