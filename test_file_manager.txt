@@ -15,17 +15,17 @@ hbox
   pos.group 1
 
 left
-  size 240 400
-  content.size 200 400
+  size 240 parent
+  content.size e
   aura 1
   aura.color colors.gray_border
   bg colors.bg
   text 1
 
 right
-  size 400 400
+  size max parent
   content.size.type fixed
-  content.size 400 400
+  content.size  e
   bg colors.bg-1
   aura 1
   aura.color colors.gray_border
@@ -45,8 +45,8 @@ dir-list-template-name
   pos.type     vbox
   pos.group    1
   pos.dir      d
-  size         200 32
-  content.size 200 32
+  size         parent 32
+  content.size e
   aura         1
   borders      1 solid #444
   text         NAME
