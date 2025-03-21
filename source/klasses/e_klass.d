@@ -205,6 +205,7 @@ set_pos_type (E* e, TString[] values) {
             case "vbox"    : e.pos_type = E.PosType.vbox; break;
             case "hbox"    : e.pos_type = E.PosType.hbox; break;
             case "percent" : e.pos_type = E.PosType.percent; break;
+            case "fixed"   : e.pos_type = E.PosType.fixed; break;
             default: {
                 if (is_percent (values[0].s,&e.pos_percent)) // 50%
                     e.pos_type = E.PosType.percent;
@@ -232,6 +233,7 @@ set_pos_type (E* e, TString[] values) {
             case "vbox"    : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
             case "hbox"    : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
             case "percent" : e.pos_type = E.PosType.percent; break;
+            case "fixed"   : e.pos_type = E.PosType.fixed; break;
             default: {
                 if (is_percent (values[0].s,&e.pos_percent)) // 50%
                     e.pos_type = E.PosType.percent;

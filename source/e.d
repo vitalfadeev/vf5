@@ -224,6 +224,7 @@ E {
         vbox,
         hbox,
         percent,
+        fixed,
     }
     enum
     PosDir : ubyte {

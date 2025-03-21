@@ -99,7 +99,8 @@ scrollbar_update (E* e_scrollbar, size_t offset, size_t limit, size_t total) {
     auto cursor = e_scrollbar.find_cursor ();
     if (cursor !is null) {
         auto percent = (cast (float) offset) / total;  // 0..1
-        auto _y = e_scrollbar.pos.y + (e_scrollbar.size.h * percent) - cursor.size.h/2;
+        auto _x = e_scrollbar.content.pos.x;
+        auto _y = e_scrollbar.content.pos.y + (e_scrollbar.size.h * percent)/* - cursor.size.h/2*/;
         //
         // new cursor klass
         // add new cursor klass to cursor
@@ -121,9 +122,10 @@ scrollbar_update (E* e_scrollbar, size_t offset, size_t limit, size_t total) {
         writeln (_cursor_klass);
         writeln (*_cursor_klass);
         if (!cursor.has_klass (_cursor_klass))
-           cursor.add_klass (_cursor_klass);
+            cursor.add_klass (_cursor_klass);
 
         _cursor_klass.add_field ("pos.type", "fixed");
+        _cursor_klass.add_field ("pos.x", _x.to!int);
         _cursor_klass.add_field ("pos.y", _y.to!int);
         dump_klass (_cursor_klass);
     }

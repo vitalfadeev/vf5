@@ -1025,6 +1025,7 @@ update_e_pos (E* e) {
         case E.PosType.vbox    : pos_type_vbox (e); break;
         case E.PosType.hbox    : pos_type_hbox (e); break;
         case E.PosType.percent : pos_type_percent (e); break;
+        case E.PosType.fixed   : pos_type_fixed (e); break;
         case E.PosType.none    : pos_type_none (e); break;
    }
 
@@ -1232,6 +1233,12 @@ pos_type_percent (E* e) {
         e.pos.x = 0;
         e.pos.y = 0;
     }
+}
+
+void
+pos_type_fixed (E* e) {
+    // e.pos.x = e.pos.x;
+    // e.pos.y = e.pos.y;
 }
 
 void
