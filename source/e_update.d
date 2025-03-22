@@ -517,57 +517,15 @@ void
 update_total_sizes (E* e) {
     auto _parent = e.parent;
     if (_parent !is null) {
-        switch (e.pos_group) {
-            case 1: {
-                _parent.t9_group_size[0].w += e.size.w;
-                _parent.t9_group_size[0].h += e.size.h;
-                break;
-            }
-            case 2: {
-                _parent.t9_group_size[1].w += e.size.w;
-                _parent.t9_group_size[1].h += e.size.h;
-                break;
-            }
-            case 3: {
-                _parent.t9_group_size[2].w += e.size.w;
-                _parent.t9_group_size[2].h += e.size.h;
-                break;
-            }
-            case 4: {
-                _parent.t9_group_size[3].w += e.size.w;
-                _parent.t9_group_size[3].h += e.size.h;
-                break;
-            }
-            case 5: {
-                _parent.t9_group_size[4].w += e.size.w;
-                _parent.t9_group_size[4].h += e.size.h;
-                break;
-            }
-            case 6: {
-                _parent.t9_group_size[5].w += e.size.w;
-                _parent.t9_group_size[5].h += e.size.h;
-                break;
-            }
-            case 7: {
-                _parent.t9_group_size[6].w += e.size.w;
-                _parent.t9_group_size[6].h += e.size.h;
-                break;
-            }
-            case 8: {
-                _parent.t9_group_size[7].w += e.size.w;
-                _parent.t9_group_size[7].h += e.size.h;
-                break;
-            }
-            case 9: {
-                _parent.t9_group_size[8].w += e.size.w;
-                _parent.t9_group_size[8].h += e.size.h;
-                break;
-            }
-            default:
-        }
-
-        _parent.total_childs_size.w += e.size.w;
-        _parent.total_childs_size.h += e.size.h;
+        // by size
+        _parent._w_by_type [e.size_w_type]         += e.size.w;
+        _parent._h_by_type [e.size_h_type]         += e.size.h;
+        _parent._w_by_group [e.pos_group]          += e.size.w;
+        _parent._h_by_group [e.pos_group]          += e.size.h;
+        _parent._total_w                           += e.size.w;
+        _parent._total_h                           += e.size.h;
+        _parent._count_by_w_size_type [e.size_w_type]++;
+        _parent._count_by_h_size_type [e.size_h_type]++;
     }
 }
 
@@ -656,37 +614,37 @@ update_size_w_window (E* e) {
 
 void
 update_size_w_max (E* e) {
-    assert (e.parent !is null);
-    W parent_w = e.parent.content.size.w;
-    W other_w;
-    size_t max_cnt;
+    //assert (e.parent !is null);
+    //W parent_w = e.parent.content.size.w;
+    //W other_w;
+    //size_t max_cnt;
 
-    // total
-    foreach (_e; WalkChilds (e.parent)) {
-        if (_e.size_w_type == E.SizeType.max)
-            max_cnt ++;
-        else {
-            _e.update_e_size ();
-            other_w += _e.size.w;
-        }
-    }
+    //// total
+    //foreach (_e; WalkChilds (e.parent)) {
+    //    if (_e.size_w_type == E.SizeType.max)
+    //        max_cnt ++;
+    //    else {
+    //        _e.update_e_size ();
+    //        other_w += _e.size.w;
+    //    }
+    //}
 
-    // has max
-    if (max_cnt >= 1) {
-        // divide
-        auto total_w = parent_w;
+    //// has max
+    //if (max_cnt >= 1) {
+    //    // divide
+    //    auto total_w = parent_w;
 
-        W one_max_w = (total_w - other_w) / max_cnt;
+    //    W one_max_w = (total_w - other_w) / max_cnt;
 
-        foreach (_e; WalkChilds (e.parent)) {
-            if (_e.size_w_type == E.SizeType.max)  {
-                auto ew = one_max_w;
-                auto cw = ew - e.aura.size.w - e.aura.size.w;
-                _e.size.w         = (ew > 0) ? ew : 0;
-                _e.content.size.w = (cw > 0) ? cw : 0;
-            }
-        }
-    }
+    //    foreach (_e; WalkChilds (e.parent)) {
+    //        if (_e.size_w_type == E.SizeType.max)  {
+    //            auto ew = one_max_w;
+    //            auto cw = ew - e.aura.size.w - e.aura.size.w;
+    //            _e.size.w         = (ew > 0) ? ew : 0;
+    //            _e.content.size.w = (cw > 0) ? cw : 0;
+    //        }
+    //    }
+    //}
 }
 
 auto
@@ -1096,65 +1054,125 @@ update_e_pos (E* e) {
     e.margin.pos  = Pos (e.pos.x - e.margin.size.w, e.pos.y - e.margin.size.h);
     e.aura.pos    = e.pos;
     e.content.pos = Pos (e.aura.pos.x + e.aura.size.w, e.aura.pos.y + e.aura.size.h);
+
+    auto _parent = e.parent;
+    if (_parent !is null) {
+        _parent._passeed_w_by_group [e.pos_group]  += e.size.w;
+        _parent._passeed_h_by_group [e.pos_group]  += e.size.h;
+    }
+}
+
+void
+update_size_fix (E* e) {
+    // update center group
+    switch (e.size_w_type) {
+        case E.SizeType.max: update_size_fix_max (e); break;
+        default:
+    }
+}
+
+void
+update_size_fix_max (E* e) {
+    auto _content_w = e.content.size.w;
+    auto _content_h = e.content.size.h;
+
+    // total
+    auto _cnt     = e._count_by_w_size_type[e.size_w_type];
+    auto _other_w = e._total_w - e._w_by_type[e.size_w_type];
+    auto _able_w  = _content_w;
+
+    if (_cnt > 0) {
+        W _one_w = (_able_w - _other_w) / _cnt;
+
+        foreach (_e; WalkChilds (e))
+            switch (_e.size_w_type) {
+                case E.SizeType.max : {
+                    auto ew = _one_w;
+                    auto cw = ew - e.aura.size.w - e.aura.size.w;
+                    _e.size.w         = (ew > 0) ? ew : 0;
+                    _e.content.size.w = (cw > 0) ? cw : 0;
+                    break;
+                }
+                default:
+            }
+    }
 }
 
 void
 update_pos_fix (E* e) {
     // update center group
-    auto _content_w = e.content.size.w;
-    auto _content_h = e.content.size.h;
-
-    if (_content_w > 0 || _content_h > 0)
-        foreach (_e; WalkChilds (e))
-            switch (_e.pos_type) {
-                case E.PosType.t9: 
-                case E.PosType.t3: {
-                    if (_e.pos_group == 2) {
-                        auto group_w = e.t9_group_size[1].w;
-                        auto group_h = e.t9_group_size[1].h;
-                        _e.pos.x      += (_content_w - group_w)/2;
-                        _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-                        _e.aura.pos    = _e.pos;
-                        _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-                    }
-
-                    if (_e.pos_group == 4) {
-                        auto group_w = e.t9_group_size[3].w;
-                        auto group_h = e.t9_group_size[3].h;
-                        _e.pos.y      += (_content_h - group_h)/2;
-                        _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-                        _e.aura.pos    = _e.pos;
-                        _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-                    }
-
-                    if (_e.pos_group == 6) {
-                        auto group_w = e.t9_group_size[5].w;
-                        auto group_h = e.t9_group_size[5].h;
-                        _e.pos.x      += (_content_w - group_w)/2;
-                        _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-                        _e.aura.pos    = _e.pos;
-                        _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-                    }
-
-                    if (_e.pos_group == 8) {
-                        auto group_w = e.t9_group_size[7].w;
-                        auto group_h = e.t9_group_size[7].h;
-                        writefln ("_content_h: %s, group_h: %s", _content_h, group_h);
-                        if (1) {
-                            if (_content_h > group_h)  // has empty space
-                                _e.pos.y      += (_content_h - group_h)/2;
-                            else    // no empty space
-                                {}
-                            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-                            _e.aura.pos    = _e.pos;
-                            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-                        }
-                    }
-                    break;
-                }
-                default:
-            }
+    foreach (_e; WalkChilds (e))
+        switch (_e.pos_type) {
+            case E.PosType.t9: update_pos_fix_t9 (e, _e); break; 
+            case E.PosType.t3: update_pos_fix_t9 (e, _e); break;
+            default:
+        }
 }
+
+void
+update_pos_fix_t9 (E* e, E* _e /* parent */) {
+    switch (_e.pos_group) {
+        case 2: {
+            auto grp_i = _e.pos_group;
+            auto group_w = e._w_by_group[grp_i];
+            auto group_h = e._h_by_group[grp_i];
+            auto _content_w = e.content.size.w;
+            auto _content_h = e.content.size.h;
+            _e.pos.x      += (_content_w - group_w)/2;
+            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+            _e.aura.pos    = _e.pos;
+            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+            break;
+        }
+
+        case 4: {
+            auto grp_i = _e.pos_group;
+            auto group_w = e._w_by_group[grp_i];
+            auto group_h = e._h_by_group[grp_i];
+            auto _content_w = e.content.size.w;
+            auto _content_h = e.content.size.h;
+            _e.pos.y      += (_content_h - group_h)/2;
+            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+            _e.aura.pos    = _e.pos;
+            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+            break;
+        }
+
+        case 6: {
+            auto grp_i = _e.pos_group;
+            auto group_w = e._w_by_group[grp_i];
+            auto group_h = e._h_by_group[grp_i];
+            auto _content_w = e.content.size.w;
+            auto _content_h = e.content.size.h;
+            _e.pos.x      += (_content_w - group_w)/2;
+            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+            _e.aura.pos    = _e.pos;
+            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+            break;
+        }
+
+        case 8: {
+            auto grp_i = _e.pos_group;
+            auto group_w = e._w_by_group[grp_i];
+            auto group_h = e._h_by_group[grp_i];
+            auto _content_w = e.content.size.w;
+            auto _content_h = e.content.size.h;
+            if (1) {
+                if (_content_h > group_h)  // has empty space
+                    _e.pos.y      += (_content_h - group_h)/2;
+                else    // no empty space
+                    {}
+                _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+                _e.aura.pos    = _e.pos;
+                _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+            }
+            break;
+        }
+
+        default:
+    }
+}
+
 
 void
 pos_type_t9 (E* e) {
@@ -1165,121 +1183,134 @@ pos_type_t9 (E* e) {
 
     switch (e.pos_group) {
         case 1: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos = _parent.content.pos;
-            auto _passed_size = &_parent._t9_group_size[0];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + _passed_size.w, 
-                    _parent_content_pos.y
-                );
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+            e.pos.x = _parent_content_pos.x + *_passed_w;
+            e.pos.y = _parent_content_pos.y;
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 2: {
-            auto _parent_content_pos = _parent.content.pos;
+            auto grp_i = e.pos_group;
+            auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[1];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
-                    _parent_content_pos.x + _passed_size.w, 
+                    _parent_content_pos.x + *_passed_w, 
                     _parent_content_pos.y
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 3: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[2];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
-                    _parent_content_pos.x + _parent_content_size.w - _passed_size.w - e.size.w,
+                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
                     _parent_content_pos.y
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 4: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[3];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
                     _parent_content_pos.x + _parent_content_size.w - e.size.w,
-                    _parent_content_pos.y + _passed_size.h
+                    _parent_content_pos.y + *_passed_h
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 5: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[4];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
-                    _parent_content_pos.x + _parent_content_size.w - _passed_size.w - e.size.w,
+                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
                     _parent_content_pos.y + _parent_content_size.h - e.size.h
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 6: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[5];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
-                    _parent_content_pos.x + _passed_size.w, 
+                    _parent_content_pos.x + *_passed_w, 
                     _parent_content_pos.y + _parent_content_size.h - e.size.h
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 7: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[6];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
-                    _parent_content_pos.x + _passed_size.w, 
+                    _parent_content_pos.x + *_passed_w, 
                     _parent_content_pos.y + _parent_content_size.h - e.size.h
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 
         case 8: {
+            auto grp_i = e.pos_group;
             auto _parent_content_pos  = _parent.content.pos;
             auto _parent_content_size = _parent.content.size;
-            auto _passed_size = &_parent._t9_group_size[7];
+            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
             e.pos = 
                 Pos (
                     _parent_content_pos.x, 
-                    _parent_content_pos.y + _passed_size.h
+                    _parent_content_pos.y + *_passed_h
                 );
 
-            _passed_size.w += e.size.w;
-            _passed_size.h += e.size.h;
+            _passed_w += e.size.w;
+            _passed_h += e.size.h;
             break;
         }
 

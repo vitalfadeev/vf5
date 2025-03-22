@@ -21,6 +21,8 @@ alias E_DRAW_FN   = void function (E* e, DrawUserEvent* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
 
+enum MAX_GROUP = 9;
+
 static
 Klass*[] reserved_klasses;
 
@@ -75,9 +77,16 @@ E {
     E*       focused;
 
     // child's sizes for pos
-    Size[9] t9_group_size;
-    Size[9] _t9_group_size;
-    Size    total_childs_size;
+    W[SizeType.max]     _w_by_type;
+    H[SizeType.max]     _h_by_type;
+    W[MAX_GROUP]        _w_by_group;
+    H[MAX_GROUP]        _h_by_group;
+    W                   _total_w;
+    H                   _total_h;
+    size_t[SizeType.max] _count_by_w_size_type;
+    size_t[SizeType.max] _count_by_h_size_type;
+    W[MAX_GROUP]        _passeed_w_by_group;
+    H[MAX_GROUP]        _passeed_h_by_group;
 
     //
     struct
@@ -318,9 +327,17 @@ E {
         size_h_type   = SizeType.parent; //
         //generator     = generator.init;
         on.length     = 0;
-        t9_group_size     = t9_group_size.init;
-        _t9_group_size    = _t9_group_size.init;
-        total_childs_size = total_childs_size.init;
+        // sizes
+        _w_by_type          = _w_by_type.init;
+        _h_by_type          = _h_by_type.init;
+        _w_by_group         = _w_by_group.init;
+        _h_by_group         = _h_by_group.init;
+        _total_w            = _total_w.init;
+        _total_h            = _total_h.init;
+        _count_by_w_size_type = _count_by_w_size_type.init;
+        _count_by_h_size_type = _count_by_h_size_type.init;
+        _passeed_w_by_group = _passeed_w_by_group.init;
+        _passeed_h_by_group = _passeed_h_by_group.init;
 
         // remove e added from klass
         {
@@ -554,6 +571,8 @@ update (E* e, UpdateUserEvent* ev) {
     }
 
     // sizes is ready. update epos
+    import e_update : update_size_fix;
+    update_size_fix (e);
     import e_update : update_pos_fix;
     update_pos_fix (e);
 }

@@ -45,7 +45,7 @@ dir-list-template-name
   pos.type     vbox
   pos.group    1
   pos.dir      d
-  size         parent 32
+  size         max 32
   content.size e
   aura         1
   borders      1 solid #444
