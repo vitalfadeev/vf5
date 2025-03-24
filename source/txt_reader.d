@@ -81,7 +81,7 @@ go (E* root, string s) {
                 // 1 e tree only
             }
             indents.length = 0;
-            indents ~= Indent (root,indent);
+            indents ~= Indent (root,indent,0);
         }
 
         // sub e
@@ -95,28 +95,28 @@ go (E* root, string s) {
                 case Indent.Type.klass  : 
                     field = new Field (name,values);
                     _ind.klass.fields ~= field;
-                    indents ~= Indent (Indent.Type.klass_e,field,indent);
+                    indents ~= Indent (Indent.Type.klass_e,field,indent,_ind.deep+1);
                     break;
                 case Indent.Type.field  : 
                     field = new Field (name,values);
                     _ind.field.fields ~= field;
-                    indents ~= Indent (Indent.Type.field_e,field,indent);
+                    indents ~= Indent (Indent.Type.field_e,field,indent,_ind.deep+1);
                     break;
                 case Indent.Type.klass_e: 
                     field = new Field (name,values);
                     _ind.field.fields ~= field;
-                    indents ~= Indent (Indent.Type.klass_e,field,indent);
+                    indents ~= Indent (Indent.Type.klass_e,field,indent,_ind.deep+1);
                     break;
                 case Indent.Type.field_e: 
                     field = new Field (name,values);
                     _ind.field.fields ~= field;
-                    indents ~= Indent (Indent.Type.field_e,field,indent);
+                    indents ~= Indent (Indent.Type.field_e,field,indent,_ind.deep+1);
                     break;
                 case Indent.Type.e      : 
                     e = new_child_e (e,values);
                     _ind.e.childs ~= e; 
                     set_klasses_for_new_e (e,values);
-                    indents ~= Indent (e,indent);
+                    indents ~= Indent (e,indent,_ind.deep+1);
                     break;
             }
         }
@@ -127,26 +127,26 @@ go (E* root, string s) {
             kls = new_klass (root,name,values,args);
             // added
             indents.length = 0;
-            indents ~= Indent (kls,indent);
+            indents ~= Indent (kls,indent,0);
         }
 
         // field swicth case  e_fields
         else
         if (name != "e" && indent >= 1) {
-              auto parent_ind = indents.find_parent (indent);
-              assert (parent_ind !is null);
+              auto _ind = indents.find_parent (indent);
+              assert (_ind !is null);
 
               field = new Field (name,values);
               
               final
-              switch (parent_ind.type) {
-                  case Indent.Type.klass   : parent_ind.klass.fields ~= field; break;
-                  case Indent.Type.field   : parent_ind.field.fields ~= field; break;
-                  case Indent.Type.e       : parent_ind.e    .fields ~= field; break;
-                  case Indent.Type.klass_e : parent_ind.field.fields ~= field; break;
-                  case Indent.Type.field_e : parent_ind.field.fields ~= field; break;
+              switch (_ind.type) {
+                  case Indent.Type.klass   : _ind.klass.fields ~= field; break;
+                  case Indent.Type.field   : _ind.field.fields ~= field; break;
+                  case Indent.Type.e       : _ind.e    .fields ~= field; break;
+                  case Indent.Type.klass_e : _ind.field.fields ~= field; break;
+                  case Indent.Type.field_e : _ind.field.fields ~= field; break;
               }        
-              indents ~= Indent (field,indent);
+              indents ~= Indent (field,indent,_ind.deep+1);
         }
     }
 }
@@ -160,6 +160,7 @@ Indent {
         E*     e;
     } 
     size_t indent;
+    Deep   deep;
 
     enum 
     Type {
@@ -170,34 +171,39 @@ Indent {
         field_e,
     }
 
-    this (Type type, E* e, size_t indent) {
+    this (Type type, E* e, size_t indent, Deep deep) {
         this.type   = type;
         this.e      = e;
         this.indent = indent;
+        this.deep   = deep;
     }
 
-    this (Type type, Field* field, size_t indent) {
+    this (Type type, Field* field, size_t indent, Deep deep) {
         this.type   = type;
         this.field  = field;
         this.indent = indent;
+        this.deep   = deep;
     }
 
-    this (Klass* kls, size_t indent) {
+    this (Klass* kls, size_t indent, Deep deep) {
         this.type   = Type.klass;
         this.klass  = kls;
         this.indent = indent;
+        this.deep   = deep;
     }
 
-    this (Field* field, size_t indent) {
+    this (Field* field, size_t indent, Deep deep) {
         this.type   = Type.field;
         this.field  = field;
         this.indent = indent;
+        this.deep   = deep;
     }
 
-    this (E* e, size_t indent) {
+    this (E* e, size_t indent, Deep deep) {
         this.type   = Type.e;
         this.e      = e;
         this.indent = indent;
+        this.deep   = deep;
     }
 
     string

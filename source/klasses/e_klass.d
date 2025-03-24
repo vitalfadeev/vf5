@@ -9,7 +9,7 @@ import e : E,content;
 import e_update : 
     go_on_event, apply_e_klasses, apply_e_fields,
     load_e_image, load_e_font, load_e_colors, load_e_text,
-    update_e_size, update_e_pos, load_e_childs,
+    e_update_size_pos, load_e_childs,
     doc_get_klass_field_value;
 import e_klass_draw;
 import e_generator : Generator;
@@ -112,7 +112,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "pos"               : set_pos                (e,values); break;
         case "pos.type"          : set_pos_type           (e,values); break;
         case "pos.group"         : set_pos_group          (e,values); break;
-        case "pos.dir"           : set_pos_dir            (e,values); break;
+        case "pos.way"           : set_way                (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
         case "size.h"            : set_size_h             (e,values); break;
         case "size"              : set_size               (e,values); break;
@@ -205,14 +205,14 @@ set_pos_type (E* e, TString[] values) {
             }
         }
         switch (values[1].s) {
-            case "b" : e.pos_dir = E.PosDir.d; break;
-            case "d" : e.pos_dir = E.PosDir.d; break;
-            case "r" : e.pos_dir = E.PosDir.r; break;
-            case "l" : e.pos_dir = E.PosDir.l; break;
-            case "t" : e.pos_dir = E.PosDir.u; break;
-            case "u" : e.pos_dir = E.PosDir.u; break;
+            case "b" : e.way = E.Way.d; break;
+            case "d" : e.way = E.Way.d; break;
+            case "r" : e.way = E.Way.r; break;
+            case "l" : e.way = E.Way.l; break;
+            case "t" : e.way = E.Way.u; break;
+            case "u" : e.way = E.Way.u; break;
             default:
-                e.pos_dir = E.PosDir.r;
+                e.way = E.Way.r;
         }
     }
     else
@@ -223,8 +223,8 @@ set_pos_type (E* e, TString[] values) {
             case "3"       : e.pos_type = E.PosType.t3; break;
             case "t3"      : e.pos_type = E.PosType.t3; break;
             case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "vbox"    : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.d; break;
-            case "hbox"    : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
+            case "vbox"    : e.pos_type = E.PosType.vbox; e.way = E.Way.d; break;
+            case "hbox"    : e.pos_type = E.PosType.hbox; e.way = E.Way.r; break;
             case "percent" : e.pos_type = E.PosType.percent; break;
             case "fixed"   : e.pos_type = E.PosType.fixed; break;
             default: {
@@ -268,15 +268,15 @@ set_pos_group (E* e, TString[] values) {
 }
 
 void
-set_pos_dir (E* e, TString[] values) {
+set_way (E* e, TString[] values) {
     if (values.length >= 1) {
         switch (values[0].s) {
-            case "r": e.pos_dir = E.PosDir.r; break;
-            case "l": e.pos_dir = E.PosDir.l; break;
-            case "t": e.pos_dir = E.PosDir.u; break;
-            case "u": e.pos_dir = E.PosDir.u; break;
-            case "b": e.pos_dir = E.PosDir.d; break;
-            case "d": e.pos_dir = E.PosDir.d; break;
+            case "r": e.way = E.Way.r; break;
+            case "l": e.way = E.Way.l; break;
+            case "t": e.way = E.Way.u; break;
+            case "u": e.way = E.Way.u; break;
+            case "b": e.way = E.Way.d; break;
+            case "d": e.way = E.Way.d; break;
             default:
         }
     }

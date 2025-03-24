@@ -55,6 +55,11 @@ e root
   e t9-8 rect8
     text 8.c
 
+root
+  size 800 600
+  pos 0 0
+  pos.type fixed
+
 rect1
   size         64 64
   aura         16
@@ -130,6 +135,7 @@ rect8
 t9-left
   pos.type  t9
   pos.group 1
+  pos.way   r
 
 t9-center
   pos.type  t9

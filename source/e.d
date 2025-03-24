@@ -45,6 +45,9 @@ Klass*[] reserved_klasses;
 //     content
 //       borders
 
+alias PosGroup = ubyte;
+alias Deep     = int;
+
 struct 
 E {
     Tree      _super;
@@ -57,7 +60,7 @@ E {
 
     Pos        pos;        // relative from parent
     PosType    pos_type = PosType.none;
-    ubyte      pos_group;
+    PosGroup   pos_group;
     Way        way;
     byte       pos_percent;
     Size       size;       // = content.size + aura.size
@@ -77,7 +80,7 @@ E {
     Klass*   hotkeys;
     E*       focused;
 
-    GCursor  gcursor;
+    Deep     deep;
 
     //
     struct

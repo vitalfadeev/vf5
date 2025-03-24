@@ -52,48 +52,56 @@ GCursor {  // child's sizes for pos
         W able_w;   // start_w
         H able_h;   // start_h
 
+        W max_used_w;
+
         W[E.SizeType.max+1]      w_by_type;
         H[E.SizeType.max+1]      h_by_type;
         size_t[E.SizeType.max+1] count_by_w_size_type;
         size_t[E.SizeType.max+1] count_by_h_size_type;
 
-        E.Way way; // < > ^ v
+        E.Way    way; // < > ^ v
+        PosGroup pos_group;
+        //Deep     deep;
     }
 }
 
 
 void
-e_update_size_pos (E* e) {
-    e.gcursor = GCursor.init;
+e_update_size_pos (E* e, GCursor* big_gcursor) {
+    assert (e.pos_group < MAX_GROUP);
+    auto gcursor = &big_gcursor.by_group[e.pos_group];
+    gcursor.start_x = 0;
+    gcursor.start_w = (e.parent !is null) ? e.parent.content.size.w : DEFAULT_WINDOW_W;;
+    gcursor.able_w  = gcursor.start_w;
 
     // <> ^ v
     final
     switch (e.way) {
-        case E.Way.r: e_update_size_pos_r (e); break;
+        case E.Way.r: e_update_size_pos_r (e,gcursor); break;
         case E.Way.l: break;
         case E.Way.d: break;
         case E.Way.u: break;
     }
+    writefln ("way: %s, pos: %s, size: %s, e: %s", e.way, e.pos, e.size, *e);
 
     // recursive
     foreach (_e; WalkChilds (e))
-        e_update_size_pos (_e);
+        e_update_size_pos (_e,big_gcursor);
 
     // fix pos  : center
     // fix size : same w, max
-    e_update_size_pos_fix (e);
+    e_update_size_pos_fix (e,gcursor);
 }
 
 void
-e_update_size_pos_r (E* e) {
-    assert (e.pos_group < MAX_GROUP);
-    auto gcursor = &e.gcursor.by_group[e.pos_group];
+e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
     auto able_w = gcursor.able_w;
 
     auto x = gcursor.x;
     auto y = gcursor.y;
 
     //
+    e_update_size (e);
     auto w = e.size.w;
     w = (w >= 0) ? w : 0;
     e.size.w = w;
@@ -113,17 +121,173 @@ e_update_size_pos_r (E* e) {
     }
 
     //
-    e.pos         = Pos (x,y);
-    e.margin.pos  = Pos (x - e.margin.size.w, y - e.margin.size.h);
-    e.aura.pos    = e.pos;
-    e.content.pos = Pos (x + e.aura.size.w, y + e.aura.size.h);
+    _e_update_pos (e,x,y);
 
     // update cursor. set next position
-    gcursor.x      += w;
-    gcursor.y       = y;
-    gcursor.able_w  = able_w;
+    gcursor.x          = x + w;
+    gcursor.y          = y;
+    gcursor.able_w     = able_w;
+    gcursor.max_used_w = (x + w) > gcursor.max_used_w ? x + w : gcursor.max_used_w;
+
+    //
+    e_update_total_sizes (e, gcursor);
 }
 
+void
+e_update_size_pos_fix (GCursor) (E* e, GCursor* gcursor) {
+    switch (e.pos_group) {
+        case 2: {
+            // fix group pos. move to center. update childs 
+            auto offset = (gcursor.start_w - gcursor.max_used_w) / 2;
+            writefln ("offset: %s", offset);
+            foreach (_e; WalkChilds (e))
+                _e_update_pos (_e, _e.pos.x+offset, _e.pos.y);
+            break;
+        }
+        default:
+    }
+}
+
+void
+e_update_total_sizes (GCursor) (E* e, GCursor* gcursor) {
+    gcursor.w_by_type [e.size_w_type] += e.size.w;
+    gcursor.h_by_type [e.size_h_type] += e.size.h;
+    gcursor.count_by_w_size_type [e.size_w_type]++;
+    gcursor.count_by_h_size_type [e.size_h_type]++;
+}
+
+// e.size       <--
+//   fixed         |
+//   content       |
+//   parent        |
+//   content.size -   <--
+//     e                 |
+//     fixed             |
+//     image             |
+//     text              |
+//     childs            |
+//     max               |
+//     childs.size    ---
+//       ...             |   [e..]
+//     image.size     ---
+//       fixed           |
+//       image           |
+//       text            |
+//       content         |
+//     text.size      ---
+//       fixed
+//       text
+//       image
+//       content
+void
+e_update_size (E* e) {
+    final
+    switch (e.size_w_type) {
+        case E.SizeType.fixed   : e_update_size_w_fixed   (e); break;
+        case E.SizeType.content : e_update_size_w_content (e); break;
+        case E.SizeType.parent  : e_update_size_w_parent  (e); break;
+        case E.SizeType.window  : e_update_size_w_window  (e); break;
+        case E.SizeType.max     : e_update_size_w_max     (e); break;
+    }
+
+    //final
+    //switch (e.size_h_type) {
+    //    case E.SizeType.fixed   : update_size_h_fixed   (e); break;
+    //    case E.SizeType.content : update_size_h_content (e); break;
+    //    case E.SizeType.parent  : update_size_h_parent  (e); break;
+    //    case E.SizeType.window  : update_size_h_window  (e); break;
+    //    case E.SizeType.max     : update_size_h_max     (e); break;
+    //}
+}
+
+void
+e_update_size_w_fixed (E* e) {
+    _e_update_size (
+        e, 
+        e.size.w, 
+        e.size.w - e.aura.size.w - e.aura.size.w
+    );
+}
+
+void
+e_update_size_w_content (E* e) {
+    //update_content_size_w (e);  // update content.size.w
+    _e_update_size (
+        e, 
+        e.content.size.w + e.aura.size.w + e.aura.size.w, 
+        e.content.size.w
+    );
+}
+
+void
+e_update_size_w_parent (E* e) {
+    if (e.parent !is null)
+        _e_update_size (
+            e, 
+            e.parent.content.size.w, 
+            e.parent.content.size.w - e.aura.size.w - e.aura.size.w
+        );
+    else
+        e_update_size_w_window (e);
+}
+
+void
+e_update_size_w_window (E* e) {
+    auto window = e.find_window ();
+    if (window !is null)
+        _e_update_size (
+            e, 
+            window.size.w, 
+            window.size.w - e.aura.size.w - e.aura.size.w
+        );
+    else
+        _e_update_size (
+            e, 
+            DEFAULT_WINDOW_W, 
+            DEFAULT_WINDOW_W - e.aura.size.w - e.aura.size.w
+        );
+}
+
+void
+e_update_size_w_max (E* e) {
+    // update max after all, in update_size_fix ()
+}
+
+// ////////////////////////////////////////////////
+void
+_e_update_size (E* e, W ew, W cw) {
+    e.size.w         = (ew > 0) ? ew : 0;
+    e.content.size.w = (cw > 0) ? cw : 0;
+}
+void
+_e_update_pos (E* e, X x, Y y) {
+    e.pos         = Pos (x,y);
+    e.margin.pos  = Pos (x - e.margin.size.w, y - e.margin.size.h);
+    e.aura.pos    = Pos (x,y);
+    e.content.pos = Pos (x + e.aura.size.w, y + e.aura.size.h);
+}
+// ////////////////////////////////////////////////
+auto
+find_window (E* e) {
+    for (auto _e=e; _e !is null; _e = _e.parent)
+        if (_e.window !is null)
+            return _e.window;
+    return null;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
 
 void
 remove_class_from_all (E* e, string s) {
@@ -556,68 +720,7 @@ dump_size (E* e, int level=0) {
 
 
 
-// e.size       <--
-//   fixed         |
-//   content       |
-//   parent        |
-//   content.size -   <--
-//     e                 |
-//     fixed             |
-//     image             |
-//     text              |
-//     childs            |
-//     max               |
-//     childs.size    ---
-//       ...             |   [e..]
-//     image.size     ---
-//       fixed           |
-//       image           |
-//       text            |
-//       content         |
-//     text.size      ---
-//       fixed
-//       text
-//       image
-//       content
-void
-update_e_size (E* e) {
-    final
-    switch (e.size_w_type) {
-        case E.SizeType.fixed   : update_size_w_fixed   (e); break;
-        case E.SizeType.content : update_size_w_content (e); break;
-        case E.SizeType.parent  : update_size_w_parent  (e); break;
-        case E.SizeType.window  : update_size_w_window  (e); break;
-        case E.SizeType.max     : update_size_w_max     (e); break;
-    }
 
-    final
-    switch (e.size_h_type) {
-        case E.SizeType.fixed   : update_size_h_fixed   (e); break;
-        case E.SizeType.content : update_size_h_content (e); break;
-        case E.SizeType.parent  : update_size_h_parent  (e); break;
-        case E.SizeType.window  : update_size_h_window  (e); break;
-        case E.SizeType.max     : update_size_h_max     (e); break;
-    }
-
-    update_total_sizes (e);
-}
-
-
-void
-update_total_sizes (E* e) {
-    auto _parent = e.parent;
-    if (_parent !is null) {
-        // by size
-        _parent._w_by_type [e.size_w_type] += e.size.w;
-        _parent._h_by_type [e.size_h_type] += e.size.h;
-        _parent._w_by_group [e.pos_group]  += e.size.w;
-        _parent._h_by_group [e.pos_group]  += e.size.h;
-        _parent._total_w                   += e.size.w;
-        _parent._total_h                   += e.size.h;
-        _parent._count_by_w_size_type [e.size_w_type]++;
-        _parent._count_by_h_size_type [e.size_h_type]++;
-    }
-}
 
 //void
 //update_fix_size_w_max (E* e) {
@@ -654,66 +757,8 @@ update_total_sizes (E* e) {
 //    }
 //}
 
-void
-update_size_w_fixed (E* e) {
-    auto ew = e.size.w;
-    auto cw = ew - e.aura.size.w - e.aura.size.w;
-    e.size.w         = (ew > 0) ? ew : 0;
-    e.content.size.w = (cw > 0) ? cw : 0;
-}
 
-void
-update_size_w_content (E* e) {
-    update_content_size_w (e);  // update content.size.w
 
-    auto ew = e.content.size.w + e.aura.size.w + e.aura.size.w;
-    auto cw = e.content.size.w;
-    e.size.w         = (ew > 0) ? ew : 0;
-    e.content.size.w = (cw > 0) ? cw : 0;
-}
-
-void
-update_size_w_parent (E* e) {
-    if (e.parent !is null) {
-        auto ew = e.parent.content.size.w;
-        auto cw = ew - e.aura.size.w - e.aura.size.w;
-        e.size.w         = (ew > 0) ? ew : 0;
-        e.content.size.w = (cw > 0) ? cw : 0;
-    }
-    else {
-        update_size_w_window (e);
-    }
-}
-
-void
-update_size_w_window (E* e) {
-    auto window = e.find_window ();
-    if (window !is null) {
-        auto ew = window.size.w;
-        auto cw = ew - e.aura.size.w - e.aura.size.w;
-        e.size.w         = (ew > 0) ? ew : 0;
-        e.content.size.w = (cw > 0) ? cw : 0;
-    }
-    else {
-        auto ew = DEFAULT_WINDOW_W;
-        auto cw = ew - e.aura.size.w - e.aura.size.w;
-        e.size.w         = (ew > 0) ? ew : 0;
-        e.content.size.w = (cw > 0) ? cw : 0;
-    }
-}
-
-void
-update_size_w_max (E* e) {
-    // update max after all, in update_size_fix ()
-}
-
-auto
-find_window (E* e) {
-    for (auto _e=e; _e !is null; _e = _e.parent)
-        if (_e.window !is null)
-            return _e.window;
-    return null;
-}
 
 
 void
@@ -726,7 +771,7 @@ update_size_h_fixed (E* e) {
 
 void
 update_size_h_content (E* e) {
-    update_content_size_h (e);
+    //update_content_size_h (e);
 
     auto eh = e.content.size.h + e.aura.size.h + e.aura.size.h;
     auto ch = e.content.size.h;
@@ -769,21 +814,21 @@ update_size_h_max (E* e) {
     // update max after all, in update_size_fix ()
 }
 
-void
-update_content_size_w (E* e) {
-    final
-    switch (e.content.size_w_type) {
-        case E.Content.SizeType.e      : update_content_size_w_e      (e); break;
-        case E.Content.SizeType.fixed  : update_content_size_w_fixed  (e); break;
-        case E.Content.SizeType.childs : update_content_size_w_childs (e); break;
-        case E.Content.SizeType.image  : update_content_size_w_image  (e); break;
-        case E.Content.SizeType.text   : update_content_size_w_text   (e); break;
-        case E.Content.SizeType.max    : update_content_size_w_max    (e); break;
-        case E.Content.SizeType.childs_image_text : update_content_size_w_childs_image_text    (e); break;
-    }
+//void
+//update_content_size_w (E* e) {
+//    final
+//    switch (e.content.size_w_type) {
+//        case E.Content.SizeType.e      : update_content_size_w_e      (e); break;
+//        case E.Content.SizeType.fixed  : update_content_size_w_fixed  (e); break;
+//        case E.Content.SizeType.childs : update_content_size_w_childs (e); break;
+//        case E.Content.SizeType.image  : update_content_size_w_image  (e); break;
+//        case E.Content.SizeType.text   : update_content_size_w_text   (e); break;
+//        case E.Content.SizeType.max    : update_content_size_w_max    (e); break;
+//        case E.Content.SizeType.childs_image_text : update_content_size_w_childs_image_text    (e); break;
+//    }
 
-    update_e_pos (e);
-}
+//    update_e_pos (e);
+//}
 
 void
 update_content_size_w_e (E* e) {
@@ -873,19 +918,19 @@ update_content_size_w_childs_image_text (E* e) {
     //e.content.size.w = 0;
 }
 
-void
-update_content_size_h (E* e) {
-    final
-    switch (e.content.size_h_type) {
-        case E.Content.SizeType.e      : update_content_size_h_e      (e); break;
-        case E.Content.SizeType.fixed  : update_content_size_h_fixed  (e); break;
-        case E.Content.SizeType.childs : update_content_size_h_childs (e); break;
-        case E.Content.SizeType.image  : update_content_size_h_image  (e); break;
-        case E.Content.SizeType.text   : update_content_size_h_text   (e); break;
-        case E.Content.SizeType.max    : update_content_size_h_max    (e); break;
-        case E.Content.SizeType.childs_image_text : update_content_size_h_childs_image_text    (e); break;
-    }
-}
+//void
+//update_content_size_h (E* e) {
+//    final
+//    switch (e.content.size_h_type) {
+//        case E.Content.SizeType.e      : update_content_size_h_e      (e); break;
+//        case E.Content.SizeType.fixed  : update_content_size_h_fixed  (e); break;
+//        case E.Content.SizeType.childs : update_content_size_h_childs (e); break;
+//        case E.Content.SizeType.image  : update_content_size_h_image  (e); break;
+//        case E.Content.SizeType.text   : update_content_size_h_text   (e); break;
+//        case E.Content.SizeType.max    : update_content_size_h_max    (e); break;
+//        case E.Content.SizeType.childs_image_text : update_content_size_h_childs_image_text    (e); break;
+//    }
+//}
 
 void
 update_content_size_h_e (E* e) {
@@ -1096,354 +1141,330 @@ update_content_text_size_h_content (E* e) {
 }
 
 
-void
-update_e_pos (E* e) {
-    final
-    switch (e.pos_type) {
-        case E.PosType.t9      : pos_type_t9   (e); break;
-        case E.PosType.t3      : pos_type_t3   (e); break;
-        case E.PosType.grid    : pos_type_grid (e); break;
-        case E.PosType.vbox    : pos_type_vbox (e); break;
-        case E.PosType.hbox    : pos_type_hbox (e); break;
-        case E.PosType.percent : pos_type_percent (e); break;
-        case E.PosType.fixed   : pos_type_fixed (e); break;
-        case E.PosType.none    : pos_type_none (e); break;
-    }
+//void
+//update_e_pos (E* e) {
+//    final
+//    switch (e.pos_type) {
+//        case E.PosType.t9      : pos_type_t9   (e); break;
+//        case E.PosType.t3      : pos_type_t3   (e); break;
+//        case E.PosType.grid    : pos_type_grid (e); break;
+//        case E.PosType.vbox    : pos_type_vbox (e); break;
+//        case E.PosType.hbox    : pos_type_hbox (e); break;
+//        case E.PosType.percent : pos_type_percent (e); break;
+//        case E.PosType.fixed   : pos_type_fixed (e); break;
+//        case E.PosType.none    : pos_type_none (e); break;
+//    }
 
-    //e.pos         = Pos (0,0);
-    e.margin.pos  = Pos (e.pos.x - e.margin.size.w, e.pos.y - e.margin.size.h);
-    e.aura.pos    = e.pos;
-    e.content.pos = Pos (e.aura.pos.x + e.aura.size.w, e.aura.pos.y + e.aura.size.h);
+//    //e.pos         = Pos (0,0);
+//    e.margin.pos  = Pos (e.pos.x - e.margin.size.w, e.pos.y - e.margin.size.h);
+//    e.aura.pos    = e.pos;
+//    e.content.pos = Pos (e.aura.pos.x + e.aura.size.w, e.aura.pos.y + e.aura.size.h);
+//}
 
-    auto _parent = e.parent;
-    if (_parent !is null) {
-        _parent._passeed_w_by_group [e.pos_group]  += e.size.w;
-        _parent._passeed_h_by_group [e.pos_group]  += e.size.h;
-    }
-}
 
 void
-reset_total_sizes (E* e) {
-    // childs sizes, childs counts
-    e._w_by_type            = e._w_by_type.init;
-    e._h_by_type            = e._h_by_type.init;
-    e._w_by_group           = e._w_by_group.init;
-    e._h_by_group           = e._h_by_group.init;
-    e._total_w              = e._total_w.init;
-    e._total_h              = e._total_h.init;
-    e._count_by_w_size_type = e._count_by_w_size_type.init;
-    e._count_by_h_size_type = e._count_by_h_size_type.init;
-    e._passeed_w_by_group   = e._passeed_w_by_group.init;
-    e._passeed_h_by_group   = e._passeed_h_by_group.init;    
-}
-
-void
-update_size_pos (E* e) {
-    e.reset_total_sizes ();
+update_size_pos2 (E* e) {
+    GCursor gcursor;
+    gcursor = GCursor.init;
 
     // 7
     if (1)
-        e.update_e_size ();
+        e_update_size_pos (e,&gcursor);
     version (profile) time_step ("update_e_size");
 
-    // 8
-    if (1)
-        e.update_e_pos ();
-    version (profile) time_step ("update_e_pos");
-
-    // to childs
-    foreach (_e; WalkChilds (e))
-        update_size_pos (_e);
+    //// to childs
+    //foreach (_e; WalkChilds (e))
+    //    update_size_pos (_e);
 
     // sizes is ready. update epos
-    import e_update : update_size_fix;
-    update_size_fix (e);
-    import e_update : update_pos_fix;
-    update_pos_fix (e);
+    //import e_update : update_size_fix;
+    //update_size_fix (e);
+    //import e_update : update_pos_fix;
+    //update_pos_fix (e);
 }
 
 
 void
 update_size_fix (E* e) {
     // update center group
-    if (e._count_by_w_size_type[E.SizeType.max] > 0)
-    if (e.content.size.w > 0)
-        update_size_fix_max (e);
+    //if (e._count_by_w_size_type[E.SizeType.max] > 0)
+    //if (e.content.size.w > 0)
+    //    update_size_fix_max (e);
 }
 
-void
-update_size_fix_max (E* e /* is parent of max */) {
-    // childs sizes, childs counts
-    auto _cnt     = e._count_by_w_size_type[E.SizeType.max];
-    auto _other_w = e._total_w - e._w_by_type[E.SizeType.max];
-    auto _able_w  = e.content.size.w;
-    W    _one_w;
+//void
+//update_size_fix_max (E* e /* is parent of max */) {
+//    // childs sizes, childs counts
+//    auto _cnt     = e._count_by_w_size_type[E.SizeType.max];
+//    auto _other_w = e._total_w - e._w_by_type[E.SizeType.max];
+//    auto _able_w  = e.content.size.w;
+//    W    _one_w;
 
-    // find e with type "max"
-    foreach (_e; WalkChilds (e))
-        if (_e.size_w_type == E.SizeType.max) {
-            if (_e.pos_dir == E.PosDir.u || _e.pos_dir == E.PosDir.d)
-                _one_w = (_able_w - _other_w);         // full able width
-            else
-                _one_w = (_able_w - _other_w) / _cnt;
+//    // find e with type "max"
+//    foreach (_e; WalkChilds (e))
+//        if (_e.size_w_type == E.SizeType.max) {
+//            if (_e.pos_dir == E.PosDir.u || _e.pos_dir == E.PosDir.d)
+//                _one_w = (_able_w - _other_w);         // full able width
+//            else
+//                _one_w = (_able_w - _other_w) / _cnt;
             
-            writefln ("_cnt: %s, _other_w: %s, _able_w: %s, _one_w: %s, e: %s", _cnt, _other_w, _able_w, _one_w, *e);
+//            writefln ("_cnt: %s, _other_w: %s, _able_w: %s, _one_w: %s, e: %s", _cnt, _other_w, _able_w, _one_w, *e);
 
-            auto ew = _one_w;
-            auto cw = ew - _e.aura.size.w - _e.aura.size.w;
-            _e.size.w         = (ew > 0) ? ew : 0;
-            _e.content.size.w = (cw > 0) ? cw : 0;
+//            auto ew = _one_w;
+//            auto cw = ew - _e.aura.size.w - _e.aura.size.w;
+//            _e.size.w         = (ew > 0) ? ew : 0;
+//            _e.content.size.w = (cw > 0) ? cw : 0;
 
-            // update e with type "max", recursive update childs
-            update_size_pos (_e);
-        }
-}
+//            // update e with type "max", recursive update childs
+//            update_size_pos (_e);
+//        }
+//}
 
 void
 update_pos_fix (E* e) {
-    // update center group
-    foreach (_e; WalkChilds (e))
-        switch (_e.pos_type) {
-            case E.PosType.t9: update_pos_fix_t9 (e, _e); break; 
-            case E.PosType.t3: update_pos_fix_t9 (e, _e); break;
-            default:
-        }
+    //// update center group
+    //foreach (_e; WalkChilds (e))
+    //    switch (_e.pos_type) {
+    //        case E.PosType.t9: update_pos_fix_t9 (e, _e); break; 
+    //        case E.PosType.t3: update_pos_fix_t9 (e, _e); break;
+    //        default:
+    //    }
 }
 
-void
-update_pos_fix_t9 (E* e, E* _e /* parent */) {
-    switch (_e.pos_group) {
-        case 2: {
-            auto grp_i = _e.pos_group;
-            auto group_w = e._w_by_group[grp_i];
-            auto group_h = e._h_by_group[grp_i];
-            auto _content_w = e.content.size.w;
-            auto _content_h = e.content.size.h;
-            _e.pos.x      += (_content_w - group_w)/2;
-            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-            _e.aura.pos    = _e.pos;
-            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-            break;
-        }
+//void
+//update_pos_fix_t9 (E* e, E* _e /* parent */) {
+//    switch (_e.pos_group) {
+//        case 2: {
+//            auto grp_i = _e.pos_group;
+//            auto group_w = e._w_by_group[grp_i];
+//            auto group_h = e._h_by_group[grp_i];
+//            auto _content_w = e.content.size.w;
+//            auto _content_h = e.content.size.h;
+//            _e.pos.x      += (_content_w - group_w)/2;
+//            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+//            _e.aura.pos    = _e.pos;
+//            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+//            break;
+//        }
 
-        case 4: {
-            auto grp_i = _e.pos_group;
-            auto group_w = e._w_by_group[grp_i];
-            auto group_h = e._h_by_group[grp_i];
-            auto _content_w = e.content.size.w;
-            auto _content_h = e.content.size.h;
-            _e.pos.y      += (_content_h - group_h)/2;
-            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-            _e.aura.pos    = _e.pos;
-            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-            break;
-        }
+//        case 4: {
+//            auto grp_i = _e.pos_group;
+//            auto group_w = e._w_by_group[grp_i];
+//            auto group_h = e._h_by_group[grp_i];
+//            auto _content_w = e.content.size.w;
+//            auto _content_h = e.content.size.h;
+//            _e.pos.y      += (_content_h - group_h)/2;
+//            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+//            _e.aura.pos    = _e.pos;
+//            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+//            break;
+//        }
 
-        case 6: {
-            auto grp_i = _e.pos_group;
-            auto group_w = e._w_by_group[grp_i];
-            auto group_h = e._h_by_group[grp_i];
-            auto _content_w = e.content.size.w;
-            auto _content_h = e.content.size.h;
-            _e.pos.x      += (_content_w - group_w)/2;
-            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-            _e.aura.pos    = _e.pos;
-            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-            break;
-        }
+//        case 6: {
+//            auto grp_i = _e.pos_group;
+//            auto group_w = e._w_by_group[grp_i];
+//            auto group_h = e._h_by_group[grp_i];
+//            auto _content_w = e.content.size.w;
+//            auto _content_h = e.content.size.h;
+//            _e.pos.x      += (_content_w - group_w)/2;
+//            _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+//            _e.aura.pos    = _e.pos;
+//            _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+//            break;
+//        }
 
-        case 8: {
-            auto grp_i = _e.pos_group;
-            auto group_w = e._w_by_group[grp_i];
-            auto group_h = e._h_by_group[grp_i];
-            auto _content_w = e.content.size.w;
-            auto _content_h = e.content.size.h;
-            if (1) {
-                if (_content_h > group_h)  // has empty space
-                    _e.pos.y      += (_content_h - group_h)/2;
-                else    // no empty space
-                    {}
-                _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
-                _e.aura.pos    = _e.pos;
-                _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
-            }
-            break;
-        }
+//        case 8: {
+//            auto grp_i = _e.pos_group;
+//            auto group_w = e._w_by_group[grp_i];
+//            auto group_h = e._h_by_group[grp_i];
+//            auto _content_w = e.content.size.w;
+//            auto _content_h = e.content.size.h;
+//            if (1) {
+//                if (_content_h > group_h)  // has empty space
+//                    _e.pos.y      += (_content_h - group_h)/2;
+//                else    // no empty space
+//                    {}
+//                _e.margin.pos  = Pos (_e.pos.x - _e.margin.size.w, _e.pos.y - _e.margin.size.h);
+//                _e.aura.pos    = _e.pos;
+//                _e.content.pos = Pos (_e.aura.pos.x + _e.aura.size.w, _e.aura.pos.y + _e.aura.size.h);
+//            }
+//            break;
+//        }
 
-        default:
-    }
-}
+//        default:
+//    }
+//}
 
 
 
-void
-pos_type_t9 (E* e) {
-    // 1 2 3 
-    // 8 9 4 
-    // 7 6 5 
-    auto _parent = e.parent;
+//void
+//pos_type_t9 (E* e) {
+//    // 1 2 3 
+//    // 8 9 4 
+//    // 7 6 5 
+//    auto _parent = e.parent;
 
-    switch (e.pos_group) {
-        case 1: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos = _parent.content.pos;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            writefln ("_passed_w: %s, _passed_h: %s", *_passed_w, *_passed_h);
+//    switch (e.pos_group) {
+//        case 1: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos = _parent.content.pos;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            writefln ("_passed_w: %s, _passed_h: %s", *_passed_w, *_passed_h);
 
-            final
-            switch (e.pos_dir) {
-                case E.PosDir.r:
-                    e.pos.x = _parent_content_pos.x + *_passed_w;
-                    e.pos.y = _parent_content_pos.y;
-                    break;
-                case E.PosDir.d:
-                    e.pos.x = _parent_content_pos.x;
-                    e.pos.y = _parent_content_pos.y + *_passed_h;
-                    break;
-                case E.PosDir.l: break;
-                case E.PosDir.u: break;
-            }
+//            final
+//            switch (e.pos_dir) {
+//                case E.PosDir.r:
+//                    e.pos.x = _parent_content_pos.x + *_passed_w;
+//                    e.pos.y = _parent_content_pos.y;
+//                    break;
+//                case E.PosDir.d:
+//                    e.pos.x = _parent_content_pos.x;
+//                    e.pos.y = _parent_content_pos.y + *_passed_h;
+//                    break;
+//                case E.PosDir.l: break;
+//                case E.PosDir.u: break;
+//            }
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 2: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + *_passed_w, 
-                    _parent_content_pos.y
-                );
+//        case 2: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + *_passed_w, 
+//                    _parent_content_pos.y
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 3: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
-                    _parent_content_pos.y
-                );
+//        case 3: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
+//                    _parent_content_pos.y
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 4: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + _parent_content_size.w - e.size.w,
-                    _parent_content_pos.y + *_passed_h
-                );
+//        case 4: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + _parent_content_size.w - e.size.w,
+//                    _parent_content_pos.y + *_passed_h
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 5: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
-                    _parent_content_pos.y + _parent_content_size.h - e.size.h
-                );
+//        case 5: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + _parent_content_size.w - *_passed_w - e.size.w,
+//                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 6: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + *_passed_w, 
-                    _parent_content_pos.y + _parent_content_size.h - e.size.h
-                );
+//        case 6: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + *_passed_w, 
+//                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 7: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x + *_passed_w, 
-                    _parent_content_pos.y + _parent_content_size.h - e.size.h
-                );
+//        case 7: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x + *_passed_w, 
+//                    _parent_content_pos.y + _parent_content_size.h - e.size.h
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 8: {
-            auto grp_i = e.pos_group;
-            auto _parent_content_pos  = _parent.content.pos;
-            auto _parent_content_size = _parent.content.size;
-            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
-            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos = 
-                Pos (
-                    _parent_content_pos.x, 
-                    _parent_content_pos.y + *_passed_h
-                );
+//        case 8: {
+//            auto grp_i = e.pos_group;
+//            auto _parent_content_pos  = _parent.content.pos;
+//            auto _parent_content_size = _parent.content.size;
+//            auto _passed_w = &_parent._passeed_w_by_group[grp_i];
+//            auto _passed_h = &_parent._passeed_h_by_group[grp_i];
+//            e.pos = 
+//                Pos (
+//                    _parent_content_pos.x, 
+//                    _parent_content_pos.y + *_passed_h
+//                );
 
-            _passed_w += e.size.w;
-            _passed_h += e.size.h;
-            break;
-        }
+//            _passed_w += e.size.w;
+//            _passed_h += e.size.h;
+//            break;
+//        }
 
-        case 9: {
-            // center
-            break;
-        }
+//        case 9: {
+//            // center
+//            break;
+//        }
 
-        default:
-    }
-}
+//        default:
+//    }
+//}
 
-void
-pos_type_t3 (E* e) {  // case of t9
-    // 1 2 3 
+//void
+//pos_type_t3 (E* e) {  // case of t9
+//    // 1 2 3 
 
-    pos_type_t9 (e);
-}
+//    pos_type_t9 (e);
+//}
 
 void
 pos_type_grid (E* e) {
@@ -1452,99 +1473,99 @@ pos_type_grid (E* e) {
     // e e e
 }
 
-void
-pos_type_vbox (E* e) {
-    // e
-    // e 
-    // e
+//void
+//pos_type_vbox (E* e) {
+//    // e
+//    // e 
+//    // e
     
-    E* prev = find_last_with_type (e, e.pos_type);
-    if (prev !is null) {
-        final
-        switch (e.pos_dir) {
-            case E.PosDir.r: break;
-            case E.PosDir.l: break;
-            case E.PosDir.d: 
-                auto prev_pos  = prev.pos;
-                auto prev_size = prev.size;
-                e.pos.x = prev_pos.x;
-                e.pos.y = (prev_pos.y + prev_size.h).to!Y;
-                break;
-            case E.PosDir.u: break;
-        }
-    }
-    else {
-        if (e.parent !is null) {
-            auto parent_content_pos = e.parent.content.pos;
-            e.pos.x = parent_content_pos.x;
-            e.pos.y = parent_content_pos.y;
-        }
-        else {
-            e.pos.x = 0;
-            e.pos.y = 0;
-        }
-    }
-}
+//    E* prev = find_last_with_type (e, e.pos_type);
+//    if (prev !is null) {
+//        final
+//        switch (e.pos_dir) {
+//            case E.PosDir.r: break;
+//            case E.PosDir.l: break;
+//            case E.PosDir.d: 
+//                auto prev_pos  = prev.pos;
+//                auto prev_size = prev.size;
+//                e.pos.x = prev_pos.x;
+//                e.pos.y = (prev_pos.y + prev_size.h).to!Y;
+//                break;
+//            case E.PosDir.u: break;
+//        }
+//    }
+//    else {
+//        if (e.parent !is null) {
+//            auto parent_content_pos = e.parent.content.pos;
+//            e.pos.x = parent_content_pos.x;
+//            e.pos.y = parent_content_pos.y;
+//        }
+//        else {
+//            e.pos.x = 0;
+//            e.pos.y = 0;
+//        }
+//    }
+//}
 
-void
-pos_type_hbox (E* e) {
-    // e e e
+//void
+//pos_type_hbox (E* e) {
+//    // e e e
 
-    E* prev = find_last_with_type (e, e.pos_type);
-    if (prev !is null) {
-        final
-        switch (e.pos_dir) {
-            case E.PosDir.r:
-                auto prev_pos  = prev.pos;
-                auto prev_size = prev.size;
-                e.pos.x = (prev_pos.x + prev_size.w).to!X;
-                e.pos.y =  prev_pos.y;
-                break;
-            case E.PosDir.l: break;
-            case E.PosDir.d: break;
-            case E.PosDir.u: break;
-        }
-    }
-    else {
-        if (e.parent !is null) {
-            auto parent_content_pos = e.parent.content.pos;
-            e.pos.x = parent_content_pos.x;
-            e.pos.y = parent_content_pos.y;
-        }
-        else {
-            e.pos.x = 0;
-            e.pos.y = 0;
-        }
-    }
-}
+//    E* prev = find_last_with_type (e, e.pos_type);
+//    if (prev !is null) {
+//        final
+//        switch (e.pos_dir) {
+//            case E.PosDir.r:
+//                auto prev_pos  = prev.pos;
+//                auto prev_size = prev.size;
+//                e.pos.x = (prev_pos.x + prev_size.w).to!X;
+//                e.pos.y =  prev_pos.y;
+//                break;
+//            case E.PosDir.l: break;
+//            case E.PosDir.d: break;
+//            case E.PosDir.u: break;
+//        }
+//    }
+//    else {
+//        if (e.parent !is null) {
+//            auto parent_content_pos = e.parent.content.pos;
+//            e.pos.x = parent_content_pos.x;
+//            e.pos.y = parent_content_pos.y;
+//        }
+//        else {
+//            e.pos.x = 0;
+//            e.pos.y = 0;
+//        }
+//    }
+//}
 
-void
-pos_type_percent (E* e) {
-    // - e ---
+//void
+//pos_type_percent (E* e) {
+//    // - e ---
     
-    if (e.parent !is null) {
-        auto parent_content_pos = e.parent.content.pos;
-        auto parent_w = e.parent.size.w;
-        auto percent = e.pos_percent;
-        e.pos.x = (parent_content_pos.x + (cast(float)parent_w * percent / 100)).to!X;
-        e.pos.y = parent_content_pos.y;
-    }
-    else {
-        e.pos.x = 0;
-        e.pos.y = 0;
-    }
-}
+//    if (e.parent !is null) {
+//        auto parent_content_pos = e.parent.content.pos;
+//        auto parent_w = e.parent.size.w;
+//        auto percent = e.pos_percent;
+//        e.pos.x = (parent_content_pos.x + (cast(float)parent_w * percent / 100)).to!X;
+//        e.pos.y = parent_content_pos.y;
+//    }
+//    else {
+//        e.pos.x = 0;
+//        e.pos.y = 0;
+//    }
+//}
 
-void
-pos_type_fixed (E* e) {
-    // e.pos.x = e.pos.x;
-    // e.pos.y = e.pos.y;
-}
+//void
+//pos_type_fixed (E* e) {
+//    // e.pos.x = e.pos.x;
+//    // e.pos.y = e.pos.y;
+//}
 
-void
-pos_type_none (E* e) {    
-    e.pos = Pos (0,0);
-}
+//void
+//pos_type_none (E* e) {    
+//    e.pos = Pos (0,0);
+//}
 
 E*
 find_last_in_group (E* e, ubyte pos_group) {
@@ -1652,7 +1673,8 @@ force_e_update (E* e) {
     UpdateUserEvent ev;
     ev.e = e;
     e.update (&ev);
-    e.update_size_pos ();
+    GCursor gcursor;    
+    e.e_update_size_pos (&gcursor);    
 }
 
 //void
