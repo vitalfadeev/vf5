@@ -7,6 +7,7 @@ import etree;
 import klass : Klass;
 import field : Field;
 import e_update : TemplateArg;
+import e_update : GCursor;
 import e_generator : Generator;
 import types;
 import tstring;
@@ -57,7 +58,7 @@ E {
     Pos        pos;        // relative from parent
     PosType    pos_type = PosType.none;
     ubyte      pos_group;
-    PosDir     pos_dir;
+    Way        way;
     byte       pos_percent;
     Size       size;       // = content.size + aura.size
     SizeType   size_w_type = SizeType.parent;
@@ -76,17 +77,7 @@ E {
     Klass*   hotkeys;
     E*       focused;
 
-    // child's sizes for pos
-    W[SizeType.max]     _w_by_type;
-    H[SizeType.max]     _h_by_type;
-    W[MAX_GROUP]        _w_by_group;
-    H[MAX_GROUP]        _h_by_group;
-    W                   _total_w;
-    H                   _total_h;
-    size_t[SizeType.max] _count_by_w_size_type;
-    size_t[SizeType.max] _count_by_h_size_type;
-    W[MAX_GROUP]        _passeed_w_by_group;
-    H[MAX_GROUP]        _passeed_h_by_group;
+    GCursor  gcursor;
 
     //
     struct
@@ -192,7 +183,7 @@ E {
             childs,
             image,
             text,
-            max,   // max (image,text)
+            max_,   // max (image,text)
             childs_image_text,
         }
     }
@@ -241,11 +232,11 @@ E {
         fixed,
     }
     enum
-    PosDir : ubyte {
-        r,
-        l,
-        t,
-        b,
+    Way : ubyte {
+        r,  // >
+        l,  // <
+        u,  //  ^
+        d,  //  v
     }
 
     enum 
@@ -321,23 +312,12 @@ E {
         hidden        = hidden.init;
         pos_type      = PosType.none; //
         pos_group     = pos_group.init;
-        pos_dir       = pos_dir.init;
+        way           = way.init;
         pos_percent   = pos_percent.init;
         size_w_type   = SizeType.parent; //
         size_h_type   = SizeType.parent; //
         //generator     = generator.init;
         on.length     = 0;
-        // sizes
-        _w_by_type          = _w_by_type.init;
-        _h_by_type          = _h_by_type.init;
-        _w_by_group         = _w_by_group.init;
-        _h_by_group         = _h_by_group.init;
-        _total_w            = _total_w.init;
-        _total_h            = _total_h.init;
-        _count_by_w_size_type = _count_by_w_size_type.init;
-        _count_by_h_size_type = _count_by_h_size_type.init;
-        _passeed_w_by_group = _passeed_w_by_group.init;
-        _passeed_h_by_group = _passeed_h_by_group.init;
 
         // remove e added from klass
         {
@@ -557,24 +537,12 @@ update (E* e, UpdateUserEvent* ev) {
     // ...
 
     // via klasses
-    foreach (kls; e.klasses) {
-        //import klasses.e;
-        //if (kls.name == "e")
-        //    klasses.e.update (kls,ev,e);
-        //else
+    foreach (kls; e.klasses)
         kls.update (ev,e);
-    }
 
     // to childs
-    foreach (_e; WalkChilds (e)) {
+    foreach (_e; WalkChilds (e))
         _e.update (ev);
-    }
-
-    // sizes is ready. update epos
-    import e_update : update_size_fix;
-    update_size_fix (e);
-    import e_update : update_pos_fix;
-    update_pos_fix (e);
 }
 
 void
@@ -612,7 +580,7 @@ _dup (EPtr _this) {
      cloned.from_template = _this.from_template;
      cloned.pos_type      = _this.pos_type;
      cloned.pos_group     = _this.pos_group;
-     cloned.pos_dir       = _this.pos_dir;
+     cloned.way           = _this.way;
      cloned.pos_percent   = _this.pos_percent;
      cloned.size_w_type   = _this.size_w_type;
      cloned.size_h_type   = _this.size_h_type;

@@ -35,6 +35,96 @@ const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
 
+struct
+GCursor {  // child's sizes for pos
+    _GCursor[MAX_GROUP+1] by_group;
+
+    struct
+    _GCursor {
+        X x;
+        Y y;
+
+        X start_x;  // is parent.content.x
+        Y start_y;  // is parent.content.y
+        W start_w;  // is parent.content.w
+        H start_h;  // is parent.content.h
+
+        W able_w;   // start_w
+        H able_h;   // start_h
+
+        W[E.SizeType.max+1]      w_by_type;
+        H[E.SizeType.max+1]      h_by_type;
+        size_t[E.SizeType.max+1] count_by_w_size_type;
+        size_t[E.SizeType.max+1] count_by_h_size_type;
+
+        E.Way way; // < > ^ v
+    }
+}
+
+
+void
+e_update_size_pos (E* e) {
+    e.gcursor = GCursor.init;
+
+    // <> ^ v
+    final
+    switch (e.way) {
+        case E.Way.r: e_update_size_pos_r (e); break;
+        case E.Way.l: break;
+        case E.Way.d: break;
+        case E.Way.u: break;
+    }
+
+    // recursive
+    foreach (_e; WalkChilds (e))
+        e_update_size_pos (_e);
+
+    // fix pos  : center
+    // fix size : same w, max
+    e_update_size_pos_fix (e);
+}
+
+void
+e_update_size_pos_r (E* e) {
+    assert (e.pos_group < MAX_GROUP);
+    auto gcursor = &e.gcursor.by_group[e.pos_group];
+    auto able_w = gcursor.able_w;
+
+    auto x = gcursor.x;
+    auto y = gcursor.y;
+
+    //
+    auto w = e.size.w;
+    w = (w >= 0) ? w : 0;
+    e.size.w = w;
+
+    auto h = e.size.h;
+    h = (h >= 0) ? h : 0;
+    e.size.h = h;
+
+    //
+    if (w < able_w) {  // OK
+        able_w -= w;
+    }
+    else {
+        x       = gcursor.start_x;
+        y      += h;
+        able_w  = gcursor.start_w;
+    }
+
+    //
+    e.pos         = Pos (x,y);
+    e.margin.pos  = Pos (x - e.margin.size.w, y - e.margin.size.h);
+    e.aura.pos    = e.pos;
+    e.content.pos = Pos (x + e.aura.size.w, y + e.aura.size.h);
+
+    // update cursor. set next position
+    gcursor.x      += w;
+    gcursor.y       = y;
+    gcursor.able_w  = able_w;
+}
+
+
 void
 remove_class_from_all (E* e, string s) {
     Klass* kls = e.find_klass (s);
@@ -518,12 +608,12 @@ update_total_sizes (E* e) {
     auto _parent = e.parent;
     if (_parent !is null) {
         // by size
-        _parent._w_by_type [e.size_w_type]         += e.size.w;
-        _parent._h_by_type [e.size_h_type]         += e.size.h;
-        _parent._w_by_group [e.pos_group]          += e.size.w;
-        _parent._h_by_group [e.pos_group]          += e.size.h;
-        _parent._total_w                           += e.size.w;
-        _parent._total_h                           += e.size.h;
+        _parent._w_by_type [e.size_w_type] += e.size.w;
+        _parent._h_by_type [e.size_h_type] += e.size.h;
+        _parent._w_by_group [e.pos_group]  += e.size.w;
+        _parent._h_by_group [e.pos_group]  += e.size.h;
+        _parent._total_w                   += e.size.w;
+        _parent._total_h                   += e.size.h;
         _parent._count_by_w_size_type [e.size_w_type]++;
         _parent._count_by_h_size_type [e.size_h_type]++;
     }
@@ -614,37 +704,7 @@ update_size_w_window (E* e) {
 
 void
 update_size_w_max (E* e) {
-    //assert (e.parent !is null);
-    //W parent_w = e.parent.content.size.w;
-    //W other_w;
-    //size_t max_cnt;
-
-    //// total
-    //foreach (_e; WalkChilds (e.parent)) {
-    //    if (_e.size_w_type == E.SizeType.max)
-    //        max_cnt ++;
-    //    else {
-    //        _e.update_e_size ();
-    //        other_w += _e.size.w;
-    //    }
-    //}
-
-    //// has max
-    //if (max_cnt >= 1) {
-    //    // divide
-    //    auto total_w = parent_w;
-
-    //    W one_max_w = (total_w - other_w) / max_cnt;
-
-    //    foreach (_e; WalkChilds (e.parent)) {
-    //        if (_e.size_w_type == E.SizeType.max)  {
-    //            auto ew = one_max_w;
-    //            auto cw = ew - e.aura.size.w - e.aura.size.w;
-    //            _e.size.w         = (ew > 0) ? ew : 0;
-    //            _e.content.size.w = (cw > 0) ? cw : 0;
-    //        }
-    //    }
-    //}
+    // update max after all, in update_size_fix ()
 }
 
 auto
@@ -706,7 +766,7 @@ update_size_h_window (E* e) {
 
 void
 update_size_h_max (E* e) {
-    //
+    // update max after all, in update_size_fix ()
 }
 
 void
@@ -1063,39 +1123,80 @@ update_e_pos (E* e) {
 }
 
 void
-update_size_fix (E* e) {
-    // update center group
-    switch (e.size_w_type) {
-        case E.SizeType.max: update_size_fix_max (e); break;
-        default:
-    }
+reset_total_sizes (E* e) {
+    // childs sizes, childs counts
+    e._w_by_type            = e._w_by_type.init;
+    e._h_by_type            = e._h_by_type.init;
+    e._w_by_group           = e._w_by_group.init;
+    e._h_by_group           = e._h_by_group.init;
+    e._total_w              = e._total_w.init;
+    e._total_h              = e._total_h.init;
+    e._count_by_w_size_type = e._count_by_w_size_type.init;
+    e._count_by_h_size_type = e._count_by_h_size_type.init;
+    e._passeed_w_by_group   = e._passeed_w_by_group.init;
+    e._passeed_h_by_group   = e._passeed_h_by_group.init;    
 }
 
 void
-update_size_fix_max (E* e) {
-    auto _content_w = e.content.size.w;
-    auto _content_h = e.content.size.h;
+update_size_pos (E* e) {
+    e.reset_total_sizes ();
 
-    // total
-    auto _cnt     = e._count_by_w_size_type[e.size_w_type];
-    auto _other_w = e._total_w - e._w_by_type[e.size_w_type];
-    auto _able_w  = _content_w;
+    // 7
+    if (1)
+        e.update_e_size ();
+    version (profile) time_step ("update_e_size");
 
-    if (_cnt > 0) {
-        W _one_w = (_able_w - _other_w) / _cnt;
+    // 8
+    if (1)
+        e.update_e_pos ();
+    version (profile) time_step ("update_e_pos");
 
-        foreach (_e; WalkChilds (e))
-            switch (_e.size_w_type) {
-                case E.SizeType.max : {
-                    auto ew = _one_w;
-                    auto cw = ew - e.aura.size.w - e.aura.size.w;
-                    _e.size.w         = (ew > 0) ? ew : 0;
-                    _e.content.size.w = (cw > 0) ? cw : 0;
-                    break;
-                }
-                default:
-            }
-    }
+    // to childs
+    foreach (_e; WalkChilds (e))
+        update_size_pos (_e);
+
+    // sizes is ready. update epos
+    import e_update : update_size_fix;
+    update_size_fix (e);
+    import e_update : update_pos_fix;
+    update_pos_fix (e);
+}
+
+
+void
+update_size_fix (E* e) {
+    // update center group
+    if (e._count_by_w_size_type[E.SizeType.max] > 0)
+    if (e.content.size.w > 0)
+        update_size_fix_max (e);
+}
+
+void
+update_size_fix_max (E* e /* is parent of max */) {
+    // childs sizes, childs counts
+    auto _cnt     = e._count_by_w_size_type[E.SizeType.max];
+    auto _other_w = e._total_w - e._w_by_type[E.SizeType.max];
+    auto _able_w  = e.content.size.w;
+    W    _one_w;
+
+    // find e with type "max"
+    foreach (_e; WalkChilds (e))
+        if (_e.size_w_type == E.SizeType.max) {
+            if (_e.pos_dir == E.PosDir.u || _e.pos_dir == E.PosDir.d)
+                _one_w = (_able_w - _other_w);         // full able width
+            else
+                _one_w = (_able_w - _other_w) / _cnt;
+            
+            writefln ("_cnt: %s, _other_w: %s, _able_w: %s, _one_w: %s, e: %s", _cnt, _other_w, _able_w, _one_w, *e);
+
+            auto ew = _one_w;
+            auto cw = ew - _e.aura.size.w - _e.aura.size.w;
+            _e.size.w         = (ew > 0) ? ew : 0;
+            _e.content.size.w = (cw > 0) ? cw : 0;
+
+            // update e with type "max", recursive update childs
+            update_size_pos (_e);
+        }
 }
 
 void
@@ -1174,6 +1275,7 @@ update_pos_fix_t9 (E* e, E* _e /* parent */) {
 }
 
 
+
 void
 pos_type_t9 (E* e) {
     // 1 2 3 
@@ -1187,8 +1289,21 @@ pos_type_t9 (E* e) {
             auto _parent_content_pos = _parent.content.pos;
             auto _passed_w = &_parent._passeed_w_by_group[grp_i];
             auto _passed_h = &_parent._passeed_h_by_group[grp_i];
-            e.pos.x = _parent_content_pos.x + *_passed_w;
-            e.pos.y = _parent_content_pos.y;
+            writefln ("_passed_w: %s, _passed_h: %s", *_passed_w, *_passed_h);
+
+            final
+            switch (e.pos_dir) {
+                case E.PosDir.r:
+                    e.pos.x = _parent_content_pos.x + *_passed_w;
+                    e.pos.y = _parent_content_pos.y;
+                    break;
+                case E.PosDir.d:
+                    e.pos.x = _parent_content_pos.x;
+                    e.pos.y = _parent_content_pos.y + *_passed_h;
+                    break;
+                case E.PosDir.l: break;
+                case E.PosDir.u: break;
+            }
 
             _passed_w += e.size.w;
             _passed_h += e.size.h;
@@ -1349,13 +1464,13 @@ pos_type_vbox (E* e) {
         switch (e.pos_dir) {
             case E.PosDir.r: break;
             case E.PosDir.l: break;
-            case E.PosDir.b: 
+            case E.PosDir.d: 
                 auto prev_pos  = prev.pos;
                 auto prev_size = prev.size;
                 e.pos.x = prev_pos.x;
                 e.pos.y = (prev_pos.y + prev_size.h).to!Y;
                 break;
-            case E.PosDir.t: break;
+            case E.PosDir.u: break;
         }
     }
     else {
@@ -1386,8 +1501,8 @@ pos_type_hbox (E* e) {
                 e.pos.y =  prev_pos.y;
                 break;
             case E.PosDir.l: break;
-            case E.PosDir.b: break;
-            case E.PosDir.t: break;
+            case E.PosDir.d: break;
+            case E.PosDir.u: break;
         }
     }
     else {
@@ -1537,6 +1652,7 @@ force_e_update (E* e) {
     UpdateUserEvent ev;
     ev.e = e;
     e.update (&ev);
+    e.update_size_pos ();
 }
 
 //void
@@ -1555,7 +1671,6 @@ time_step (string file_name=__FILE__, size_t line=__LINE__) {
         writefln ("%16s: %s", file_name, dur);
     last_time = cur;
 }
-
 
 auto
 max (A,B) (A a, B b) {

@@ -97,19 +97,10 @@ update (Klass* kls, UpdateUserEvent* ev, E* e) {
     version (profile) time_step ("load_e_text");
 
     // 6
-    if (1)
-        e.update_e_size ();
-    version (profile) time_step ("update_e_size");
-
-    // 7
-    if (1)
-        e.update_e_pos ();
-    version (profile) time_step ("update_e_pos");
-
-    // 8
     if (e.generator.type != Generator.Type.none)
         e.load_e_childs ();
     version (profile) time_step ("load_e_childs");
+
 }
 
 // KLASS_SET_FN
@@ -214,10 +205,12 @@ set_pos_type (E* e, TString[] values) {
             }
         }
         switch (values[1].s) {
-            case "b" : e.pos_dir = E.PosDir.b; break;
+            case "b" : e.pos_dir = E.PosDir.d; break;
+            case "d" : e.pos_dir = E.PosDir.d; break;
             case "r" : e.pos_dir = E.PosDir.r; break;
             case "l" : e.pos_dir = E.PosDir.l; break;
-            case "t" : e.pos_dir = E.PosDir.t; break;
+            case "t" : e.pos_dir = E.PosDir.u; break;
+            case "u" : e.pos_dir = E.PosDir.u; break;
             default:
                 e.pos_dir = E.PosDir.r;
         }
@@ -230,7 +223,7 @@ set_pos_type (E* e, TString[] values) {
             case "3"       : e.pos_type = E.PosType.t3; break;
             case "t3"      : e.pos_type = E.PosType.t3; break;
             case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "vbox"    : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.b; break;
+            case "vbox"    : e.pos_type = E.PosType.vbox; e.pos_dir = E.PosDir.d; break;
             case "hbox"    : e.pos_type = E.PosType.hbox; e.pos_dir = E.PosDir.r; break;
             case "percent" : e.pos_type = E.PosType.percent; break;
             case "fixed"   : e.pos_type = E.PosType.fixed; break;
@@ -280,8 +273,10 @@ set_pos_dir (E* e, TString[] values) {
         switch (values[0].s) {
             case "r": e.pos_dir = E.PosDir.r; break;
             case "l": e.pos_dir = E.PosDir.l; break;
-            case "t": e.pos_dir = E.PosDir.b; break;
-            case "b": e.pos_dir = E.PosDir.l; break;
+            case "t": e.pos_dir = E.PosDir.u; break;
+            case "u": e.pos_dir = E.PosDir.u; break;
+            case "b": e.pos_dir = E.PosDir.d; break;
+            case "d": e.pos_dir = E.PosDir.d; break;
             default:
         }
     }

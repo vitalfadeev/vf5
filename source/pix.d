@@ -188,7 +188,7 @@ event (Pix* pix, Event* ev, E* root) {
         }
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.update : root.update (&ev._user.update); break;
+                case USER_EVENT.update : update (&ev._user.update,root); break;
                 case USER_EVENT.draw   : pix.draw    (ev,root); break;
                 case USER_EVENT.redraw : pix.draw    (ev,root); break;
                 default                : //root.event  (ev);
@@ -208,10 +208,12 @@ void
 update (E* root) {
     UpdateUserEvent ev;
     root.update (&ev); 
+    root.e_update_size_pos ();
 }
 void
 update (UpdateUserEvent* ev, E* root) {
     root.update (ev); 
+    root.e_update_size_pos ();
 }
 
 void

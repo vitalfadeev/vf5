@@ -42,18 +42,18 @@ dir-list-template
   e dir-list-template-name
 
 dir-list-template-name
-  pos.type     vbox
+  size         max 32
+  pos.type     t9
   pos.group    1
   pos.dir      d
-  size         max 32
   content.size e
   aura         1
   borders      1 solid #444
   text         NAME
 
 scrollbar
-  pos.type  9
-  pos.group 4
+  pos.type  t9
+  pos.group 3
   size 32 parent
   aura 2
   aura.color #ccc
