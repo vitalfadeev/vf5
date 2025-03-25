@@ -82,7 +82,7 @@ e_update_size_pos (E* e, GCursor* big_gcursor) {
     switch (e.way) {
         case E.Way.r: e_update_size_pos_r (e,gcursor); break;
         case E.Way.l: break;
-        case E.Way.d: break;
+        case E.Way.d: e_update_size_pos_d (e,gcursor); break;
         case E.Way.u: break;
     }
     writefln ("way: %s, pos: %s, size: %s, e: %s", e.way, e.pos, e.size, *e);
@@ -126,6 +126,7 @@ new_gcursor (E* e) {
 void
 e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
     auto able_w = gcursor.able_w;
+    auto able_h = gcursor.able_h;
 
     auto x = gcursor.x;
     auto y = gcursor.y;
@@ -148,15 +149,61 @@ e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
         x       = gcursor.start_x;
         y      += h;
         able_w  = gcursor.start_w;
+        able_h -= h;
     }
 
     //
     _e_update_pos (e,x,y);
 
     // update cursor. set next position
-    gcursor.x          = x + w;
-    gcursor.y          = y;
+    gcursor.x          = x + w;  // next_x
+    gcursor.y          = y;      // next_y
     gcursor.able_w     = able_w;
+    gcursor.able_h     = able_h;
+    gcursor.max_used_w = (x + w) > gcursor.max_used_w ? x + w : gcursor.max_used_w;
+    gcursor.max_used_h = (y + h) > gcursor.max_used_h ? y + h : gcursor.max_used_h;
+
+    //
+    e_update_total_sizes (e,gcursor);
+}
+
+void
+e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
+    auto able_w = gcursor.able_w;
+    auto able_h = gcursor.able_h;
+
+    auto x = gcursor.x;
+    auto y = gcursor.y;
+    
+    //
+    e_update_size (e);
+    auto w = e.size.w;
+    w = (w >= 0) ? w : 0;
+    e.size.w = w;
+
+    auto h = e.size.h;
+    h = (h >= 0) ? h : 0;
+    e.size.h = h;
+
+    //
+    if (h <= able_h) {  // OK
+        able_h -= h;
+    }
+    else {
+        x      += w;
+        y       = gcursor.start_y;
+        able_h  = gcursor.start_h;
+        able_w -= w;
+    }
+
+    //
+    _e_update_pos (e,x,y);
+
+    // update cursor. set next position
+    gcursor.x          = x;      // next_x
+    gcursor.y          = y + h;  // next_y
+    gcursor.able_w     = able_w;
+    gcursor.able_h     = able_h;
     gcursor.max_used_w = (x + w) > gcursor.max_used_w ? x + w : gcursor.max_used_w;
     gcursor.max_used_h = (y + h) > gcursor.max_used_h ? y + h : gcursor.max_used_h;
 
@@ -280,19 +327,19 @@ e_update_size (E* e) {
         case E.SizeType.max     : e_update_size_w_max     (e); break;
     }
 
-    //final
-    //switch (e.size_h_type) {
-    //    case E.SizeType.fixed   : update_size_h_fixed   (e); break;
-    //    case E.SizeType.content : update_size_h_content (e); break;
-    //    case E.SizeType.parent  : update_size_h_parent  (e); break;
-    //    case E.SizeType.window  : update_size_h_window  (e); break;
-    //    case E.SizeType.max     : update_size_h_max     (e); break;
-    //}
+    final
+    switch (e.size_h_type) {
+        case E.SizeType.fixed   : e_update_size_h_fixed   (e); break;
+        case E.SizeType.content : e_update_size_h_content (e); break;
+        case E.SizeType.parent  : e_update_size_h_parent  (e); break;
+        case E.SizeType.window  : e_update_size_h_window  (e); break;
+        case E.SizeType.max     : e_update_size_h_max     (e); break;
+    }
 }
 
 void
 e_update_size_w_fixed (E* e) {
-    _e_update_size (
+    _e_update_size_w (
         e, 
         e.size.w, 
         e.size.w - e.aura.size.w - e.aura.size.w
@@ -302,7 +349,7 @@ e_update_size_w_fixed (E* e) {
 void
 e_update_size_w_content (E* e) {
     //update_content_size_w (e);  // update content.size.w
-    _e_update_size (
+    _e_update_size_w (
         e, 
         e.content.size.w + e.aura.size.w + e.aura.size.w, 
         e.content.size.w
@@ -312,7 +359,7 @@ e_update_size_w_content (E* e) {
 void
 e_update_size_w_parent (E* e) {
     if (e.parent !is null)
-        _e_update_size (
+        _e_update_size_w (
             e, 
             e.parent.content.size.w, 
             e.parent.content.size.w - e.aura.size.w - e.aura.size.w
@@ -325,13 +372,13 @@ void
 e_update_size_w_window (E* e) {
     auto window = e.find_window ();
     if (window !is null)
-        _e_update_size (
+        _e_update_size_w (
             e, 
             window.size.w, 
             window.size.w - e.aura.size.w - e.aura.size.w
         );
     else
-        _e_update_size (
+        _e_update_size_w (
             e, 
             DEFAULT_WINDOW_W, 
             DEFAULT_WINDOW_W - e.aura.size.w - e.aura.size.w
@@ -343,11 +390,69 @@ e_update_size_w_max (E* e) {
     // update max after all, in update_size_fix ()
 }
 
+
+void
+e_update_size_h_fixed (E* e) {
+    _e_update_size_h (
+        e, 
+        e.size.h, 
+        e.size.h - e.aura.size.h - e.aura.size.h
+    );
+}
+
+void
+e_update_size_h_content (E* e) {
+    _e_update_size_h (
+        e, 
+        e.content.size.h + e.aura.size.h + e.aura.size.h, 
+        e.content.size.h
+    );
+}
+
+void
+e_update_size_h_parent (E* e) {
+    if (e.parent !is null)
+        _e_update_size_h (
+            e, 
+            e.parent.content.size.h, 
+            e.parent.content.size.h - e.aura.size.h - e.aura.size.h
+        );
+    else
+        e_update_size_h_window (e);
+}
+
+void
+e_update_size_h_window (E* e) {
+    auto window = e.find_window ();
+    if (window !is null)
+        _e_update_size_h (
+            e, 
+            window.size.h, 
+            window.size.h - e.aura.size.h - e.aura.size.h
+        );
+    else
+        _e_update_size_h (
+            e, 
+            DEFAULT_WINDOW_H, 
+            DEFAULT_WINDOW_H - e.aura.size.h - e.aura.size.h
+        );
+}
+
+void
+e_update_size_h_max (E* e) {
+    // update max after all, in update_size_fix ()
+}
+
 // ////////////////////////////////////////////////
 void
-_e_update_size (E* e, W ew, W cw) {
+_e_update_size_w (E* e, W ew, W cw) {
     e.size.w         = (ew > 0) ? ew : 0;
     e.content.size.w = (cw > 0) ? cw : 0;
+}
+void
+_e_update_size_h (E* e, W eh, W ch) {
+    e.size.h         = (eh > 0) ? eh : 0;
+    e.content.size.h = (ch > 0) ? ch : 0;
 }
 void
 _e_update_pos (E* e, X x, Y y) {
@@ -851,58 +956,6 @@ dump_size (E* e, int level=0) {
 
 
 
-void
-update_size_h_fixed (E* e) {
-    auto eh = e.size.h;
-    auto ch = eh - e.aura.size.h - e.aura.size.h;
-    e.size.h         = (eh > 0) ? eh : 0;
-    e.content.size.h = (ch > 0) ? ch : 0;
-}
-
-void
-update_size_h_content (E* e) {
-    //update_content_size_h (e);
-
-    auto eh = e.content.size.h + e.aura.size.h + e.aura.size.h;
-    auto ch = e.content.size.h;
-    e.size.h         = (eh > 0) ? eh : 0;
-    e.content.size.h = (ch > 0) ? ch : 0;
-}
-
-void
-update_size_h_parent (E* e) {
-    if (e.parent !is null) {
-        auto eh = e.parent.content.size.h;
-        auto ch = eh - e.aura.size.h - e.aura.size.h;
-        e.size.h         = (eh > 0) ? eh : 0;
-        e.content.size.h = (ch > 0) ? ch : 0;
-    }
-    else {
-        update_size_h_window (e);
-    }
-}
-
-void
-update_size_h_window (E* e) {
-    auto window = e.find_window ();
-    if (window !is null) {
-        auto eh = window.size.h;
-        auto ch = eh - e.aura.size.h - e.aura.size.h;
-        e.size.h         = (eh > 0) ? eh : 0;
-        e.content.size.h = (ch > 0) ? ch : 0;
-    }
-    else {
-        auto eh = DEFAULT_WINDOW_H;
-        auto ch = eh - e.aura.size.h - e.aura.size.h;
-        e.size.h         = (eh > 0) ? eh : 0;
-        e.content.size.h = (ch > 0) ? ch : 0;
-    }
-}
-
-void
-update_size_h_max (E* e) {
-    // update max after all, in update_size_fix ()
-}
 
 //void
 //update_content_size_w (E* e) {

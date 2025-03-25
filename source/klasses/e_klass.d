@@ -113,6 +113,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "pos.type"          : set_pos_type           (e,values); break;
         case "pos.group"         : set_pos_group          (e,values); break;
         case "pos.way"           : set_way                (e,values); break;
+        case "way"               : set_way                (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
         case "size.h"            : set_size_h             (e,values); break;
         case "size"              : set_size               (e,values); break;
