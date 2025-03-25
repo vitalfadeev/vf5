@@ -208,14 +208,14 @@ void
 update (E* root) {
     UpdateUserEvent ev;
     root.update (&ev); 
-    GCursor gcursor;
-    root.e_update_size_pos (&gcursor);
+    auto gcursor = new_gcursor (root);
+    root.e_update_size_pos (gcursor);
 }
 void
 update (UpdateUserEvent* ev, E* root) {
     root.update (ev); 
-    GCursor gcursor;
-    root.e_update_size_pos (&gcursor);
+    auto gcursor = new_gcursor (root);
+    root.e_update_size_pos (gcursor);
 }
 
 void
@@ -223,6 +223,7 @@ draw (Pix* pix, Event* ev, E* root) {
     DrawUserEvent draw_ev;
     draw_ev.renderer = ev.renderer;
     pix.draw (&draw_ev,root);
+    dump_sizes (root);
 }
 
 void
