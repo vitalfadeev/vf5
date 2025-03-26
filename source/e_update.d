@@ -436,7 +436,7 @@ e_update_size_w_fixed (E* e) {
 
 void
 e_update_size_w_content (E* e) {
-    //update_content_size_w (e);  // update content.size.w
+    e_update_content_size_w (e);  // update content.size.w
     _e_update_size_w (
         e, 
         e.content.size.w + e.aura.size.w + e.aura.size.w, 
@@ -1002,32 +1002,47 @@ dump_size (E* e, int level=0) {
 }
 
 
+
 void
-update_content_size_w_e (E* e) {
-    auto cw = e.size.w;
-    e.content.size.w = (cw > 0) ? cw : 0;
+e_update_content_size_w (E* e) {
+    final
+    switch (e.content.size_h_type) {
+        case E.Content.SizeType.e      : e_update_content_size_w_e      (e); break;
+        case E.Content.SizeType.fixed  : e_update_content_size_w_fixed  (e); break;
+        case E.Content.SizeType.childs : e_update_content_size_w_childs (e); break;
+        case E.Content.SizeType.image  : e_update_content_size_w_image  (e); break;
+        case E.Content.SizeType.text   : e_update_content_size_w_text   (e); break;
+        case E.Content.SizeType.max_   : e_update_content_size_w_max    (e); break;
+        case E.Content.SizeType.childs_image_text : 
+                                         e_update_content_size_w_childs_image_text (e); break;
+    }
 }
 
 void
-update_content_size_w_fixed (E* e) {
-    auto cw = e.content.size.w;
-    e.content.size.w = (cw > 0) ? cw : 0;
+_update_content_size_w (E* e, W w) {
+    e.content.size.w = (w > 0) ? w : 0;
 }
 
 void
-update_content_size_w_image (E* e) {
-    update_content_image_size_w (e);
-
-    auto cw = e.content.image.size.w;
-    e.content.size.w = (cw > 0) ? cw : 0;
+e_update_content_size_w_e (E* e) {
+    _update_content_size_w (e, e.size.w);
 }
 
 void
-update_content_size_w_text (E* e) {
-    update_content_text_size_w (e);
+e_update_content_size_w_fixed (E* e) {
+    _update_content_size_w (e, e.content.size.w);
+}
 
-    auto cw = e.content.text.size.w;
-    e.content.size.w = (cw > 0) ? cw : 0;
+void
+e_update_content_size_w_image (E* e) {
+    e_update_content_image_size_w (e);
+    _update_content_size_w (e, e.content.image.size.w);
+}
+
+void
+e_update_content_size_w_text (E* e) {
+    e_update_content_text_size_w (e);
+    _update_content_size_w (e, e.content.text.size.w);
 }
 
 // e.size = content
@@ -1037,15 +1052,13 @@ update_content_size_w_text (E* e) {
 // content.size = e
 //   update parent e
 void
-update_content_size_w_childs (E* e) {
-    update_content_childs_size (e);
-
-    auto cw = e.content.childs_size.w;
-    e.content.size.w = (cw > 0) ? cw : 0;
+e_update_content_size_w_childs (E* e) {
+    e_update_content_childs_size (e);
+    _update_content_size_w (e, e.content.childs_size.w);
 }
 
 void
-update_content_childs_size (E* e) {
+e_update_content_childs_size (E* e) {
     Size max_sz;
     foreach (_e; WalkChilds (e)) {
         _e.force_e_update ();
@@ -1066,29 +1079,103 @@ update_content_childs_size (E* e) {
 
 
 void
-update_content_size_w_max (E* e) {
-    e.content.size.w = max (e.content.image.size.w, e.content.text.size.w);
+e_update_content_size_w_max (E* e) {
+    _update_content_size_w (e, max (e.content.image.size.w, e.content.text.size.w));
 }
 
 void
-update_content_size_w_childs_image_text (E* e) {
+e_update_content_size_w_childs_image_text (E* e) {
     if (e.has_childs) {
-        e.content.size.w = e.content.childs_size.w;
+        _update_content_size_w (e, e.content.childs_size.w);
         return;
     }
 
     if (e.content.image.ptr) {
-        e.content.size.w = e.content.image.size.w;
+        _update_content_size_w (e, e.content.image.size.w);
         return;
     }
 
     if (e.content.text.s.length) {
-        e.content.size.w = e.content.text.size.w;
+        _update_content_size_w (e, e.content.text.size.w);
         return;
     }
 
     //e.content.size.w = 0;
 }
+
+void
+e_update_content_image_size_w (E* e) {
+    final
+    switch (e.content.image.size_w_type) {
+        case E.Content.Image.SizeType.fixed   : e_update_content_image_size_w_fixed   (e); break;
+        case E.Content.Image.SizeType.image   : e_update_content_image_size_w_image   (e); break;
+        case E.Content.Image.SizeType.text    : e_update_content_image_size_w_text    (e); break;
+        case E.Content.Image.SizeType.content : e_update_content_image_size_w_content (e); break;
+    }
+}
+
+void 
+e_update_content_image_size_w_fixed (E* e) {
+    e.content.image.size.w = e.content.image.size.w;
+}
+
+void 
+e_update_content_image_size_w_image (E* e) {
+    if (e.content.image.ptr !is null) {
+        auto img_surface = e.content.image.ptr;
+        e.content.image.size.w = cast(ushort)img_surface.w;
+    }
+    else {
+        //e.cached.content_image_size = e.cached.content_image_size;
+        assert (0, "Image ptr is null");
+    }
+}
+
+void 
+e_update_content_image_size_w_text (E* e) {
+    e.content.image.size.w = e.content.text.size.w;
+}
+
+void 
+e_update_content_image_size_w_content (E* e) {
+    e.content.image.size.w = e.content.size.w;
+}
+
+void
+e_update_content_text_size_w (E* e) {
+    final
+    switch (e.content.text.size_w_type) {
+        case E.Content.Text.SizeType.fixed   : e_update_content_text_size_w_fixed   (e); break;
+        case E.Content.Text.SizeType.text    : e_update_content_text_size_w_text    (e); break;
+        case E.Content.Text.SizeType.image   : e_update_content_text_size_w_image   (e); break;
+        case E.Content.Text.SizeType.content : e_update_content_text_size_w_content (e); break;
+    }
+}
+
+void 
+e_update_content_text_size_w_image (E* e) {    
+    e.content.text.size.w = e.content.image.size.w;
+}
+
+void 
+e_update_content_text_size_w_fixed (E* e) {
+    //e.content.text.size.w = e.content.text.size.w;
+}
+
+void 
+e_update_content_text_size_w_text (E* e) {
+    e.content.text.size.w = get_text_size (
+        e.content.text.s, 
+        e.content.text.font.ptr, 
+        e.content.text.fg
+    ).w;
+}
+
+void 
+e_update_content_text_size_w_content (E* e) {
+    e.content.text.size.w = e.content.size.w;
+}
+
 
 //void
 //update_content_size_h (E* e) {
@@ -1134,7 +1221,7 @@ update_content_size_h_text (E* e) {
 
 void
 update_content_size_h_childs (E* e) {
-    update_content_childs_size (e);
+    e_update_content_childs_size (e);
 
     auto ch = e.content.childs_size.h;
     e.content.size.h = (ch > 0) ? ch : 0;
@@ -1163,44 +1250,6 @@ update_content_size_h_max (E* e) {
 void
 update_content_size_h_childs_image_text (E* e) {
     e.content.size.h = max (e.content.image.size.h, e.content.text.size.h);
-}
-
-void
-update_content_image_size_w (E* e) {
-    final
-    switch (e.content.image.size_w_type) {
-        case E.Content.Image.SizeType.fixed   : update_content_image_size_w_fixed   (e); break;
-        case E.Content.Image.SizeType.image   : update_content_image_size_w_image   (e); break;
-        case E.Content.Image.SizeType.text    : update_content_image_size_w_text    (e); break;
-        case E.Content.Image.SizeType.content : update_content_image_size_w_content (e); break;
-    }
-}
-
-void 
-update_content_image_size_w_fixed (E* e) {
-    e.content.image.size.w = e.content.image.size.w;
-}
-
-void 
-update_content_image_size_w_image (E* e) {
-    if (e.content.image.ptr !is null) {
-        auto img_surface = e.content.image.ptr;
-        e.content.image.size.w = cast(ushort)img_surface.w;
-    }
-    else {
-        //e.cached.content_image_size = e.cached.content_image_size;
-        assert (0, "Image ptr is null");
-    }
-}
-
-void 
-update_content_image_size_w_text (E* e) {
-    e.content.image.size.w = e.content.text.size.w;
-}
-
-void 
-update_content_image_size_w_content (E* e) {
-    e.content.image.size.w = e.content.size.w;
 }
 
 void
@@ -1241,41 +1290,6 @@ update_content_image_size_h_content (E* e) {
     e.content.image.size.h = e.content.size.h;
 }
 
-
-void
-update_content_text_size_w (E* e) {
-    final
-    switch (e.content.text.size_w_type) {
-        case E.Content.Text.SizeType.fixed   : update_content_text_size_w_fixed   (e); break;
-        case E.Content.Text.SizeType.text    : update_content_text_size_w_text    (e); break;
-        case E.Content.Text.SizeType.image   : update_content_text_size_w_image   (e); break;
-        case E.Content.Text.SizeType.content : update_content_text_size_w_content (e); break;
-    }
-}
-
-void 
-update_content_text_size_w_image (E* e) {    
-    e.content.text.size.w = e.content.image.size.w;
-}
-
-void 
-update_content_text_size_w_fixed (E* e) {
-    //e.content.text.size.w = e.content.text.size.w;
-}
-
-void 
-update_content_text_size_w_text (E* e) {
-    e.content.text.size.w = get_text_size (
-        e.content.text.s, 
-        e.content.text.font.ptr, 
-        e.content.text.fg
-    ).w;
-}
-
-void 
-update_content_text_size_w_content (E* e) {
-    e.content.text.size.w = e.content.size.w;
-}
 
 void
 update_content_text_size_h (E* e) {

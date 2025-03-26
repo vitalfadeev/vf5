@@ -41,12 +41,15 @@ root
 
 menubar
  size         parent content
- content.size childs
+ //size         parent 32
+ //content.size childs
+ content.size e 32
  bg           colors.bg
  borders      1 solid colors.gray_border
 
 menubar-item
- size         content
+ size         content 32
+ //size         180 32
  content.size text
  aura         8
  aura.color   colors.bg
@@ -54,14 +57,17 @@ menubar-item
  text.bg      colors.bg
 
 toolbar
- size         parent content
- content.size e childs
+ //size         parent content
+ size         parent 48
+ //content.size e childs
+ content.size e 48
  bg           colors.bg
  borders      1 solid colors.gray_border
 
 toolbar-item
- size         content
- content.size 40 40
+ //size         content
+ size         48 48
+ //content.size 40 40
  aura         2
  aura.color   colors.bg
 // borders      1 solid colors.gray_border
@@ -212,48 +218,50 @@ tb-volume
 3-left
  pos.type  3
  pos.group 1
- pos.dir   r
+ pos.way   r
 
 3-center
  pos.type  3
  pos.group 2
- pos.dir   r
+ pos.way   r
 
 3-right
  pos.type  3
  pos.group 3
- pos.dir   r
+ pos.way   r
 
 9-top-left
  pos.type  9
  pos.group 1
- pos.dir   r
+ pos.way   r
 
 9-top-right
  pos.type  9
  pos.group 3
- pos.dir   r
+ pos.way   r
 
 9-center-left
  pos.type  9
  pos.group 8
- pos.dir   r
+ pos.way   r
 
 9-bottom-left
  pos.type  9
  pos.group 7
- pos.dir   r
+ pos.way   r
 
 9-bottom-right
  pos.type  9
  pos.group 4
- pos.dir   r
+ pos.way   r
 
 vbox
- pos.type  vbox b
+ pos.type  t9
+ pos.way   d
 
 hbox
- pos.type  hbox r
+pos.type  t9
+pos.way   r
 
 hidden
  hidden 1
