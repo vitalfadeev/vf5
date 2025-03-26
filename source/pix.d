@@ -223,7 +223,6 @@ draw (Pix* pix, Event* ev, E* root) {
     DrawUserEvent draw_ev;
     draw_ev.renderer = ev.renderer;
     pix.draw (&draw_ev,root);
-    dump_sizes (root);
 }
 
 void

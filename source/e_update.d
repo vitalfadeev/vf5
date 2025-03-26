@@ -1,6 +1,7 @@
 module e_update;
 
 import std.conv;
+import std.array : replicate;
 import std.string;
 import std.string : startsWith;
 import std.string : fromStringz, toStringz; 
@@ -57,6 +58,9 @@ GCursor {  // child's sizes for pos
         W able_w;   // start_w
         H able_h;   // start_h
 
+        W used_w;
+        H used_h;
+
         W max_used_w;
         H max_used_h;
 
@@ -73,7 +77,7 @@ GCursor {  // child's sizes for pos
 
 
 void
-e_update_size_pos (E* e, GCursor* big_gcursor) {
+e_update_size_pos (E* e, GCursor* big_gcursor, int deep=0) {
     assert (e.pos_group < MAX_GROUP);
     auto gcursor = &big_gcursor.by_group[e.pos_group];
 
@@ -94,7 +98,8 @@ e_update_size_pos (E* e, GCursor* big_gcursor) {
         case E.Way.ul : break;
         case E.Way._  : break;
     }
-    writefln ("way: %s, pos: %s, size: %s, e: %s", e.way, e.pos, e.size, *e);
+    version (debug_update)
+    writefln ("%s way: %s, pos: %s, size: %s, e: %s", replicate(" ", deep*2), e.way, e.pos, e.size, *e);
 
     // recursive
     if (e.has_childs)
@@ -102,11 +107,12 @@ e_update_size_pos (E* e, GCursor* big_gcursor) {
     if (e.size.h > 0) { 
         auto _big_gcursor = new_gcursor (e);
         foreach (_e; WalkChilds (e))
-            e_update_size_pos (_e,_big_gcursor);
+            e_update_size_pos (_e,_big_gcursor,deep+1);
 
-        // fix pos  : center
-        // fix size : max
-        e_update_size_pos_fix (e,_big_gcursor);
+        // move groups
+        //   fix pos  : center
+        //   fix size : max
+        e_update_size_pos_fix (e,_big_gcursor,deep);
     }
 }
 
@@ -140,6 +146,8 @@ new_gcursor (E* e) {
 
 void
 e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
+    auto used_w = gcursor.used_w;
+    auto used_h = gcursor.used_h;
     auto able_w = gcursor.able_w;
     auto able_h = gcursor.able_h;
 
@@ -152,15 +160,12 @@ e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
     //
     e_update_size (e);
     auto w = e.size.w;
-    w = (w >= 0) ? w : 0;
-    e.size.w = w;
-
     auto h = e.size.h;
-    h = (h >= 0) ? h : 0;
-    e.size.h = h;
+    used_h = h;
 
     //
     if (w <= able_w) {  // OK
+        used_w += w;
         able_w -= w;
         next_x  = x + w;
     }
@@ -168,10 +173,15 @@ e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
         if (e.way == E.Way.rd) {
             x       = gcursor.start_x;
             y      += h;
+            used_w  = 0;
             able_w  = gcursor.start_w;
+            used_h += h;
             able_h -= h;
             next_x  = x + w;
             next_y  = y;
+        } 
+        else {
+            // stay at last x,y
         }
     }
 
@@ -181,10 +191,12 @@ e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
     // update cursor. set next position
     gcursor.x          = next_x;
     gcursor.y          = next_y;
+    gcursor.used_w     = used_w;
+    gcursor.used_h     = used_h;
     gcursor.able_w     = able_w;
     gcursor.able_h     = able_h;
-    gcursor.max_used_w = (x + w) > gcursor.max_used_w ? x + w : gcursor.max_used_w;
-    gcursor.max_used_h = (y + h) > gcursor.max_used_h ? y + h : gcursor.max_used_h;
+    gcursor.max_used_w = used_w > gcursor.max_used_w ? used_w : gcursor.max_used_w;
+    gcursor.max_used_h = used_h > gcursor.max_used_h ? used_h : gcursor.max_used_h;
 
     //
     e_update_total_sizes (e,gcursor);
@@ -192,6 +204,8 @@ e_update_size_pos_r (GCursor) (E* e, GCursor* gcursor) {
 
 void
 e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
+    auto used_w = gcursor.used_w;
+    auto used_h = gcursor.used_h;
     auto able_w = gcursor.able_w;
     auto able_h = gcursor.able_h;
 
@@ -204,15 +218,12 @@ e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
     //
     e_update_size (e);
     auto w = e.size.w;
-    w = (w >= 0) ? w : 0;
-    e.size.w = w;
-
     auto h = e.size.h;
-    h = (h >= 0) ? h : 0;
-    e.size.h = h;
+    used_w = w;
 
     //
     if (h <= able_h) {  // OK
+        used_h += h;
         able_h -= h;
         next_y  = y + h;
     }
@@ -220,10 +231,15 @@ e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
         if (e.way == E.Way.dr) {
             x      += w;
             y       = gcursor.start_y;
+            used_h  = 0;
             able_h  = gcursor.start_h;
+            used_w += w;
             able_w -= w;
             next_x  = x;
             next_y  = y + h;
+        }
+        else {
+            // stay at last x,y
         }
     }
 
@@ -233,17 +249,19 @@ e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
     // update cursor. set next position
     gcursor.x          = next_x;
     gcursor.y          = next_y;
+    gcursor.used_w     = used_w;
+    gcursor.used_h     = used_h;
     gcursor.able_w     = able_w;
     gcursor.able_h     = able_h;
-    gcursor.max_used_w = (x + w) > gcursor.max_used_w ? x + w : gcursor.max_used_w;
-    gcursor.max_used_h = (y + h) > gcursor.max_used_h ? y + h : gcursor.max_used_h;
+    gcursor.max_used_w = used_w > gcursor.max_used_w ? used_w : gcursor.max_used_w;
+    gcursor.max_used_h = used_h > gcursor.max_used_h ? used_h : gcursor.max_used_h;
 
     //
     e_update_total_sizes (e,gcursor);
 }
 
 void
-e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
+e_update_size_pos_fix (E* e, GCursor* big_gcursor, int deep) {
     X offset_x;
     Y offset_y;
 
@@ -253,19 +271,42 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
 
         //
         // size max
-        if (_e.size_w_type == E.SizeType.max_)
-        if (gcursor.count_by_w_size_type[E.SizeType.max_] > 0) {
-            W ew = (gcursor.start_w - gcursor.max_used_w) / gcursor.count_by_w_size_type[E.SizeType.max_];
-            _e_update_size_w (
-                _e, 
-                ew,
-                ew - _e.aura.size.w - _e.aura.size.w
-            );
-            changed = true;
+        if (_e.size_w_type == E.SizeType.max_) {
+            if (_e.way == E.Way.r) {
+                auto max_cnt = gcursor.count_by_w_size_type[E.SizeType.max_];
+
+                if (max_cnt > 0) {            
+                    W one_max_w = 
+                        (max_cnt > 0) ?
+                            (gcursor.start_w - gcursor.max_used_w) / max_cnt:
+                            0;
+
+                    _e_update_size_w (
+                        _e, 
+                        one_max_w,
+                        one_max_w - _e.aura.size.w - _e.aura.size.w
+                    );
+                    changed = true;
+                }
+            }
+            else  // max_cnt ... full size ... = 1... way d
+            if (_e.way == E.Way.d) {
+                {
+                    W one_max_w = (gcursor.start_w - gcursor.max_used_w);
+
+                    _e_update_size_w (
+                        _e, 
+                        one_max_w,
+                        one_max_w - _e.aura.size.w - _e.aura.size.w
+                    );
+                    changed = true;
+                }
+            }
         }
 
         //
-        // pos t9 center, right
+        // move groups
+        //   pos t9 center, right
         switch (_e.pos_group) {
             case 1:
                 offset_x = 0;
@@ -303,8 +344,9 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
                 offset_x = 0;
                 offset_y = 0;
         }
-        writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-            _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
+        version (debug_update)
+        writefln ("%s fix: %s: offset xy: %s,%s, start_w: %s, y: %s, e: %s", 
+            replicate(" ", deep*2), _e.pos_group, offset_x, offset_y, gcursor.start_w, _e.pos.y, *_e);
         if (offset_x || offset_y) {
             _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
             changed = true;
@@ -313,13 +355,10 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
         // recursive
         if (changed)
         if (_e.has_childs) {
+            version (debug_update)
+            writefln ("%s fix: reupdate", replicate(" ", deep*2));
             auto _big_gcursor = new_gcursor (_e);
-            foreach (__e; WalkChilds (_e))
-                e_update_size_pos (__e,_big_gcursor);
-
-            // fix pos  : center
-            // fix size : same w, max
-            e_update_size_pos_fix (_e,_big_gcursor);
+            e_update_size_pos (_e,_big_gcursor,deep+1);
         }
     }
 }
