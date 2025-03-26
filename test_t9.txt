@@ -92,6 +92,7 @@ rect7
   text         7
 
 rect8
+  way          d
   text         8
 
 t9-left

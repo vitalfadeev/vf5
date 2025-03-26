@@ -1,5 +1,5 @@
 e root
- e hbox left hot-list
+ e hbox left  hot-list
  e hbox right list dir-list
    e scrollbar
      e scrollbar-up
@@ -10,13 +10,12 @@ root
  bg         colors.black
 
 hbox
-  //pos.type  hbox r
   pos.type  t9
   pos.group 1
+  pos.way   r
 
 left
   size 240 parent
-  content.size e
   aura 1
   aura.color colors.gray_border
   bg colors.bg
@@ -24,8 +23,6 @@ left
 
 right
   size max parent
-  content.size.type fixed
-  content.size  e
   bg colors.bg-1
   aura 1
   aura.color colors.gray_border
@@ -45,7 +42,7 @@ dir-list-template-name
   size         max 32
   pos.type     t9
   pos.group    1
-  pos.dir      d
+  pos.way      d
   content.size e
   aura         1
   borders      1 solid #444
@@ -60,21 +57,21 @@ scrollbar
 
 scrollbar-up
   pos.type  9
-  pos.group 3
+  pos.group 1
   size 24 24 
   aura 2
   aura.color #666
 
 scrollbar-dn
   pos.type  9
-  pos.group 5
+  pos.group 7
   size 24 24 
   aura 2
   aura.color #777
 
 scrollbar-cursor
   pos.type  t9
-  pos.group 4
+  pos.group 8
   size 24 24 
   aura 2
   aura.color #888
