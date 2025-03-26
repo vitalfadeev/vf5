@@ -97,13 +97,15 @@ e_update_size_pos (E* e, GCursor* big_gcursor) {
     writefln ("way: %s, pos: %s, size: %s, e: %s", e.way, e.pos, e.size, *e);
 
     // recursive
-    if (e.has_childs) {
+    if (e.has_childs)
+    if (e.size.w > 0)
+    if (e.size.h > 0) { 
         auto _big_gcursor = new_gcursor (e);
         foreach (_e; WalkChilds (e))
             e_update_size_pos (_e,_big_gcursor);
 
         // fix pos  : center
-        // fix size : same w, max
+        // fix size : max
         e_update_size_pos_fix (e,_big_gcursor);
     }
 }
@@ -242,85 +244,14 @@ e_update_size_pos_d (GCursor) (E* e, GCursor* gcursor) {
 
 void
 e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
+    X offset_x;
+    Y offset_y;
+
     foreach (_e; WalkChilds (e)) {
         auto gcursor = &big_gcursor.by_group[_e.pos_group];
+        bool changed;
 
-        // pos t9 center, right
-        switch (_e.pos_group) {
-            case 1: {
-                auto offset_x = 0;
-                auto offset_y = 0;
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 2: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = (gcursor.start_w - gcursor.max_used_w) / 2;
-                auto offset_y = 0;
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 3: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = (gcursor.start_w - gcursor.max_used_w);
-                auto offset_y = 0;
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 4: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = (gcursor.start_w - gcursor.max_used_w);
-                auto offset_y = (gcursor.start_h - gcursor.max_used_h) / 2;
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 5: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = (gcursor.start_w - gcursor.max_used_w);
-                auto offset_y = (gcursor.start_h - gcursor.max_used_h);
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 6: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = (gcursor.start_w - gcursor.max_used_w) / 2;
-                auto offset_y = (gcursor.start_h - gcursor.max_used_h);
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 7: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = 0;
-                auto offset_y = (gcursor.start_h - gcursor.max_used_h);
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            case 8: {
-                // fix group pos. move to center. update childs 
-                auto offset_x = 0;
-                auto offset_y = (gcursor.start_h - gcursor.max_used_h) / 2;
-                writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
-                    _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
-                _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
-                break;
-            }
-            default:
-        }        
-
+        //
         // size max
         if (_e.size_w_type == E.SizeType.max_)
         if (gcursor.count_by_w_size_type[E.SizeType.max_] > 0) {
@@ -330,18 +261,65 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor) {
                 ew,
                 ew - _e.aura.size.w - _e.aura.size.w
             );
+            changed = true;
+        }
 
-            // update childs
-            // recursive
-            if (_e.has_childs) {
-                auto _big_gcursor = new_gcursor (_e);
-                foreach (__e; WalkChilds (_e))
-                    e_update_size_pos (__e,_big_gcursor);
+        //
+        // pos t9 center, right
+        switch (_e.pos_group) {
+            case 1:
+                offset_x = 0;
+                offset_y = 0;
+                break;
+            case 2:
+                offset_x = (gcursor.start_w - gcursor.max_used_w) / 2;
+                offset_y = 0;
+                break;
+            case 3:
+                offset_x = (gcursor.start_w - gcursor.max_used_w);
+                offset_y = 0;
+                break;
+            case 4:
+                offset_x = (gcursor.start_w - gcursor.max_used_w);
+                offset_y = (gcursor.start_h - gcursor.max_used_h) / 2;
+                break;
+            case 5:
+                offset_x = (gcursor.start_w - gcursor.max_used_w);
+                offset_y = (gcursor.start_h - gcursor.max_used_h);
+                break;
+            case 6:
+                offset_x = (gcursor.start_w - gcursor.max_used_w) / 2;
+                offset_y = (gcursor.start_h - gcursor.max_used_h);
+                break;
+            case 7:
+                offset_x = 0;
+                offset_y = (gcursor.start_h - gcursor.max_used_h);
+                break;
+            case 8:
+                offset_x = 0;
+                offset_y = (gcursor.start_h - gcursor.max_used_h) / 2;
+                break;
+            default:
+                offset_x = 0;
+                offset_y = 0;
+        }
+        writefln ("%s: offset_x: %s, start_w: %s, y: %s", 
+            _e.pos_group, offset_x, gcursor.start_w, _e.pos.y);
+        if (offset_x || offset_y) {
+            _e_update_pos (_e, _e.pos.x+offset_x, _e.pos.y+offset_y);
+            changed = true;
+        }
 
-                // fix pos  : center
-                // fix size : same w, max
-                e_update_size_pos_fix (_e,_big_gcursor);
-            }
+        // recursive
+        if (changed)
+        if (_e.has_childs) {
+            auto _big_gcursor = new_gcursor (_e);
+            foreach (__e; WalkChilds (_e))
+                e_update_size_pos (__e,_big_gcursor);
+
+            // fix pos  : center
+            // fix size : same w, max
+            e_update_size_pos_fix (_e,_big_gcursor);
         }
     }
 }
