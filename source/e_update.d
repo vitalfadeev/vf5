@@ -292,11 +292,7 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor, int deep) {
             else  // max_cnt ... full size ... = 1... way d
             if (_e.way == E.Way.d) {
                 {
-                    W all_non_max_w;
-                    foreach (_e; WalkChilds (e))
-                        if (_e.size_w_type != E.SizeType.max_)
-                            all_non_max_w += _e.size.w;
-                    W one_max_w = (gcursor.start_w - all_non_max_w);
+                    W one_max_w = (gcursor.start_w - all_non_max_w (e));
 
                     _e_update_size_w (
                         _e, 
@@ -365,6 +361,16 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor, int deep) {
             e_update_size_pos (_e,_big_gcursor,deep+1);
         }
     }
+}
+
+auto
+all_non_max_w (E* e) {
+    W _all_non_max_w;
+    foreach (_e; WalkChilds (e))
+        if (_e.size_w_type != E.SizeType.max_)
+            _all_non_max_w += _e.size.w;    
+
+    return _all_non_max_w;
 }
 
 void
