@@ -43,7 +43,6 @@ dir-list-template-name
   pos.type     t9
   pos.group    1
   pos.way      d
-  content.size e
   aura         1
   borders      1 solid #444
   text         NAME
