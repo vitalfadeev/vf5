@@ -189,8 +189,12 @@ event (Pix* pix, Event* ev, E* root) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.update : update (&ev._user.update,root); break;
-                case USER_EVENT.draw   : pix.draw    (ev,root); break;
-                case USER_EVENT.redraw : pix.draw    (ev,root); break;
+                case USER_EVENT.draw   : pix.update_draw (ev,root); break;
+                case USER_EVENT.redraw : pix.update_draw (ev,root); break;
+                case USER_EVENT.click  : 
+                    focus (pix,ev,root);
+                    send_to_focused (pix,ev); 
+                    break;
                 default                : //root.event  (ev);
             }
             break;
@@ -216,6 +220,12 @@ update (UpdateUserEvent* ev, E* root) {
     root.update (ev); 
     auto gcursor = new_gcursor (root);
     root.e_update_size_pos (gcursor);
+}
+
+void
+update_draw (Pix* pix, Event* ev, E* root) {
+    .update (root);
+    .draw (pix,ev,root);
 }
 
 void
@@ -270,8 +280,12 @@ focus (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
-                case USER_EVENT.click : break;
-                default               : 
+                case USER_EVENT.click : 
+                    auto click_ev = &ev._user.click;
+                    auto deepest = find_deepest (root, click_ev.up_pos.x, click_ev.up_pos.y);
+                    pix.set_focus (deepest);
+                    break;
+                default: 
             }
             break;
         case SDL_MOUSEBUTTONDOWN : 

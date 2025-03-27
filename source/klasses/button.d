@@ -46,7 +46,6 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.state == SDL_PRESSED)
             if (event_for_me (kls,&ev.button,e)) {
                 e.add_klass ("button.pressed");
-                e.force_e_update ();
                 e.send_e_redraw ();
             }
             break;
@@ -56,7 +55,6 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.state == SDL_RELEASED)
             if (e.has_klass ("button.pressed")) {
                 e.remove_klass ("button.pressed");
-                e.force_e_update ();
                 e.send_e_redraw ();
             }
             break;
