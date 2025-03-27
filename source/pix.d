@@ -272,6 +272,18 @@ draw (Pix* pix, DrawUserEvent* ev, E* root) {
     }
 }
 
+Pos
+target_pos (ClickUserEvent* ev) {
+    return ev.up_pos;
+}
+Pos
+target_pos (SDL_MouseWheelEvent* ev) {
+    return Pos (ev.mouseX, ev.mouseY);
+}
+Pos
+target_pos (SDL_MouseButtonEvent* ev) {
+    return Pos (ev.x, ev.y);
+}
 
 void
 focus (Pix* pix, Event* ev, E* root) {
@@ -281,8 +293,7 @@ focus (Pix* pix, Event* ev, E* root) {
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.click : 
-                    auto click_ev = &ev._user.click;
-                    auto deepest = find_deepest (root, click_ev.up_pos.x, click_ev.up_pos.y);
+                    auto deepest = find_deepest (root, target_pos (&ev._user.click));
                     pix.set_focus (deepest);
                     break;
                 default: 
@@ -290,12 +301,12 @@ focus (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_MOUSEBUTTONDOWN : 
         case SDL_MOUSEBUTTONUP   : {
-            auto deepest = find_deepest (root, ev.button.x, ev.button.y);
+            auto deepest = find_deepest (root, target_pos (&ev.button));
             pix.set_focus (deepest);
             break;
         }
         case SDL_MOUSEWHEEL      : {
-            auto deepest = find_deepest (root, ev.wheel.mouseX, ev.wheel.mouseY);
+            auto deepest = find_deepest (root, target_pos (&ev.wheel));
             pix.set_focus (deepest);
             break;
         }
@@ -317,9 +328,8 @@ send_to_focused (Pix* pix, Event* ev) {
 }
 
 E*
-find_deepest (E* root, X x, Y y) {
+find_deepest (E* root, Pos pos) {
     E* deepest;
-    auto pos = Pos (x,y);
 
     bool 
     valid_e (E* e) {
