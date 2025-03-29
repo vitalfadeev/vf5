@@ -16,7 +16,7 @@ import events;
 import types;
 
 alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, E* root);
-alias PIX_DRAW_FN   = void function (Pix* pix, DrawUserEvent* ev, E* root);
+alias PIX_DRAW_FN   = void function (Pix* pix, draw_UserEvent* ev, E* root);
 alias PIX_GO_FN     = int  function (Pix* pix, E* root);
 
 alias IMAGE_PTR = SDL_Surface*;
@@ -44,7 +44,7 @@ Pix {
     }
 
     void
-    draw (DrawUserEvent* ev, E* root) {
+    draw (draw_UserEvent* ev, E* root) {
         if (fn.draw !is null)
             fn.draw (&this,ev,root);
     }
@@ -86,7 +86,7 @@ go (Pix* pix, E* root) {
     update (root);
 
     // Event "start"
-    send_user_event!StartUserEvent ();
+    send_user_event!start_UserEvent ();
 
     // Event Loop
     writefln ("\n======== PIX start event loop ========");
@@ -128,7 +128,7 @@ click_translate (Event* ev) {
             // get  pos up
             // send click (down_pos, up_pos)
             Pos up_pos = Pos (ev.button.x, ev.button.y);
-            send_user_event!ClickUserEvent (down_pos, up_pos);
+            send_user_event!click_UserEvent (down_pos, up_pos);
             down_pos = Pos ();
             break;
         default:
@@ -210,13 +210,13 @@ event (Pix* pix, Event* ev, E* root) {
 
 void
 update (E* root) {
-    UpdateUserEvent ev;
+    update_UserEvent ev;
     root.update (&ev); 
     auto gcursor = new_gcursor (root);
     root.e_update_size_pos (gcursor);
 }
 void
-update (UpdateUserEvent* ev, E* root) {
+update (update_UserEvent* ev, E* root) {
     root.update (ev); 
     auto gcursor = new_gcursor (root);
     root.e_update_size_pos (gcursor);
@@ -230,13 +230,13 @@ update_draw (Pix* pix, Event* ev, E* root) {
 
 void
 draw (Pix* pix, Event* ev, E* root) {
-    DrawUserEvent draw_ev;
+    draw_UserEvent draw_ev;
     draw_ev.renderer = ev.renderer;
     pix.draw (&draw_ev,root);
 }
 
 void
-draw (Pix* pix, DrawUserEvent* ev, E* root) {
+draw (Pix* pix, draw_UserEvent* ev, E* root) {
     auto renderer = ev.renderer;
     auto e = root;
 
@@ -273,7 +273,7 @@ draw (Pix* pix, DrawUserEvent* ev, E* root) {
 }
 
 Pos
-target_pos (ClickUserEvent* ev) {
+target_pos (click_UserEvent* ev) {
     return ev.up_pos;
 }
 Pos
@@ -477,6 +477,13 @@ send_user_event (EVT,ARGS...) (ARGS args) {
 }
 
 void
+force_send_user_event (EVT,ARGS...) (E* e, ARGS args) {
+    Event ev;
+    ev._user = UserEvent (EVT (args));
+    e.event (&ev);
+}
+
+void
 direct_user_event (EVT,ARGS...) (Pix* pix, Event* ev, E* root, ARGS args) {
     Event direct_ev = *ev;
     direct_ev._user = UserEvent (EVT (args));
@@ -520,12 +527,12 @@ send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
 
 void
 redraw_window (SDL_Window* window) {
-    send_user_event!RedrawUserEvent ();
+    send_user_event!redraw_UserEvent ();
 }
 
 void
 send_e_redraw (E* e) {
-    send_user_event!RedrawUserEvent (e);
+    send_user_event!redraw_UserEvent (e);
 }
 
 struct

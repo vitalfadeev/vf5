@@ -16,9 +16,9 @@ import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);
-alias E_UPDATE_FN = void function (E* e, UpdateUserEvent* ev);
+alias E_UPDATE_FN = void function (E* e, update_UserEvent* ev);
 alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
-alias E_DRAW_FN   = void function (E* e, DrawUserEvent* ev);
+alias E_DRAW_FN   = void function (E* e, draw_UserEvent* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
 
@@ -287,7 +287,7 @@ E {
     }
 
     void 
-    update (UpdateUserEvent* ev) { 
+    update (update_UserEvent* ev) { 
         if (fn.update !is null) fn.update (&this,ev); 
     }
 
@@ -297,7 +297,7 @@ E {
     }
 
     void 
-    draw (DrawUserEvent* ev) {
+    draw (draw_UserEvent* ev) {
         if (fn.draw !is null) fn.draw (&this,ev);
     }
 
@@ -544,7 +544,7 @@ event (E* e, Event* ev) {
 }
 
 void
-update (E* e, UpdateUserEvent* ev) {
+update (E* e, update_UserEvent* ev) {
     // custom update
     // ...
 
@@ -563,7 +563,7 @@ set (E* e, string field_id, TString[] values) {
 }
 
 void
-draw (E* e, DrawUserEvent* ev) {
+draw (E* e, draw_UserEvent* ev) {
     // custom draw
     // ...
 
@@ -623,7 +623,7 @@ event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
 }
 
 bool
-event_for_me (Klass* kls, ClickUserEvent* ev, E* e) {
+event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
     Pos _pos = ev.up_pos;
     return pos_in_rect (_pos, e.pos, e.size);
 }

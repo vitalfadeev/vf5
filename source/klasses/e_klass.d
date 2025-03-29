@@ -63,7 +63,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN
 void
-update (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, update_UserEvent* ev, E* e) {
     version (debug_event)
     writefln ("KLASS(%s).update, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     version (profile) writefln ("%-60s", e.toString);
@@ -157,7 +157,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, DrawUserEvent* ev, E* e) {
+draw (Klass* kls, draw_UserEvent* ev, E* e) {
     version (debug_event)
     writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
     e_klass_draw.draw (ev.renderer,e);

@@ -11,6 +11,7 @@ import klass;
 import types;
 import tstring;
 import events;
+import pix : force_send_user_event;
 
 
 struct 
@@ -37,14 +38,18 @@ update_scrollbar (E* list) {
     // find scrollbar
     //   set offset,limit,total
     //   update
+    auto percent = (100 * list.generator.offset / list.generator.total).to!byte;
+    auto size    = (100 * list.generator.limit  / list.generator.total).to!byte;
     if (auto scrollbar = find_scrollbar (list)) {
-        auto offset = list.generator.offset;
-        auto limit  = list.generator.limit;
-        auto total  = list.generator.total;
+        force_send_user_event!update_scrollbar_UserEvent (
+            scrollbar, 
+            percent,
+            size
+        );
 
-        import klasses.scrollbar : scrollbar_update;
-        if (scrollbar !is null)
-            scrollbar.scrollbar_update (offset,limit,total);
+        //import klasses.scrollbar : scrollbar_update;
+        //if (scrollbar !is null)
+        //    scrollbar.scrollbar_update (offset,limit,total);
     }
 }
 
@@ -84,7 +89,7 @@ event (Klass* kls, Event* ev, E* e) {
                         import pix : send_e_redraw;
                         import pix : send_user_event;
                         update_scrollbar (e);
-                        send_user_event!UpdateUserEvent ();
+                        send_user_event!update_UserEvent ();
                         send_e_redraw (e);
                     }
                 }
@@ -96,8 +101,46 @@ event (Klass* kls, Event* ev, E* e) {
                         import pix : update;
                         import pix : send_e_redraw;
                         import pix : send_user_event;
+//assert (0, "update scrollbar");
+// List
+//   scrollbar-klass -----------+
+//     pos.y 50                 |
+// Scrollbar scrollbar-klass <--+
+//
+// List
+//   defined_klasses
+//     local-scrollbar-klass
+//  
+//   defined_klasses
+//     dir-list-template-name-1
+//     dir-list-template-name-2
+//     dir-list-template-name-3
+//     dir-list-template-name-20
+//
+// kls = list.find_klass ("local-scrollbar-klass")
+// kls.fields ~= Field ("pos.y", 50)
+// scrollbar.add_klass (kls)
+//
+// List
+//   Wheel Up
+//   Wheel Dn
+//     update (offset,limit,total)
+//     if changed
+//       Event Update Scrollbar (offset,limit,total) 
+//         to child Scrollbar
+//
+// Scrollbar
+//   Event Scroll Up Request ()
+//   Event Scroll Dn Request ()
+//   Event Scroll Page Up Request ()
+//   Event Scroll Page Dn Request ()
+//   Event Scroll Start Request ()
+//   Event Scroll End Request ()
+//   Event Scroll Percent Request (percent)
+//     to parent List
+//
                         update_scrollbar (e);
-                        send_user_event!UpdateUserEvent ();
+                        send_user_event!update_UserEvent ();
                         send_e_redraw (e);
                     }
                 }
@@ -126,7 +169,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, update_UserEvent* ev, E* e) {
     //
 }
 
@@ -138,7 +181,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, DrawUserEvent* ev, E* e) {
+draw (Klass* kls, draw_UserEvent* ev, E* e) {
     //
 }
 

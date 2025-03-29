@@ -40,6 +40,14 @@ USER_EVENT : Sint32 {
     draw,
     redraw,
     click,
+    scroll_up_request,
+    scroll_dn_request,
+    scroll_page_up_request,
+    scroll_page_dn_request,
+    scroll_start_request,
+    scroll_end_request,
+    scroll_percent_request,
+    update_scrollbar,
 }
 
 
@@ -47,37 +55,49 @@ union
 UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     union {
-        SDL_UserEvent   user;
-        StartUserEvent  start;
-        UpdateUserEvent update;
-        DrawUserEvent   draw;
-        RedrawUserEvent redraw;
-        ClickUserEvent  click;
+        SDL_UserEvent                    user;
+        start_UserEvent                  start;
+        update_UserEvent                 update;
+        draw_UserEvent                   draw;
+        redraw_UserEvent                 redraw;
+        click_UserEvent                  click;
+        scroll_up_request_UserEvent      scroll_up_request;
+        scroll_dn_request_UserEvent      scroll_dn_request;
+        scroll_page_up_request_UserEvent scroll_page_up_request;
+        scroll_page_dn_request_UserEvent scroll_page_dn_request;
+        scroll_start_request_UserEvent   scroll_start_request;
+        scroll_end_request_UserEvent     scroll_end_request;
+        scroll_percent_request_UserEvent scroll_percent_request;
+        update_scrollbar_UserEvent       update_scrollbar;
     }
 
-    this (UpdateUserEvent ev) {
+    this (update_UserEvent ev) {
         this.update = ev;
     }
 
-    this (StartUserEvent ev) {
+    this (start_UserEvent ev) {
         this.start = ev;
     }
 
-    this (DrawUserEvent ev) {
+    this (draw_UserEvent ev) {
         this.draw = ev;
     }
 
-    this (RedrawUserEvent ev) {
+    this (redraw_UserEvent ev) {
         this.redraw = ev;
     }
 
-    this (ClickUserEvent ev) {
+    this (click_UserEvent ev) {
         this.click = ev;
+    }
+
+    this (update_scrollbar_UserEvent ev) {
+        this.update_scrollbar = ev;
     }
 }
 
 struct
-StartUserEvent {
+start_UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     Uint32 timestamp;
     Uint32 windowID;
@@ -85,7 +105,7 @@ StartUserEvent {
 }
 
 struct
-UpdateUserEvent {
+update_UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     Uint32        timestamp;
     Uint32        windowID;
@@ -98,7 +118,7 @@ UpdateUserEvent {
 }
 
 struct
-DrawUserEvent {
+draw_UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     Uint32        timestamp;
     Uint32        windowID;
@@ -108,7 +128,7 @@ DrawUserEvent {
 }
 
 struct
-RedrawUserEvent {
+redraw_UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     Uint32        timestamp;
     Uint32        windowID;
@@ -122,7 +142,7 @@ RedrawUserEvent {
 }
 
 struct
-ClickUserEvent {
+click_UserEvent {
     SDL_EventType type = SDL_USEREVENT;
     Uint32 timestamp;
     Uint32 windowID;
@@ -134,6 +154,83 @@ ClickUserEvent {
     this (Pos down_pos, Pos up_pos) {
         this.down_pos = down_pos;
         this.up_pos   = up_pos;
+    }
+}
+
+struct
+scroll_up_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_up_request;
+}
+
+struct
+scroll_dn_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_dn_request;
+}
+
+struct
+scroll_page_up_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_page_up_request;
+}
+
+struct
+scroll_page_dn_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_page_dn_request;
+}
+
+struct
+scroll_start_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_start_request;
+}
+
+struct
+scroll_end_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_end_request;
+}
+
+struct
+scroll_percent_request_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.scroll_percent_request;
+    int    percent;
+
+    this (int percent) {
+        this.percent = percent;
+    }
+}
+
+struct
+update_scrollbar_UserEvent {
+    SDL_EventType type = SDL_USEREVENT;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Sint32 code = USER_EVENT.update_scrollbar;
+    byte   pos_percent;
+    byte   size_percent;
+
+
+    this (byte pos_percent, byte size_persent) {
+        this.pos_percent  = pos_percent;
+        this.size_percent = size_percent;
     }
 }
 

@@ -35,12 +35,61 @@ Scrollbar {
 // KLASS_EVENT_FN  
 void 
 event (Klass* kls, Event* ev, E* e) {
+    switch (ev.type) {
+        case SDL_USEREVENT:
+            switch (ev.user.code) {
+                case USER_EVENT.scroll_up_request      : .event (kls,&ev._user.scroll_up_request,e); break;
+                case USER_EVENT.scroll_dn_request      : .event (kls,&ev._user.scroll_dn_request,e); break;
+                case USER_EVENT.scroll_page_up_request : .event (kls,&ev._user.scroll_page_up_request,e); break;
+                case USER_EVENT.scroll_page_dn_request : .event (kls,&ev._user.scroll_page_dn_request,e); break;
+                case USER_EVENT.scroll_start_request   : .event (kls,&ev._user.scroll_start_request,e); break;
+                case USER_EVENT.scroll_end_request     : .event (kls,&ev._user.scroll_end_request,e); break;
+                case USER_EVENT.scroll_percent_request : .event (kls,&ev._user.scroll_percent_request,e); break;
+                case USER_EVENT.update_scrollbar       : .event (kls,&ev._user.update_scrollbar,e); break;
+                default:
+            }
+            break;
+
+        default:
+    }
+}
+void 
+event (Klass* kls, scroll_up_request_UserEvent* ev, E* e) {
     //
 }
+void 
+event (Klass* kls, scroll_dn_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, scroll_page_up_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, scroll_page_dn_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, scroll_start_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, scroll_end_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, scroll_percent_request_UserEvent* ev, E* e) {
+    //
+}
+void 
+event (Klass* kls, update_scrollbar_UserEvent* ev, E* e) {
+    scrollbar_update (e, ev.pos_percent, ev.size_percent);
+}
+
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, update_UserEvent* ev, E* e) {
     //
 }
 
@@ -52,7 +101,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, DrawUserEvent* ev, E* e) {
+draw (Klass* kls, draw_UserEvent* ev, E* e) {
     //
 }
 
@@ -91,16 +140,15 @@ scrollbar
 */
 
 void 
-scrollbar_update (E* e_scrollbar, size_t offset, size_t limit, size_t total) {
+scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
     // total,offset
     //   cursor position
     // limit
     //   cursor size
     auto cursor = e_scrollbar.find_cursor ();
     if (cursor !is null) {
-        auto percent = (cast (float) offset) / total;  // 0..1
         auto _x = e_scrollbar.content.pos.x;
-        auto _y = e_scrollbar.content.pos.y + (e_scrollbar.size.h * percent)/* - cursor.size.h/2*/;
+        auto _y = e_scrollbar.content.pos.y + (e_scrollbar.size.h * pos_percent / 100);
         //
         // new cursor klass
         // add new cursor klass to cursor

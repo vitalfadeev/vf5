@@ -1412,7 +1412,7 @@ extract_class_field_value (E* e, string s) {
 //
 void
 force_e_update (E* e) {
-    UpdateUserEvent ev;
+    update_UserEvent ev;
     ev.e = e;
     e.update (&ev);
     auto gcursor = new_gcursor (e);
@@ -1421,7 +1421,7 @@ force_e_update (E* e) {
 
 //void
 //send_e_update (E* e) {
-//    send_user_event!UpdateUserEvent (e);
+//    send_user_event!update_UserEvent (e);
 //}
 
 

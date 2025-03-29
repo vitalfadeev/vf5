@@ -8,12 +8,12 @@ import etree;
 import e : E;
 import e_update : TemplateArg;
 import field : Field;
-import events : Event, UpdateUserEvent, DrawUserEvent;
+import events : Event, update_UserEvent, draw_UserEvent;
 
 alias KLASS_EVENT_FN  = void function (Klass* kls, Event* ev, E* e);
-alias KLASS_UPDATE_FN = void function (Klass* kls, UpdateUserEvent* ev, E* e);
+alias KLASS_UPDATE_FN = void function (Klass* kls, update_UserEvent* ev, E* e);
 alias KLASS_SET_FN    = void function (Klass* kls, E* e, string field, TString[] values);
-alias KLASS_DRAW_FN   = void function (Klass* kls, DrawUserEvent* ev, E* e);
+alias KLASS_DRAW_FN   = void function (Klass* kls, draw_UserEvent* ev, E* e);
 alias KLASS_DUP_FN    = KlassPtr function (KlassPtr kls);
 alias KlassPtr = Klass*;
 
@@ -56,7 +56,7 @@ Klass {
     }
 
     void 
-    update (UpdateUserEvent* ev, E* e) { 
+    update (update_UserEvent* ev, E* e) { 
         if (fn.update !is null) fn.update (&this,ev,e); 
     }
 
@@ -66,7 +66,7 @@ Klass {
     }
 
     void 
-    draw (DrawUserEvent* ev, E* e) {
+    draw (draw_UserEvent* ev, E* e) {
         if (fn.draw !is null) fn.draw (&this,ev,e);
     }
 
@@ -105,7 +105,7 @@ event (Klass* kls, Event* ev, E* e) {
 }
 
 void
-update (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, update_UserEvent* ev, E* e) {
     //
 }
 
@@ -115,7 +115,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 }
 
 void
-draw (Klass* kls, DrawUserEvent* ev, E* e) {
+draw (Klass* kls, draw_UserEvent* ev, E* e) {
     // auto renderer = ev.renderer;
 }
 

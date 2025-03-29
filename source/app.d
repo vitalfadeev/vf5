@@ -18,9 +18,9 @@ main () {
 	//E* root = open ("test_1.txt");
 	//E* root = open ("test_t3.txt");
 	//E* root = open ("test_generator_klass.txt");
-	E* root = open ("test_audacious.txt");
+	//E* root = open ("test_audacious.txt");
 	//E* root = open ("test_t9.txt");
-	//E* root = open ("test_file_manager.txt");
+	E* root = open ("test_file_manager.txt");
 	writefln ("root: %s, %s", *root, root);
 	writefln ("root.parent: %s", root.parent);
 

@@ -74,7 +74,7 @@ event (Klass* kls, Event* ev, E* e) {
 
 // KLASS_UPDATE_FN 
 void 
-update (Klass* kls, UpdateUserEvent* ev, E* e) {
+update (Klass* kls, update_UserEvent* ev, E* e) {
     //
 }
 
@@ -86,6 +86,6 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
 
 // KLASS_DRAW_FN
 void
-draw (Klass* kls, DrawUserEvent* ev, E* e) {
+draw (Klass* kls, draw_UserEvent* ev, E* e) {
     //
 }
