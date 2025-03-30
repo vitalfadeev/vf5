@@ -147,8 +147,6 @@ scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
     //   cursor size
     auto cursor = e_scrollbar.find_cursor ();
     if (cursor !is null) {
-        auto _x = e_scrollbar.content.pos.x;
-        auto _y = e_scrollbar.content.pos.y + (e_scrollbar.size.h * pos_percent / 100);
         //
         // new cursor klass
         // add new cursor klass to cursor
@@ -168,9 +166,10 @@ scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
         if (!cursor.has_klass (_cursor_klass))
             cursor.add_klass (_cursor_klass);
 
-        _cursor_klass.add_field ("pos.type", "fixed");
-        _cursor_klass.add_field ("pos.x", _x.to!int);
-        _cursor_klass.add_field ("pos.y", _y.to!int);
+        auto balance = pos_percent;
+        _cursor_klass.add_field ("pos.type", "t9");
+        _cursor_klass.add_field ("pos.group.balance", balance.to!byte);
+        _cursor_klass.add_field ("pos.group", "4");
     }
 }
 

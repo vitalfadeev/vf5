@@ -5,11 +5,12 @@ import bindbc.sdl;
 public import color;
 
 
-alias Uint32 X;
-alias Uint32 Y;
-alias Uint32 W;
-alias Uint32 H;
-alias Uint32 R; // radius
+alias COORD = Uint32;
+alias X = COORD;
+alias Y = X;
+alias W = X;
+alias H = X;
+alias R = X; // radius
 
 struct 
 Pos {
@@ -105,5 +106,3 @@ pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
 
     return false;
 }
-
-

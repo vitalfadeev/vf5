@@ -61,6 +61,7 @@ E {
     Pos        pos;        // relative from parent
     PosType    pos_type = PosType.none;
     PosGroup   pos_group;
+    byte       pos_group_balance;
     Way        way;
     byte       pos_percent;
     Size       size;       // = content.size + aura.size

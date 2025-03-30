@@ -78,7 +78,7 @@ GCursor {  // child's sizes for pos
 
 void
 e_update_size_pos (E* e, GCursor* big_gcursor, int deep=0) {
-    assert (e.pos_group < MAX_GROUP);
+//    assert (e.pos_group < MAX_GROUP);
     auto gcursor = &big_gcursor.by_group[e.pos_group];
 
     // <> ^ v
@@ -322,7 +322,10 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor, int deep) {
                 break;
             case 4:
                 offset_x = (gcursor.start_w - gcursor.max_used_w);
-                offset_y = (gcursor.start_h - gcursor.max_used_h) / 2;
+                offset_y = (gcursor.start_h - gcursor.max_used_h);
+                auto balance = _e.pos_group_balance;
+                balance = (balance) ? balance : 50;
+                offset_y = offset_y * balance / 100;
                 break;
             case 5:
                 offset_x = (gcursor.start_w - gcursor.max_used_w);

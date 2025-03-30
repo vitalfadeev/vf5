@@ -56,21 +56,22 @@ scrollbar
 
 scrollbar-up
   pos.type  9
-  pos.group 1
+  pos.group 3
   size 24 24 
   aura 2
   aura.color #666
 
 scrollbar-dn
   pos.type  9
-  pos.group 7
+  pos.group 5
   size 24 24 
   aura 2
   aura.color #777
 
 scrollbar-cursor
   pos.type  t9
-  pos.group 8
+  pos.group 4
+  pos.group.balance 1
   size 24 24 
   aura 2
   aura.color #888

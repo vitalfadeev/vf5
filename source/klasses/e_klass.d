@@ -112,6 +112,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "pos"               : set_pos                (e,values); break;
         case "pos.type"          : set_pos_type           (e,values); break;
         case "pos.group"         : set_pos_group          (e,values); break;
+        case "pos.group.balance" : set_pos_group_balance  (e,values); break;
         case "pos.way"           : set_way                (e,values); break;
         case "way"               : set_way                (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
@@ -238,6 +239,7 @@ set_pos_type (E* e, TString[] values) {
     }
 }
 
+
 bool
 is_percent (string s, byte* percent) {
     auto perc_pos = s.indexOf ("%");
@@ -265,6 +267,13 @@ void
 set_pos_group (E* e, TString[] values) {
     if (values.length >= 1) {
         e.pos_group = values[0].s.to!ubyte;
+    }
+}
+
+void
+set_pos_group_balance (E* e, TString[] values) {
+    if (values.length >= 1) {
+        e.pos_group_balance = values[0].s.to!byte;
     }
 }
 
