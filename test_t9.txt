@@ -39,7 +39,7 @@ e root
     e rect rect5
       text 5.c
 
-  e t9-6
+  e t9-6 group
     e rect rect6
       text 6.a
     e rect rect6
@@ -47,7 +47,7 @@ e root
     e rect rect6
       text 6.c
 
-  e t9-7 rect rect7
+  e t9-7 group
     e rect rect7
       text 7.a
     e rect rect7
@@ -55,7 +55,7 @@ e root
     e rect rect7
       text 7.c
 
-  e t9-8 rect rect8
+  e t9-8 group
     e rect rect8
       text 8.a
     e rect rect8
@@ -95,6 +95,7 @@ rect6
   text         6
 
 rect7
+  way          r
   text         7
 
 rect8
@@ -105,33 +106,46 @@ t9-left
   pos.type  t9
   pos.group 1
   pos.group.balance.x 0
+  pos.group.balance.y 0
 
 t9-center
   pos.type  t9
   pos.group 2
   pos.group.balance.x 50
+  pos.group.balance.y 0
 
 t9-right
   pos.type  t9
   pos.group 3
   pos.group.balance.x 100
+  pos.group.balance.y 0
 
 t9-4
   pos.type  t9
   pos.group 4
+  pos.group.balance.x 100
+  pos.group.balance.y 50
 
 t9-5
   pos.type  t9
   pos.group 5
+  pos.group.balance.x 100
+  pos.group.balance.y 100
 
 t9-6
   pos.type  t9
   pos.group 6
+  pos.group.balance.x 50
+  pos.group.balance.y 100
 
 t9-7
   pos.type  t9
   pos.group 7
+  pos.group.balance.x 0
+  pos.group.balance.y 100
 
 t9-8
   pos.type  t9
   pos.group 8
+  pos.group.balance.x 0
+  pos.group.balance.y 50

@@ -66,8 +66,8 @@ e_update_step (E* e, E* pre, Deep deep) {
         case E.Way.lu : break;
         case E.Way.ld : break;
         case E.Way.d  : e_update_size_pos_d (e,pre, 0); break;
-        case E.Way.dr : e_update_size_pos_d (e,pre,-1); break;
-        case E.Way.dl : e_update_size_pos_d (e,pre,+1); break;
+        case E.Way.dr : e_update_size_pos_d (e,pre,+1); break;
+        case E.Way.dl : e_update_size_pos_d (e,pre,-1); break;
         case E.Way.u  : break;
         case E.Way.ur : break;
         case E.Way.ul : break;
@@ -163,24 +163,25 @@ _e_update_size_pos_d (Pos pre_pos, Pos step, Pos limit, int wrap) {
 
 void
 e_update_balance_childs (E* e) {
-    e_update_balance_childs_x (e);
-    e_update_balance_childs_y (e);
-}
+    // childs size
+    Size childs_size;
+    foreach (_e; WalkChilds (e)) {
+        childs_size.w = max (childs_size.w, _e.pos.x + _e.size.w);
+        childs_size.h = max (childs_size.h, _e.pos.y + _e.size.h);
+    }
 
-void
-e_update_balance_childs_x (E* e) {
-    writefln ("_able_x: %s, e.pos_group_balance_x: %s, e: %s", e._able_x, e.pos_group_balance_x, *e);
-    auto offset = Pos (_balance (e._able_x, e.pos_group_balance_x), 0);
-    _e_update_pos (e, e.pos + offset);
+    auto able = e.content.size - childs_size;
 
-    // recutsove move
-    //foreach (_e; WalkChilds (e))
-    //    e_update_balance_childs_x (_e);
-}
+    // offset
+    auto offset = 
+        Pos (
+            _balance (able.w, e.pos_group_balance_x),
+            _balance (able.h, e.pos_group_balance_y)
+        );
 
-void
-e_update_balance_childs_y (E* e) {
-    //
+    // mvoe childs
+    foreach (_e; WalkChilds (e))
+        _e_update_pos (_e, _e.pos + offset);
 }
 
 void
@@ -298,10 +299,15 @@ e_update_size_pos_fix (E* e, GCursor* big_gcursor, int deep) {
 }
 */
 
-auto 
-_able_x (E* e) {
-    return e.content.size.w - e.content.childs_size.w;
-}
+//auto 
+//_able_x (E* e) {
+//    return e.content.size.w - e.content.childs_size.w;
+//}
+
+//auto 
+//_able_y (E* e) {
+//    return e.content.size.h - e.content.childs_size.h;
+//}
 
 auto 
 _balance  (Balance) (X able_x, Balance balance) {

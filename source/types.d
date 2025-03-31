@@ -5,7 +5,7 @@ import bindbc.sdl;
 public import color;
 
 
-alias COORD = Uint32;
+alias COORD = int;
 alias X = COORD;
 alias Y = COORD;
 alias W = COORD;
