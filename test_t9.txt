@@ -1,64 +1,70 @@
 e root
-  e t9-left rect rect1
-    text 1.a
-  e t9-left rect rect1
-    text 1.b
-  e t9-left rect rect1
-    text 1.c
+  e t9-left group
+    e rect rect1
+      text 1.a
+    e rect rect1
+      text 1.b
+    e rect rect1
+      text 1.c
 
-  e t9-center rect rect2
-    text 2.a
-  e t9-center rect rect2
-    text 2.b
-  e t9-center rect rect2
-    text 2.c
+  e t9-center group
+    e rect rect2
+      text 2.a
+    e rect rect2
+      text 2.b
+    e rect rect2
+      text 2.c
 
-  e t9-right rect rect3
-    text 3.a
-  e t9-right rect rect3
-    text 3.b
-  e t9-right rect rect3
-    text 3.c
+  e t9-right group
+    e rect rect3
+      text 3.a
+    e rect rect3
+      text 3.b
+    e rect rect3
+      text 3.c
 
-  e t9-4 rect rect4
-    text 4.a
-  e t9-4 rect rect4
-    text 4.b
-  e t9-4 rect rect4
-    text 4.c
+  e t9-4 group
+    e rect rect4
+      text 4.a
+    e rect rect4
+      text 4.b
+    e rect rect4
+      text 4.c
 
-  e t9-5 rect rect5
-    text 5.a
-  e t9-5 rect rect5
-    text 5.b
-  e t9-5 rect rect5
-    text 5.c
+  e t9-5 group
+    e rect rect5
+      text 5.a
+    e rect rect5
+      text 5.b
+    e rect rect5
+      text 5.c
 
-  e t9-6 rect rect6
-    text 6.a
-  e t9-6 rect rect6
-    text 6.b
-  e t9-6 rect rect6
-    text 6.c
+  e t9-6
+    e rect rect6
+      text 6.a
+    e rect rect6
+      text 6.b
+    e rect rect6
+      text 6.c
 
   e t9-7 rect rect7
-    text 7.a
-  e t9-7 rect rect7
-    text 7.b
-  e t9-7 rect rect7
-    text 7.c
+    e rect rect7
+      text 7.a
+    e rect rect7
+      text 7.b
+    e rect rect7
+      text 7.c
 
   e t9-8 rect rect8
-    text 8.a
-  e t9-8 rect rect8
-    text 8.b
-  e t9-8 rect rect8
-    text 8.c
+    e rect rect8
+      text 8.a
+    e rect rect8
+      text 8.b
+    e rect rect8
+      text 8.c
 
 root
   size 1024 480
-  pos 0 0
-  pos.type fixed
 
 rect
   size         64 64
@@ -98,15 +104,17 @@ rect8
 t9-left
   pos.type  t9
   pos.group 1
-  pos.way   r
+  pos.group.balance.x 0
 
 t9-center
   pos.type  t9
   pos.group 2
+  pos.group.balance.x 50
 
 t9-right
   pos.type  t9
   pos.group 3
+  pos.group.balance.x 100
 
 t9-4
   pos.type  t9

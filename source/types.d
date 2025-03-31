@@ -7,10 +7,12 @@ public import color;
 
 alias COORD = Uint32;
 alias X = COORD;
-alias Y = X;
-alias W = X;
-alias H = X;
-alias R = X; // radius
+alias Y = COORD;
+alias W = COORD;
+alias H = COORD;
+alias R = COORD; // radius
+
+alias Balance = byte;
 
 struct 
 Pos {
@@ -20,6 +22,11 @@ Pos {
     Pos
     opBinary (string op : "+") (Size size) {
         return Pos (x+size.w, y+size.h);
+    }
+
+    Pos
+    opBinary (string op : "-") (Size size) {
+        return Pos (x-size.w, y-size.h);
     }
 
     Pos
@@ -70,10 +77,14 @@ Pos {
     }
 }
 
+alias Limit = Pos;
+
 struct
 Size {
     W w;         // 0..16385 
     H h;         // 0..16385
+    alias x = w;
+    alias y = h;
 
     Size
     opBinary (string op : "+") (Size b) {

@@ -113,6 +113,8 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "pos.type"          : set_pos_type           (e,values); break;
         case "pos.group"         : set_pos_group          (e,values); break;
         case "pos.group.balance" : set_pos_group_balance  (e,values); break;
+        case "pos.group.balance.x" : set_pos_group_balance_x (e,values); break;
+        case "pos.group.balance.y" : set_pos_group_balance_y (e,values); break;
         case "pos.way"           : set_way                (e,values); break;
         case "way"               : set_way                (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
@@ -168,15 +170,9 @@ draw (Klass* kls, draw_UserEvent* ev, E* e) {
 void
 set_pos (E* e, TString[] values) {
     if (values.length >= 2) {
-        if (values[1].type == TString.Type.string && values[1].s == "%") {
-            set_pos_x_percent (e, values[0..1]);
-            e.pos_type = E.PosType.percent;
-        }
-        else {
-            set_pos_x (e, values[0..1]);
-            set_pos_y (e, values[1..$]);
-            //e.pos_type = E.PosType.fixed;
-        }
+        set_pos_x (e, values[0..1]);
+        set_pos_y (e, values[1..$]);
+        //e.pos_type = E.PosType.fixed;
     }
     else
     if (values.length == 1) {
@@ -192,16 +188,11 @@ set_pos_type (E* e, TString[] values) {
         switch (values[0].s) {
             case "9"       : e.pos_type = E.PosType.t9; break;
             case "t9"      : e.pos_type = E.PosType.t9; break;
-            case "3"       : e.pos_type = E.PosType.t3; break;
-            case "t3"      : e.pos_type = E.PosType.t3; break;
             case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "vbox"    : e.pos_type = E.PosType.vbox; break;
-            case "hbox"    : e.pos_type = E.PosType.hbox; break;
-            case "percent" : e.pos_type = E.PosType.percent; break;
             case "fixed"   : e.pos_type = E.PosType.fixed; break;
             default: {
-                if (is_percent (values[0].s,&e.pos_percent)) // 50%
-                    e.pos_type = E.PosType.percent;
+                if (is_percent (values[0].s,&e.pos_group_balance_x)) // 50%
+                    e.pos_type = E.PosType.t9;
                 else
                     e.pos_type = E.PosType.none;
             }
@@ -222,16 +213,11 @@ set_pos_type (E* e, TString[] values) {
         switch (values[0].s) {
             case "9"       : e.pos_type = E.PosType.t9; break;
             case "t9"      : e.pos_type = E.PosType.t9; break;
-            case "3"       : e.pos_type = E.PosType.t3; break;
-            case "t3"      : e.pos_type = E.PosType.t3; break;
             case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "vbox"    : e.pos_type = E.PosType.vbox; e.way = E.Way.d; break;
-            case "hbox"    : e.pos_type = E.PosType.hbox; e.way = E.Way.r; break;
-            case "percent" : e.pos_type = E.PosType.percent; break;
             case "fixed"   : e.pos_type = E.PosType.fixed; break;
             default: {
-                if (is_percent (values[0].s,&e.pos_percent)) // 50%
-                    e.pos_type = E.PosType.percent;
+                if (is_percent (values[0].s,&e.pos_group_balance_x)) // 50%
+                    e.pos_type = E.PosType.t9;
                 else
                     e.pos_type = E.PosType.none;
             }
@@ -241,11 +227,11 @@ set_pos_type (E* e, TString[] values) {
 
 
 bool
-is_percent (string s, byte* percent) {
+is_percent (Balance) (string s, Balance* percent) {
     auto perc_pos = s.indexOf ("%");
     if (perc_pos != -1) {
         if (s[0..perc_pos].isNumeric ()) {
-            *percent = s[0..perc_pos].to!byte;
+            *percent = s[0..perc_pos].to!Balance;
             return true;
         }
     }
@@ -272,8 +258,27 @@ set_pos_group (E* e, TString[] values) {
 
 void
 set_pos_group_balance (E* e, TString[] values) {
+    if (values.length >= 2) {
+        set_pos_group_balance_x (e,values[0..1]);
+        set_pos_group_balance_y (e,values[1..$]);
+    }
+    else
     if (values.length >= 1) {
-        e.pos_group_balance = values[0].s.to!byte;
+        set_pos_group_balance_x (e,values);
+    }
+}
+
+void
+set_pos_group_balance_x (E* e, TString[] values) {
+    if (values.length >= 1) {
+        e.pos_group_balance_x = values[0].s.to!(typeof(e.pos_group_balance_x));
+    }
+}
+
+void
+set_pos_group_balance_y (E* e, TString[] values) {
+    if (values.length >= 1) {
+        e.pos_group_balance_y = values[0].s.to!(typeof(e.pos_group_balance_y));
     }
 }
 
@@ -297,10 +302,6 @@ set_pos_x (E* e, TString[] values) {
     if (values.length) {
         string value = values[0].s;
 
-        if (value.is_percent (&e.pos_percent)) { // 50%
-            e.pos_type = E.PosType.percent;
-        }
-        else
         if (value.isNumeric ()) { // 50
             e.pos.x = value.to!X;
         }
@@ -313,9 +314,9 @@ set_pos_x_percent (E* e, TString[] values) {
         string value = values[0].s;
 
         if (value.isNumeric)
-            e.pos_percent = value.to!byte;
+            e.pos_group_balance_x = value.to!(typeof(e.pos_group_balance_x));
         else
-            e.pos_percent = 0;
+            e.pos_group_balance_x = 0;
     }
 }
 
@@ -548,12 +549,7 @@ set_text_pos_type (E* e, TString[] values) {
         switch (values[0].s) {
             case "9"       : e.content.text.pos_type = E.PosType.t9; break;
             case "t9"      : e.content.text.pos_type = E.PosType.t9; break;
-            case "3"       : e.content.text.pos_type = E.PosType.t3; break;
-            case "t3"      : e.content.text.pos_type = E.PosType.t3; break;
             case "grid"    : e.content.text.pos_type = E.PosType.grid; break;
-            case "vbox"    : e.content.text.pos_type = E.PosType.vbox; break;
-            case "hbox"    : e.content.text.pos_type = E.PosType.hbox; break;
-            case "percent" : e.content.text.pos_type = E.PosType.percent; break;
             default:
                 e.content.text.pos_type = E.PosType.none;
         }

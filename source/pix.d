@@ -212,14 +212,12 @@ void
 update (E* root) {
     update_UserEvent ev;
     root.update (&ev); 
-    auto gcursor = new_gcursor (root);
-    root.e_update_size_pos (gcursor);
+    root.e_update_size_pos ();
 }
 void
 update (update_UserEvent* ev, E* root) {
     root.update (ev); 
-    auto gcursor = new_gcursor (root);
-    root.e_update_size_pos (gcursor);
+    root.e_update_size_pos ();
 }
 
 void

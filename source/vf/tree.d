@@ -233,6 +233,30 @@ _WalkChilds (TTree,Skip) {
 
         return 0;
     }
+
+    int
+    opApply (int delegate (TTree* pre, TTree* t) dg) {
+        Tree* pre  = null;
+        Tree* next = t._childs.l;
+
+        loop:
+            if (next is null)
+                return 0;
+
+            if (skip (cast (TTree*) next)) {
+                goto go_right;
+            }
+
+            if (auto result = dg (cast (TTree*) pre, cast (TTree*) next))
+                return result;
+
+            go_right:  // >
+                pre  = next;
+                next = next.r;
+                goto loop;  // go_right
+
+        return 0;
+    }
 }
 
 

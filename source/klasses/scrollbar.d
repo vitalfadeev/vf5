@@ -157,6 +157,12 @@ scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
         //   pos.y AAA
         //
 
+        // cursor
+        //   .pos.group.balance = 1
+        //
+        // kls
+        //   .pos.group.balance = 1
+
         //auto _cursor_klass = &e_scrollbar.cursor_klass;
         auto _cursor_klass = 
             e_scrollbar.find_klass_or_create (

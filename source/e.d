@@ -7,7 +7,6 @@ import etree;
 import klass : Klass;
 import field : Field;
 import e_update : TemplateArg;
-import e_update : GCursor;
 import e_generator : Generator;
 import types;
 import tstring;
@@ -61,12 +60,21 @@ E {
     Pos        pos;        // relative from parent
     PosType    pos_type = PosType.none;
     PosGroup   pos_group;
-    byte       pos_group_balance;
+//    byte       pos_group_balance = 50;
+    Balance    pos_group_balance_x = 50;
+    Balance    pos_group_balance_y = 50;
+    // way
+    //   r, ot last e
+    //   d, ot last e
     Way        way;
-    byte       pos_percent;
+
+    //byte       pos_percent;
     Size       size;       // = content.size + aura.size
     SizeType   size_w_type = SizeType.parent;
     SizeType   size_h_type = SizeType.parent;
+
+    Limit      limit;
+
     bool       hidden;
     Klass*     from_klass;
     Klass*     from_template;
@@ -228,11 +236,7 @@ E {
     PosType : ubyte {
         none,
         t9,
-        t3,
         grid,
-        vbox,
-        hbox,
-        percent,
         fixed,
     }
     enum
@@ -325,8 +329,9 @@ E {
         hidden        = hidden.init;
         pos_type      = PosType.none; //
         pos_group     = pos_group.init;
+        pos_group_balance_x = pos_group_balance_x.init;
+        pos_group_balance_y = pos_group_balance_y.init;
         way           = way.init;
-        pos_percent   = pos_percent.init;
         size_w_type   = SizeType.parent; //
         size_h_type   = SizeType.parent; //
         //generator     = generator.init;
@@ -389,6 +394,11 @@ _Content {
     auto ref
     childs () {
         return e.childs;
+    }
+
+    auto 
+    limit () {
+        return _content.pos + _content.size;
     }
 }
 
@@ -594,7 +604,6 @@ _dup (EPtr _this) {
      cloned.pos_type      = _this.pos_type;
      cloned.pos_group     = _this.pos_group;
      cloned.way           = _this.way;
-     cloned.pos_percent   = _this.pos_percent;
      cloned.size_w_type   = _this.size_w_type;
      cloned.size_h_type   = _this.size_h_type;
      //cloned.childs_src    = _this.childs_src;
