@@ -49,7 +49,7 @@ e_update_size_pos (E* e, E* pre=null, Deep deep=0) {
     e_update_step (e,pre,deep);
     e_update_childs (e,deep);
     e_update_balance_childs (e);  // move group
-//    e_update_move_childs (e);
+    e_update_move_childs (e);
 }
 
 void
@@ -186,7 +186,12 @@ e_update_balance_childs (E* e) {
 
 void
 e_update_move_childs (E* e) {
-    // recursove
+    if (e.parent !is null) {
+        auto offset = e.parent.content.pos;
+
+        foreach (_e; WalkChilds (e))
+            _e_update_pos (_e, _e.pos + offset);
+    }
 }
 
 void

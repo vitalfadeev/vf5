@@ -1,4 +1,6 @@
 e root
+ e shifted1
+ e shifted2
   e t9-left group
     e rect rect1
       text 1.a
@@ -65,6 +67,13 @@ e root
 
 root
   size 1024 480
+
+shifted1
+  pos 10
+  size 10 10 
+
+shifted2
+  pos 10
 
 rect
   size         64 64

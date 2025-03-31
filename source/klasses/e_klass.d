@@ -265,6 +265,7 @@ set_pos_group_balance (E* e, TString[] values) {
     else
     if (values.length >= 1) {
         set_pos_group_balance_x (e,values);
+        set_pos_group_balance_y (e,values);
     }
 }
 
