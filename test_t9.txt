@@ -1,79 +1,28 @@
 e root
- e shifted1
- e shifted2
-  e t9-left group
-    e rect rect1
-      text 1.a
-    e rect rect1
-      text 1.b
-    e rect rect1
-      text 1.c
+  e rect group-left
+    text 1.a
+  e rect group-left
+    text 1.b
+  e rect group-left
+    text 1.c
 
-  e t9-center group
-    e rect rect2
-      text 2.a
-    e rect rect2
-      text 2.b
-    e rect rect2
-      text 2.c
+  e rect group-center
+    text 2.a
+  e rect group-center
+    text 2.b
+  e rect group-center
+    text 2.c
 
-  e t9-right group
-    e rect rect3
-      text 3.a
-    e rect rect3
-      text 3.b
-    e rect rect3
-      text 3.c
+  e rect group-right
+    text 3.a
+  e rect group-right
+    text 3.b
+  e rect group-right
+    text 3.c
 
-  e t9-4 group
-    e rect rect4
-      text 4.a
-    e rect rect4
-      text 4.b
-    e rect rect4
-      text 4.c
-
-  e t9-5 group
-    e rect rect5
-      text 5.a
-    e rect rect5
-      text 5.b
-    e rect rect5
-      text 5.c
-
-  e t9-6 group
-    e rect rect6
-      text 6.a
-    e rect rect6
-      text 6.b
-    e rect rect6
-      text 6.c
-
-  e t9-7 group
-    e rect rect7
-      text 7.a
-    e rect rect7
-      text 7.b
-    e rect rect7
-      text 7.c
-
-  e t9-8 group
-    e rect rect8
-      text 8.a
-    e rect rect8
-      text 8.b
-    e rect rect8
-      text 8.c
 
 root
   size 1024 480
-
-shifted1
-  pos 10
-  size 10 10 
-
-shifted2
-  pos 10
 
 rect
   size         64 64
@@ -83,78 +32,12 @@ rect
   text.fg      #ccc
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
-rect1
-  way          r
-  text         1
+group-left
+  pos          l u
 
-rect2
-  text         2
+group-center
+  pos          c u
 
-rect3
-  text         3
+group-right
+  pos          r u
 
-rect4
-  way          d
-  text         4
-
-rect5
-  text         5
-
-rect6
-  text         6
-
-rect7
-  way          r
-  text         7
-
-rect8
-  way          d
-  text         8
-
-t9-left
-  pos.type  t9
-  pos.group 1
-  pos.group.balance.x 0
-  pos.group.balance.y 0
-
-t9-center
-  pos.type  t9
-  pos.group 2
-  pos.group.balance.x 50
-  pos.group.balance.y 0
-
-t9-right
-  pos.type  t9
-  pos.group 3
-  pos.group.balance.x 100
-  pos.group.balance.y 0
-
-t9-4
-  pos.type  t9
-  pos.group 4
-  pos.group.balance.x 100
-  pos.group.balance.y 50
-
-t9-5
-  pos.type  t9
-  pos.group 5
-  pos.group.balance.x 100
-  pos.group.balance.y 100
-
-t9-6
-  pos.type  t9
-  pos.group 6
-  pos.group.balance.x 50
-  pos.group.balance.y 100
-
-t9-7
-  pos.type  t9
-  pos.group 7
-  pos.group.balance.x 0
-  pos.group.balance.y 100
-
-t9-8
-  pos.type  t9
-  pos.group 8
-  pos.group.balance.x 0
-  pos.group.balance.y 50

@@ -12,7 +12,11 @@ alias W = COORD;
 alias H = COORD;
 alias R = COORD; // radius
 
-alias Balance = byte;
+struct 
+Balance {
+    int length;    // -50 0 +50
+    int capacity;  // 100
+}
 
 struct 
 Pos {
@@ -94,6 +98,11 @@ Size {
     Size
     opBinary (string op : "-") (Size b) {
         return Size ((w-b.w).to!W, (h-b.h).to!H);
+    }
+
+    Size
+    opBinary (string op : "/") (int b) {
+        return Size ((w/b).to!W, (h/b).to!H);
     }
 
     void

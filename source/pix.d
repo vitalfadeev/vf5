@@ -257,6 +257,10 @@ draw (Pix* pix, draw_UserEvent* ev, E* root) {
         SDL_RenderClear (renderer);
     }
 
+    // setup offsets for relative rendering
+    ev.offset.reserve (7);
+    ev.offset ~= Pos (0,0);
+
     // draw
     if (e !is null)
         e.draw (ev);

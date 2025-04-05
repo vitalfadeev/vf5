@@ -13,4 +13,5 @@ rect
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
 hbox
-  pos.type  hbox r
+  pos.type  way
+  way       r

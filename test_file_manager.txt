@@ -11,20 +11,19 @@ root
  bg         colors.black
 
 hbox
-  pos.type  t9
-  pos.way   r
-  pos.group 1
-  pos.group.balance 0 0
+  pos l u
+  way r
 
 left
   size 240 parent
+//  size 30% parent
   aura 1
   aura.color colors.gray_border
   bg colors.bg
   text 1
 
 right
-  size 400 parent
+  size max parent
   bg colors.bg-1
   aura 1
   aura.color colors.gray_border
@@ -36,55 +35,48 @@ hot-list
 dir-list
   generator  fs . fields NAME
   template   dir-list-template
+  // target     scroll-content
 
 dir-list-template
   e dir-list-template-name
 
 dir-list-template-name
   size         200 32
-  pos.type     t9
-  pos.way      d
-  pos.group    1
-  pos.group.balance 0 0
+  way          d
   aura         1
   borders      1 solid #444
   text         NAME
 
 scroll-content
-  pos.type  t9
-  pos.group 1
-  pos.group.balance 0 0
+  way r
+  size max parent
   aura 2
-  aura.color #555
+  aura.color #a55
 
 scroll-bar
-  pos.type  t9
-  pos.group 2
-  pos.group.balance 100 0
+  pos  r u
+  way r
   size 32 parent
   aura 2
   aura.color #ccc
 
 scroll-bar-up
-  pos.type  9
-  pos.group 1
-  pos.group.balance 0 0
+  pos l u
+  way .
   size 24 24 
   aura 2
   aura.color #666
 
 scroll-bar-dn
-  pos.type  9
-  pos.group 3
-  pos.group.balance 0 100
+  pos l d
+  way .
   size 24 24 
   aura 2
   aura.color #777
 
 scroll-bar-cursor
-  pos.type  t9
-  pos.group 2
-  pos.group.balance 0 50
+  pos l c
+  way .
   size 24 24 
   aura 2
   aura.color #888

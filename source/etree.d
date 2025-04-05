@@ -29,7 +29,6 @@ remove_child (Tree) (Tree* t, Tree* c) {
     (cast (vf.tree.Tree*) t).remove_child (cast (vf.tree.Tree*) c);
 }
 
-
 auto 
 WalkFields (Klass* kls) {
     return _WalkFields!Klass (kls);

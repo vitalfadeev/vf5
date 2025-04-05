@@ -110,6 +110,9 @@ gen_tree (E* e, Klass* template_klass) {
     // template
     //   kls.args      = [TEXT]
     //   template_args = [abc,def]
+
+    auto target = find_child (e,"scroll-content");
+    assert (target !is null);
     
     foreach (line; *generator) {
         TemplateArg[] template_args;
@@ -121,7 +124,7 @@ gen_tree (E* e, Klass* template_klass) {
                 break;
         }
 
-        apply_template (e,template_klass,template_args);
+        apply_template (target,template_klass,template_args);
 
         //foreach (_e; WalkChildsReverse (e)) {
         //    //force_e_update (_e);

@@ -124,7 +124,8 @@ draw_UserEvent {
     Uint32        windowID;
     Sint32        code = USER_EVENT.draw;
     E*            e;
-    SDL_Renderer* renderer;;
+    SDL_Renderer* renderer;
+    Pos[]         offset;
 }
 
 struct

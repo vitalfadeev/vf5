@@ -11,9 +11,9 @@ import pix : FONT_PTR, SDLException, TTFException;
 
 
 void
-draw (SDL_Renderer* renderer, E* e) {
-    draw_content_with_aura (renderer,e);
-    draw_click_decoration (renderer,e);
+draw (SDL_Renderer* renderer, Pos offset, E* e) {
+    draw_content_with_aura (renderer,offset,e);
+    draw_click_decoration (renderer,offset,e);
 }
 
 void
@@ -186,7 +186,7 @@ content_size (E* e) {
 }
 
 void
-draw_click_decoration (SDL_Renderer* renderer, E* e) {
+draw_click_decoration (SDL_Renderer* renderer, Pos offset, E* e) {
     // shade around content, inside borders. in pad or content. shade bg
 }
 
@@ -224,11 +224,11 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
 }
 
 void
-draw_aura_borders (SDL_Renderer* renderer, E* e) {
+draw_aura_borders (SDL_Renderer* renderer, E* e, Pos aura_pos) {
     auto color = e.aura.border.color;
     SDL_SetRenderDrawColor (renderer, color.r,color.g,color.b,color.a,);
 
-    auto pos  = aura_borders_pos  (e);
+    auto pos  = aura_pos;
     auto size = aura_borders_size (e);
 
     if (size.w > 0 && size.h > 0)
@@ -252,16 +252,17 @@ draw_aura_borders (SDL_Renderer* renderer, E* e) {
 }
 
 void
-draw_content_with_aura (SDL_Renderer* renderer, E* e) {
-    auto _content_pos  = content_pos (e);
-    auto _content_size = content_size (e);
-    auto _aura_pos     = e.aura.pos;
+draw_content_with_aura (SDL_Renderer* renderer, Pos offset, E* e) {
+    // all relative from parent content
+    auto _aura_pos     = offset + e.pos;
     auto _aura_size    = aura_real_size (e);
+    auto _content_pos  = offset + e.pos + e.aura.size;
+    auto _content_size = content_size (e);
 
     if (e.aura.size.w != 0 && e.aura.size.h != 0 && e.aura.color.a != 0)
         draw_aura (renderer,e,_aura_pos,_aura_size);
     if (e.aura.border.type != E.Border.Type.none && e.aura.border.color.a != 0)
-        draw_aura_borders (renderer,e);
+        draw_aura_borders (renderer,e,_aura_pos);
     if (e.content.size.w != 0 && e.content.size.h != 0 && e.content.color.a != 0)
         draw_content_bg (renderer,e,_content_pos,_content_size);
     if (e.content.size.w != 0 && e.content.size.h != 0)

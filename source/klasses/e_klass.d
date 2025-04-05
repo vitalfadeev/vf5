@@ -3,6 +3,7 @@ module klasses.e;
 import std.stdio;
 import std.string;
 import std.conv;
+import std.range : back;
 import bindbc.sdl;
 import etree;
 import e : E,content;
@@ -110,13 +111,12 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         case "pos.x"             : set_pos_x              (e,values); break;
         case "pos.y"             : set_pos_y              (e,values); break;
         case "pos"               : set_pos                (e,values); break;
-        case "pos.type"          : set_pos_type           (e,values); break;
-        case "pos.group"         : set_pos_group          (e,values); break;
-        case "pos.group.balance" : set_pos_group_balance  (e,values); break;
-        case "pos.group.balance.x" : set_pos_group_balance_x (e,values); break;
-        case "pos.group.balance.y" : set_pos_group_balance_y (e,values); break;
-        case "pos.way"           : set_way                (e,values); break;
+        //case "pos.balance"       : set_pos_balance        (e,values); break;
+        //case "pos.balance.x"     : set_pos_balance_x      (e,values); break;
+        //case "pos.balance.y"     : set_pos_balance_y      (e,values); break;
+        //case "pos.way"           : set_way                (e,values); break;
         case "way"               : set_way                (e,values); break;
+        //case "organize.childs"   : set_organize_childs    (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
         case "size.h"            : set_size_h             (e,values); break;
         case "size"              : set_size               (e,values); break;
@@ -163,7 +163,7 @@ void
 draw (Klass* kls, draw_UserEvent* ev, E* e) {
     version (debug_event)
     writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
-    e_klass_draw.draw (ev.renderer,e);
+    e_klass_draw.draw (ev.renderer,ev.offset.back,e);
 }
 
 //
@@ -172,59 +172,13 @@ set_pos (E* e, TString[] values) {
     if (values.length >= 2) {
         set_pos_x (e, values[0..1]);
         set_pos_y (e, values[1..$]);
-        //e.pos_type = E.PosType.fixed;
     }
     else
     if (values.length == 1) {
         set_pos_x (e, values[0..1]);
         set_pos_y (e, values[0..1]);
-        //e.pos_type = E.PosType.fixed;
     }
 }
-
-void
-set_pos_type (E* e, TString[] values) {
-    if (values.length >= 2) {
-        switch (values[0].s) {
-            case "9"       : e.pos_type = E.PosType.t9; break;
-            case "t9"      : e.pos_type = E.PosType.t9; break;
-            case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "fixed"   : e.pos_type = E.PosType.fixed; break;
-            default: {
-                if (is_percent (values[0].s,&e.pos_group_balance_x)) // 50%
-                    e.pos_type = E.PosType.t9;
-                else
-                    e.pos_type = E.PosType.none;
-            }
-        }
-        switch (values[1].s) {
-            case "b" : e.way = E.Way.d; break;
-            case "d" : e.way = E.Way.d; break;
-            case "r" : e.way = E.Way.r; break;
-            case "l" : e.way = E.Way.l; break;
-            case "t" : e.way = E.Way.u; break;
-            case "u" : e.way = E.Way.u; break;
-            default:
-                e.way = E.Way.r;
-        }
-    }
-    else
-    if (values.length >= 1) {
-        switch (values[0].s) {
-            case "9"       : e.pos_type = E.PosType.t9; break;
-            case "t9"      : e.pos_type = E.PosType.t9; break;
-            case "grid"    : e.pos_type = E.PosType.grid; break;
-            case "fixed"   : e.pos_type = E.PosType.fixed; break;
-            default: {
-                if (is_percent (values[0].s,&e.pos_group_balance_x)) // 50%
-                    e.pos_type = E.PosType.t9;
-                else
-                    e.pos_type = E.PosType.none;
-            }
-        }
-    }
-}
-
 
 bool
 is_percent (Balance) (string s, Balance* percent) {
@@ -250,38 +204,137 @@ is_numeric (string s, int* num) {
 }
 
 void
-set_pos_group (E* e, TString[] values) {
-    if (values.length >= 1) {
-        e.pos_group = values[0].s.to!ubyte;
-    }
-}
-
-void
-set_pos_group_balance (E* e, TString[] values) {
+set_pos_balance (E* e, TString[] values) {
     if (values.length >= 2) {
-        set_pos_group_balance_x (e,values[0..1]);
-        set_pos_group_balance_y (e,values[1..$]);
+        set_pos_balance_x (e,values[0..1]);
+        set_pos_balance_y (e,values[1..$]);
     }
     else
     if (values.length >= 1) {
-        set_pos_group_balance_x (e,values);
-        set_pos_group_balance_y (e,values);
+        set_pos_balance_x (e,values);
+        set_pos_balance_y (e,values);
     }
 }
 
 void
-set_pos_group_balance_x (E* e, TString[] values) {
+set_pos_balance_x (E* e, TString[] values) {
     if (values.length >= 1) {
-        e.pos_group_balance_x = values[0].s.to!(typeof(e.pos_group_balance_x));
+        e.pos_balance_x = _parse_balance (values[0].s);
     }
 }
 
 void
-set_pos_group_balance_y (E* e, TString[] values) {
+set_pos_balance_y (E* e, TString[] values) {
     if (values.length >= 1) {
-        e.pos_group_balance_y = values[0].s.to!(typeof(e.pos_group_balance_y));
+        e.pos_balance_y = _parse_balance (values[0].s);
     }
 }
+
+Balance
+_parse_balance (string s) {
+    // +50/100
+    // 0
+    // +1/2
+    //  1/2
+    // -1/2
+    // +50
+    // -50
+    //
+    // 0%
+    // 100%
+
+    Balance balance;
+
+    string c = s;
+
+    //_read_sign (s);
+    //_read_1 (s);
+    //_read_div (s);
+    //_read_2 (s);
+
+    byte _sign = +1;
+    int _1;
+    byte _div;
+    int _2;
+
+    _wait_sign:
+    if (c.length) {
+        if (c[0] == '+') {
+            _sign = +1;
+            c = c[1..$];
+        }
+        if (c[0] == '-') {
+            _sign = -1;
+            c = c[1..$];
+        }
+    }
+
+    _wait_1:
+    int _int_1;
+    if (auto readed=_read_integer (c,_int_1)) {
+        balance.length = _int_1;
+        balance.capacity = 100;
+
+        c = c[readed..$];
+
+        if (_int_1 == 0) {
+            // 0;
+            balance.capacity = 1;
+            goto end;
+        }
+    }
+
+    _wait_div:
+    if (auto readed = _read_div (c)) {
+        //_div;
+        c = c[readed..$];
+
+        _wait_2:
+        int _int_2;
+        if (auto readed2 = _read_integer (c,_int_2)) {
+            if (_int_2 == 0)
+                balance.capacity = 1;
+            else
+                balance.capacity = _int_2;
+        }
+    }
+
+    end:
+    balance.length *= _sign;
+    return balance;
+}
+
+auto
+_read_integer (string s, ref int _int) {
+    _int = 0;
+    size_t i;
+
+    for (i=0; i < s.length && _is_int (s[i]); i++)
+        _int = _int * 10 + _atoi (s[i]);
+
+    return i;
+}
+
+bool
+_is_int (char c) {
+    return 
+        c >= '0' && c <= '9';
+}
+
+int
+_atoi (char c) {
+    return c - '0';
+}
+
+auto
+_read_div (string s) {
+    if (s.length)
+    if (s[0] == '/')
+        return 1;
+
+    return 0;
+}
+
 
 void
 set_way (E* e, TString[] values) {
@@ -293,6 +346,18 @@ set_way (E* e, TString[] values) {
             case "u": e.way = E.Way.u; break;
             case "b": e.way = E.Way.d; break;
             case "d": e.way = E.Way.d; break;
+            case "_": e.way = E.Way._; break;
+            case ".": e.way = E.Way._; break;
+            default:
+        }
+    }
+}
+
+void
+set_organize_childs (E* e, TString[] values) {
+    if (values.length >= 1) {
+        switch (values[0].s) {
+            case "max": e.organize_childs = E.OrganizeChilds.max_; break;
             default:
         }
     }
@@ -301,32 +366,85 @@ set_way (E* e, TString[] values) {
 void
 set_pos_x (E* e, TString[] values) {
     if (values.length) {
-        string value = values[0].s;
-
-        if (value.isNumeric ()) { // 50
-            e.pos.x = value.to!X;
-        }
-    }
-}
-
-void
-set_pos_x_percent (E* e, TString[] values) {
-    if (values.length) {
-        string value = values[0].s;
-
-        if (value.isNumeric)
-            e.pos_group_balance_x = value.to!(typeof(e.pos_group_balance_x));
-        else
-            e.pos_group_balance_x = 0;
+        _set_pos_x (e,values[0].s);
     }
 }
 
 void
 set_pos_y (E* e, TString[] values) {
     if (values.length) {
-        if (values[0].s.isNumeric ()) {
-            e.pos.y = values[0].s.to!Y;
-        }
+        _set_pos_y (e,values[0].s);
+    }
+}
+
+void
+_set_pos_x (E* e, string value) {
+    // pos  right
+    // pos  l
+    // pos  r
+    // pos  c
+    // pos  0%
+    // pos  100%
+    // pos  50%
+    // pos  0
+    // pos  10
+    // pos  10 10
+    // pos  l u
+    // pos  l d
+    // pos  l c
+    // pos .
+    // pos way
+    // way r
+    // way l
+    // way d
+    // way u
+    // way .
+    //
+    // pos.type.x r
+    // pos.type.x l
+    // pos.type.x c
+    // pos.type.x way
+    // pos.type.y u
+    // pos.type.y d
+    // pos.type.y c
+    // pos.type.y way
+
+    switch (value) {
+        case "right"  : e.pos_type_x = E.PosType.r; break;
+        case "r"      : e.pos_type_x = E.PosType.r; break;
+        case "left"   : e.pos_type_x = E.PosType.l; break;
+        case "l"      : e.pos_type_x = E.PosType.l; break;
+        case "center" : e.pos_type_x = E.PosType.c; break;
+        case "c"      : e.pos_type_x = E.PosType.c; break;
+        case "way"    : e.pos_type_x = E.PosType.way; break;
+        case "_"      : e.pos_type_x = E.PosType._; break;
+        case "."      : e.pos_type_x = E.PosType._; break;
+        default       :
+            if (value.isNumeric ()) { // 50
+                e.pos_type_x = E.PosType.fixed;
+                e.pos.x      = value.to!X;
+            }
+    }
+}
+
+void
+_set_pos_y (E* e, string value) {
+    switch (value) {
+        case "up"     : e.pos_type_y = E.PosType.u; break;
+        case "u"      : e.pos_type_y = E.PosType.u; break;
+        case "down"   : e.pos_type_y = E.PosType.d; break;
+        case "dn"     : e.pos_type_y = E.PosType.d; break;
+        case "d"      : e.pos_type_y = E.PosType.d; break;
+        case "center" : e.pos_type_y = E.PosType.c; break;
+        case "c"      : e.pos_type_y = E.PosType.c; break;
+        case "way"    : e.pos_type_y = E.PosType.way; break;
+        case "_"      : e.pos_type_y = E.PosType._; break;
+        case "."      : e.pos_type_y = E.PosType._; break;
+        default       :
+            if (value.isNumeric ()) { // 50
+                e.pos_type_y = E.PosType.fixed;
+                e.pos.y      = value.to!Y;
+            }
     }
 }
 
@@ -548,11 +666,12 @@ void
 set_text_pos_type (E* e, TString[] values) {
     if (values.length) {
         switch (values[0].s) {
-            case "9"       : e.content.text.pos_type = E.PosType.t9; break;
-            case "t9"      : e.content.text.pos_type = E.PosType.t9; break;
+            case "_"       : e.content.text.pos_type = E.PosType._; break;
+            case "fixed"   : e.content.text.pos_type = E.PosType.fixed; break;
+            case "way"     : e.content.text.pos_type = E.PosType.way; break;
+            case "balance" : e.content.text.pos_type = E.PosType.balance; break;
             case "grid"    : e.content.text.pos_type = E.PosType.grid; break;
-            default:
-                e.content.text.pos_type = E.PosType.none;
+            default        : e.content.text.pos_type = E.PosType._;
         }
     }
 }

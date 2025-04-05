@@ -16,6 +16,7 @@ main () {
 
 	//UTree
 	//E* root = open ("test_1.txt");
+	//E* root = open ("test_3.txt");
 	//E* root = open ("test_t3.txt");
 	//E* root = open ("test_generator_klass.txt");
 	//E* root = open ("test_audacious.txt");

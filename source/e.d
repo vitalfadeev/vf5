@@ -2,6 +2,7 @@ import std.stdio;
 import std.format;
 import std.string;
 import std.conv;
+import std.range : back;
 import bindbc.sdl;
 import etree;
 import klass : Klass;
@@ -44,7 +45,6 @@ Klass*[] reserved_klasses;
 //     content
 //       borders
 
-alias PosGroup = ubyte;
 alias Deep     = int;
 
 struct 
@@ -58,15 +58,17 @@ E {
     Content   _content;
 
     Pos        pos;        // relative from parent
-    PosType    pos_type = PosType.none;
-    PosGroup   pos_group;
+    PosType    pos_type_x = PosType._;
+    PosType    pos_type_y = PosType._;
 //    byte       pos_group_balance = 50;
-    Balance    pos_group_balance_x = 50;
-    Balance    pos_group_balance_y = 50;
+    Balance    pos_balance_x = Balance (0,1);
+    Balance    pos_balance_y = Balance (0,1);
     // way
     //   r, ot last e
     //   d, ot last e
     Way        way;
+    MaxStepWay max_step_way; // 1 bit. max jump. max step. expand
+    OrganizeChilds organize_childs;
 
     //byte       pos_percent;
     Size       size;       // = content.size + aura.size
@@ -234,10 +236,16 @@ E {
 
     enum
     PosType : ubyte {
-        none,
-        t9,
+        _,
+        fixed,   // 10 10
+        way,     // r
+        balance, // -1/3
         grid,
-        fixed,
+        r,
+        l,
+        u,
+        d,
+        c,
     }
     enum
     Way : ubyte {
@@ -253,7 +261,33 @@ E {
         dr = 0b1000_0001,  // v >
         ul = 0b0100_0010,  // ^ <
         dl = 0b1000_0010,  // v <
-        _  = 0b0000_0000,  // >
+        _  = 0b0000_0000_0000_0000,  // >
+    }
+    alias MaxStepWay = bool;
+    // max right
+    // max_right
+    // max_r
+    //
+    // 1   2   3
+    // 1, 2 ot 1 max_r, 3 ot 2 max_r, fix_max_spaces (1..2, 2..3)
+    //
+    // 1   2   3
+    // 2 balance 0, 1 ot 2 max_l, 3 ot 2 max_r
+    //
+
+    enum
+    Overflow {
+        _,
+        scroll,
+        pdmenu,
+        dots,
+    }
+
+    enum
+    OrganizeChilds {
+        _,
+        way,
+        max_,
     }
 
     enum 
@@ -327,10 +361,10 @@ E {
         aura          = aura.init;
         _content      = _content.init;
         hidden        = hidden.init;
-        pos_type      = PosType.none; //
-        pos_group     = pos_group.init;
-        pos_group_balance_x = pos_group_balance_x.init;
-        pos_group_balance_y = pos_group_balance_y.init;
+        pos_type_x    = PosType._; //
+        pos_type_y    = PosType._; //
+        pos_balance_x = pos_balance_x.init;
+        pos_balance_y = pos_balance_y.init;
         way           = way.init;
         size_w_type   = SizeType.parent; //
         size_h_type   = SizeType.parent; //
@@ -356,6 +390,11 @@ E {
             foreach (_e; for_remove)
                 (&this).remove_child (_e);
         }
+    }
+
+    auto 
+    content_pos () {
+        return this.pos + this.aura.size;
     }
 
     string
@@ -398,7 +437,7 @@ _Content {
 
     auto 
     limit () {
-        return _content.pos + _content.size;
+        return e.pos + _content.size;  // e.pos is relative
     }
 }
 
@@ -583,8 +622,14 @@ draw (E* e, draw_UserEvent* ev) {
         kls.draw (ev,e);
 
     // to childs
-    foreach (_e; WalkChilds (e))
-        _e.draw (ev);
+    if (e.has_childs) {
+        ev.offset ~= ev.offset.back + e.content_pos;
+
+        foreach (_e; WalkChilds (e))
+            _e.draw (ev);
+
+        ev.offset.length--;
+    }
 }
 
 EPtr
@@ -601,8 +646,8 @@ _dup (EPtr _this) {
      cloned.hidden        = _this.hidden;
      cloned.from_klass    = _this.from_klass;
      cloned.from_template = _this.from_template;
-     cloned.pos_type      = _this.pos_type;
-     cloned.pos_group     = _this.pos_group;
+     cloned.pos_type_x    = _this.pos_type_x;
+     cloned.pos_type_y    = _this.pos_type_y;
      cloned.way           = _this.way;
      cloned.size_w_type   = _this.size_w_type;
      cloned.size_h_type   = _this.size_h_type;
