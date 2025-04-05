@@ -55,6 +55,11 @@ e_update_size_pos (E* e, E* pre=null, Deep deep=0) {
 
 void
 e_update_pos_step (E* e, E* pre, Deep deep) {
+    // by group
+    //  r
+    //  l
+    //  c
+
     // to way
     //   < > ^ v
     e_update_pos_step_way (e,pre,deep);
@@ -120,8 +125,8 @@ e_update_childs (E* e, Deep deep) {
             writefln ("  pos: %s, size: %s, _e: %s", _e.pos, _e.size, *_e);
 
             auto m = _e.pos + _e.size;
-            used_by_type_w[e.pos_type_x] = max (used_by_type_w[e.pos_type_x], m.x);
-            used_by_type_h[e.pos_type_y] = max (used_by_type_h[e.pos_type_y], m.y);
+            used_by_type_w[_e.pos_type_x] = max (used_by_type_w[_e.pos_type_x], m.x);
+            used_by_type_h[_e.pos_type_y] = max (used_by_type_h[_e.pos_type_y], m.y);
             used.w = max (used.w, m.x);
             used.h = max (used.h, m.y);
             if (_e.size_w_type == E.SizeType.max_)
@@ -187,10 +192,19 @@ e_update_childs (E* e, Deep deep) {
 
 void
 e_update_size_pos_r (E* e, E* pre, int wrap) {
-    auto step  = Pos (pre.size.w, pre.size.h);
+    // reset pos if group != prev.group
+    auto pos = Pos (
+        (pre.pos_type_x == e.pos_type_x) ? pre.pos.x : 0,
+        (pre.pos_type_y == e.pos_type_y) ? pre.pos.y : 0
+    );
+    auto step  = Pos (
+        (pre.pos_type_x == e.pos_type_x) ? pre.size.w : 0,
+        (pre.pos_type_y == e.pos_type_y) ? pre.size.h : 0
+    );
     auto limit = e.parent.content.limit;
+
     //writefln ("step: %s, pre.pos: %s, limit: %s, e: %s", step, pre.pos, limit, *e);
-    _e_update_pos (e, _e_update_size_pos_r (pre.pos, step, limit, wrap));
+    _e_update_pos (e, _e_update_size_pos_r (pos, step, limit, wrap));
 }
 
 Pos
@@ -224,9 +238,16 @@ _e_update_size_pos_r (Pos pre_pos, Pos step, Pos limit, int wrap) {
 
 void
 e_update_size_pos_d (E* e, E* pre, int wrap) {
-    auto step  = Pos (pre.size.w, pre.size.h);
+    auto pos = Pos (
+        (pre.pos_type_x == e.pos_type_x) ? pre.pos.x : 0,
+        (pre.pos_type_y == e.pos_type_y) ? pre.pos.y : 0
+    );
+    auto step  = Pos (
+        (pre.pos_type_x == e.pos_type_x) ? pre.size.w : 0,
+        (pre.pos_type_y == e.pos_type_y) ? pre.size.h : 0
+    );
     auto limit = e.parent.content.limit;
-    _e_update_pos (e, _e_update_size_pos_d (pre.pos, step, limit, wrap));
+    _e_update_pos (e, _e_update_size_pos_d (pos, step, limit, wrap));
 }
 
 Pos
