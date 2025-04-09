@@ -231,7 +231,7 @@ _WalkChilds (TTree,Skip) {
                 next = next.r;
                 goto loop;  // go_right
 
-        return 0;
+//        return 0;
     }
 
     int
@@ -255,7 +255,7 @@ _WalkChilds (TTree,Skip) {
                 next = next.r;
                 goto loop;  // go_right
 
-        return 0;
+//        return 0;
     }
 }
 

@@ -45,45 +45,95 @@ Klass*[] reserved_klasses;
 //     content
 //       borders
 
-alias Deep     = int;
+//
+// E_
+//  E_ margin
+//   E_ aura
+//    E_ bg
+//     E_ text
+struct
+E_ {
+    Type type;
+    union {
+        ES   es;     // is E_
+        void image;  // is E_
+        void text;   // is E_
+        void border; // is E_
+        void bg;     // is E_
+    }
+
+    enum
+    Type {
+        _,
+        es,
+        image,
+        text,
+        border,
+        bg,
+    }
+}
+
+struct
+ES {
+    PosSize ps;
+    E_[] s;
+}
+
+struct
+Image_ {
+    PosSize ps;
+    void*   ptr;
+}
+
+struct
+Text_ {
+    PosSize ps;
+    void*   ptr;
+}
+
+struct
+Border_ {
+    PosSize ps;
+    Color   color;
+    COORD   bold;
+}
+
+struct
+BG_ {
+    PosSize ps;
+    Color   color;
+}
+
 
 struct 
 E {
-    Tree      _super;
-    Klass*[]   klasses;    // box green rounded
-    Field*[]   fields;     //   text abc
+    Tree         _super;
+    Klass*[]      klasses;    // box green rounded
+    Field*[]      fields;     //   text abc
 
-    Margin     margin;
-    Aura       aura;
-    Content   _content;
+    Margin        margin;
+    Aura          aura;
+    Content      _content;
 
-    Pos        pos;        // relative from parent
-    PosType    pos_type_x = PosType._;
-    PosType    pos_type_y = PosType._;
-//    byte       pos_group_balance = 50;
-    Balance    pos_balance_x = Balance (0,1);
-    Balance    pos_balance_y = Balance (0,1);
-    // way
-    //   r, ot last e
-    //   d, ot last e
-    Way        way;
-    MaxStepWay max_step_way; // 1 bit. max jump. max step. expand
-    OrganizeChilds organize_childs;
+    Pos            pos;        // relative from parent
+    PosType[ORDS]  pos_type;
+    Balance[ORDS]  pos_balance = [Balance (0,1), Balance (0,1)];
+    Size           size;       // = content.size + aura.size
+    SizeType[ORDS] size_type;
+    Way[ORDS]      way; //  ORD.X, ORD.Y
+                        // -ORD.X, ORD.Y
+                        //  ORD.Y, ORD.X
+                        // -ORD.Y, ORD.X
 
-    //byte       pos_percent;
-    Size       size;       // = content.size + aura.size
-    SizeType   size_w_type = SizeType.parent;
-    SizeType   size_h_type = SizeType.parent;
+    Limit         limit;
 
-    Limit      limit;
-
-    bool       hidden;
-    Klass*     from_klass;
-    Klass*     from_template;
-    Generator  generator;
+    bool          hidden;
+    Klass*        from_klass;
+    Klass*        from_template;
+    Generator     generator;
     TemplateArg[] template_args;
-    On[]       on;
-    Fn         fn;
+    On[]          on;
+    Fn            fn;
 
     // root
     Klass*[] defined_klasses;
@@ -237,33 +287,18 @@ E {
     enum
     PosType : ubyte {
         _,
-        fixed,   // 10 10
-        way,     // r
-        balance, // -1/3
-        grid,
+        fixed,
+        balance,
+    }
+
+    enum
+    Way : byte {
+        _,
         r,
+        d,
         l,
         u,
-        d,
-        c,
     }
-    enum
-    Way : ubyte {
-        r  = 0b0001_0000,  // >
-        l  = 0b0010_0000,  // <
-        u  = 0b0100_0000,  // ^
-        d  = 0b1000_0000,  // v
-        ru = 0b0001_0100,  //   > ^
-        rd = 0b0001_1000,  //   > v
-        lu = 0b0010_0100,  //   < ^
-        ld = 0b0010_1000,  //   < v
-        ur = 0b0100_0001,  // ^ >
-        dr = 0b1000_0001,  // v >
-        ul = 0b0100_0010,  // ^ <
-        dl = 0b1000_0010,  // v <
-        _  = 0b0000_0000_0000_0000,  // >
-    }
-    alias MaxStepWay = bool;
     // max right
     // max_right
     // max_r
@@ -292,9 +327,9 @@ E {
 
     enum 
     SizeType {
-        content, // default
+        parent, // default
         fixed,
-        parent,
+        content,
         window,
         max_,
     }
@@ -361,13 +396,10 @@ E {
         aura          = aura.init;
         _content      = _content.init;
         hidden        = hidden.init;
-        pos_type_x    = PosType._; //
-        pos_type_y    = PosType._; //
-        pos_balance_x = pos_balance_x.init;
-        pos_balance_y = pos_balance_y.init;
+        pos_type      = pos_type.init; //
+        pos_balance   = pos_balance.init;
         way           = way.init;
-        size_w_type   = SizeType.parent; //
-        size_h_type   = SizeType.parent; //
+        size_type     = size_type.init; //
         //generator     = generator.init;
         on.length     = 0;
 
@@ -646,11 +678,9 @@ _dup (EPtr _this) {
      cloned.hidden        = _this.hidden;
      cloned.from_klass    = _this.from_klass;
      cloned.from_template = _this.from_template;
-     cloned.pos_type_x    = _this.pos_type_x;
-     cloned.pos_type_y    = _this.pos_type_y;
+     cloned.pos_type      = _this.pos_type;
      cloned.way           = _this.way;
-     cloned.size_w_type   = _this.size_w_type;
-     cloned.size_h_type   = _this.size_h_type;
+     cloned.size_type     = _this.size_type;
      //cloned.childs_src    = _this.childs_src;
      //cloned.childs_src.tpl.src 
      //                     = _this.childs_src.tpl.src.dup;

@@ -84,21 +84,30 @@ void
 e_update_pos_step_way (E* e, E* pre, Deep deep) {
     if (pre !is null)
     final
-    switch (e.way) {
-        case E.Way.r  : e_update_size_pos_r (e,pre, 0); break;
-        case E.Way.rd : e_update_size_pos_r (e,pre,+1); break;
-        case E.Way.ru : e_update_size_pos_r (e,pre,-1); break;
+    switch (e.way[0]) {
+        case E.Way.r  : e_update_size_pos_r (e,pre,e.way[1].to_wrap); break;
         case E.Way.l  : break;
-        case E.Way.lu : break;
-        case E.Way.ld : break;
-        case E.Way.d  : e_update_size_pos_d (e,pre, 0); break;
-        case E.Way.dr : e_update_size_pos_d (e,pre,+1); break;
-        case E.Way.dl : e_update_size_pos_d (e,pre,-1); break;
         case E.Way.u  : break;
-        case E.Way.ur : break;
-        case E.Way.ul : break;
+        case E.Way.d  : e_update_size_pos_d (e,pre,e.way[1].to_wrap); break;
         case E.Way._  : break;
     }
+}
+
+auto
+to_wrap (E.Way way) {
+    if (way == E.Way.u) 
+        return -1;
+    else
+    if (way == E.Way.d) 
+        return +1;
+    else
+    if (way == E.Way.l) 
+        return -1;
+    else
+    if (way == E.Way.r) 
+        return +1;
+
+    return 0;
 }
 
 void
@@ -108,14 +117,13 @@ e_update_childs (E* e, Deep deep) {
         // pre
         auto able = e.content.size;
         // ...for move groups to left,center
-        W[E.PosType.max+1] used_by_type_w;
-        H[E.PosType.max+1] used_by_type_h;
-        X[E.PosType.max+1] offset_by_type_x;
-        Y[E.PosType.max+1] offset_by_type_y;
+//assert (0, "used_by_type_w used_by_type_h -> ...[by w,h] used_by_type_wh");
+        COORD[ORDS][E.PosType.max+1] used_by_type;
+        COORD[ORDS][E.PosType.max+1] offset_by_type;
         // ...for detect max size
         int  nw;
         int  nh;
-        Size used;
+        Pos  used;
         writefln ("able: %s, e: %s", able, *e);
 
         // update childs size & pos
@@ -125,13 +133,13 @@ e_update_childs (E* e, Deep deep) {
             writefln ("  pos: %s, size: %s, _e: %s", _e.pos, _e.size, *_e);
 
             auto m = _e.pos + _e.size;
-            used_by_type_w[_e.pos_type_x] = max (used_by_type_w[_e.pos_type_x], m.x);
-            used_by_type_h[_e.pos_type_y] = max (used_by_type_h[_e.pos_type_y], m.y);
-            used.w = max (used.w, m.x);
-            used.h = max (used.h, m.y);
-            if (_e.size_w_type == E.SizeType.max_)
+            used_by_type[_e.pos_type[ORD.X]][ORD.X] = max (used_by_type[_e.pos_type[ORD.X]][ORD.X], m.x);
+            used_by_type[_e.pos_type[ORD.Y]][ORD.Y] = max (used_by_type[_e.pos_type[ORD.Y]][ORD.Y], m.y);
+            used = max (used,m);
+
+            if (_e.size_type[ORD.X] == E.SizeType.max_)
                 nw++;
-            if (_e.size_h_type == E.SizeType.max_)
+            if (_e.size_type[ORD.Y] == E.SizeType.max_)
                 nh++;
         }
 
@@ -141,10 +149,7 @@ e_update_childs (E* e, Deep deep) {
         //   center - each + ((able.width - group.width) / 2)
         // size
         //   detect max
-        offset_by_type_x[E.PosType.c] = (able.w - used_by_type_w[E.PosType.c]) / 2;;
-        offset_by_type_x[E.PosType.r] =  able.w - used_by_type_w[E.PosType.r];
-        offset_by_type_y[E.PosType.c] = (able.h - used_by_type_h[E.PosType.c]) / 2;;
-        offset_by_type_y[E.PosType.d] =  able.h - used_by_type_h[E.PosType.d];
+        offset_by_type[E.PosType.balance][ORD.X] = (able.w - used_by_type[E.PosType.balance][ORD.X]) / 2;;
         writefln ("");
         writefln ("2: able: %s, e: %s", able, *e);
         foreach (_pre,_e; WalkChilds (e)) {
@@ -153,12 +158,10 @@ e_update_childs (E* e, Deep deep) {
 
             writefln ("-:   pos: %s, size: %s, _e: %s", pos, _e.size, *_e);
 
-            auto offset_x = offset_by_type_x[_e.pos_type_x];
-            auto offset_y = offset_by_type_y[_e.pos_type_y];
-            pos.x += offset_x;
-            pos.y += offset_y;
+            auto offset = offset_by_type[_e.pos_type[ORD.X]];
+            pos += offset;
 
-            if (offset_x > 0 || offset_y > 0)
+            if (offset != Pos (0,0))
                 _e_update_pos (_e,pos);
             writefln ("+:   pos: %s, size: %s, _e: %s", pos, _e.size, *_e);
 
@@ -193,13 +196,14 @@ e_update_childs (E* e, Deep deep) {
 void
 e_update_size_pos_r (E* e, E* pre, int wrap) {
     // reset pos if group != prev.group
+    bool same_group = (pre.pos_type == e.pos_type);
     auto pos = Pos (
-        (pre.pos_type_x == e.pos_type_x) ? pre.pos.x : 0,
-        (pre.pos_type_y == e.pos_type_y) ? pre.pos.y : 0
+        same_group ? pre.pos.x : 0,
+        same_group ? pre.pos.y : 0
     );
     auto step  = Pos (
-        (pre.pos_type_x == e.pos_type_x) ? pre.size.w : 0,
-        (pre.pos_type_y == e.pos_type_y) ? pre.size.h : 0
+        same_group ? pre.size.w : 0,
+        same_group ? pre.size.h : 0
     );
     auto limit = e.parent.content.limit;
 
@@ -238,13 +242,14 @@ _e_update_size_pos_r (Pos pre_pos, Pos step, Pos limit, int wrap) {
 
 void
 e_update_size_pos_d (E* e, E* pre, int wrap) {
+    bool same_group = (pre.pos_type_x == e.pos_type_x) && (pre.pos_type_y == e.pos_type_y);
     auto pos = Pos (
-        (pre.pos_type_x == e.pos_type_x) ? pre.pos.x : 0,
-        (pre.pos_type_y == e.pos_type_y) ? pre.pos.y : 0
+        same_group ? pre.pos.x : 0,
+        same_group ? pre.pos.y : 0
     );
     auto step  = Pos (
-        (pre.pos_type_x == e.pos_type_x) ? pre.size.w : 0,
-        (pre.pos_type_y == e.pos_type_y) ? pre.size.h : 0
+        same_group ? pre.size.w : 0,
+        same_group ? pre.size.h : 0
     );
     auto limit = e.parent.content.limit;
     _e_update_pos (e, _e_update_size_pos_d (pos, step, limit, wrap));

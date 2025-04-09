@@ -12,6 +12,15 @@ alias W = COORD;
 alias H = COORD;
 alias R = COORD; // radius
 
+enum 
+ORD {
+    X,
+    Y
+};
+enum ORDS = ORD.max+1;
+
+alias Deep = int;
+
 struct 
 Balance {
     int length;    // -50 0 +50
@@ -20,8 +29,13 @@ Balance {
 
 struct 
 Pos {
-    X x;         // 0..16385
-    Y y;         // 0..16385
+    union {
+        struct {
+            X x;         // 0..16385
+            Y y;         // 0..16385
+        }
+        COORD[ORD] v;
+    }
 
     Pos
     opBinary (string op : "+") (Size size) {
@@ -48,6 +62,18 @@ Pos {
         x += b.x;
         y += b.y;
     }
+
+    int
+    opCmp (Pos b) {
+        if (x.v == b.v)
+            return 0;
+        else
+        if (x.v > b.v)
+            return 1;
+        else
+            return -1;
+    }
+
 
     void
     opOpAssign (string op : "-") (Pos b) {
@@ -81,12 +107,71 @@ Pos {
     }
 }
 
+struct
+Pos_ {
+    Type[N] type;
+    union {
+        Vec_!N     fixed;
+        Balance[N] balance;
+    }
+    Vec_!N calculated;
+
+    enum
+    Type {
+        _,
+        fixed,
+        balance,
+    }
+}
+
+struct
+Size_ (N) {
+    Type[N] type = Type.parent;
+    union {
+        Vec_!N     fixed;
+        Balance[N] balance;
+    }
+    Vec_!N calculated;
+
+    enum 
+    Type {
+        fixed,
+        balance,
+        //
+        parent, // default
+        content,
+        window,
+    }
+}
+
+struct
+PosSize_ (N) {
+    Pos_!N  pos;  // 1. a
+    Size_!N size; // 2. b
+}
+
+struct
+Vec_ (N) {
+   COORD[N] s;
+}
+
+alias Pos2     = Pos_!2;
+alias Size2    = Size_!2;
+alias PosSize2 = PosSize_!2;
+alias Vec2     = Vec_!2;
+
+
 alias Limit = Pos;
 
 struct
 Size {
-    W w;         // 0..16385 
-    H h;         // 0..16385
+    union {
+        struct {
+            W w;         // 0..16385 
+            H h;         // 0..16385
+        };
+        COORD[ORDS] v;
+    }
     alias x = w;
     alias y = h;
 
@@ -126,3 +211,5 @@ pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
 
     return false;
 }
+
+

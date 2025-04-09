@@ -20,6 +20,13 @@ e root
   e rect group-right
     text 3.c
 
+  e rect group-right-center
+    text 4.a
+  e rect group-right-center
+    text 4.b
+  e rect group-right-center
+    text 4.c
+
 
 root
   size 1024 480
@@ -33,11 +40,14 @@ rect
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
 group-left
-  pos          l u
+  pos lu
 
 group-center
-  pos          c u
+  pos cu
 
 group-right
-  pos          r u
+  pos  ru
 
+group-right-center
+  pos  rc
+  way  d
