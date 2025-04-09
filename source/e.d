@@ -75,33 +75,33 @@ E_ {
 
 struct
 ES {
-    PosSize ps;
-    E_[] s;
+    Form2 ps;
+    E_[]  s;
 }
 
 struct
 Image_ {
-    PosSize ps;
-    void*   ptr;
+    Form2 ps;
+    void* ptr;
 }
 
 struct
 Text_ {
-    PosSize ps;
-    void*   ptr;
+    Form2 ps;
+    void* ptr;
 }
 
 struct
 Border_ {
-    PosSize ps;
-    Color   color;
-    COORD   bold;
+    Form2 ps;
+    Color color;
+    COORD bold;
 }
 
 struct
 BG_ {
-    PosSize ps;
-    Color   color;
+    Form2 ps;
+    Color color;
 }
 
 

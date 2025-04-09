@@ -144,24 +144,74 @@ Size_ (N) {
     }
 }
 
+
 struct
-PosSize_ (N) {
-    Pos_!N  pos;  // 1. a
-    Size_!N size; // 2. b
+L {
+    int x;
+    alias x this;
 }
 
 struct
-Vec_ (N) {
-   COORD[N] s;
+_Loc (N) {
+    L[N] s;
+    // v
+    // 1: loc x
+    // 2: loc x,y
+    // 3: loc x,y,z
+
+    // v
+    // 1 loc: dot  x,y
+    // 2 loc: line x,y x,y
+    // 3 loc: tri  x,y x,y x,y
+    // 4 loc: rect x,y x,y x,y x,y
+
+    // loc in ?
+    // 1: loc in loc
+    // 2: loc in line
+    // 3: loc in tri
+    // 4: loc in rect
 }
 
-alias Pos2     = Pos_!2;
-alias Size2    = Size_!2;
-alias PosSize2 = PosSize_!2;
-alias Vec2     = Vec_!2;
+enum ORDS = 2;
+alias Loc = _Loc!ORDS; // 2 coords: x,y
 
+struct
+Form (N) {
+    Loc[N] s;
+}
+
+alias Form1 = Form!1;
+alias Form2 = Form!2;
+alias Form3 = Form!3;
+alias Form4 = Form!4;
+
+bool
+has (Form2 a, Form1 b) {
+    // a has b  // line has dot 
+    // xy[2] has xy[1]  // xy..xy has xy
+
+    return (
+        (a[0].x <= b[0].x) && (a[1].x <= b[0].x) &&
+        (a[0].y <= b[0].y) && (a[1].y <= b[0].y)
+    );
+}
+
+bool
+has (Form3 a, Form1 b) {
+    // a has b  // tri has dot 
+    // xy[3] has xy[1]  // xy..xy..xy has xy
+
+    Loc[3] ordered;  // by y  // by 0, by 1, by 2, ...
+}
+
+bool
+has (Form4 a, Form1 b) {
+    // a has b  // rect has dot 
+    // xy[4] has xy[1]  // xy..xy..xy..xy has xy
+}
 
 alias Limit = Pos;
+
 
 struct
 Size {
