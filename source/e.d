@@ -52,29 +52,55 @@ Klass*[] reserved_klasses;
 //    E_ bg
 //     E_ text
 struct
-E_ {
-    Type type;
-    union {
-        ES   es;     // is E_
-        void image;  // is E_
-        void text;   // is E_
-        void border; // is E_
-        void bg;     // is E_
-    }
+E3 {
+    // def
+    Form2 def_form;
+    // real
+    Form2 form;
 
-    enum
-    Type {
-        _,
-        es,
-        image,
-        text,
-        border,
-        bg,
+    // def
+    PosType[ORDS] pos_type;  // fixed | balance
+    union {
+        L[ORDS]       fixed;
+        Balance[ORDS] balance;
+    }
+    // real
+    Loc pos;
+    Loc limit;
+
+    //
+    Color color;
+    E2    aura;
+    Way_  way;
+
+    //
+    struct
+    E2 {
+        Form2 ps;
+        Color color;
+        E1    core;
+
+        struct
+        E1 {
+            Form2 ps;
+            Color color;
+            void  _;
+        }
     }
 }
 
+// Way
+// 1: -x +x
+// 2: -x +x  -y +y
+// 3: -x +x  -y +y  -z +z
 struct
-ES {
+Way_ (N) {
+    ubyte[N] v;    // x y z, x y x, y x x, x x x
+        L[N] step; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
+}
+
+struct
+ES_ {
     Form2 ps;
     E_[]  s;
 }
@@ -83,6 +109,12 @@ struct
 Image_ {
     Form2 ps;
     void* ptr;
+}
+
+struct
+Aura_ {
+    Form2 ps;
+    Color color;
 }
 
 struct

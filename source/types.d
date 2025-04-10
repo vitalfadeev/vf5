@@ -186,14 +186,37 @@ alias Form3 = Form!3;
 alias Form4 = Form!4;
 
 bool
-has (Form2 a, Form1 b) {
+has (bool INCLUDE_A=true, bool INCLUDE_B=true) (Form2 a, Form1 b) {
     // a has b  // line has dot 
     // xy[2] has xy[1]  // xy..xy has xy
 
-    return (
-        (a[0].x <= b[0].x) && (a[1].x <= b[0].x) &&
-        (a[0].y <= b[0].y) && (a[1].y <= b[0].y)
-    );
+    static
+    if (INCLUDE_A && INCLUDE_B) 
+        return (
+            (a[0].x <= b[0].x) && (b[0].x <= a[1].x) &&
+            (a[0].y <= b[0].y) && (b[0].y <= a[1].y)
+        );
+    else
+    static
+    if (INCLUDE_A && !INCLUDE_B) 
+        return (
+            (a[0].x <= b[0].x) && (b[0].x < a[1].x) &&
+            (a[0].y <= b[0].y) && (b[0].y < a[1].y)
+        );
+    else
+    static
+    if (!INCLUDE_A && INCLUDE_B) 
+        return (
+            (a[0].x < b[0].x) && (b[0].x <= a[1].x) &&
+            (a[0].y < b[0].y) && (b[0].y <= a[1].y)
+        );
+    else
+    static
+    if (!INCLUDE_A && !INCLUDE_B) 
+        return (
+            (a[0].x < b[0].x) && (b[0].x < a[1].x) &&
+            (a[0].y < b[0].y) && (b[0].y < a[1].y)
+        );
 }
 
 bool
