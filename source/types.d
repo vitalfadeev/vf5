@@ -22,9 +22,9 @@ enum ORDS = ORD.max+1;
 alias Deep = int;
 
 struct 
-Balance {
-    int length;    // -50 0 +50
-    int capacity;  // 100
+Flex {
+    uint length;    // 0 50 100
+    uint capacity;  // 100
 }
 
 struct 

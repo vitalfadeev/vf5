@@ -52,49 +52,68 @@ Klass*[] reserved_klasses;
 //    E_ bg
 //     E_ text
 struct
-E3 {
+E4 {  // margin
+    Loc   loc;
+    Loc   length;
+    Way   way;
     // def
-    Form2 def_form;
-    // real
-    Form2 form;
-
-    // def
-    PosType[ORDS] pos_type;  // fixed | balance
+    LocType[ORDS] loc_type;  // fixed | balance
     union {
-        L[ORDS]       fixed;
-        Balance[ORDS] balance;
+        L[ORDS]    stab;  // stable   // 10,10
+        Flex[ORDS] flex;  // flexable // 1/100,50/100
     }
-    // real
-    Loc pos;
-    Loc limit;
-
-    //
     Color color;
-    E2    aura;
-    Way_  way;
+    E3   _inner;
 
-    //
     struct
-    E2 {
-        Form2 ps;
+    E3 {  // border
+        Loc   loc;
+        Loc   length;
         Color color;
-        E1    core;
+        E2   _inner;
 
+        //
         struct
-        E1 {
-            Form2 ps;
+        E2 {  // aura
+            Loc   loc;
+            Loc   length;
             Color color;
-            void  _;
+            E1   _inner;
+
+            struct
+            E1 {  // core
+                Loc   loc;
+                Loc   length;
+                Color color;
+                void _inner;
+
+                Type type;
+                union {
+                    Image  image;
+                    Text   text;
+                    Childs childs;
+                }
+
+                enum
+                Type {
+                    _,
+                    image,
+                    text,
+                    childs,
+                }
+            }
         }
     }
 }
+
+alias E = E4;
 
 // Way
 // 1: -x +x
 // 2: -x +x  -y +y
 // 3: -x +x  -y +y  -z +z
 struct
-Way_ (N) {
+Way (N) {
     ubyte[N] v;    // x y z, x y x, y x x, x x x
         L[N] step; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
 }
@@ -317,30 +336,11 @@ E {
 
 
     enum
-    PosType : ubyte {
+    LocType : ubyte {
         _,
-        fixed,
-        balance,
+        stab,  // 1,1
+        flex,  // 1/100 50/100
     }
-
-    enum
-    Way : byte {
-        _,
-        r,
-        d,
-        l,
-        u,
-    }
-    // max right
-    // max_right
-    // max_r
-    //
-    // 1   2   3
-    // 1, 2 ot 1 max_r, 3 ot 2 max_r, fix_max_spaces (1..2, 2..3)
-    //
-    // 1   2   3
-    // 2 balance 0, 1 ot 2 max_l, 3 ot 2 max_r
-    //
 
     enum
     Overflow {

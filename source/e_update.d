@@ -298,8 +298,8 @@ e_update_balance_childs (E* e) {
     // offset
     auto offset = 
         Pos (
-            _balance (able.w, e.pos_balance_x),
-            _balance (able.h, e.pos_balance_y)
+            _flex (able.w, e.pos_balance_x),
+            _flex (able.h, e.pos_balance_y)
         );
 
     // mvoe childs
@@ -317,9 +317,9 @@ _e_update_move_childs (E* e, Pos offset) {
 
 
 auto 
-_balance  (Balance) (X able_x, Balance balance) {
-    if (balance.capacity)
-        return able_x * balance.length / balance.capacity;
+_flex  (Flex) (X able_x, Flex flex) {
+    if (flex.capacity)
+        return able_x * flex.length / flex.capacity;
     else
         return 0;
 }
