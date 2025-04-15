@@ -189,19 +189,13 @@ e_update_childs (E* e, Path path) {
 void
 _e_update_loc_way_grouped (E* e, E* pre, Path path, Way way) {
     // reset loc if group != prev.group
-    bool same_group = (pre.pos_type == e.pos_type);
-    auto loc = Loc (
-        same_group ? pre.loc[0] : 0,
-        same_group ? pre.loc[1] : 0
-    );
-    auto length  = Loc (
-        same_group ? pre.length[0] : 0,
-        same_group ? pre.length[1] : 0
-    );
-    auto limit = path[$-1].content.limit;
+    bool same_group = (pre.loc_def == e.loc_def);
+    auto loc    = same_group ? pre.loc    : Loc ();
+    auto length = same_group ? pre.length : Loc ();
+    auto limit  = path[$-1].content.loc + path[$-1].content.length;
 
     //writefln ("step: %s, pre.pos: %s, limit: %s, e: %s", step, pre.pos, limit, *e);
-    _e_update_pos (e, _e_update_loc_way (loc, length, limit, way));
+    _e_update_pos (e, _e_update_loc_way (loc,length,limit,way));
 }
 
 Loc

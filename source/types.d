@@ -132,7 +132,24 @@ _LocDef (uint N) {
     union {
         Loc     stab;  // stable   // 10,10
         FlexLoc flex;  // flexable // 1/100,50/100
-    }    
+    }
+
+    bool
+    opEqual (typeof(this) b) {
+        static
+        foreach (i; 0..N) {
+            if (loc_type[i] == b.loc_type[i]) {
+                final
+                switch (loc_type[i]) {
+                    case LocType.stab : return (this.stab == b.stab);
+                    case LocType.flex : return (this.flex == b.flex);
+                }
+            }
+            else {
+                assert (0, "defferent loc types");
+            }
+        }
+    }
 }
 alias LocDef = _LocDef!NLOC;
 
