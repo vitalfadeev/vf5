@@ -45,7 +45,7 @@ E*
 new_root () {
     auto root = new E ();
     create_reserved_classes (root);
-    root.size = Size (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
+    root.size = Loc  (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
     return root;
 }
 

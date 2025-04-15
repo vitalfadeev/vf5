@@ -53,23 +53,22 @@ Klass*[] reserved_klasses;
 //     E_ text
 struct
 E4 {  // margin
-    Loc   loc;
-    Loc   length;
-    Way   way;
-    // def
-    LocType[ORDS] loc_type;  // fixed | balance
-    union {
-        L[ORDS]    stab;  // stable   // 10,10
-        Flex[ORDS] flex;  // flexable // 1/100,50/100
-    }
-    Color color;
-    E3   _inner;
+    Loc    loc;      // real
+    Loc    length;   // 
+    Way    way;      // 
+    Color  color;    //
+    Fn     fn;       //
+    Flags  flags;    //
+    E3    _inner;    //
+    //
+    LocDef loc_def;  // def
 
     struct
     E3 {  // border
         Loc   loc;
-        Loc   length;
+        Loc   length;  // bold
         Color color;
+        Fn    fn;
         E2   _inner;
 
         //
@@ -78,14 +77,16 @@ E4 {  // margin
             Loc   loc;
             Loc   length;
             Color color;
+            Fn    fn;
             E1   _inner;
 
             struct
             E1 {  // core
-                Loc   loc;
-                Loc   length;
-                Color color;
-                void _inner;
+                Loc    loc;
+                Loc    length;
+                Color  color;
+                Fn     fn;  // &image_draw, &text_draw, &childs_draw
+                void* _inner;
 
                 Type type;
                 union {
@@ -104,60 +105,113 @@ E4 {  // margin
             }
         }
     }
+
+    struct
+    Flags {
+        bool hidden;
+        bool deleted;
+    }
+
+    struct
+    Fn {
+        E_EVENT_FN  event  = &.event;
+        E_UPDATE_FN update = &.update;
+        E_SET_FN    set    = &.set;
+        E_DRAW_FN   draw   = &.draw;
+        E_DUP_FN    dup    = &._dup;        
+    }
+
+    void 
+    event (Event* ev) { 
+        if (fn.event !is null) fn.event (&this,ev); 
+    }
+
+    void 
+    update (update_UserEvent* ev) { 
+        if (fn.update !is null) fn.update (&this,ev); 
+    }
+
+    void 
+    set (string field_id, TString[] values) {
+        if (fn.set !is null) fn.set (&this,field_id,values); 
+    }
+
+    void 
+    draw (draw_UserEvent* ev) {
+        if (fn.draw !is null) fn.draw (&this,ev);
+    }
+
+}
+
+struct
+Image {
+  string    src;       // "abc"
+  Color     bg;
+  Loc       loc;
+  Loc       length = Loc (100,100);
+  SizeType  size_w_type;
+  SizeType  size_h_type;
+  IMAGE_PTR ptr;
+
+  enum
+  SizeType {
+    fixed,
+    image,
+    text,
+    content,
+  }
+}
+
+struct
+Text {
+    string     s;            // "abc"
+    Font       font;
+    Color      fg = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Color      bg;
+    Loc        pos;
+    //PosType    pos_type;
+    Loc        length;
+    SizeType   size_w_type;
+    SizeType   size_h_type;
+    TextRect[] rects;
+
+    struct 
+    Font {
+        string    file;    // "abc"
+        string    family;  // "abc"
+        ubyte     size;    // 0..256
+        bool      bold;    // 0/1
+        bool      italic;  // 0/1
+        FONT_PTR  ptr;     // ...
+    }
+
+    enum
+    SizeType {
+        fixed,
+        image,
+        text,
+        content,
+    }
+
+    struct
+    TextRect {
+        Loc      loc;
+        Loc      length;
+        string   s;  // chars[a..b]
+        TEXT_PTR ptr;
+    }
+}
+
+struct
+Childs {
+    E[] s;  // no links
 }
 
 alias E = E4;
 
-// Way
-// 1: -x +x
-// 2: -x +x  -y +y
-// 3: -x +x  -y +y  -z +z
-struct
-Way (N) {
-    ubyte[N] v;    // x y z, x y x, y x x, x x x
-        L[N] step; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
-}
-
-struct
-ES_ {
-    Form2 ps;
-    E_[]  s;
-}
-
-struct
-Image_ {
-    Form2 ps;
-    void* ptr;
-}
-
-struct
-Aura_ {
-    Form2 ps;
-    Color color;
-}
-
-struct
-Text_ {
-    Form2 ps;
-    void* ptr;
-}
-
-struct
-Border_ {
-    Form2 ps;
-    Color color;
-    COORD bold;
-}
-
-struct
-BG_ {
-    Form2 ps;
-    Color color;
-}
-
 
 struct 
-E {
+E_ {
     Tree         _super;
     Klass*[]      klasses;    // box green rounded
     Field*[]      fields;     //   text abc
@@ -166,10 +220,10 @@ E {
     Aura          aura;
     Content      _content;
 
-    Pos            pos;        // relative from parent
+    Loc            pos;        // relative from parent
     PosType[ORDS]  pos_type;
     Balance[ORDS]  pos_balance = [Balance (0,1), Balance (0,1)];
-    Size           size;       // = content.size + aura.size
+    Loc            size;       // = content.size + aura.size
     SizeType[ORDS] size_type;
     Way[ORDS]      way; //  ORD.X, ORD.Y
                         // -ORD.X, ORD.Y
@@ -199,20 +253,20 @@ E {
     Margin {
         Form   form;
         Border border;
-        Size   size;
+        Loc    size;
         Color  color;
 
-        Pos    pos;
+        Loc    pos;
     }
 
     struct
     Aura {
         Form   form;
         Border border = Border (1, Border.Type.solid);;
-        Size   size;
+        Loc    size;
         Color  color;
 
-        Pos    pos;
+        Loc    pos;
     }
 
     struct
@@ -223,11 +277,11 @@ E {
         Image    image;
         Text     text;
 
-        Size     size;
-        Size     childs_size;
+        Loc      size;
+        Loc      childs_size;
         SizeType size_w_type = SizeType.e;
         SizeType size_h_type = SizeType.e;
-        Pos      pos;
+        Loc      pos;
 
         // childs
         // image
@@ -236,8 +290,8 @@ E {
         Image {
           string    src;       // "abc"
           Color     bg;
-          Pos       pos;
-          Size      size = Size (100,100);
+          Loc       pos;
+          Loc       size = Loc  (100,100);
           SizeType  size_w_type;
           SizeType  size_h_type;
           IMAGE_PTR ptr;
@@ -257,9 +311,9 @@ E {
             Font       font;
             Color      fg = Color (0xFF, 0xFF, 0xFF, 0xFF);
             Color      bg;
-            Pos        pos;
+            Loc        pos;
             PosType    pos_type;
-            Size       size;
+            Loc        size;
             SizeType   size_w_type;
             SizeType   size_h_type;
             TextRect[] rects;
@@ -284,8 +338,8 @@ E {
   
             struct
             TextRect {
-                Pos      pos;
-                Size     size;
+                Loc      pos;
+                Loc      size;
                 string   s;  // chars[a..b]
                 TEXT_PTR ptr;
             }
@@ -334,14 +388,6 @@ E {
         }
     }
 
-
-    enum
-    LocType : ubyte {
-        _,
-        stab,  // 1,1
-        flex,  // 1/100 50/100
-    }
-
     enum
     Overflow {
         _,
@@ -378,35 +424,6 @@ E {
         TString[] action; // audacious --play-pause
     }
 
-    struct
-    Fn {
-        E_EVENT_FN  event  = &.event;
-        E_UPDATE_FN update = &.update;
-        E_SET_FN    set    = &.set;
-        E_DRAW_FN   draw   = &.draw;
-        E_DUP_FN    dup    = &._dup;        
-    }
-
-    void 
-    event (Event* ev) { 
-        if (fn.event !is null) fn.event (&this,ev); 
-    }
-
-    void 
-    update (update_UserEvent* ev) { 
-        if (fn.update !is null) fn.update (&this,ev); 
-    }
-
-    void 
-    set (string field_id, TString[] values) {
-        if (fn.set !is null) fn.set (&this,field_id,values); 
-    }
-
-    void 
-    draw (draw_UserEvent* ev) {
-        if (fn.draw !is null) fn.draw (&this,ev);
-    }
-
     void
     remove_child (E* c) {
         etree.remove_child (&this, c);
@@ -420,7 +437,7 @@ E {
 
     void
     reset () {
-        pos           = pos.init;
+        loc           = pos.init;
         size          = size.init;
         hotkeys       = hotkeys.init;
         focused       = focused.init;
@@ -729,18 +746,18 @@ _dup (EPtr _this) {
 
 bool
 event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
-    Pos _pos = Pos (ev.mouseX, ev.mouseY);
+    Loc _pos = Loc (ev.mouseX, ev.mouseY);
     return pos_in_rect (_pos, e.pos, e.size);
 }
 
 bool
 event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
-    Pos _pos = Pos (ev.x, ev.y);
+    Loc _pos = Loc (ev.x, ev.y);
     return pos_in_rect (_pos, e.pos, e.size);
 }
 
 bool
 event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
-    Pos _pos = ev.up_pos;
+    Loc _pos = ev.up_pos;
     return pos_in_rect (_pos, e.pos, e.size);
 }

@@ -11,18 +11,18 @@ import pix : FONT_PTR, SDLException, TTFException;
 
 
 void
-draw (SDL_Renderer* renderer, Pos offset, E* e) {
+draw (SDL_Renderer* renderer, Loc offset, E* e) {
     draw_content_with_aura (renderer,offset,e);
     draw_click_decoration (renderer,offset,e);
 }
 
 void
-line (Pos pos, Pos pos2, W wid) {
+line (Loc loc, Loc pos2, W wid) {
     // hickLineColor (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color)
 }
 
 void
-arc (Pos pos, Pos pos2, W wid) {
+arc (Loc loc, Loc pos2, W wid) {
     // aaArcColor (SDL_Renderer * renderer, float cx, float cy, float rx, float ry, float start, float end, float thick, Uint32 color);
     // thickArcColor (SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, Uint32 color, Uint8 thick);
 
@@ -73,30 +73,28 @@ image (SDL_Renderer* renderer, IMAGE_PTR ptr, X x, Y y, W w, H h) {
 
 
 void
-_text (SDL_Renderer* renderer, E.Content.Text.TextRect[] rects, FONT_PTR font, Color color, X x, Y y, W w, H h) {
+_text (SDL_Renderer* renderer, Text.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Loc length) {
     // clip w h
     // from text.rects
     foreach (ref rec; rects)
         if (rec.s.length) {
-            auto char_x = rec.pos.x + x;
-            auto char_y = rec.pos.y + y;
-            one_string (renderer, rec.s, font, color, char_x, char_y, rec.size.w, rec.size.h);
+            auto char_loc = rec.loc + loc;
+            one_string (renderer, rec.s, font, color, char_loc, rec.length);
         }
 }
 
-Size
+Loc
 get_text_size (string s, FONT_PTR font, Color color) {
-    int w, h;
-    auto ret = TTF_SizeUTF8 (font, s.toStringz, &w, &h);
-    
-    return Size (w.to!W,h.to!W);
+    loc loc;
+    auto ret = TTF_SizeUTF8 (font, s.toStringz, &loc[0], &loc[1]);    
+    return loc;
 }
 
 
 void
-one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color, int x, int y, int w, int h) {
+one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color, Loc loc, Loc length) {
     auto image = _one_string (renderer,s,font,color);
-    _render_texture (renderer,image,x,y,w,h);
+    _render_texture (renderer,image,loc,length);
 }
 
 SDL_Texture*
@@ -120,12 +118,12 @@ _one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color) {
 }
 
 void 
-_render_texture (SDL_Renderer* renderer, SDL_Texture* tex, int x, int y, int w, int h) {
+_render_texture (SDL_Renderer* renderer, SDL_Texture* tex, Loc loc, Loc length) {
     SDL_Rect dst;
-    dst.x = x;
-    dst.y = y;
-    dst.w = w;
-    dst.h = h;
+    dst.x = loc[0];
+    dst.y = loc[1];
+    dst.w = loc[0];
+    dst.h = loc[1];
     _render_texture (renderer, tex, dst);
 }
 void 
@@ -135,58 +133,58 @@ _render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst) {
 
 // e.pos  = border + pad + content
 // e.size = border + pad + content
-Pos
-e_pos (E* e) {
-    return e.pos;
+Loc
+e_loc (E* e) {
+    return e.loc;
 }
 
-Pos
-aura_borders_pos (E* e) {
-    return e.aura.pos;
+Loc
+aura_borders_loc (E* e) {
+    return e.aura.loc;
 }
 
-Size
-aura_borders_size (E* e) {
-    auto _content_size = e.content.size;
-    auto _aura_size    = _content_size + e.aura.size + e.aura.size;
-    return _aura_size;
+Loc
+aura_borders_length (E* e) {
+    auto _content_length = e.content.length;
+    auto _aura_length    = _content_length + e.aura.length + e.aura.length;
+    return _aura_length;
 }
 
-Size
-aura_real_size (E* e) {
-    auto _content_size = e.content.size;
-    auto _aura_size    = _content_size + e.aura.size + e.aura.size;
-    return _aura_size;
+Loc
+aura_real_length (E* e) {
+    auto _content_length = e.content.length;
+    auto _aura_length    = _content_length + e.aura.length + e.aura.length;
+    return _aura_length;
 }
 
-Pos
-content_pos (E* e) {
-    return e.content.pos;
+Loc
+content_loc (E* e) {
+    return e.content.loc;
 }
 
-Pos
-text_pos (E* e) {
-    return content_pos (e);
+Loc
+text_loc (E* e) {
+    return content_loc (e);
 }
 
-Pos
-image_pos (E* e) {
-    return content_pos (e);
+Loc
+image_loc (E* e) {
+    return content_loc (e);
 }
 
 
-Size
-e_size (E* e) {
-    return e.size;
+Loc
+e_length (E* e) {
+    return e.length;
 }
 
-Size
-content_size (E* e) {
-    return e.content.size;
+Loc
+content_length (E* e) {
+    return e.content.length;
 }
 
 void
-draw_click_decoration (SDL_Renderer* renderer, Pos offset, E* e) {
+draw_click_decoration (SDL_Renderer* renderer, Loc offset, E* e) {
     // shade around content, inside borders. in pad or content. shade bg
 }
 
@@ -224,11 +222,11 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
 }
 
 void
-draw_aura_borders (SDL_Renderer* renderer, E* e, Pos aura_pos) {
+draw_aura_borders (SDL_Renderer* renderer, E* e, Loc aura_pos) {
     auto color = e.aura.border.color;
     SDL_SetRenderDrawColor (renderer, color.r,color.g,color.b,color.a,);
 
-    auto pos  = aura_pos;
+    auto loc  = aura_pos;
     auto size = aura_borders_size (e);
 
     if (size.w > 0 && size.h > 0)
@@ -252,7 +250,7 @@ draw_aura_borders (SDL_Renderer* renderer, E* e, Pos aura_pos) {
 }
 
 void
-draw_content_with_aura (SDL_Renderer* renderer, Pos offset, E* e) {
+draw_content_with_aura (SDL_Renderer* renderer, Loc offset, E* e) {
     // all relative from parent content
     auto _aura_pos     = offset + e.pos;
     auto _aura_size    = aura_real_size (e);
@@ -270,21 +268,21 @@ draw_content_with_aura (SDL_Renderer* renderer, Pos offset, E* e) {
 }
 
 void
-draw_aura (SDL_Renderer* renderer, E* e, Pos _aura_pos, Size _aura_size) {
+draw_aura (SDL_Renderer* renderer, E* e, Loc _aura_pos, Loc  _aura_size) {
     auto color = e.aura.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, _aura_pos.x, _aura_pos.y, _aura_size.w, _aura_size.h);
 }
 
 void
-draw_content_bg (SDL_Renderer* renderer, E* e, Pos _content_pos, Size _content_size) {
+draw_content_bg (SDL_Renderer* renderer, E* e, Loc _content_pos, Loc  _content_size) {
     auto color = e.content.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, _content_pos.x, _content_pos.y, _content_size.w, _content_size.h);
 }
 
 void
-draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
+draw_content (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
     if (e.content.image.ptr !is null)
         draw_image_bg (renderer,e,content_pos,content_size);
     
@@ -299,14 +297,14 @@ draw_content (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) 
 }
 
 void
-draw_text_bg (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
+draw_text_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
     auto color = e.content.text.bg;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
 }
 
 void
-draw_image_bg (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size) {
+draw_image_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
     auto color = e.content.image.bg;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
@@ -314,7 +312,7 @@ draw_image_bg (SDL_Renderer* renderer, E* e, Pos content_pos, Size content_size)
 
 
 void
-draw_text (SDL_Renderer* renderer, E* e, Pos cp, Size cs) {
+draw_text (SDL_Renderer* renderer, E* e, Loc cp, Loc  cs) {
     // fill rects
     //   e.content.text.rects
     //   rect.pos = pos;

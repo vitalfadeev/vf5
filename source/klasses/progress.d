@@ -46,7 +46,7 @@ event (Klass* kls, Event* ev, E* e) {
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state  == SDL_PRESSED) {
                 // tree_apply_klasses (doc.tree);
-                //auto clicked_e = doc.find_e_at_pos (Pos (ev.button.x.to!X, ev.button.y.to!Y));
+                //auto clicked_e = doc.find_e_at_pos (Loc (ev.button.x.to!X, ev.button.y.to!Y));
                 //if (clicked_e !is null) {
                 //    drag_started = true;
                 //}

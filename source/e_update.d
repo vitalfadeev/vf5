@@ -37,7 +37,7 @@ const DEFAULT_FONT_SIZE = 12;
 
 
 void
-e_update_size_pos (E* e, E* pre=null, Deep deep=0) {
+e_update_size_pos (E* e, E* pre=null, Path path) {
     // size
     // step
     //   childs
@@ -45,16 +45,16 @@ e_update_size_pos (E* e, E* pre=null, Deep deep=0) {
     //   move childs
 
     // size
-    e_update_size (e);
+    e_update_length (e);
     // if max skip step & cchilds
     //if (e.size_w_type == E.SizeType.max)
     //if (e.size_h_type == E.SizeType.max)
-    e_update_pos_step (e,pre,deep);
-    e_update_childs (e,deep);
+    e_update_loc (e,pre,path);
+    e_update_childs (e,path);
 }
 
 void
-e_update_pos_step (E* e, E* pre, Deep deep) {
+e_update_loc (E* e, E* pre, Path path) {
     // by group
     //  r
     //  l
@@ -62,7 +62,7 @@ e_update_pos_step (E* e, E* pre, Deep deep) {
 
     // to way
     //   < > ^ v
-    e_update_pos_step_way (e,pre,deep);
+    e_update_loc_way (e,pre,path);
     //final
     //switch (e.pos_type_x) {
     //    case E.PosType._       : break;
@@ -81,20 +81,13 @@ e_update_pos_step (E* e, E* pre, Deep deep) {
 }
 
 void
-e_update_pos_step_way (E* e, E* pre, Deep deep) {
+e_update_loc_way (E* e, E* pre, Path path) {
     if (pre !is null)
-    final
-    switch (e.way[0]) {
-        case E.Way.r  : e_update_size_pos_r (e,pre,e.way[1].to_wrap); break;
-        case E.Way.l  : break;
-        case E.Way.u  : break;
-        case E.Way.d  : e_update_size_pos_d (e,pre,e.way[1].to_wrap); break;
-        case E.Way._  : break;
-    }
+        _e_update_loc_way_grouped (e,pre,path,e.way);
 }
 
 auto
-to_wrap (E.Way way) {
+to_wrap (Way way) {
     if (way == E.Way.u) 
         return -1;
     else
@@ -111,7 +104,7 @@ to_wrap (E.Way way) {
 }
 
 void
-e_update_childs (E* e, Deep deep) {
+e_update_childs (E* e, Path path) {
     // recursive
     if (e.has_childs) {
         // pre
@@ -123,12 +116,12 @@ e_update_childs (E* e, Deep deep) {
         // ...for detect max size
         int  nw;
         int  nh;
-        Pos  used;
+        Loc  used;
         writefln ("able: %s, e: %s", able, *e);
 
         // update childs size & pos
         foreach (_pre,_e; WalkChilds (e)) {
-            e_update_size_pos (_e,_pre,deep+1);
+            e_update_size_pos (_e,_pre,path~=_e);
 
             writefln ("  pos: %s, size: %s, _e: %s", _e.pos, _e.size, *_e);
 
@@ -143,7 +136,7 @@ e_update_childs (E* e, Deep deep) {
                 nh++;
         }
 
-        // pos post. move group
+        // loc post. move group
         //   left   - ok
         //   right  - each + (able.width - group.width)
         //   center - each + ((able.width - group.width) / 2)
@@ -153,17 +146,17 @@ e_update_childs (E* e, Deep deep) {
         writefln ("");
         writefln ("2: able: %s, e: %s", able, *e);
         foreach (_pre,_e; WalkChilds (e)) {
-            // update pos right , center
-            auto pos = _e.pos;
+            // update loc right , center
+            auto loc = _e.pos;
 
-            writefln ("-:   pos: %s, size: %s, _e: %s", pos, _e.size, *_e);
+            writefln ("-:   pos: %s, size: %s, _e: %s", loc, _e.size, *_e);
 
             auto offset = offset_by_type[_e.pos_type[ORD.X]];
-            pos += offset;
+            loc += offset;
 
-            if (offset != Pos (0,0))
+            if (offset != Loc (0,0))
                 _e_update_pos (_e,pos);
-            writefln ("+:   pos: %s, size: %s, _e: %s", pos, _e.size, *_e);
+            writefln ("+:   pos: %s, size: %s, _e: %s", loc, _e.size, *_e);
 
             // update size max
             if (nw > 0) {
@@ -184,7 +177,7 @@ e_update_childs (E* e, Deep deep) {
                 );
             }
 
-            // if max then reupdate childs pos & size 
+            // if max then reupdate childs loc & size 
             if (nw > 0 || nh > 0) {
                 e_update_pos_step (_e,_pre,deep);
                 e_update_childs (_e,deep);
@@ -194,100 +187,55 @@ e_update_childs (E* e, Deep deep) {
 }
 
 void
-e_update_size_pos_r (E* e, E* pre, int wrap) {
-    // reset pos if group != prev.group
+_e_update_loc_way_grouped (E* e, E* pre, Path path, Way way) {
+    // reset loc if group != prev.group
     bool same_group = (pre.pos_type == e.pos_type);
-    auto pos = Pos (
-        same_group ? pre.pos.x : 0,
-        same_group ? pre.pos.y : 0
+    auto loc = Loc (
+        same_group ? pre.loc[0] : 0,
+        same_group ? pre.loc[1] : 0
     );
-    auto step  = Pos (
-        same_group ? pre.size.w : 0,
-        same_group ? pre.size.h : 0
+    auto length  = Loc (
+        same_group ? pre.length[0] : 0,
+        same_group ? pre.length[1] : 0
     );
-    auto limit = e.parent.content.limit;
+    auto limit = path[$-1].content.limit;
 
     //writefln ("step: %s, pre.pos: %s, limit: %s, e: %s", step, pre.pos, limit, *e);
-    _e_update_pos (e, _e_update_size_pos_r (pos, step, limit, wrap));
+    _e_update_pos (e, _e_update_loc_way (loc, length, limit, way));
 }
 
-Pos
-_e_update_size_pos_r (Pos pre_pos, Pos step, Pos limit, int wrap) {
-    auto pos = pre_pos;
+Loc
+_e_update_loc_way (Loc pre_loc, Loc length, Loc limit, Way way) {
+    auto loc = pre_loc;
+
+    //
+    auto L1 = way[0];
+    auto L2 = way[1];
 
     // step x
-    pos.x += step.x;
+    loc[L1] += length[L1];
 
     // check xy limits
-    if (pos.x <= limit.x) {  // OK
+    if (loc[L1] <= limit[L1]) {  // OK
         //
     }
-    else {                   // reset x, step y
-        if (wrap == +1) {
-            pos.x  = pos.x.init;
-            pos.y += step.y;
-        } 
-        else
-        if (wrap == -1) {
-            pos.x  = pos.x.init;
-            pos.y -= step.y;
+    else {  // reset x, step y
+        if (length[L2] != 0) {
+            loc[L1]  = loc[L1].init;
+            loc[L2] += length[L2];
         } 
         else {
             // stay at last x,y
         }
     }
 
-    return pos;
-}
-
-void
-e_update_size_pos_d (E* e, E* pre, int wrap) {
-    bool same_group = (pre.pos_type_x == e.pos_type_x) && (pre.pos_type_y == e.pos_type_y);
-    auto pos = Pos (
-        same_group ? pre.pos.x : 0,
-        same_group ? pre.pos.y : 0
-    );
-    auto step  = Pos (
-        same_group ? pre.size.w : 0,
-        same_group ? pre.size.h : 0
-    );
-    auto limit = e.parent.content.limit;
-    _e_update_pos (e, _e_update_size_pos_d (pos, step, limit, wrap));
-}
-
-Pos
-_e_update_size_pos_d (Pos pre_pos, Pos step, Pos limit, int wrap) {
-    auto pos = pre_pos;
-
-    // step y
-    pos.y += step.y;
-
-    // check xy limits
-    if (pos.y <= limit.y) {  // OK
-        //
-    }
-    else {                   // reset x, step y
-        if (wrap == +1) {
-            pos.y   = pos.y.init;
-            pos.x  += step.x;
-        } 
-        else
-        if (wrap == -1) {
-            pos.y   = pos.y.init;
-            pos.x  -= step.x;
-        } 
-        else {
-            // stay at last x,y
-        }
-    }
-
-    return pos;
+    return loc;
 }
 
 void
 e_update_balance_childs (E* e) {
     // childs size
-    Size childs_size;
+    Loc  childs_size;
     foreach (_e; WalkChilds (e)) {
         childs_size.w = max (childs_size.w, _e.pos.x + _e.size.w);
         childs_size.h = max (childs_size.h, _e.pos.y + _e.size.h);
@@ -297,7 +245,7 @@ e_update_balance_childs (E* e) {
 
     // offset
     auto offset = 
-        Pos (
+        Loc (
             _flex (able.w, e.pos_balance_x),
             _flex (able.h, e.pos_balance_y)
         );
@@ -310,7 +258,7 @@ e_update_balance_childs (E* e) {
 
 
 void
-_e_update_move_childs (E* e, Pos offset) {
+_e_update_move_childs (E* e, Loc offset) {
     _e_update_pos (e, e.pos + offset);
 }
 
@@ -367,7 +315,7 @@ e_update_total_sizes (GCursor) (E* e, GCursor* gcursor) {
 //       image
 //       content
 void
-e_update_size (E* e) {
+e_update_length (E* e) {
     final
     switch (e.size_w_type) {
         case E.SizeType.fixed   : e_update_size_w_fixed   (e); break;
@@ -505,15 +453,15 @@ _e_update_size_h (E* e, W eh, W ch) {
     e.content.size.h = (ch > 0) ? ch : 0;
 }
 void
-_e_update_pos (E* e, X x, Y y) {
-    _e_update_pos (e, Pos (x,y));
+_e_update_loc (E* e, X x, Y y) {
+    _e_update_loc (e, Loc (x,y));
 }
 void
-_e_update_pos (E* e, Pos pos) {
-    e.pos         = pos;
-    //e.margin.pos  = pos - e.margin.size;
+_e_update_loc (E* e, Loc loc) {
+    e.loc         = loc;
+    //e.margin.pos  = loc - e.margin.size;
     //e.aura.pos    = pos;
-    //e.content.pos = pos + e.aura.size;
+    //e.content.pos = loc + e.aura.size;
 }
 // ////////////////////////////////////////////////
 auto
@@ -907,7 +855,7 @@ load_e_image (E* e) {
         }
 
         e.content.image.ptr = img_surface;
-        e.content.image.size = Size (
+        e.content.image.size = Loc  (
                 cast(ushort)img_surface.w,
                 cast(ushort)img_surface.h
             );
@@ -927,8 +875,8 @@ load_e_text (E* e) {
         auto ret = TTF_SizeUTF8 (e.content.text.font.ptr, c.to!string.toStringz, &w, &h);
 
         e.content.text.rects ~= E.Content.Text.TextRect (
-            Pos  (_x,_y), 
-            Size (w.to!W,h.to!H), 
+            Loc  (_x,_y), 
+            Loc  (w.to!W,h.to!H), 
             c.to!string
         );
 
@@ -951,7 +899,7 @@ dump_size (E* e, int level=0) {
 
     for (auto i=0; i<level; i++) write ("  ");
     writeln ("  pos_type            : ", e.pos_type_x, " ", e.pos_type_y);
-    writeln ("  pos                 : ", e.pos);
+    writeln ("  loc                 : ", e.pos);
     for (auto i=0; i<level; i++) write ("  ");
     writeln ("  size                : ", e.size);
     for (auto i=0; i<level; i++) write ("  ");
@@ -1025,7 +973,7 @@ e_update_content_size_w_childs (E* e) {
 void
 e_update_content_childs_size (E* e) {
 //assert (0, "recursive");
-    Size max_sz;
+    Loc  max_sz;
     foreach (_pre,_e; WalkChilds (e)) {
         e_update_size_pos (_e,_pre);
         max_sz.w = max (max_sz.w, _e.pos.x + _e.size.w);

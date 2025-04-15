@@ -4,156 +4,34 @@ import std.conv;
 import bindbc.sdl;
 public import color;
 
-
-alias COORD = int;
-alias X = COORD;
-alias Y = COORD;
-alias W = COORD;
-alias H = COORD;
-alias R = COORD; // radius
-
 enum 
-ORD {
+LOC {  // location
     X,
     Y
 };
-enum ORDS = ORD.max+1;
+enum NLOC = LOC.max+1;  // N locations: 1 = X, 2 = XY, 3 = XYZ
+alias Loc    = _Loc!NLOC;  // 2 coords: x,y
+alias Length = Loc;        // 2 coords: x,y
+
+alias L = int;  // length
+alias X = L;
+alias Y = L;
+alias W = L;
+alias H = L;
+alias R = L; // radius
 
 alias Deep = int;
 
-struct 
-Flex {
-    uint length;    // 0 50 100
-    uint capacity;  // 100
-}
-
-struct 
-Pos {
-    union {
-        struct {
-            X x;         // 0..16385
-            Y y;         // 0..16385
-        }
-        COORD[ORD] v;
-    }
-
-    Pos
-    opBinary (string op : "+") (Size size) {
-        return Pos (x+size.w, y+size.h);
-    }
-
-    Pos
-    opBinary (string op : "-") (Size size) {
-        return Pos (x-size.w, y-size.h);
-    }
-
-    Pos
-    opBinary (string op : "+") (Pos b) {
-        return Pos ((x+b.x).to!W, (y+b.y).to!H);
-    }
-
-    Pos
-    opBinary (string op : "-") (Pos b) {
-        return Pos ((x-b.x).to!W, (y-b.y).to!H);
-    }
-
-    void
-    opOpAssign (string op : "+") (Pos b) {
-        x += b.x;
-        y += b.y;
-    }
-
-    int
-    opCmp (Pos b) {
-        if (x.v == b.v)
-            return 0;
-        else
-        if (x.v > b.v)
-            return 1;
-        else
-            return -1;
-    }
-
-
-    void
-    opOpAssign (string op : "-") (Pos b) {
-        x -= b.x;
-        y -= b.y;
-    }
-
-    void*
-    toVoidPtr () {
-        struct
-        VoidPtr {
-            union {
-                Pos   pos;
-                void* ptr;
-            }
-        }
-        return VoidPtr (this).ptr;
-    }
-
-    static
-    Pos
-    from_VoidPtr (void* ptr) {
-        struct
-        VoidPtr {
-            union {
-                void* ptr;
-                Pos   pos;
-            }
-        }
-        return VoidPtr (ptr).pos;
-    }
-}
-
 struct
-Pos_ {
-    Type[N] type;
-    union {
-        Vec_!N     fixed;
-        Balance[N] balance;
-    }
-    Vec_!N calculated;
-
-    enum
-    Type {
-        _,
-        fixed,
-        balance,
-    }
-}
-
-struct
-Size_ (N) {
-    Type[N] type = Type.parent;
-    union {
-        Vec_!N     fixed;
-        Balance[N] balance;
-    }
-    Vec_!N calculated;
-
-    enum 
-    Type {
-        fixed,
-        balance,
-        //
-        parent, // default
-        content,
-        window,
-    }
-}
-
-
-struct
-L {
-    int x;
-    alias x this;
-}
-
-struct
-_Loc (N) {
+_Loc (uint N) {  // SIMD vector
     L[N] s;
+
+    this (L...) (L l) {
+        static
+        foreach (i,_L; L)
+            s[i] = l[i];
+    }
+
     // v
     // 1: loc x
     // 2: loc x,y
@@ -172,11 +50,8 @@ _Loc (N) {
     // 4: loc in rect
 }
 
-enum ORDS = 2;
-alias Loc = _Loc!ORDS; // 2 coords: x,y
-
 struct
-Form (N) {
+Form (uint N) {
     Loc[N] s;
 }
 
@@ -233,11 +108,129 @@ has (Form4 a, Form1 b) {
     // xy[4] has xy[1]  // xy..xy..xy..xy has xy
 }
 
-alias Limit = Pos;
+struct 
+_FlexLoc {
+    Loc length;    // 0 50 100
+    Loc capacity;  // 100
+}
+alias FlexLoc = _FlexLoc;
 
+// Way
+// 1: -x +x
+// 2: -x +x  -y +y
+// 3: -x +x  -y +y  -z +z
+struct
+_Way (uint N) {
+    ubyte[N] v;    // x y z, x y x, y x x, x x x
+        Loc  length; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
+}
+alias Way = _Way!NLOC;
 
 struct
-Size {
+_LocDef (uint N) {
+    LocType[N] loc_type;  // fixed | balance
+    union {
+        Loc     stab;  // stable   // 10,10
+        FlexLoc flex;  // flexable // 1/100,50/100
+    }    
+}
+alias LocDef = _LocDef!NLOC;
+
+enum
+LocType : ubyte {
+    _,
+    stab,  // 1,1
+    flex,  // 1/100 50/100
+}
+
+
+//alias Limit = Pos;
+
+/*
+struct 
+Pos {
+    union {
+        struct {
+            X x;         // 0..16385
+            Y y;         // 0..16385
+        }
+        COORD[ORD] v;
+    }
+
+    Pos
+    opBinary (string op : "+") (Loc  size) {
+        return Loc (x+size.w, y+size.h);
+    }
+
+    Pos
+    opBinary (string op : "-") (Loc  size) {
+        return Loc (x-size.w, y-size.h);
+    }
+
+    Pos
+    opBinary (string op : "+") (Loc b) {
+        return Loc ((x+b.x).to!W, (y+b.y).to!H);
+    }
+
+    Pos
+    opBinary (string op : "-") (Loc b) {
+        return Loc ((x-b.x).to!W, (y-b.y).to!H);
+    }
+
+    void
+    opOpAssign (string op : "+") (Loc b) {
+        x += b.x;
+        y += b.y;
+    }
+
+    int
+    opCmp (Loc b) {
+        if (x.v == b.v)
+            return 0;
+        else
+        if (x.v > b.v)
+            return 1;
+        else
+            return -1;
+    }
+
+
+    void
+    opOpAssign (string op : "-") (Loc b) {
+        x -= b.x;
+        y -= b.y;
+    }
+
+    void*
+    toVoidPtr () {
+        struct
+        VoidPtr {
+            union {
+                Loc   pos;
+                void* ptr;
+            }
+        }
+        return VoidPtr (this).ptr;
+    }
+
+    static
+    Pos
+    from_VoidPtr (void* ptr) {
+        struct
+        VoidPtr {
+            union {
+                void* ptr;
+                Loc   pos;
+            }
+        }
+        return VoidPtr (ptr).pos;
+    }
+}
+*/
+
+/*
+struct
+Loc  {
     union {
         struct {
             W w;         // 0..16385 
@@ -249,40 +242,41 @@ Size {
     alias y = h;
 
     Size
-    opBinary (string op : "+") (Size b) {
-        return Size ((w+b.w).to!W, (h+b.h).to!H);
+    opBinary (string op : "+") (Loc  b) {
+        return Loc  ((w+b.w).to!W, (h+b.h).to!H);
     }
 
     Size
-    opBinary (string op : "-") (Size b) {
-        return Size ((w-b.w).to!W, (h-b.h).to!H);
+    opBinary (string op : "-") (Loc  b) {
+        return Loc  ((w-b.w).to!W, (h-b.h).to!H);
     }
 
     Size
     opBinary (string op : "/") (int b) {
-        return Size ((w/b).to!W, (h/b).to!H);
+        return Loc  ((w/b).to!W, (h/b).to!H);
     }
 
     void
-    opOpAssign (string op : "+") (Size b) {
+    opOpAssign (string op : "+") (Loc  b) {
         w += b.w;
         h += b.h;
     }
 
     void
-    opOpAssign (string op : "-") (Size b) {
+    opOpAssign (string op : "-") (Loc  b) {
         w -= b.w;
         h -= b.h;
     }
 }
+*/
 
+/*
 bool
-pos_in_rect (Pos pos, Pos rect_pos, Size rect_size) {
+pos_in_rect (Loc loc, Loc rect_pos, Loc  rect_size) {
     if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
     if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
         return true;
 
     return false;
 }
-
-
+*/

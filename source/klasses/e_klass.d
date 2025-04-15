@@ -378,24 +378,24 @@ set_pos_y (E* e, TString[] values) {
 
 void
 _set_pos_x (E* e, string value) {
-    // pos  right
-    // pos  l
-    // pos  r
-    // pos  c
-    // pos  0%
-    // pos  100%
-    // pos  50%
-    // pos  0
-    // pos  10
-    // pos  10 10
-    // pos  l u
-    // pos  l d
-    // pos  l c
-    // pos  lu
-    // pos  cu
-    // pos  ru
-    // pos .
-    // pos way
+    // loc  right
+    // loc  l
+    // loc  r
+    // loc  c
+    // loc  0%
+    // loc  100%
+    // loc  50%
+    // loc  0
+    // loc  10
+    // loc  10 10
+    // loc  l u
+    // loc  l d
+    // loc  l c
+    // loc  lu
+    // loc  cu
+    // loc  ru
+    // loc .
+    // loc way
     // way r
     // way l
     // way d

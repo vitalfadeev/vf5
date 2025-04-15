@@ -113,23 +113,23 @@ translate (Event* ev) {
 
 void
 click_translate (Event* ev) {
-    static Pos down_pos;
+    static Loc down_pos;
 
     switch (ev.type) {
         case SDL_MOUSEBUTTONDOWN:
             if (ev.button.button == SDL_BUTTON_LEFT)
             if (ev.button.state == SDL_PRESSED) {
-                // save pos down
-                down_pos = Pos (ev.button.x, ev.button.y);
+                // save loc down
+                down_pos = Loc (ev.button.x, ev.button.y);
             }
             break;
         case SDL_MOUSEBUTTONUP:
-            // load pos down
-            // get  pos up
+            // load loc down
+            // get  loc up
             // send click (down_pos, up_pos)
-            Pos up_pos = Pos (ev.button.x, ev.button.y);
+            Loc up_pos = Loc (ev.button.x, ev.button.y);
             send_user_event!click_UserEvent (down_pos, up_pos);
-            down_pos = Pos ();
+            down_pos = Loc ();
             break;
         default:
     }
@@ -171,12 +171,12 @@ event (Pix* pix, Event* ev, E* root) {
             }
             break;
         case SDL_MOUSEBUTTONDOWN : 
-        case SDL_MOUSEBUTTONUP :  {
+        case SDL_MOUSEBUTTONUP   :  {
             focus (pix,ev,root);
             send_to_focused (pix,ev); 
             break;
         }
-        case SDL_MOUSEWHEEL: {
+        case SDL_MOUSEWHEEL      : {
             focus (pix,ev,root);
             send_to_focused (pix,ev); 
             break;
@@ -186,7 +186,7 @@ event (Pix* pix, Event* ev, E* root) {
             send_to_focused (pix,ev); 
             break;
         }
-        case SDL_USEREVENT:
+        case SDL_USEREVENT       :
             switch (ev.user.code) {
                 case USER_EVENT.update : update (&ev._user.update,root); break;
                 case USER_EVENT.draw   : pix.update_draw (ev,root); break;
@@ -259,7 +259,7 @@ draw (Pix* pix, draw_UserEvent* ev, E* root) {
 
     // setup offsets for relative rendering
     ev.offset.reserve (7);
-    ev.offset ~= Pos (0,0);
+    ev.offset ~= Loc (0,0);
 
     // draw
     if (e !is null)
@@ -274,17 +274,17 @@ draw (Pix* pix, draw_UserEvent* ev, E* root) {
     }
 }
 
-Pos
+Loc
 target_pos (click_UserEvent* ev) {
-    return ev.up_pos;
+    return ev.up_loc;
 }
-Pos
+Loc
 target_pos (SDL_MouseWheelEvent* ev) {
-    return Pos (ev.mouseX, ev.mouseY);
+    return Loc (ev.mouseX, ev.mouseY);
 }
-Pos
+Loc
 target_pos (SDL_MouseButtonEvent* ev) {
-    return Pos (ev.x, ev.y);
+    return Loc (ev.x, ev.y);
 }
 
 void
@@ -330,7 +330,7 @@ send_to_focused (Pix* pix, Event* ev) {
 }
 
 E*
-find_deepest (E* root, Pos pos) {
+find_deepest (E* root, Loc loc) {
     E* deepest;
 
     bool 
@@ -462,11 +462,11 @@ struct
 Window {
     SDL_Window* _super;
 
-    Size
-    size () {
-        int w,h;
-        SDL_GetWindowSize (_super, &w, &h);
-        return Size (w,h);
+    Loc
+    length () {
+        Loc loc;
+        SDL_GetWindowLoc  (_super, &loc[0], &loc[1]);
+        return loc;
     }
 }
 
@@ -494,7 +494,7 @@ direct_user_event (EVT,ARGS...) (Pix* pix, Event* ev, E* root, ARGS args) {
 
 
 void
-send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* renderer) {
+send_event_in_deep (Event* ev, E* e, Loc loc, SDL_Window* window, SDL_Renderer* renderer) {
     bool 
     valid_e (E* e) {
         return (
@@ -510,7 +510,7 @@ send_event_in_deep (Event* ev, E* e, Pos pos, SDL_Window* window, SDL_Renderer* 
 }
 
 void
-send_mouse_event_in_deep (Event* ev, E* e, Pos pos, ref E* deepest) {
+send_mouse_event_in_deep (Event* ev, E* e, Loc loc, ref E* deepest) {
     bool 
     valid_e (E* e) {
         return (

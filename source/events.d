@@ -3,7 +3,7 @@ module events;
 import std.format : format;
 import std.conv : to;
 import bindbc.sdl;
-import types : Pos;
+import types : Loc;
 import etree;
 import e : E;
 
@@ -125,7 +125,7 @@ draw_UserEvent {
     Sint32        code = USER_EVENT.draw;
     E*            e;
     SDL_Renderer* renderer;
-    Pos[]         offset;
+    Loc[]         offsets;
 }
 
 struct
@@ -148,13 +148,13 @@ click_UserEvent {
     Uint32 timestamp;
     Uint32 windowID;
     Sint32 code = USER_EVENT.click;
-    Pos    down_pos;
-    Pos    up_pos;
+    Loc    down_loc;
+    Loc    up_loc;
 
 
-    this (Pos down_pos, Pos up_pos) {
-        this.down_pos = down_pos;
-        this.up_pos   = up_pos;
+    this (Loc down_loc, Loc up_loc) {
+        this.down_loc = down_loc;
+        this.up_loc   = up_loc;
     }
 }
 
