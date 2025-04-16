@@ -4,6 +4,12 @@ import std.conv;
 import bindbc.sdl;
 public import color;
 
+const DEFAULT_WINDOW_W = 1024;
+const DEFAULT_WINDOW_H = 480;
+const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
+const DEFAULT_FONT_SIZE = 12;
+
+
 enum 
 LOC {  // location
     X,
@@ -127,7 +133,7 @@ _Way (uint N) {
 alias Way = _Way!NLOC;
 
 struct
-_LocDef (uint N) {
+_DefLoc (uint N) {
     LocType[N] loc_type;  // fixed | balance
     union {
         Loc     stab;  // stable   // 10,10
@@ -151,7 +157,7 @@ _LocDef (uint N) {
         }
     }
 }
-alias LocDef = _LocDef!NLOC;
+alias DefLoc = _DefLoc!NLOC;
 
 enum
 LocType : ubyte {
@@ -159,6 +165,7 @@ LocType : ubyte {
     stab,  // 1,1
     flex,  // 1/100 50/100
 }
+
 
 
 //alias Limit = Pos;
@@ -260,17 +267,17 @@ Loc  {
 
     Size
     opBinary (string op : "+") (Loc  b) {
-        return Loc  ((w+b.w).to!W, (h+b.h).to!H);
+        return Loc ((w+b.w).to!W, (h+b.h).to!H);
     }
 
     Size
     opBinary (string op : "-") (Loc  b) {
-        return Loc  ((w-b.w).to!W, (h-b.h).to!H);
+        return Loc ((w-b.w).to!W, (h-b.h).to!H);
     }
 
     Size
     opBinary (string op : "/") (int b) {
-        return Loc  ((w/b).to!W, (h/b).to!H);
+        return Loc ((w/b).to!W, (h/b).to!H);
     }
 
     void

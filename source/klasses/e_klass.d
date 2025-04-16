@@ -6,7 +6,7 @@ import std.conv;
 import std.range : back;
 import bindbc.sdl;
 import etree;
-import e : E,content;
+import e : E;
 import e_update : 
     go_on_event, apply_e_klasses, apply_e_fields,
     load_e_image, load_e_font, load_e_colors, load_e_text,
@@ -229,8 +229,8 @@ set_pos_balance_y (E* e, TString[] values) {
     }
 }
 
-Balance
-_parse_balance (string s) {
+bool
+_parse_balance (string s, ref L length, ref L capacity) {
     // +50/100
     // 0
     // +1/2
@@ -241,8 +241,6 @@ _parse_balance (string s) {
     //
     // 0%
     // 100%
-
-    Balance balance;
 
     string c = s;
 
@@ -271,14 +269,14 @@ _parse_balance (string s) {
     _wait_1:
     int _int_1;
     if (auto readed=_read_integer (c,_int_1)) {
-        balance.length = _int_1;
-        balance.capacity = 100;
+        length = _int_1;
+        capacity = 100;
 
         c = c[readed..$];
 
         if (_int_1 == 0) {
             // 0;
-            balance.capacity = 1;
+            capacity = 1;
             goto end;
         }
     }
@@ -292,15 +290,16 @@ _parse_balance (string s) {
         int _int_2;
         if (auto readed2 = _read_integer (c,_int_2)) {
             if (_int_2 == 0)
-                balance.capacity = 1;
+                capacity = 1;
             else
-                balance.capacity = _int_2;
+                capacity = _int_2;
         }
     }
 
     end:
-    balance.length *= _sign;
-    return balance;
+    length *= _sign;
+
+    return true;
 }
 
 auto
@@ -536,7 +535,7 @@ set_popup (E* e, TString[] values) {
 void
 set_aura_borders (E* e, TString[] values) {
     if (values.length >= 1) {
-        set_border (e, &e.aura.border, values[0..$]);
+        set_border (e, &e.border, values[0..$]);
     }
 }
 
@@ -578,36 +577,23 @@ set_aura_color (E* e, TString[] values) {
 }
 
 void
-set_border (E* e, E.Border* border, TString[] values) {    
-    if (values.length >= 3) {
+set_border (Border) (E* e, Border* border, TString[] values) {    
+    if (values.length >= 2) {
         set_border_w     (e, border, values[0..1]);
-        set_border_type  (e, border, values[1..2]);
         set_border_color (e, border, values[2..3]);
     }
 }
 
 void
-set_border_w (E* e, E.Border* border, TString[] values) {
+set_border_w (Border) (E* e, Border* border, TString[] values) {
     if (values.length) {
         if (values[0].s.isNumeric)
-            border.w = values[0].s.to!W;
+            border.length = values[0].s.to!L;
     }
 }
 
 void
-set_border_type (E* e, E.Border* border, TString[] values) {
-    if (values.length) {
-        if (values[0].s == "none")
-            border.type = E.Border.Type.none;
-        if (values[0].s == "solid")
-            border.type = E.Border.Type.solid;
-        if (values[0].s == "dash")
-            border.type = E.Border.Type.dash;
-    }
-}
-
-void
-set_border_color (E* e, E.Border* border, TString[] values) {
+set_border_color (Border) (E* e, Border* border, TString[] values) {
     if (values.length) {
         Color c;
         if (doc_parse_color (e, values, &c))

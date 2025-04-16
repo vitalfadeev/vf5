@@ -53,38 +53,48 @@ Klass*[] reserved_klasses;
 //     E_ text
 struct
 E4 {  // margin
-    Loc    loc;      // real
-    Loc    length;   // 
-    Way    way;      // 
-    Color  color;    //
-    Fn     fn;       //
-    Flags  flags;    //
-    E3    _inner;    //
+    Loca   loca;
+    alias  loca this;
     //
-    LocDef loc_def;  // def
+    Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Way    way;
+    //
+    Klass*[] klasses;      // box green rounded
+    On[]     on;           // [click: audacious --play-pause]
+    Fn       fn;           // event,update,draw,set
+    Flags    flags;        // hidden,deleted
+    E3      _inner;        // bordder,aura,content,childs,text,image
+    //
+    DefLoc   def_loc;      // def LocDef
+    Klasses  def_klasses;  // 
+
+    auto ref margin  () { return this; }
+    auto ref border  () { return _inner; }
+    auto ref aura    () { return _inner._inner; }
+    auto ref content () { return _inner._inner._inner; }
 
     struct
     E3 {  // border
-        Loc   loc;
-        Loc   length;  // bold
-        Color color;
+        Loca   loca;
+        alias loca this;
+        Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
         Fn    fn;
         E2   _inner;
 
         //
         struct
         E2 {  // aura
-            Loc   loc;
-            Loc   length;
-            Color color;
+            Loca   loca;
+            alias loca this;
+            Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
             Fn    fn;
             E1   _inner;
 
             struct
-            E1 {  // core
-                Loc    loc;
-                Loc    length;
-                Color  color;
+            E1 {  // core  // content
+                Loca   loca;
+                alias loca this;
+                Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
                 Fn     fn;  // &image_draw, &text_draw, &childs_draw
                 void* _inner;
 
@@ -112,6 +122,9 @@ E4 {  // margin
         bool deleted;
     }
 
+    auto ref hidden ()  { return flags.hidden; }
+    auto ref deleted () { return flags.deleted; }
+
     struct
     Fn {
         E_EVENT_FN  event  = &.event;
@@ -119,6 +132,12 @@ E4 {  // margin
         E_SET_FN    set    = &.set;
         E_DRAW_FN   draw   = &.draw;
         E_DUP_FN    dup    = &._dup;        
+    }
+
+    struct
+    On {
+        string    event;  // click
+        TString[] action; // audacious --play-pause
     }
 
     void 
@@ -143,34 +162,42 @@ E4 {  // margin
 
 }
 
+
+struct
+Loca {
+    Loc loc;   
+    Loc length;
+}
+
 struct
 Image {
-  string    src;       // "abc"
-  Color     bg;
-  Loc       loc;
-  Loc       length = Loc (100,100);
-  SizeType  size_w_type;
-  SizeType  size_h_type;
-  IMAGE_PTR ptr;
+    Loca loca;
+    alias loca this;
+    string    src;       // "abc"
+    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Color     bg;
+    SizeType  size_w_type;
+    SizeType  size_h_type;
+    IMAGE_PTR ptr;
 
-  enum
-  SizeType {
-    fixed,
-    image,
-    text,
-    content,
-  }
+    enum
+    SizeType {
+        fixed,
+        image,
+        text,
+        content,
+    }
 }
 
 struct
 Text {
+    Loca loca;
+    alias loca this;
+    Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Color      bg;
     string     s;            // "abc"
     Font       font;
-    Color      fg = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    Color      bg;
-    Loc        pos;
     //PosType    pos_type;
-    Loc        length;
     SizeType   size_w_type;
     SizeType   size_h_type;
     TextRect[] rects;
@@ -195,8 +222,8 @@ Text {
 
     struct
     TextRect {
-        Loc      loc;
-        Loc      length;
+        Loca loca;
+        alias loca this;
         string   s;  // chars[a..b]
         TEXT_PTR ptr;
     }
@@ -204,12 +231,15 @@ Text {
 
 struct
 Childs {
+    Loca loca;
+    alias loca this;
     E[] s;  // no links
 }
 
 alias E = E4;
 
 
+/*
 struct 
 E_ {
     Tree         _super;
@@ -291,7 +321,7 @@ E_ {
           string    src;       // "abc"
           Color     bg;
           Loc       pos;
-          Loc       size = Loc  (100,100);
+          Loc       size = Loc (100,100);
           SizeType  size_w_type;
           SizeType  size_h_type;
           IMAGE_PTR ptr;
@@ -312,7 +342,7 @@ E_ {
             Color      fg = Color (0xFF, 0xFF, 0xFF, 0xFF);
             Color      bg;
             Loc        pos;
-            PosType    pos_type;
+            //PosType    pos_type;
             Loc        size;
             SizeType   size_w_type;
             SizeType   size_h_type;
@@ -499,8 +529,9 @@ E_ {
         return format!"E(%s) (%s)" (e_klasses_to_string,fs);
     }
 }
+*/
 
-
+/*
 auto 
 content (E* e) {
     return _Content (e,&e._content);
@@ -521,6 +552,7 @@ _Content {
         return e.pos + _content.size;  // e.pos is relative
     }
 }
+*/
 
 
 void
@@ -529,30 +561,35 @@ add_klass (E* e, Klass* kls) {
 }
 
 bool
-has_klass (E* e, Klass* kls) {
+has_klass (E* e, Path path, Klass* kls) {
     import std.algorithm.searching : canFind;
     return e.klasses.canFind (kls);
 }
 
 bool
-has_klass (E* e, string s) {
-    auto kls = find_klass (e,s);
+has_klass (E* e, Path path, string s) {
+    auto kls = find_klass (e,path,s);
     assert (kls !is null);
-    return has_klass (e,kls);
+    return has_klass (e,path,kls);
 }
 
 Klass*
-find_klass_or_create (E* e, string s) {
-    auto kls = find_klass (e,s);
+find_klass_or_create (E* e, Path path, string s) {
+    auto kls = find_klass (e,path,s);
     if (kls is null)
         kls = create_klass (e,s);
     return kls;
 }
 
 Klass*
-find_klass (E* e, string s) {
-    // in e, in parents
-    for (auto _e=e; _e !is null; _e = _e.parent) {
+find_klass (E* e, Path path, string s) {
+    // in e
+    foreach (kls; e.defined_klasses)
+        if (kls.name == s)
+            return kls;
+
+    // in parents
+    foreach_reverse (_e; path) {
         foreach (kls; _e.defined_klasses)
             if (kls.name == s)
                 return kls;

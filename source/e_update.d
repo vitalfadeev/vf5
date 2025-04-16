@@ -30,14 +30,9 @@ import pix : IMAGE_PTR;
 import pix : send_user_event;
 import e_generator : Generator;
 
-const DEFAULT_WINDOW_W = 1024;
-const DEFAULT_WINDOW_H = 480;
-const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
-const DEFAULT_FONT_SIZE = 12;
-
 
 void
-e_update_size_pos (E* e, E* pre=null, Path path) {
+e_update_size_pos (E* e, E* pre, Path path, update_UserEvent* ev) {
     // size
     // step
     //   childs
@@ -194,8 +189,7 @@ _e_update_loc_way_grouped (E* e, E* pre, Path path, Way way) {
     auto length = same_group ? pre.length : Loc ();
     auto limit  = path[$-1].content.loc + path[$-1].content.length;
 
-    //writefln ("step: %s, pre.pos: %s, limit: %s, e: %s", step, pre.pos, limit, *e);
-    _e_update_pos (e, _e_update_loc_way (loc,length,limit,way));
+    e.loc = _e_update_loc_way (loc,length,limit,way);
 }
 
 Loc
@@ -452,10 +446,7 @@ _e_update_loc (E* e, X x, Y y) {
 }
 void
 _e_update_loc (E* e, Loc loc) {
-    e.loc         = loc;
-    //e.margin.pos  = loc - e.margin.size;
-    //e.aura.pos    = pos;
-    //e.content.pos = loc + e.aura.size;
+    e.loc = loc;
 }
 // ////////////////////////////////////////////////
 auto
@@ -849,7 +840,7 @@ load_e_image (E* e) {
         }
 
         e.content.image.ptr = img_surface;
-        e.content.image.size = Loc  (
+        e.content.image.size = Loc (
                 cast(ushort)img_surface.w,
                 cast(ushort)img_surface.h
             );
@@ -869,8 +860,8 @@ load_e_text (E* e) {
         auto ret = TTF_SizeUTF8 (e.content.text.font.ptr, c.to!string.toStringz, &w, &h);
 
         e.content.text.rects ~= E.Content.Text.TextRect (
-            Loc  (_x,_y), 
-            Loc  (w.to!W,h.to!H), 
+            Loc (_x,_y), 
+            Loc (w.to!W,h.to!H), 
             c.to!string
         );
 

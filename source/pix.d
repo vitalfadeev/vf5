@@ -9,7 +9,7 @@ import std.algorithm.searching : canFind;
 import bindbc.sdl;
 import bindbc.sdlgfx;
 import etree;
-import e : E,content;
+import e : E;
 import e_update;
 import klass;
 import events;
@@ -25,8 +25,12 @@ alias TEXT_PTR  = SDL_Texture*;
 
 struct 
 Pix {
-    Fn fn;
-    E* focused;
+    Fn     fn;
+    E*     focused;
+
+    this (string[] args) {
+        this._init ();
+    }
 
     struct
     Fn {
@@ -55,46 +59,41 @@ Pix {
     }
 
     int
-    go (E* root) {
+    go (E* root, Klasses* klasses) {
         if (fn.go !is null)
-            return fn.go (&this,root);
+            return fn.go (&this,root,klasses);
         else
             return 0;
     }
 
     void
-    setup () {
+    _init () {
         init_sdl ();
     }
 }
 
 
 int 
-go (Pix* pix, E* root) {
+go (Pix* pix, Events* events, E* root, Klasses* klasses) {
     // Window, Surface
-    SDL_Window* window = new_window (__FILE_FULL_PATH__);
-
+    SDL_Window* sdl_window = new_sdl_window (__FILE_FULL_PATH__);
     // Renderer
-    SDL_Renderer* renderer = new_renderer (window);
+    SDL_Renderer* renderer = new_sdl_renderer (sdl_window);
+    // Window
+    auto window = Window (sdl_window);
 
     //
-    root.window = new Window (window);
-    root.size   = root.window.size;
-    root.content.size = root.size - root.aura.size - root.aura.size;
+    events.setup_event (root,klasses,window,renderer);
 
     // update
-    update (root);
+    events ~= update_UserEvent ();
 
     // Event "start"
-    send_user_event!start_UserEvent ();
+    events ~= start_UserEvent ();
 
     // Event Loop
     writefln ("\n======== PIX start event loop ========");
-    foreach (Event* ev; Events ()) {
-        //ev.root       = root;
-        ev.app_window = window;
-        ev.renderer   = renderer;
-
+    foreach (Event* ev; events) {
         if (auto result = pix.event (ev,root)) {
             writefln ("\n======== PIX   end event loop ========");
             return result;
@@ -188,7 +187,12 @@ event (Pix* pix, Event* ev, E* root) {
         }
         case SDL_USEREVENT       :
             switch (ev.user.code) {
-                case USER_EVENT.update : update (&ev._user.update,root); break;
+                case USER_EVENT.update : 
+                    auto update_ev = &ev._user.update;
+                    update_ev.root   = ev.root; 
+                    update_ev.window = ev.window; 
+                    update (update_ev); 
+                    break;
                 case USER_EVENT.draw   : pix.update_draw (ev,root); break;
                 case USER_EVENT.redraw : pix.update_draw (ev,root); break;
                 case USER_EVENT.click  : 
@@ -208,16 +212,18 @@ event (Pix* pix, Event* ev, E* root) {
     return 0;
 }
 
+//void
+//update (E* root) {
+//    Path pathl;
+//    update_UserEvent ev;
+//    root.update (&ev); 
+//    root.e_update_size_pos (null,path,ev);
+//}
 void
-update (E* root) {
-    update_UserEvent ev;
-    root.update (&ev); 
-    root.e_update_size_pos ();
-}
-void
-update (update_UserEvent* ev, E* root) {
+update (update_UserEvent* ev) {
+    Path path;
     root.update (ev); 
-    root.e_update_size_pos ();
+    e_update_size_pos (root,null,path,ev);
 }
 
 void
@@ -420,7 +426,7 @@ void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message) {
 
 //
 SDL_Window*
-new_window (string window_title) {
+new_sdl_window (string window_title) {
     // Window
     SDL_Window* window = 
         SDL_CreateWindow (
@@ -443,7 +449,7 @@ new_window (string window_title) {
 
 //
 SDL_Renderer* 
-new_renderer (SDL_Window* window) {
+new_sdl_renderer (SDL_Window* window) {
     return SDL_CreateRenderer (window, -1, SDL_RENDERER_SOFTWARE);
 }
 
@@ -463,9 +469,16 @@ Window {
     SDL_Window* _super;
 
     Loc
+    loc () {
+        Loc loc;
+        SDL_GetWindowPos  (_super, &loc[0], &loc[1]);
+        return loc;
+    }
+
+    Loc
     length () {
         Loc loc;
-        SDL_GetWindowLoc  (_super, &loc[0], &loc[1]);
+        SDL_GetWindowSize (_super, &loc[0], &loc[1]);
         return loc;
     }
 }
@@ -542,6 +555,10 @@ Events {
     bool _go = true;
     Event ev;
 
+    this (string[] args) {
+        //
+    }
+
     int
     opApply (int delegate (Event* ev) dg) {
         while (_go) {
@@ -552,6 +569,28 @@ Events {
         }        
 
         return 0;
+    }
+
+    void
+    push_user_event (EVT,ARGS...) (ARGS args) {
+        Event ev;
+        ev._user = UserEvent (EVT (args));
+        SDL_PushEvent (&ev.sdl);
+    }
+
+    void
+    opOpAssign (string op : "~", EVT) (EVT ev) {
+        SDL_PushEvent (&ev);
+    }
+
+    void
+    setup_event (E* root, Klasses* klasses, Window* window, SDL_Renderer* renderer) {
+        with (ev) {
+            root     = root;
+            klasses  = klasses;
+            window   = window;
+            renderer = renderer;
+        }        
     }
 }
 

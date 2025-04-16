@@ -9,10 +9,9 @@ import events;
 import txt_reader;
 
 void 
-main () {
-	//
-	auto pix = new Pix ();
-	pix.setup ();
+main (string[] args) {
+	Klasses klasses;
+	setup_reserved_classes (&klasses);
 
 	//UTree
 	//E* root = open ("test_1.txt");
@@ -20,37 +19,38 @@ main () {
 	//E* root = open ("test_t3.txt");
 	//E* root = open ("test_generator_klass.txt");
 	//E* root = open ("test_audacious.txt");
-	E* root = open ("test_t9.txt");
+	(file_root,file_klasses) = open ("test_t9.txt");
 	//E* root = open ("test_file_manager.txt");
-	writefln ("root: %s, %s", *root, root);
-	writefln ("root.parent: %s", root.parent);
+
+	root     = file_root;
+	klasses ~= file_klasses;
 
 	// Check
 	//dump_tree (root);
 	//dump_klasses (root);
 
 	//
-	pix.go (root);
+	auto events = Events (args);
+
+	//
+	Pix (args)
+		.go (&events,&root,&klasses);
 }
 
-E*
+auto
 open (string file_name) {
 	import std.file;
-	E* root = new_root ();
-	txt_reader.go (root, file_name.readText);
-	return root;
-}
 
-E*
-new_root () {
-    auto root = new E ();
-    create_reserved_classes (root);
-    root.size = Loc  (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H);
-    return root;
+	auto root    = E (Loca (Loc(), Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H)));
+	auto klasses = Klasses ();
+
+	txt_reader.go (root, &klasses, file_name.readText);
+
+	return (root,klasses);
 }
 
 void
-create_reserved_classes (E* root) {
+setup_reserved_classes (Klasses* klasses) {
 	import klasses.e         : E_Klass;
 	import klasses.progress  : Progress;
 	import klasses.button    : Button;
@@ -59,13 +59,13 @@ create_reserved_classes (E* root) {
 	import klasses.list      : List;
 	import klasses.scrollbar : Scrollbar;
 
-	reserved_klasses ~= new_reserved_klass!E_Klass ();
-	reserved_klasses ~= new_reserved_klass!Progress ();
-	reserved_klasses ~= new_reserved_klass!Button ();
-	reserved_klasses ~= new_reserved_klass!Check ();
-	reserved_klasses ~= new_reserved_klass!Edit ();
-	reserved_klasses ~= new_reserved_klass!List ();
-	reserved_klasses ~= new_reserved_klass!Scrollbar ();
+	klasses ~= new_reserved_klass!E_Klass ();
+	klasses ~= new_reserved_klass!Progress ();
+	klasses ~= new_reserved_klass!Button ();
+	klasses ~= new_reserved_klass!Check ();
+	klasses ~= new_reserved_klass!Edit ();
+	klasses ~= new_reserved_klass!List ();
+	klasses ~= new_reserved_klass!Scrollbar ();
 }
 
 Klass*

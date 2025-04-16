@@ -17,8 +17,9 @@ Event {
     alias _super this;
     alias sdl = _super;
 
-    SDL_Window*   app_window;
+    Window*       window;
     SDL_Renderer* renderer;
+    Klasses*      klasses;
 
     string
     toString () {
@@ -111,6 +112,8 @@ update_UserEvent {
     Uint32        windowID;
     Sint32        code = USER_EVENT.update;
     E*            e;
+    E*            root;
+    Window*       window;
 
     this (E* e) {
         this.e = e;

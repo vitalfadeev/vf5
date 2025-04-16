@@ -39,7 +39,7 @@ import txt_token;
 //  on player.prev ...
 
 void 
-go (E* root, string s) {
+go (E* root, Klasses* klasses, string s) {
     size_t    indent;
     string    name;
     string    args;

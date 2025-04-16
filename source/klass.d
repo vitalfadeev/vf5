@@ -79,6 +79,12 @@ Klass {
     }
 }
 
+struct
+Klasses {
+    Klass[] s;
+    alias s this;
+}
+
 Field*
 find_field (Klass* kls, string s) {
     foreach (field; WalkFields (kls))
