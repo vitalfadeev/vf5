@@ -22,7 +22,6 @@ import types;
 import tstring;
 import events;
 import pix : open_font;
-import pix : Window;
 import pix : IMGException;
 import pix : redraw_window;
 import pix : send_e_redraw;

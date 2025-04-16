@@ -6,13 +6,14 @@ import std.range : back;
 import bindbc.sdl;
 import etree;
 import klass : Klass;
+import klass : Klasses;
 import field : Field;
 import e_update : TemplateArg;
 import e_generator : Generator;
 import types;
 import tstring;
 import events;
-import pix : Window, IMAGE_PTR, FONT_PTR, TEXT_PTR;
+import pix : IMAGE_PTR, FONT_PTR, TEXT_PTR;
 
 
 alias E_EVENT_FN  = void function (E* e, Event* ev);

@@ -167,6 +167,25 @@ LocType : ubyte {
 }
 
 
+struct
+Window {
+    SDL_Window* _super;
+    alias _super this;
+
+    Loc
+    loc () {
+        Loc loc;
+        SDL_GetWindowPos  (_super, &loc[0], &loc[1]);
+        return loc;
+    }
+
+    Loc
+    length () {
+        Loc loc;
+        SDL_GetWindowSize (_super, &loc[0], &loc[1]);
+        return loc;
+    }
+}
 
 //alias Limit = Pos;
 

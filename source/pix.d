@@ -15,9 +15,9 @@ import klass;
 import events;
 import types;
 
-alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev, E* root);
-alias PIX_DRAW_FN   = void function (Pix* pix, draw_UserEvent* ev, E* root);
-alias PIX_GO_FN     = int  function (Pix* pix, E* root);
+alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
+alias PIX_DRAW_FN   = void function (Pix* pix, draw_UserEvent* ev);
+alias PIX_GO_FN     = int  function (Pix* pix, Events* events, E* root, Klasses* klasses);
 
 alias IMAGE_PTR = SDL_Surface*;
 alias FONT_PTR  = TTF_Font*;
@@ -36,32 +36,32 @@ Pix {
     Fn {
         PIX_EVENT_FN  event  = &.event;
         PIX_DRAW_FN   draw   = &.draw;
-        PIX_GO_FN     go     = &.go;        
+        PIX_GO_FN     go     = &.go;
     }
 
     int
-    event (Event* ev, E* root) {
+    event (Event* ev) {
         if (fn.event !is null)
-            return fn.event (&this,ev,root);
+            return fn.event (&this,ev);
         else
             return 0;
     }
 
     void
-    draw (draw_UserEvent* ev, E* root) {
+    draw (draw_UserEvent* ev) {
         if (fn.draw !is null)
-            fn.draw (&this,ev,root);
+            fn.draw (&this,ev);
     }
 
     void
-    draw (Event* ev, E* root) {
-        .draw (&this,ev,root);
+    draw (Event* ev) {
+        .draw (&this,ev);
     }
 
     int
-    go (E* root, Klasses* klasses) {
+    go (Events* events, E* root, Klasses* klasses) {
         if (fn.go !is null)
-            return fn.go (&this,root,klasses);
+            return fn.go (&this,events,root,klasses);
         else
             return 0;
     }
@@ -75,26 +75,22 @@ Pix {
 
 int 
 go (Pix* pix, Events* events, E* root, Klasses* klasses) {
-    // Window, Surface
-    SDL_Window* sdl_window = new_sdl_window (__FILE_FULL_PATH__);
-    // Renderer
-    SDL_Renderer* renderer = new_sdl_renderer (sdl_window);
-    // Window
-    auto window = Window (sdl_window);
+    // Window, Renderer, Custom Window
+    auto sdl_window = new_sdl_window (__FILE_FULL_PATH__);
+    auto renderer   = new_sdl_renderer (sdl_window);
+    auto window     = Window (sdl_window);
 
-    //
-    events.setup_event (root,klasses,window,renderer);
+    // Save root,klasses,window,renderer into event
+    events.init_base_event (root,klasses,window,renderer);
 
-    // update
+    // update, start
     events ~= update_UserEvent ();
-
-    // Event "start"
     events ~= start_UserEvent ();
 
     // Event Loop
     writefln ("\n======== PIX start event loop ========");
     foreach (Event* ev; events) {
-        if (auto result = pix.event (ev,root)) {
+        if (auto result = pix.event (ev)) {
             writefln ("\n======== PIX   end event loop ========");
             return result;
         }
@@ -127,7 +123,7 @@ click_translate (Event* ev) {
             // get  loc up
             // send click (down_pos, up_pos)
             Loc up_pos = Loc (ev.button.x, ev.button.y);
-            send_user_event!click_UserEvent (down_pos, up_pos);
+            Events () ~= click_UserEvent (down_pos, up_pos);
             down_pos = Loc ();
             break;
         default:
@@ -142,19 +138,20 @@ click_translate (Event* ev) {
 //        kls.event (ev)
 
 int
-event (Pix* pix, Event* ev, E* root) {
+event (Pix* pix, Event* ev) {
     if (ev.type != SDL_MOUSEMOTION) 
         writefln ("\nPIX.event: %s", *ev);
+
     translate (ev);
 
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED      : pix.draw (ev,root); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED      : pix.draw (ev); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN        : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN       : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED        : break;  // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED      : update (root); pix.draw (ev,root);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED      : update (root); pix.draw (ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED : break;  // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED    : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED    : break;  // event.window.windowID
@@ -171,12 +168,12 @@ event (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_MOUSEBUTTONDOWN : 
         case SDL_MOUSEBUTTONUP   :  {
-            focus (pix,ev,root);
+            focus (pix,ev);
             send_to_focused (pix,ev); 
             break;
         }
         case SDL_MOUSEWHEEL      : {
-            focus (pix,ev,root);
+            focus (pix,ev);
             send_to_focused (pix,ev); 
             break;
         }
@@ -193,10 +190,10 @@ event (Pix* pix, Event* ev, E* root) {
                     update_ev.window = ev.window; 
                     update (update_ev); 
                     break;
-                case USER_EVENT.draw   : pix.update_draw (ev,root); break;
-                case USER_EVENT.redraw : pix.update_draw (ev,root); break;
+                case USER_EVENT.draw   : pix.update_draw (ev); break;
+                case USER_EVENT.redraw : pix.update_draw (ev); break;
                 case USER_EVENT.click  : 
-                    focus (pix,ev,root);
+                    focus (pix,ev);
                     send_to_focused (pix,ev); 
                     break;
                 default                : //root.event  (ev);
@@ -227,22 +224,25 @@ update (update_UserEvent* ev) {
 }
 
 void
-update_draw (Pix* pix, Event* ev, E* root) {
-    .update (root);
-    .draw (pix,ev,root);
+update_draw (Pix* pix, Event* ev) {
+    .update (ev.root);
+    .draw (pix,ev);
 }
 
 void
-draw (Pix* pix, Event* ev, E* root) {
+draw (Pix* pix, Event* ev) {
     draw_UserEvent draw_ev;
+    draw_ev.root     = ev.root;
+    draw_ev.window   = ev.window;
     draw_ev.renderer = ev.renderer;
-    pix.draw (&draw_ev,root);
+    pix.draw (&draw_ev);
 }
 
 void
-draw (Pix* pix, draw_UserEvent* ev, E* root) {
+draw (Pix* pix, draw_UserEvent* ev) {
     auto renderer = ev.renderer;
-    auto e = root;
+    auto root     = ev.root;
+    auto e        = ev.root;
 
     if (ev.code == USER_EVENT.redraw)
         e = ev.e;
@@ -294,14 +294,14 @@ target_pos (SDL_MouseButtonEvent* ev) {
 }
 
 void
-focus (Pix* pix, Event* ev, E* root) {
+focus (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT: 
             break;
         case SDL_USEREVENT:
             switch (ev.user.code) {
                 case USER_EVENT.click : 
-                    auto deepest = find_deepest (root, target_pos (&ev._user.click));
+                    auto deepest = find_deepest (ev.root, target_pos (&ev._user.click));
                     pix.set_focus (deepest);
                     break;
                 default: 
@@ -309,12 +309,12 @@ focus (Pix* pix, Event* ev, E* root) {
             break;
         case SDL_MOUSEBUTTONDOWN : 
         case SDL_MOUSEBUTTONUP   : {
-            auto deepest = find_deepest (root, target_pos (&ev.button));
+            auto deepest = find_deepest (ev.root, target_pos (&ev.button));
             pix.set_focus (deepest);
             break;
         }
         case SDL_MOUSEWHEEL      : {
-            auto deepest = find_deepest (root, target_pos (&ev.wheel));
+            auto deepest = find_deepest (ev.root, target_pos (&ev.wheel));
             pix.set_focus (deepest);
             break;
         }
@@ -464,25 +464,6 @@ open_font (string file_name, int font_size) {
     throw new TTFException ("TTF_OpenFont");
 }
 
-struct
-Window {
-    SDL_Window* _super;
-
-    Loc
-    loc () {
-        Loc loc;
-        SDL_GetWindowPos  (_super, &loc[0], &loc[1]);
-        return loc;
-    }
-
-    Loc
-    length () {
-        Loc loc;
-        SDL_GetWindowSize (_super, &loc[0], &loc[1]);
-        return loc;
-    }
-}
-
 
 void
 send_user_event (EVT,ARGS...) (ARGS args) {
@@ -580,11 +561,11 @@ Events {
 
     void
     opOpAssign (string op : "~", EVT) (EVT ev) {
-        SDL_PushEvent (&ev);
+        SDL_PushEvent (cast (SDL_Event*) &ev);
     }
 
     void
-    setup_event (E* root, Klasses* klasses, Window* window, SDL_Renderer* renderer) {
+    init_base_event (E* root, Klasses* klasses, Window* window, SDL_Renderer* renderer) {
         with (ev) {
             root     = root;
             klasses  = klasses;

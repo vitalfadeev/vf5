@@ -3,7 +3,8 @@ module events;
 import std.format : format;
 import std.conv : to;
 import bindbc.sdl;
-import types : Loc;
+import types : Loc,Window;
+import klass : Klasses;
 import etree;
 import e : E;
 
@@ -126,9 +127,11 @@ draw_UserEvent {
     Uint32        timestamp;
     Uint32        windowID;
     Sint32        code = USER_EVENT.draw;
-    E*            e;
+    E*            root;
+    Window*       window;
     SDL_Renderer* renderer;
     Loc[]         offsets;
+    E*            e;
 }
 
 struct

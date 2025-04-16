@@ -4809,6 +4809,27 @@ cast(T)a < cast(T) b
 // expansion at 
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/internal/memory.d(32,18)
+onOutOfMemoryError();
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
 // expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
 alias a = __a ;
 
@@ -5036,27 +5057,6 @@ lhs < rhs
 
 // expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
 lhs < rhs
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/internal/memory.d(32,18)
-onOutOfMemoryError();
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
-alias a = __a ;
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
-alias b = __b ;
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
-a == b
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
-alias a = __a ;
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
-alias b = __b ;
-
-// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
-a == b
 
 // expansion at 
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;

@@ -44,7 +44,7 @@ open (string file_name) {
 	auto root    = E (Loca (Loc(), Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H)));
 	auto klasses = Klasses ();
 
-	txt_reader.go (root, &klasses, file_name.readText);
+	txt_reader.go (&root,&klasses,file_name.readText);
 
 	return (root,klasses);
 }
