@@ -10,8 +10,10 @@ import txt_reader;
 
 void 
 main (string[] args) {
+	E       root;
 	Klasses klasses;
-	setup_reserved_classes (&klasses);
+
+	init_reserved_classes (&klasses);
 
 	//UTree
 	//E* root = open ("test_1.txt");
@@ -19,11 +21,11 @@ main (string[] args) {
 	//E* root = open ("test_t3.txt");
 	//E* root = open ("test_generator_klass.txt");
 	//E* root = open ("test_audacious.txt");
-	(file_root,file_klasses) = open ("test_t9.txt");
+	auto file = TreeFile ("test_t9.txt");
 	//E* root = open ("test_file_manager.txt");
 
-	root     = file_root;
-	klasses ~= file_klasses;
+	root     = file.root;
+	klasses ~= file.klasses;
 
 	// Check
 	//dump_tree (root);
@@ -37,20 +39,26 @@ main (string[] args) {
 		.go (&events,&root,&klasses);
 }
 
-auto
-open (string file_name) {
-	import std.file;
+struct
+TreeFile {
+    string  name;
+    E       root = E (Loca (Loc(), Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H)));;
+    Klasses klasses;
 
-	auto root    = E (Loca (Loc(), Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H)));
-	auto klasses = Klasses ();
+    this (string name) {
+    	this.name = name;
+    	_open ();
+    }
 
-	txt_reader.go (&root,&klasses,file_name.readText);
-
-	return (root,klasses);
+	void
+	_open () {
+		import std.file : readText;
+		txt_reader.go (&root,&klasses,name.readText);
+	}
 }
 
 void
-setup_reserved_classes (Klasses* klasses) {
+init_reserved_classes (Klasses* klasses) {
 	import klasses.e         : E_Klass;
 	import klasses.progress  : Progress;
 	import klasses.button    : Button;
