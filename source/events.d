@@ -115,6 +115,7 @@ update_UserEvent {
     E*            e;
     E*            root;
     Window*       window;
+    Path          path;
 
     this (E* e) {
         this.e = e;
@@ -132,6 +133,7 @@ draw_UserEvent {
     SDL_Renderer* renderer;
     Loc[]         offsets;
     E*            e;
+    Path          path;
 }
 
 struct

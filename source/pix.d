@@ -89,12 +89,8 @@ go (Pix* pix, Events* events, E* root, Klasses* klasses) {
 
     // Event Loop
     writefln ("\n======== PIX start event loop ========");
-    foreach (Event* ev; events) {
-        if (auto result = pix.event (ev)) {
-            writefln ("\n======== PIX   end event loop ========");
-            return result;
-        }
-    }
+    foreach (Event* ev; events)
+        pix.event (ev);
     writefln ("\n======== PIX   end event loop ========");
 
     return 0;
@@ -137,7 +133,7 @@ click_translate (Event* ev) {
 //      foreach (kls; klasses)  // widget
 //        kls.event (ev)
 
-int
+void
 event (Pix* pix, Event* ev) {
     if (ev.type != SDL_MOUSEMOTION) 
         writefln ("\nPIX.event: %s", *ev);
@@ -199,14 +195,9 @@ event (Pix* pix, Event* ev) {
                 default                : //root.event  (ev);
             }
             break;
-        case SDL_QUIT: 
-            //root.event (ev); 
-            return 1;
+        case SDL_QUIT: break;
         default: 
-            //root.event (ev);
     }
-
-    return 0;
 }
 
 //void
@@ -218,9 +209,8 @@ event (Pix* pix, Event* ev) {
 //}
 void
 update (update_UserEvent* ev) {
-    Path path;
-    root.update (ev); 
-    e_update_size_pos (root,null,path,ev);
+    ev.root.update (ev); 
+    e_update_size_pos (ev.root,null,ev);
 }
 
 void
@@ -356,15 +346,15 @@ void
 init_sdl () {
     // SDL
     version (Windows)
-        SDLSupport ret = loadSDL ("sdl2.dll");
+        SDLSupport _sdl_support = loadSDL ("sdl2.dll");
     else
-        SDLSupport ret = loadSDL ();
+        SDLSupport _sdl_support = loadSDL ();
 
-    if (ret != sdlSupport) {
-        if (ret == SDLSupport.noLibrary) 
+    if (_sdl_support != sdlSupport) {
+        if (_sdl_support == SDLSupport.noLibrary) 
             throw new Exception ("The SDL shared library failed to load");
         else 
-        if (ret == SDLSupport.badLibrary) 
+        if (_sdl_support == SDLSupport.badLibrary) 
             throw new Exception ("One or more symbols failed to load. The likely cause is that the shared library is for a lower version than bindbc-sdl was configured to load (via SDL_204, GLFW_2010 etc.)");
     }
 
@@ -377,8 +367,8 @@ init_sdl () {
 
     // IMG
     if (bindSDLImage) {
-        auto sdl_image_ret = loadSDLImage ();
-        if (sdl_image_ret < sdlImageSupport) // 2.6.3
+        auto _sdl_image_support = loadSDLImage ();
+        if (_sdl_image_support < sdlImageSupport) // 2.6.3
             throw new Exception ("The SDL_Image shared library failed to load");
         
         auto flags = IMG_INIT_PNG; // | IMG_INIT_JPG;
@@ -388,8 +378,8 @@ init_sdl () {
 
     // TTF
     if (bindSDLTTF) {
-        auto sdl_ttf_ret = loadSDLTTF (); // SDLTTFSupport
-        if (sdl_ttf_ret < sdlTTFSupport) // 2.0.20
+        auto _sdl_ttf_support = loadSDLTTF (); // SDLTTFSupport
+        if (_sdl_ttf_support < sdlTTFSupport) // 2.0.20
             throw new TTFException ("The SDL_TTF shared library failed to load:");
         
         if (TTF_Init () == -1)
@@ -398,12 +388,12 @@ init_sdl () {
 
     // GFX
     // libSDL2_gfx.so
-    auto sdl_gfx_ret = loadSDLgfx (); // SDLgfxSupport
-    if (sdl_gfx_ret != SDLgfxSupport.SDLgfx) {
-        if (sdl_gfx_ret == SDLgfxSupport.noLibrary) 
+    auto _sdl_gfx_support = loadSDLgfx (); // SDLgfxSupport
+    if (_sdl_gfx_support != SDLgfxSupport.SDLgfx) {
+        if (_sdl_gfx_support == SDLgfxSupport.noLibrary) 
             throw new Exception ("The SDL GFX shared library failed to load");
         else 
-        if (sdl_gfx_ret == SDLgfxSupport.badLibrary) 
+        if (_sdl_gfx_support == SDLgfxSupport.badLibrary) 
             throw new Exception ("SDL GFX: One or more symbols failed to load.");
     }
 }
@@ -428,7 +418,7 @@ void FreeImageErrorHandler(FREE_IMAGE_FORMAT fif, const char *message) {
 SDL_Window*
 new_sdl_window (string window_title) {
     // Window
-    SDL_Window* window = 
+    auto window = 
         SDL_CreateWindow (
             window_title.toStringz, // "SDL2 Window",
             SDL_WINDOWPOS_CENTERED,
@@ -457,7 +447,7 @@ new_sdl_renderer (SDL_Window* window) {
 TTF_Font*
 open_font (string file_name, int font_size) {
     //TTF_Font* font = TTF_OpenFont (file_name.toStringz, font_size);
-    TTF_Font* font = TTF_OpenFontDPI (file_name.toStringz, font_size, 102, 102);
+    auto font = TTF_OpenFontDPI (file_name.toStringz, font_size, 102, 102);
     if (font !is null)
         return font;
 
@@ -465,30 +455,30 @@ open_font (string file_name, int font_size) {
 }
 
 
-void
-send_user_event (EVT,ARGS...) (ARGS args) {
-    Event ev;
-    ev._user = UserEvent (EVT (args));
-    SDL_PushEvent (&ev.sdl);
-}
+//void
+//send_user_event (EVT,ARGS...) (ARGS args) {
+//    Event ev;
+//    ev._user = UserEvent (EVT (args));
+//    SDL_PushEvent (&ev.sdl);
+//}
+
+//void
+//force_send_user_event (EVT,ARGS...) (E* e, ARGS args) {
+//    Event ev;
+//    ev._user = UserEvent (EVT (args));
+//    e.event (&ev);
+//}
+
+//void
+//direct_user_event (EVT,ARGS...) (Pix* pix, Event* ev, E* root, ARGS args) {
+//    Event direct_ev = *ev;
+//    direct_ev._user = UserEvent (EVT (args));
+//    pix.event (&direct_ev,root); 
+//}
+
 
 void
-force_send_user_event (EVT,ARGS...) (E* e, ARGS args) {
-    Event ev;
-    ev._user = UserEvent (EVT (args));
-    e.event (&ev);
-}
-
-void
-direct_user_event (EVT,ARGS...) (Pix* pix, Event* ev, E* root, ARGS args) {
-    Event direct_ev = *ev;
-    direct_ev._user = UserEvent (EVT (args));
-    pix.event (&direct_ev,root); 
-}
-
-
-void
-send_event_in_deep (Event* ev, E* e, Loc loc, SDL_Window* window, SDL_Renderer* renderer) {
+send_event_in_deep (Event* ev, E* e, Loc loc) {
     bool 
     valid_e (E* e) {
         return (
@@ -523,12 +513,12 @@ send_mouse_event_in_deep (Event* ev, E* e, Loc loc, ref E* deepest) {
 
 void
 redraw_window (SDL_Window* window) {
-    send_user_event!redraw_UserEvent ();
+    Events () ~= redraw_UserEvent ();
 }
 
 void
 send_e_redraw (E* e) {
-    send_user_event!redraw_UserEvent (e);
+    Events () ~= redraw_UserEvent (e);
 }
 
 struct
@@ -546,6 +536,8 @@ Events {
             while (SDL_WaitEvent (&ev.sdl) > 0) {
                 if (auto result = dg (&ev))
                     return result;
+                if (ev.type == SDL_QUIT)
+                    return 0;
             }
         }        
 
