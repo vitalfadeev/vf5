@@ -114,44 +114,60 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         //case "loc.balance"       : set_loc_balance        (e,values); break;
         //case "loc.balance.x"     : set_loc_balance_x      (e,values); break;
         //case "loc.balance.y"     : set_loc_balance_y      (e,values); break;
-        case "way"               : set_way                (e,values); break;
         //case "organize.childs"   : set_organize_childs    (e,values); break;
         case "length"            : set_length             (e,values); break;
-        case "length.x"          : set_length_x             (e,values); break;
-        case "length.y"          : set_length_y             (e,values); break;
-        case "hidden"            : set_hidden             (e,values); break;
-        case "popup"             : set_popup              (e,values); break;
-        case "aura.borders"      : set_aura_borders       (e,values); break;
-        case "borders"           : set_aura_borders       (e,values); break;
-        case "aura.borders.color": set_aura_borders_color (e,values); break;
-        case "borders.color"     : set_aura_borders_color (e,values); break;
+        case "length.x"          : set_length_x           (e,values); break;
+        case "length.y"          : set_length_y           (e,values); break;
+        //
+        case "way"               : set_way                (e,values); break;
+        //
+        case "borders"           : set_borders            (e,values); break;
+        case "borders.loc"       : set_borders_loc        (e,values); break;
+        case "borders.len"       : set_borders_ken        (e,values); break;
+        case "borders.color"     : set_borders_color      (e,values); break;
+        //
         case "aura"              : set_aura               (e,values); break;
-        case "aura.bg"           : set_aura_color         (e,values); break;
+        case "aura.loc"          : set_aura_loc           (e,values); break;
+        case "aura.len"          : set_aura_len           (e,values); break;
         case "aura.color"        : set_aura_color         (e,values); break;
+        //
+        case "content"           : set_content            (e,values); break;
+        case "content.loc"       : set_content_loc        (e,values); break;
+        case "content.len"       : set_content_len        (e,values); break;
+        case "content.color"     : set_aura_color         (e,values); break;
+        case "content.size.w"    : set_content_size_w     (e,values); break;
+        case "content.size.h"    : set_content_size_h     (e,values); break;
+        case "content.size"      : set_content_size       (e,values); break;
+        case "content.size.type" : set_content_siztype    (e,values); break;
+        case "bg"                : set_bg                 (e,values); break;
+        case "content.color"     : set_bg                 (e,values); break;
+        //
         case "content.image"     : set_content_image      (e,values); break;
         case "content.text"      : set_content_text       (e,values); break;
-        case "content"           : set_content            (e,values); break;
+        //
         case "image"             : set_content_image      (e,values); break;
+        //
         case "text"              : set_content_text       (e,values); break;
         case "text.color"        : set_text_fg            (e,values); break;
         case "text.fg"           : set_text_fg            (e,values); break;
         case "text.bg"           : set_text_bg            (e,values); break;
         case "text.pos.type"     : set_text_pos_type      (e,values); break;
-        case "content.size.w"    : set_content_size_w     (e,values); break;
-        case "content.size.h"    : set_content_size_h     (e,values); break;
-        case "content.size"      : set_content_size       (e,values); break;
-        case "content.size.type" : set_content_siztype    (e,values); break;
         case "text.font"         : set_content_text_font  (e,values); break;
         case "text.font.family"  : set_content_text_font_family (e,values); break;
         case "text.font.size"    : set_content_text_font_size   (e,values); break;
         case "text.font.file"    : set_content_text_font_file   (e,values); break;
-        case "bg"                : set_bg                 (e,values); break;
-        case "content.color"     : set_bg                 (e,values); break;
+        //
         case "generator"         : set_generator          (e,values); break;
-        case "template"          : set_generator_template (e,values); break;
         case "generator.template": set_generator_template (e,values); break;
         case "generator.fields"  : set_generator_fields   (e,values); break;
+        case "template"          : set_generator_template (e,values); break;
+        //
+        case "hidden"            : set_hidden             (e,values); break;
+        //
+        case "popup"             : set_popup              (e,values); break;
+        //
         case "on"                : set_on                 (e,values); break;
+        //
         default:
             writefln ("IGNORED: %s: %s", field_id, values);
     }
@@ -410,6 +426,8 @@ _set_loc (uint LOC_I, E* e, string value) {
         default      :
             if (value.isNumeric ()) // 50
                 e.def_loc.set (LOC_I, LocType.stab, value.to!L); break;
+            else
+                throw new Exception (format!"unsupported loc (%s): %s" (LOC_I, value));
     }    
 }
 
@@ -430,31 +448,33 @@ void
 set_length_x (E* e, TString[] values) {
     alias X = 0;
     alias Y = 1;
-    _set_length (X,e,values);
+    if (values.length) {
+        _set_length (X,e,values[0].s);
+    }
 }
 
 void
 set_length_y (E* e, TString[] values) {
     alias X = 0;
     alias Y = 1;
-    _set_length (Y,e,values);
+    if (values.length) {
+        _set_length (Y,e,values[0].s);
+    }
 }
 
 void
-_set_length (uint LOC_I, E* e, TString[] values) {
-    if (values.length) {
-        switch (values[0].s) {
-            case "stab"    : e.def_length.set (LOC_I, LengthType.stab);  break;
-            case "content" : e.def_length.set (LOC_I, LengthType.content); break;
-            case "parent"  : e.def_length.set (LOC_I, LengthType.parent);  break;
-            case "window"  : e.def_length.set (LOC_I, LengthType.window);  break;
-            case "max"     : e.def_length.set (LOC_I, LengthType.max_);  break;
-            default : 
-                if (values[0].s.isNumeric ())
-                    e.def_length.set (LOC_I, LengthType.fixed, values[0].s.to!L);
-                else
-                    throw new Exception (format!"unsupported set_length (%s): %s" (LOC_I, values[0].s));
-        }
+_set_length (uint LOC_I, E* e, string value) {
+    switch (value) {
+        case "stab"    : e.def_length.set (LOC_I, LengthType.stab);  break;
+        case "content" : e.def_length.set (LOC_I, LengthType.content); break;
+        case "parent"  : e.def_length.set (LOC_I, LengthType.parent);  break;
+        case "window"  : e.def_length.set (LOC_I, LengthType.window);  break;
+        case "max"     : e.def_length.set (LOC_I, LengthType.max_);  break;
+        default : 
+            if (value.isNumeric ())
+                e.def_length.set (LOC_I, LengthType.fixed, value.to!L);
+            else
+                throw new Exception (format!"unsupported length (%s): %s" (LOC_I, value));
     }
 }
 
