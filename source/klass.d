@@ -102,16 +102,30 @@ add_field (Klass* kls, string name, int value) {
 
 
 // KLASSES
+static
+Klasses reserved_klasses;
+
 struct
 Klasses {  // index of all klasses
     Klass*[] s;
-    alias s this;
+    //alias s this;
 
 
     // find or create
     Klass*
     opIndex (string name) {
         return _find_klass_or_create (name);
+    }
+
+    void
+    opOpAssign (string op : "~") (Klass* b) {
+        s ~= b;
+    }
+
+    void
+    opOpAssign (string op : "~") (Klasses b) {
+        foreach (kls; b.s)
+            s ~= kls;
     }
 
     Klass*
@@ -142,6 +156,15 @@ Klasses {  // index of all klasses
         if (kls is null)
             kls = _create_klass (name);
         return kls;
+    }
+
+    bool
+    has (string name) {
+        foreach (kls; s)
+            if (kls.name == name)
+                return true;
+
+        return false;
     }
 
     void

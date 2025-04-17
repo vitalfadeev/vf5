@@ -32,6 +32,10 @@ struct
 _Loc (uint N) {  // SIMD vector
     L[N] s;
 
+    this (L[N] s) {
+        this.s = s;
+    }
+
     this (L...) (L l) {
         static
         foreach (i,_L; L)
@@ -54,6 +58,28 @@ _Loc (uint N) {  // SIMD vector
     // 2: loc in line
     // 3: loc in tri
     // 4: loc in rect
+
+    typeof (this)
+    opBinary (string op : "+") (typeof (this) b) {
+        L[N] _s;
+
+        static
+        foreach (i; 0..N)
+            _s[i] += b.s[i];
+
+        return typeof (this) (_s);
+    }
+
+    typeof (this)
+    opBinary (string op : "-") (typeof (this) b) {
+        L[N] _s;
+
+        static
+        foreach (i; 0..N)
+            _s[i] -= b.s[i];
+
+        return typeof (this) (_s);
+    }
 }
 
 struct
@@ -203,7 +229,7 @@ LocType : ubyte {
 
 
 struct
-_DefLength (N) {
+_DefLength (uint N) {
     LengthType[N] type;
     union {
         Loc     stab;
@@ -211,12 +237,12 @@ _DefLength (N) {
     }
 
     void
-    set (LOC_I, LengthType type) {
+    set (uint LOC_I, LengthType type) {
         this.type[LOC_I] = type;
     }
 
     void
-    set (LOC_I, LengthType type, L l) {
+    set (uint LOC_I, LengthType type, L l) {
         this.type[LOC_I] = type;
         if (loc_type == LocType.stab) {
             this.stab[LOC_I] = l;

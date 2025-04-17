@@ -26,7 +26,7 @@ import pix : IMGException;
 import pix : redraw_window;
 import pix : send_e_redraw;
 import pix : IMAGE_PTR;
-import pix : send_user_event;
+//import pix : send_user_event;
 import e_generator : Generator;
 
 

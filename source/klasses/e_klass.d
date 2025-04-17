@@ -379,8 +379,8 @@ set_organize_childs (E* e, TString[] values) {
 
 void
 set_loc_x (E* e, TString[] values) {
-    alias X = 0;
-    alias Y = 1;
+    enum X = 0;
+    enum Y = 1;
     if (values.length) {
         _set_loc (X,e,values[0].s);
     }
@@ -388,8 +388,8 @@ set_loc_x (E* e, TString[] values) {
 
 void
 set_loc_y (E* e, TString[] values) {
-    alias X = 0;
-    alias Y = 1;
+    enum X = 0;
+    enum Y = 1;
     if (values.length) {
         _set_loc (Y,e,values[0].s);
     }
@@ -425,7 +425,7 @@ _set_loc (uint LOC_I, E* e, string value) {
         case "."     : e.def_loc.set (LOC_I, LocType._); break;
         default      :
             if (value.isNumeric ()) // 50
-                e.def_loc.set (LOC_I, LocType.stab, value.to!L); break;
+                e.def_loc.set (LOC_I, LocType.stab, value.to!L);
             else
                 throw new Exception (format!"unsupported loc (%s): %s" (LOC_I, value));
     }    
@@ -446,8 +446,8 @@ set_length (E* e, TString[] values) {
 
 void
 set_length_x (E* e, TString[] values) {
-    alias X = 0;
-    alias Y = 1;
+    enum X = 0;
+    enum Y = 1;
     if (values.length) {
         _set_length (X,e,values[0].s);
     }
@@ -455,8 +455,8 @@ set_length_x (E* e, TString[] values) {
 
 void
 set_length_y (E* e, TString[] values) {
-    alias X = 0;
-    alias Y = 1;
+    enum X = 0;
+    enum Y = 1;
     if (values.length) {
         _set_length (Y,e,values[0].s);
     }

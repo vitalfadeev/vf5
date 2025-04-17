@@ -67,18 +67,13 @@ init_reserved_classes (Klasses* klasses) {
 	import klasses.list      : List;
 	import klasses.scrollbar : Scrollbar;
 
-	klasses ~= new_reserved_klass!E_Klass ();
-	klasses ~= new_reserved_klass!Progress ();
-	klasses ~= new_reserved_klass!Button ();
-	klasses ~= new_reserved_klass!Check ();
-	klasses ~= new_reserved_klass!Edit ();
-	klasses ~= new_reserved_klass!List ();
-	klasses ~= new_reserved_klass!Scrollbar ();
-}
-
-Klass*
-new_reserved_klass (KLASS) () {
-	return cast (Klass*) new KLASS ();
+	reserved_klasses ~= cast (Klass*) new E_Klass ();
+	reserved_klasses ~= cast (Klass*) new Progress ();
+	reserved_klasses ~= cast (Klass*) new Button ();
+	reserved_klasses ~= cast (Klass*) new Check ();
+	reserved_klasses ~= cast (Klass*) new Edit ();
+	reserved_klasses ~= cast (Klass*) new List ();
+	reserved_klasses ~= cast (Klass*) new Scrollbar ();
 }
 
 

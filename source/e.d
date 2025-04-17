@@ -25,9 +25,6 @@ alias EPtr = E*;
 
 enum MAX_GROUP = 9;
 
-static
-Klass*[] reserved_klasses;
-
 // form
 //   type none, rect, 3, 4, 5, 6, 7, 8
 //
@@ -558,8 +555,8 @@ _Content {
 
 void
 add_klass (E* e, Klasses* klasses, string name) {
-    auto kls = klasses [name];
-    add_klass (e.kls);
+    auto kls = (*klasses) [name];
+    add_klass (e,kls);
 }
 void
 add_klass (E* e, Klass* kls) {
@@ -569,9 +566,9 @@ add_klass (E* e, Klass* kls) {
 }
 
 bool
-has_klass (E* e, Klasses* klasses, string s) {
-    auto kls = find_klass (klasses,s);
-    assert (kls !is null);
+has_klass (E* e, Klasses* klasses, string name) {
+    auto kls = klasses._find_klass (name);
+    assert (kls != null);
     return has_klass (e,kls);
 }
 bool
@@ -581,21 +578,20 @@ has_klass (E* e, Klass* kls) {
 }
 
 void
-trigger_class (E* e, Klasses* klasses, string s) {
-    if (e.has_klass (klasses,s))
-        e.remove_klass (s);
+trigger_class (E* e, Klasses* klasses, string name) {
+    if (e.has_klass (klasses,name))
+        e.remove_klass (klasses,name);
     else
-        e.add_klass (klasses,s);
+        e.add_klass (klasses,name);
 }
 
 
 void
-remove_klass (E* e, Klasses* klasses, string s) {
-    auto kls = find_klass (klasses,s);
+remove_klass (E* e, Klasses* klasses, string name) {
+    auto kls = klasses._find_klass (name);
     if (kls !is null)
         e.remove_klass (kls);
 }
-
 void
 remove_klass (E* e, Klass* kls) {
     import std.algorithm.searching : countUntil;
@@ -607,9 +603,9 @@ remove_klass (E* e, Klass* kls) {
 }
 
 E*
-find_child (E* e, string klass_name) {
+find_child (E* e, Klasses* klasses, string klass_name) {
     foreach (_e; WalkChilds (e))
-        if (_e.has_klass (klass_name))
+        if (_e.has_klass (klasses,klass_name))
             return _e; // found!
 
     return null;
@@ -636,9 +632,11 @@ event (E* e, Event* ev) {
         kls.event (ev,e);
 
     // to up
-    if (e.parent !is null)
-        e.parent.event (ev);
-
+    if (!ev.path.empty) {
+        auto parent = ev.path.back;
+        ev.path.length--;
+        parent.event (ev);
+    }
 }
 
 void
@@ -702,39 +700,14 @@ draw (E* e, draw_UserEvent* ev) {
 
 EPtr
 _dup (EPtr _this) {
-     auto cloned = new E ();
-
-     cloned.klasses       = _this.klasses.dup;
-     cloned.pos           = _this.pos;
-     cloned.size          = _this.size;
-     cloned.aura          = _this.aura;
-     cloned._content      = _this._content;
-     cloned.content.text.rects 
-                          = _this.content.text.rects.dup;
-     cloned.hidden        = _this.hidden;
-     cloned.from_klass    = _this.from_klass;
-     cloned.from_template = _this.from_template;
-     cloned.pos_type      = _this.pos_type;
-     cloned.way           = _this.way;
-     cloned.size_type     = _this.size_type;
-     //cloned.childs_src    = _this.childs_src;
-     //cloned.childs_src.tpl.src 
-     //                     = _this.childs_src.tpl.src.dup;
-     //cloned.childs_src.tpl.dst 
-     //                     = _this.childs_src.tpl.dst.dup;
-     cloned.on            = _this.on.dup;
-     foreach (ref _on; cloned.on)
-        _on.action = _on.action.dup;
-     cloned.fn         = _this.fn;
-
-     return cloned;
+     return null;
 }
 
 
 bool
 event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
-    Loc _pos = Loc (ev.mouseX, ev.mouseY);
-    return pos_in_rect (_pos, e.pos, e.size);
+    Loc _loc = Loc (ev.mouseX, ev.mouseY);
+    return loc_in_rect (_loc, e.loc, e.length);
 }
 
 bool
@@ -747,4 +720,11 @@ bool
 event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
     Loc _pos = ev.up_pos;
     return pos_in_rect (_pos, e.pos, e.size);
+}
+
+bool
+loc_in_rect (Loc loc, Form2 rect) {
+    enum INCLUDE_A = true;
+    enum INCLUDE_B = true;
+    return has (INCLUDE_A,INCLUDE_B) (rect,loc);
 }

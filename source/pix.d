@@ -15,7 +15,7 @@ import klass;
 import events;
 import types;
 
-alias PIX_EVENT_FN  = int  function (Pix* pix, Event* ev);
+alias PIX_EVENT_FN  = void function (Pix* pix, Event* ev);
 alias PIX_DRAW_FN   = void function (Pix* pix, draw_UserEvent* ev);
 alias PIX_GO_FN     = int  function (Pix* pix, Events* events, E* root, Klasses* klasses);
 

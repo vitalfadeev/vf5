@@ -21,6 +21,7 @@ Event {
     Window*       window;
     SDL_Renderer* renderer;
     Klasses*      klasses;
+    Path          path;
 
     string
     toString () {
