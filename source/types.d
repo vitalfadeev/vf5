@@ -42,6 +42,11 @@ _Loc (uint N) {  // SIMD vector
             s[i] = l[i];
     }
 
+    auto ref
+    opIndex (size_t i) {
+        return s[i];
+    }
+
     // v
     // 1: loc x
     // 2: loc x,y
@@ -91,6 +96,7 @@ alias Form1 = Form!1;
 alias Form2 = Form!2;
 alias Form3 = Form!3;
 alias Form4 = Form!4;
+
 
 bool
 has (bool INCLUDE_A=true, bool INCLUDE_B=true) (Form2 a, Form1 b) {

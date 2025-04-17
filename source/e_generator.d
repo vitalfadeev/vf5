@@ -103,7 +103,7 @@ Generator {            // is part of E
 }
 
 void
-gen_tree (E* e, Klass* template_klass) {
+gen_tree (E* e, Klasses* klasses, Klass* template_klass) {
     auto generator = &e.generator;
     auto fields    = e.generator.fields;
 
@@ -111,7 +111,7 @@ gen_tree (E* e, Klass* template_klass) {
     //   kls.args      = [TEXT]
     //   template_args = [abc,def]
 
-    auto target = find_child (e,"scroll-content");
+    auto target = find_child (e,klasses,"scroll-content");
     assert (target !is null);
     
     foreach (line; *generator) {
@@ -147,8 +147,9 @@ void
 _go () {
     E*        dst = new E ();
     Klass*    template_klass;
+    Klasses   klasses;
 
-    gen_tree (dst,template_klass);
+    gen_tree (dst,&klasses,template_klass);
 }
 
 

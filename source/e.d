@@ -54,14 +54,15 @@ E4 {  // margin
     Loca   loca;
     alias  loca this;
     //
-    Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    Way      way;
+    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Way       way;
     //
-    Klass*[] klasses;      // box green rounded
-    On[]     on;           // [click: audacious --play-pause]
-    Fn       fn;           // event,update,draw,set
-    Flags    flags;        // hidden,deleted
-    E3      _inner;        // bordder,aura,content,childs,text,image
+    Klass*[]  klasses;      // box green rounded
+    On[]      on;           // [click: audacious --play-pause]
+    Fn        fn;           // event,update,draw,set
+    Flags     flags;        // hidden,deleted
+    Generator generator;   //
+    E3       _inner;        // bordder,aura,content,childs,text,image
     //
     DefLoc    def_loc;     //
     DefLength def_length;  // 
@@ -707,24 +708,27 @@ _dup (EPtr _this) {
 bool
 event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
     Loc _loc = Loc (ev.mouseX, ev.mouseY);
-    return loc_in_rect (_loc, e.loc, e.length);
+    return loc_in (_loc, e.loc, e.length);
 }
 
 bool
 event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
-    Loc _pos = Loc (ev.x, ev.y);
-    return pos_in_rect (_pos, e.pos, e.size);
+    Loc _loc = Loc (ev.x, ev.y);
+    return loc_in (_loc, e.loc, e.length);
 }
 
 bool
 event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
-    Loc _pos = ev.up_pos;
-    return pos_in_rect (_pos, e.pos, e.size);
+    Loc _loc = ev.up_loc;
+    return loc_in (_loc, e.loc, e.length);
 }
 
 bool
-loc_in_rect (Loc loc, Form2 rect) {
-    enum INCLUDE_A = true;
-    enum INCLUDE_B = true;
-    return has (INCLUDE_A,INCLUDE_B) (rect,loc);
+loc_in (Loc loc, Loc area_loc, Length area_length) {
+    static
+    foreach (i; 0..NLOC)
+        if ((area_loc.s[i] <= loc.s[i]) && (loc.s[i] <= area_loc.s[i] + area_length.s[i]))
+            return true;
+
+    return false;
 }

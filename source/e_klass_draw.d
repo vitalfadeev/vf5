@@ -85,8 +85,8 @@ _text (SDL_Renderer* renderer, Text.TextRect[] rects, FONT_PTR font, Color color
 
 Loc
 get_text_size (string s, FONT_PTR font, Color color) {
-    loc loc;
-    auto ret = TTF_SizeUTF8 (font, s.toStringz, &loc[0], &loc[1]);    
+    Loc loc;
+    auto ret = TTF_SizeUTF8 (font, s.toStringz, &loc[0], &loc[1]);
     return loc;
 }
 
