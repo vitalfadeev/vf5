@@ -205,7 +205,10 @@ LocType : ubyte {
 struct
 _DefLength (N) {
     LengthType[N] type;
-    Length        length;
+    union {
+        Loc     stab;
+        FlexLoc flex;
+    }
 
     void
     set (LOC_I, LengthType type) {
@@ -214,8 +217,10 @@ _DefLength (N) {
 
     void
     set (LOC_I, LengthType type, L l) {
-        this.type[LOC_I]   = type;
-        this.length[LOC_I] = l;
+        this.type[LOC_I] = type;
+        if (loc_type == LocType.stab) {
+            this.stab[LOC_I] = l;
+        }
     }
 }
 alias DefLength = _DefLength!NLOC;
@@ -244,7 +249,8 @@ Window {
 enum 
 LengthType {
     parent, // default
-    fixed,
+    stab,
+    flex,
     content,
     window,
     max_,

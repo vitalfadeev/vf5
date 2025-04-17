@@ -363,85 +363,24 @@ set_organize_childs (E* e, TString[] values) {
 
 void
 set_loc_x (E* e, TString[] values) {
+    alias X = 0;
+    alias Y = 1;
     if (values.length) {
-        _set_loc_x (e,values[0].s);
+        _set_loc (X,e,values[0].s);
     }
 }
 
 void
 set_loc_y (E* e, TString[] values) {
+    alias X = 0;
+    alias Y = 1;
     if (values.length) {
-        _set_loc_y (e,values[0].s);
+        _set_loc (Y,e,values[0].s);
     }
 }
 
 void
-_set_loc_x (E* e, string value) {
-    // loc  right
-    // loc  l
-    // loc  r
-    // loc  c
-    // loc  0%
-    // loc  100%
-    // loc  50%
-    // loc  0
-    // loc  10
-    // loc  10 10
-    // loc  l u
-    // loc  l d
-    // loc  l c
-    // loc  lu
-    // loc  cu
-    // loc  ru
-    // loc .
-    // loc way
-    // way r
-    // way l
-    // way d
-    // way u
-    // way .
-    //
-    // loc.type.x r
-    // loc.type.x l
-    // loc.type.x c
-    // loc.type.x way
-    // loc.type.y u
-    // loc.type.y d
-    // loc.type.y c
-    // loc.type.y way
-
-    const X = 0;
-    const Y = 1;
-
-    switch (value) {  //               type           x     y
-        case "lu"    : e.def_loc.set (LocType.flex, -1,1, -1,1); break;
-        case "cu"    : e.def_loc.set (LocType.flex,  0,1, -1,1); break;
-        case "ru"    : e.def_loc.set (LocType.flex,  1,1, -1,1); break;
-        case "rc"    : e.def_loc.set (LocType.flex,  1,1,  0,1); break;
-        case "rd"    : e.def_loc.set (LocType.flex,  1,1,  1,1); break;
-        case "cd"    : e.def_loc.set (LocType.flex,  0,1,  1,1); break;
-        case "ld"    : e.def_loc.set (LocType.flex, -1,1,  1,1); break;
-        case "lc"    : e.def_loc.set (LocType.flex,  1,1,  0,1); break;
-        case "cc"    : e.def_loc.set (LocType.flex,  0,1,  0,1); break;
-        case "r"     : e.def_loc.set (X, LocType.flex,  1,1); break;
-        case "right" : e.def_loc.set (X, LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (X, LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (X, LocType.flex,  0,1); break;
-        case "l"     : e.def_loc.set (X, LocType.flex, -1,1); break;
-        case "left"  : e.def_loc.set (X, LocType.flex, -1,1); break;
-        case "_"     : e.def_loc.set (X, LocType._); break;
-        case "."     : e.def_loc.set (X, LocType._); break;
-        default      :
-            if (value.isNumeric ()) // 50
-                e.def_loc.set (X, LocType.stab, value.to!L); break;
-    }
-}
-
-void
-_set_loc_y (E* e, string value) {
-    const X = 0;
-    const Y = 1;
-
+_set_loc (uint LOC_I, E* e, string value) {
     auto _loc = &e.def_loc;
 
     switch (value) {
@@ -454,18 +393,24 @@ _set_loc_y (E* e, string value) {
         case "ld"    : e.def_loc.set (LocType.flex, -1,1,  1,1); break;
         case "lc"    : e.def_loc.set (LocType.flex,  1,1,  0,1); break;
         case "cc"    : e.def_loc.set (LocType.flex,  0,1,  0,1); break;
-        case "d"     : e.def_loc.set (Y, LocType.flex,  1,1); break;
-        case "dn"    : e.def_loc.set (Y, LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (Y, LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (Y, LocType.flex,  0,1); break;
-        case "u"     : e.def_loc.set (Y, LocType.flex, -1,1); break;
-        case "up"    : e.def_loc.set (Y, LocType.flex, -1,1); break;
-        case "_"     : e.def_loc.set (Y, LocType._); break;
-        case "."     : e.def_loc.set (Y, LocType._); break;
+        case "d"     : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
+        case "dn"    : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
+        case "c"     : e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
+        case "center": e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
+        case "r"     : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
+        case "right" : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
+        case "c"     : e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
+        case "center": e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
+        case "l"     : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
+        case "left"  : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
+        case "u"     : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
+        case "up"    : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
+        case "_"     : e.def_loc.set (LOC_I, LocType._); break;
+        case "."     : e.def_loc.set (LOC_I, LocType._); break;
         default      :
             if (value.isNumeric ()) // 50
-                e.def_loc.set (Y, LocType.stab, value.to!L); break;
-    }
+                e.def_loc.set (LOC_I, LocType.stab, value.to!L); break;
+    }    
 }
 
 void
@@ -483,42 +428,32 @@ set_length (E* e, TString[] values) {
 
 void
 set_length_x (E* e, TString[] values) {
-    const X = 0;
-    const Y = 1;
-
-    if (values.length) {
-        switch (values[0].s) {
-            case "fixed"   : e.def_length.set (X, LengthType.fixed);  break;
-            case "content" : e.def_length.set (X, LengthType.content); break;
-            case "parent"  : e.def_length.set (X, LengthType.parent);  break;
-            case "window"  : e.def_length.set (X, LengthType.window);  break;
-            case "max"     : e.def_length.set (X, LengthType.max_);  break;
-            default : 
-                if (values[0].s.isNumeric ())
-                    e.def_length.set (X, LengthType.fixed, values[0].s.to!L);
-                else
-                    throw new Exception ("unsupported size.w: " ~ values[0].s);
-        }
-    }
+    alias X = 0;
+    alias Y = 1;
+    _set_length (X,e,values);
 }
 
 void
 set_length_y (E* e, TString[] values) {
-    const X = 0;
-    const Y = 1;
+    alias X = 0;
+    alias Y = 1;
+    _set_length (Y,e,values);
+}
 
+void
+_set_length (uint LOC_I, E* e, TString[] values) {
     if (values.length) {
         switch (values[0].s) {
-            case "fixed"   : e.def_length.set (Y, LengthType.fixed);  break;
-            case "content" : e.def_length.set (Y, LengthType.content); break;
-            case "parent"  : e.def_length.set (Y, LengthType.parent);  break;
-            case "window"  : e.def_length.set (Y, LengthType.window);  break;
-            case "max"     : e.def_length.set (Y, LengthType.max_);  break;
+            case "stab"    : e.def_length.set (LOC_I, LengthType.stab);  break;
+            case "content" : e.def_length.set (LOC_I, LengthType.content); break;
+            case "parent"  : e.def_length.set (LOC_I, LengthType.parent);  break;
+            case "window"  : e.def_length.set (LOC_I, LengthType.window);  break;
+            case "max"     : e.def_length.set (LOC_I, LengthType.max_);  break;
             default : 
                 if (values[0].s.isNumeric ())
-                    e.def_length.set (Y, LengthType.fixed, values[0].s.to!L);
+                    e.def_length.set (LOC_I, LengthType.fixed, values[0].s.to!L);
                 else
-                    throw new Exception ("unsupported size.h: " ~ values[0].s);
+                    throw new Exception (format!"unsupported set_length (%s): %s" (LOC_I, values[0].s));
         }
     }
 }
