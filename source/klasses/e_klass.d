@@ -108,12 +108,12 @@ update (Klass* kls, update_UserEvent* ev, E* e) {
 void
 set (Klass* kls, E* e, string field_id, TString[] values) {
     switch (field_id) {
-        case "pos"               : set_pos                (e,values); break;
-        case "pos.x"             : set_pos_x              (e,values); break;
-        case "pos.y"             : set_pos_y              (e,values); break;
-        case "pos.balance"       : set_pos_balance        (e,values); break;
-        case "pos.balance.x"     : set_pos_balance_x      (e,values); break;
-        case "pos.balance.y"     : set_pos_balance_y      (e,values); break;
+        case "loc"               : set_loc                (e,values); break;
+        case "loc.x"             : set_loc_x              (e,values); break;
+        case "loc.y"             : set_loc_y              (e,values); break;
+        case "loc.balance"       : set_loc_balance        (e,values); break;
+        case "loc.balance.x"     : set_loc_balance_x      (e,values); break;
+        case "loc.balance.y"     : set_loc_balance_y      (e,values); break;
         case "way"               : set_way                (e,values); break;
         //case "organize.childs"   : set_organize_childs    (e,values); break;
         case "size.w"            : set_size_w             (e,values); break;
@@ -167,15 +167,15 @@ draw (Klass* kls, draw_UserEvent* ev, E* e) {
 
 //
 void
-set_pos (E* e, TString[] values) {
+set_loc (E* e, TString[] values) {
     if (values.length >= 2) {
-        set_pos_x (e, values[0..1]);
-        set_pos_y (e, values[1..$]);
+        set_loc_x (e, values[0..1]);
+        set_loc_y (e, values[1..$]);
     }
     else
     if (values.length == 1) {
-        set_pos_x (e, values[0..1]);
-        //set_pos_y (e, values[0..1]);
+        set_loc_x (e, values[0..1]);
+        //set_loc_y (e, values[0..1]);
     }
 }
 
@@ -203,29 +203,29 @@ is_numeric (string s, int* num) {
 }
 
 void
-set_pos_balance (E* e, TString[] values) {
+set_loc_balance (E* e, TString[] values) {
     if (values.length >= 2) {
-        set_pos_balance_x (e,values[0..1]);
-        set_pos_balance_y (e,values[1..$]);
+        set_loc_balance_x (e,values[0..1]);
+        set_loc_balance_y (e,values[1..$]);
     }
     else
     if (values.length >= 1) {
-        set_pos_balance_x (e,values);
-        set_pos_balance_y (e,values);
+        set_loc_balance_x (e,values);
+        set_loc_balance_y (e,values);
     }
 }
 
 void
-set_pos_balance_x (E* e, TString[] values) {
+set_loc_balance_x (E* e, TString[] values) {
     if (values.length >= 1) {
-        e.pos_balance[OX] = _parse_balance (values[0].s);
+        e.loc_balance[OX] = _parse_balance (values[0].s);
     }
 }
 
 void
-set_pos_balance_y (E* e, TString[] values) {
+set_loc_balance_y (E* e, TString[] values) {
     if (values.length >= 1) {
-        e.pos_balance[OY] = _parse_balance (values[0].s);
+        e.loc_balance[OY] = _parse_balance (values[0].s);
     }
 }
 
@@ -362,21 +362,21 @@ set_organize_childs (E* e, TString[] values) {
 }
 
 void
-set_pos_x (E* e, TString[] values) {
+set_loc_x (E* e, TString[] values) {
     if (values.length) {
-        _set_pos_x (e,values[0].s);
+        _set_loc_x (e,values[0].s);
     }
 }
 
 void
-set_pos_y (E* e, TString[] values) {
+set_loc_y (E* e, TString[] values) {
     if (values.length) {
-        _set_pos_y (e,values[0].s);
+        _set_loc_y (e,values[0].s);
     }
 }
 
 void
-_set_pos_x (E* e, string value) {
+_set_loc_x (E* e, string value) {
     // loc  right
     // loc  l
     // loc  r
@@ -401,33 +401,38 @@ _set_pos_x (E* e, string value) {
     // way u
     // way .
     //
-    // pos.type.x r
-    // pos.type.x l
-    // pos.type.x c
-    // pos.type.x way
-    // pos.type.y u
-    // pos.type.y d
-    // pos.type.y c
-    // pos.type.y way
+    // loc.type.x r
+    // loc.type.x l
+    // loc.type.x c
+    // loc.type.x way
+    // loc.type.y u
+    // loc.type.y d
+    // loc.type.y c
+    // loc.type.y way
+
+    const X = 0;
+    const Y = 1;
+
+    auto _loc = &e.def_loc;
 
     switch (value) {
-        case "lu"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance (-1,1); break;
-        case "cu"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance (-1,1); break;
-        case "ru"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance (-1,1); break;
-        case "rc"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 0,1); break;
-        case "rd"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
-        case "cd"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
-        case "ld"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
-        case "lc"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,0); break;
-        case "cc"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 0,1); break;
-        case "r"     : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 1,1); break;
-        case "right" : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 1,1); break;
-        case "c"     : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); break;
-        case "center": e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); break;
-        case "l"     : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); break;
-        case "left"  : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); break;
-        case "_"     : e.pos_type[OX] = E.PosType._; break;
-        case "."     : e.pos_type[OX] = E.PosType._; break;
+        case "lu"    : *_loc = DefLoc (LocType.flex, -1,1, -1,1); break;
+        case "cu"    : *_loc = DefLoc (LocType.flex,  0,1, -1,1); break;
+        case "ru"    : *_loc = DefLoc (LocType.flex,  1,1, -1,1); break;
+        case "rc"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 0,1); break;
+        case "rd"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
+        case "cd"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
+        case "ld"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,1); break;
+        case "lc"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 1,0); break;
+        case "cc"    : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance ( 0,1); break;
+        case "r"     : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 1,1); break;
+        case "right" : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 1,1); break;
+        case "c"     : _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 0,1); break;
+        case "center": _typ = LocType.flex; _loc.flex [X] = FlexLoc ( 0,1); break;
+        case "l"     : _typ = LocType.flex; _loc.flex [X] = FlexLoc (-1,1); break;
+        case "left"  : _typ = LocType.flex; _loc.flex [X] = FlexLoc (-1,1); break;
+        case "_"     : _typ = E.PosType._; break;
+        case "."     : _typ = E.PosType._; break;
         default      :
             if (value.isNumeric ()) { // 50
                 e.pos_type[OX] = E.PosType.fixed;
@@ -437,7 +442,7 @@ _set_pos_x (E* e, string value) {
 }
 
 void
-_set_pos_y (E* e, string value) {
+_set_loc_y (E* e, string value) {
     switch (value) {
         case "lu"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance (-1,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance (-1,1); break;
         case "cu"    : e.pos_type[OX] = E.PosType.balance; e.pos_balance[OX] = Balance ( 0,1); e.pos_type[OY] = E.PosType.balance; e.pos_balance[OY] = Balance (-1,1); break;

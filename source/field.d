@@ -18,7 +18,7 @@ Field {
 
     Field*
     dup () {
-        auto cloned = new Field ();
+        auto cloned   = new Field ();
 
         cloned.name   = this.name;
         cloned.values = this.values.dup;

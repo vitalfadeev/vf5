@@ -57,8 +57,8 @@ E4 {  // margin
     Loca   loca;
     alias  loca this;
     //
-    Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    Way    way;
+    Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Way      way;
     //
     Klass*[] klasses;      // box green rounded
     On[]     on;           // [click: audacious --play-pause]
@@ -67,7 +67,6 @@ E4 {  // margin
     E3      _inner;        // bordder,aura,content,childs,text,image
     //
     DefLoc   def_loc;      // def LocDef
-    Klasses  def_klasses;  // 
 
     auto ref margin  () { return this; }
     auto ref border  () { return _inner; }
@@ -557,95 +556,41 @@ _Content {
 
 
 void
+add_klass (E* e, Klasses* klasses, string name) {
+    auto kls = klasses [name];
+    add_klass (e.kls);
+}
+void
 add_klass (E* e, Klass* kls) {
-    e.klasses ~= kls;
-}
-
-bool
-has_klass (E* e, Path path, Klass* kls) {
     import std.algorithm.searching : canFind;
-    return e.klasses.canFind (kls);
-}
-
-bool
-has_klass (E* e, Path path, string s) {
-    auto kls = find_klass (e,path,s);
-    assert (kls !is null);
-    return has_klass (e,path,kls);
-}
-
-Klass*
-find_klass_or_create (E* e, Path path, string s) {
-    auto kls = find_klass (e,path,s);
-    if (kls is null)
-        kls = create_klass (e,s);
-    return kls;
-}
-
-Klass*
-find_klass (E* e, Path path, string s) {
-    // in e
-    foreach (kls; e.defined_klasses)
-        if (kls.name == s)
-            return kls;
-
-    // in parents
-    foreach_reverse (_e; path) {
-        foreach (kls; _e.defined_klasses)
-            if (kls.name == s)
-                return kls;
-    }
-
-    // in reserved
-    foreach (kls; reserved_klasses)
-        if (kls.name == s)
-            return kls;
-
-    return null;
-}
-
-Klass*
-create_klass (E* e, string s) {
-    Klass* kls = new Klass (s);
-    add_defined_klass (e,kls);
-    return kls;
-}
-
-
-void
-add_defined_klass (E* e, Klass* kls) {
-    // find root
-    for (auto _e=e; _e !is null; _e = _e.parent) {
-        if (_e.parent is null) {
-            auto root = _e;
-            root.defined_klasses ~= kls;
-            break;
-        }
-    }
-}
-
-
-void
-add_klass (E* e, string s) {
-    import std.algorithm.searching : canFind;
-    Klass* kls = e.find_klass_or_create (s);
     if (!e.klasses.canFind (kls))
         e.klasses ~= kls;
 }
 
+bool
+has_klass (E* e, Klasses* klasses, string s) {
+    auto kls = find_klass (klasses,s);
+    assert (kls !is null);
+    return has_klass (e,kls);
+}
+bool
+has_klass (E* e, Klass* kls) {
+    import std.algorithm.searching : canFind;
+    return e.klasses.canFind (kls);
+}
 
 void
-trigger_class (E* e, string s) {
-    if (e.has_klass ("check.pressed"))
-        e.remove_klass ("check.pressed");
+trigger_class (E* e, Klasses* klasses, string s) {
+    if (e.has_klass (klasses,s))
+        e.remove_klass (s);
     else
-        e.add_klass ("check.pressed");
+        e.add_klass (klasses,s);
 }
 
 
 void
-remove_klass (E* e, string s) {
-    auto kls = e.find_klass (s);
+remove_klass (E* e, Klasses* klasses, string s) {
+    auto kls = find_klass (klasses,s);
     if (kls !is null)
         e.remove_klass (kls);
 }
@@ -669,23 +614,6 @@ find_child (E* e, string klass_name) {
     return null;
 }
 
-
-void
-dump_klasses (E* e) {
-    foreach (kls; e.defined_klasses)
-        dump_klass (kls);
-}
-
-void
-dump_klass (Klass* kls) {
-    writeln (*kls);
-    foreach (fld; kls.fields) {
-        writefln ("  %s", *fld);
-        foreach (_fld; fld.fields) {
-            writefln ("    %s", *_fld);
-        }
-    }
-}
 
 //void
 //send_event_in_childs (E* e, Event* ev) {
@@ -722,8 +650,21 @@ update (E* e, update_UserEvent* ev) {
         kls.update (ev,e);
 
     // to childs
-    foreach (_e; WalkChilds (e))
-        _e.update (ev);
+    if (e.has_childs) {
+        ev.path ~= e;
+        ev.locs ~= 
+            ev.locs.back
+            + e.margin.loc
+            + e.border.loc
+            + e.aura.loc
+            + e.content.loc;
+
+        foreach (_e; WalkChilds (e))
+            _e.update (ev);
+
+        ev.locs.length--;
+        ev.path.length--;
+    }
 }
 
 void
@@ -742,12 +683,19 @@ draw (E* e, draw_UserEvent* ev) {
 
     // to childs
     if (e.has_childs) {
-        ev.offset ~= ev.offset.back + e.content_pos;
+        ev.path ~= e;
+        ev.locs ~= 
+            ev.locs.back
+            + e.margin.loc
+            + e.border.loc
+            + e.aura.loc
+            + e.content.loc;
 
         foreach (_e; WalkChilds (e))
             _e.draw (ev);
 
-        ev.offset.length--;
+        ev.locs.length--;
+        ev.path.length--;
     }
 }
 

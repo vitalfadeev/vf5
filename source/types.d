@@ -140,6 +140,13 @@ _DefLoc (uint N) {
         FlexLoc flex;  // flexable // 1/100,50/100
     }
 
+    this (LocType loc_type, L x_length, L x_capacity, L y_length, L y_capacity) {
+        this.loc_type = loc_type;
+        if (loc_type == LocType.flex) {
+            this.flex = FlexLoc (Loc (x_length,y_length), Loc (x_capacity,y_capacity));
+        }
+    }
+
     bool
     opEqual (typeof(this) b) {
         static

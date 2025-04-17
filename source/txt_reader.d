@@ -124,7 +124,7 @@ go (E* root, Klasses* klasses, string s) {
         // klass
         else
         if (name != "e" && indent == 0) { 
-            kls = new_klass (root,name,values,args);
+            kls = new_klass (klasses,name,values,args);
             // added
             indents.length = 0;
             indents ~= Indent (kls,indent,0);
@@ -235,8 +235,8 @@ find_parent (ref Indent[] indents, size_t for_indent) {
 
 
 Klass*
-new_klass (E* root, string name, TString[] values, string args) {
-    auto kls = find_klass_or_create (root,name);
+new_klass (Klasses* klasses, string name, TString[] values, string args) {
+    auto kls = klasses [name];
 
     // klass (args)
     if (args.length) {

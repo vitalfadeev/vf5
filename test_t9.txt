@@ -29,10 +29,10 @@ e root
 
 
 root
-  size 1024 480
+  len          1024 480
 
 rect
-  size         64 64
+  len          64 64
   aura         16
   aura.color   #008
   borders      2 solid #ccc
@@ -40,14 +40,14 @@ rect
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
 group-left
-  pos lu
+  loc lu
 
 group-center
-  pos cu
+  loc cu
 
 group-right
-  pos  ru
+  loc ru
 
 group-right-center
-  pos  rc
-  way  d
+  loc rc
+  way d

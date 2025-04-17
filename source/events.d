@@ -114,8 +114,9 @@ update_UserEvent {
     Sint32        code = USER_EVENT.update;
     E*            e;
     E*            root;
+    Path          path; // parents
+    Loc[]         locs; // parent loc s
     Window*       window;
-    Path          path;
 
     this (E* e) {
         this.e = e;
@@ -128,12 +129,12 @@ draw_UserEvent {
     Uint32        timestamp;
     Uint32        windowID;
     Sint32        code = USER_EVENT.draw;
+    E*            e;
     E*            root;
+    Path          path; // parents
+    Loc[]         locs; // parent loc s
     Window*       window;
     SDL_Renderer* renderer;
-    Loc[]         offsets;
-    E*            e;
-    Path          path;
 }
 
 struct

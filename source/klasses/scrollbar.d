@@ -140,7 +140,7 @@ scrollbar
 */
 
 void 
-scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
+scrollbar_update (E* e_scrollbar, Klasses* klasse, byte pos_percent, byte size_percent) {
     // total,offset
     //   cursor position
     // limit
@@ -165,9 +165,7 @@ scrollbar_update (E* e_scrollbar, byte pos_percent, byte size_percent) {
 
         //auto _cursor_klass = &e_scrollbar.cursor_klass;
         auto _cursor_klass = 
-            e_scrollbar.find_klass_or_create (
-                format!"scrollbar-cursor-%X" (e_scrollbar)
-            );
+            klasses [format!"scrollbar-cursor-%X" (e_scrollbar)];
 
         if (!cursor.has_klass (_cursor_klass))
             cursor.add_klass (_cursor_klass);

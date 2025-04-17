@@ -79,11 +79,6 @@ Klass {
     }
 }
 
-struct
-Klasses {
-    Klass[] s;
-    alias s this;
-}
 
 Field*
 find_field (Klass* kls, string s) {
@@ -105,6 +100,70 @@ add_field (Klass* kls, string name, int value) {
     return add_field (kls,name,value.to!string);
 }
 
+
+// KLASSES
+struct
+Klasses {  // index of all klasses
+    Klass*[] s;
+    alias s this;
+
+
+    // find or create
+    Klass*
+    opIndex (string name) {
+        return _find_klass_or_create (name);
+    }
+
+    Klass*
+    _create_klass (string name) {
+        Klass* kls = new Klass (name);
+        s ~= kls;
+        return kls;
+    }
+
+    Klass*
+    _find_klass (string name) {
+        // in e
+        foreach (kls; s)
+            if (kls.name == name)
+                return kls;
+
+        // in reserved
+        //foreach (kls; reserved_klasses)
+        //    if (kls.name == name)
+        //        return kls;
+
+        return null;
+    }
+
+    Klass*
+    _find_klass_or_create (string name) {
+        auto kls = _find_klass (name);
+        if (kls is null)
+            kls = _create_klass (name);
+        return kls;
+    }
+
+    void
+    dump () {
+        foreach (kls; s)
+            _dump_klass (kls);
+    }
+
+    void
+    _dump_klass (Klass* kls) {
+        writeln (*kls);
+        foreach (fld; kls.fields) {
+            writefln ("  %s", *fld);
+            foreach (_fld; fld.fields) {
+                writefln ("    %s", *_fld);
+            }
+        }
+    }
+}
+
+
+// FN
 void
 event (Klass* kls, Event* ev, E* e) {
     //

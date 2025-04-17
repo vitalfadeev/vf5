@@ -25,8 +25,8 @@ alias TEXT_PTR  = SDL_Texture*;
 
 struct 
 Pix {
-    Fn     fn;
-    E*     focused;
+    Fn fn;
+    E* focused;
 
     this (string[] args) {
         this._init ();
@@ -48,14 +48,17 @@ Pix {
     }
 
     void
+    draw (Event* ev) {
+        draw_UserEvent draw_ev;
+        draw_ev.root     = ev.root;
+        draw_ev.window   = ev.window;
+        draw_ev.renderer = ev.renderer;
+        draw (&draw_ev);
+    }
+    void
     draw (draw_UserEvent* ev) {
         if (fn.draw !is null)
             fn.draw (&this,ev);
-    }
-
-    void
-    draw (Event* ev) {
-        .draw (&this,ev);
     }
 
     int
@@ -220,15 +223,6 @@ update_draw (Pix* pix, Event* ev) {
 }
 
 void
-draw (Pix* pix, Event* ev) {
-    draw_UserEvent draw_ev;
-    draw_ev.root     = ev.root;
-    draw_ev.window   = ev.window;
-    draw_ev.renderer = ev.renderer;
-    pix.draw (&draw_ev);
-}
-
-void
 draw (Pix* pix, draw_UserEvent* ev) {
     auto renderer = ev.renderer;
     auto root     = ev.root;
@@ -258,6 +252,7 @@ draw (Pix* pix, draw_UserEvent* ev) {
     ev.offset ~= Loc (0,0);
 
     // draw
+    //   recursive in e
     if (e !is null)
         e.draw (ev);
 

@@ -532,9 +532,8 @@ set_field (E* e, Field* field, Klass* from_klass, Klass* from_template, Template
     }
 
     // klasses set
-    foreach (kls; e.klasses) {
-            kls.set (e,field.name,values);
-    }
+    foreach (kls; e.klasses)
+        kls.set (e,field.name,values);
 }
 
 
@@ -642,16 +641,15 @@ new_child_e (E* e, TString[] values) {
 }
 
 void
-set_klasses_for_new_e (E* e, TString[] values) {
-    e.add_klass (e.find_klass_or_create ("e"));
+set_klasses_for_new_e (E* e, Klasses* klasses, TString[] values) {
+    e.add_klass (klasses ["e"]);
 
     // klasses
     foreach (ts; values)
         switch (ts.type) {
             case TString.Type.name   : 
             case TString.Type.string : 
-                auto kls = e.find_klass_or_create (ts.s);
-                e.add_klass (kls);
+                e.add_klass (klasss,ts.s);
                 break;
             default:
         }    
