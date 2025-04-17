@@ -140,10 +140,38 @@ _DefLoc (uint N) {
         FlexLoc flex;  // flexable // 1/100,50/100
     }
 
-    this (LocType loc_type, L x_length, L x_capacity, L y_length, L y_capacity) {
-        this.loc_type = loc_type;
+    void
+    set (LocType loc_type, L x_length, L x_capacity, L y_length, L y_capacity) {
         if (loc_type == LocType.flex) {
-            this.flex = FlexLoc (Loc (x_length,y_length), Loc (x_capacity,y_capacity));
+            this.loc_type[0]      = loc_type;
+            this.loc_type[1]      = loc_type;
+            this.flex.length[0]   = x_length;
+            this.flex.length[1]   = y_length;
+            this.flex.capacity[0] = x_capacity;
+            this.flex.capacity[1] = y_capacity;
+        }
+    }
+
+    // X, LocType.flex,  0,1
+    void
+    set (uint LOC_I, LocType loc_type, L length, L capacity) {
+        this.loc_type[LOC_I] = loc_type;
+        if (loc_type == LocType.flex) {
+            this.flex.length[LOC_I]   = length;
+            this.flex.capacity[LOC_I] = capacity;
+        }
+    }
+
+    void
+    set (uint LOC_I, LocType loc_type) {
+        this.loc_type[LOC_I] = loc_type;
+    }
+
+    void
+    set (uint LOC_I, LocType loc_type, L l) {
+        this.loc_type[LOC_I] = loc_type;
+        if (loc_type == LocType.stab) {
+            this.stab[LOC_I] = l;
         }
     }
 
@@ -175,6 +203,25 @@ LocType : ubyte {
 
 
 struct
+_DefLength (N) {
+    LengthType[N] type;
+    Length        length;
+
+    void
+    set (LOC_I, LengthType type) {
+        this.type[LOC_I] = type;
+    }
+
+    void
+    set (LOC_I, LengthType type, L l) {
+        this.type[LOC_I]   = type;
+        this.length[LOC_I] = l;
+    }
+}
+alias DefLength = _DefLength!NLOC;
+
+
+struct
 Window {
     SDL_Window* _super;
     alias _super this;
@@ -192,6 +239,15 @@ Window {
         SDL_GetWindowSize (_super, &loc[0], &loc[1]);
         return loc;
     }
+}
+
+enum 
+LengthType {
+    parent, // default
+    fixed,
+    content,
+    window,
+    max_,
 }
 
 //alias Limit = Pos;

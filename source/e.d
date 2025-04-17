@@ -66,7 +66,8 @@ E4 {  // margin
     Flags    flags;        // hidden,deleted
     E3      _inner;        // bordder,aura,content,childs,text,image
     //
-    DefLoc   def_loc;      // def LocDef
+    DefLoc    def_loc;     //
+    DefLength def_length;  // 
 
     auto ref margin  () { return this; }
     auto ref border  () { return _inner; }
