@@ -11,9 +11,8 @@ import pix : FONT_PTR, SDLException, TTFException;
 
 
 void
-draw (SDL_Renderer* renderer, Loc offset, E* e) {
-    draw_content_with_aura (renderer,offset,e);
-    draw_click_decoration (renderer,offset,e);
+draw (SDL_Renderer* renderer, Loc loc, Path* path, E* e) {
+    draw_inners (renderer,loc,length,e);
 }
 
 void
@@ -44,6 +43,24 @@ fill_rect (SDL_Renderer* renderer, int x, int y, int w, int h) {
     rect.w = w;
     rect.h = h;
     SDL_RenderFillRect (renderer, &rect);
+}
+
+void
+fill (SDL_Renderer* renderer, Loc loc, Length length) {
+    enum X = 0;
+    enum Y = 1;
+    SDL_Rect rect;  // rect = {loc,length} = Loca
+    rect.x = loc[X];
+    rect.y = loc[Y];
+    rect.w = length[X];
+    rect.h = length[Y];
+    SDL_RenderFillRect (renderer,&rect);
+}
+void
+fill (SDL_Renderer* renderer, Loc loc, Length length, Color color) {
+    auto color = e.color;
+    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+    fill (renderer,loc,length);
 }
 
 void
@@ -138,56 +155,10 @@ e_loc (E* e) {
     return e.loc;
 }
 
-Loc
-aura_borders_loc (E* e) {
-    return e.aura.loc;
-}
-
-Loc
-aura_borders_length (E* e) {
-    auto _content_length = e.content.length;
-    auto _aura_length    = _content_length + e.aura.length + e.aura.length;
-    return _aura_length;
-}
-
-Loc
-aura_real_length (E* e) {
-    auto _content_length = e.content.length;
-    auto _aura_length    = _content_length + e.aura.length + e.aura.length;
-    return _aura_length;
-}
-
-Loc
-content_loc (E* e) {
-    return e.content.loc;
-}
-
-Loc
-text_loc (E* e) {
-    return content_loc (e);
-}
-
-Loc
-image_loc (E* e) {
-    return content_loc (e);
-}
-
-
-Loc
-e_length (E* e) {
-    return e.length;
-}
-
-Loc
-content_length (E* e) {
-    return e.content.length;
-}
-
 void
 draw_click_decoration (SDL_Renderer* renderer, Loc offset, E* e) {
     // shade around content, inside borders. in pad or content. shade bg
 }
-
 
 void
 color_decor (Color color, ubyte tome, ubyte contrast, ubyte bright) {
@@ -222,64 +193,30 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
 }
 
 void
-draw_aura_borders (SDL_Renderer* renderer, E* e, Loc aura_pos) {
-    auto color = e.aura.border.color;
-    SDL_SetRenderDrawColor (renderer, color.r,color.g,color.b,color.a,);
+draw_inners (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
+    // all relative from parent content 'loc'
+    // e.draw
+    //   e.margin.draw
+    //   e.border.draw
+    //   e.aura.draw
+    //   e.content.draw
 
-    auto loc  = aura_pos;
-    auto size = aura_borders_size (e);
+    // content
+    auto _loc    = loc + e.loc;
+    auto _length = e.length;
+    draw_inner (renderer,e,_loc,_length);
 
-    if (size.w > 0 && size.h > 0)
-        switch (e.aura.form.type) {
-            case E.Form.Type.rect: 
-                draw_rect (renderer, pos.x, pos.y, size.w, size.h, e.aura.border.w);
-                //draw8 (
-                //    renderer, 
-                //    pos.x, 
-                //    pos.y, 
-                //    size.w, 
-                //    size.h, 
-                //    e.aura.border.w,
-                //    e.aura.border.w,
-                //    e.aura.border.w,
-                //    e.aura.border.w
-                //);
-                break;
-            default:
-        }
+    // recursive
+    static
+    if (__traits (hasMember, e, "_inner"))
+        draw_inners (renderer,e._inner,_loc,_length);
 }
 
 void
-draw_content_with_aura (SDL_Renderer* renderer, Loc offset, E* e) {
-    // all relative from parent content
-    auto _aura_pos     = offset + e.pos;
-    auto _aura_size    = aura_real_size (e);
-    auto _content_pos  = offset + e.pos + e.aura.size;
-    auto _content_size = content_size (e);
-
-    if (e.aura.size.w != 0 && e.aura.size.h != 0 && e.aura.color.a != 0)
-        draw_aura (renderer,e,_aura_pos,_aura_size);
-    if (e.aura.border.type != E.Border.Type.none && e.aura.border.color.a != 0)
-        draw_aura_borders (renderer,e,_aura_pos);
-    if (e.content.size.w != 0 && e.content.size.h != 0 && e.content.color.a != 0)
-        draw_content_bg (renderer,e,_content_pos,_content_size);
-    if (e.content.size.w != 0 && e.content.size.h != 0)
-        draw_content (renderer,e,_content_pos,_content_size);
+draw_inner (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+    fill (renderer,loc,length,e.color);
 }
 
-void
-draw_aura (SDL_Renderer* renderer, E* e, Loc _aura_pos, Loc  _aura_size) {
-    auto color = e.aura.color;
-    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, _aura_pos.x, _aura_pos.y, _aura_size.w, _aura_size.h);
-}
-
-void
-draw_content_bg (SDL_Renderer* renderer, E* e, Loc _content_pos, Loc  _content_size) {
-    auto color = e.content.color;
-    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, _content_pos.x, _content_pos.y, _content_size.w, _content_size.h);
-}
 
 void
 draw_content (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {

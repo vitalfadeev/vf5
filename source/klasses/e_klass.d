@@ -178,7 +178,7 @@ void
 draw (Klass* kls, draw_UserEvent* ev, E* e) {
     version (debug_event)
     writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
-    e_klass_draw.draw (ev.renderer,ev.offset.back,e);
+    e_klass_draw.draw (ev.renderer,ev.locs.back,&ev.path,e);
 }
 
 //

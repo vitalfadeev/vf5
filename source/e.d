@@ -95,7 +95,7 @@ E4 {  // margin
                 alias loca this;
                 Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
                 Fn     fn;  // &image_draw, &text_draw, &childs_draw
-                void* _inner;
+                // void _inner;
 
                 Type type;
                 union {
