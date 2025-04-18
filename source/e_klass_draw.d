@@ -3,15 +3,18 @@ module e_klass_draw;
 import std.stdio;
 import std.string;
 import std.conv;
+import std.range : back;
 import bindbc.sdl;
 import e;
 import e_update : max;
 import types;
 import pix : FONT_PTR, SDLException, TTFException;
+import etree : Path;
 
 
 void
 draw (SDL_Renderer* renderer, Loc loc, Path* path, E* e) {
+    auto length = (*path).back.length;
     draw_inners (renderer,loc,length,e);
 }
 
@@ -58,7 +61,6 @@ fill (SDL_Renderer* renderer, Loc loc, Length length) {
 }
 void
 fill (SDL_Renderer* renderer, Loc loc, Length length, Color color) {
-    auto color = e.color;
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
     fill (renderer,loc,length);
 }
@@ -204,95 +206,106 @@ draw_inners (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     // content
     auto _loc    = loc + e.loc;
     auto _length = e.length;
-    //draw_inner (renderer,e,_loc,_length);
-    if (e.draw != null)
-        e.draw (renderer,e,_loc,_length);
+    //draw_inner (renderer,_loc,_length,e);
+    draw (renderer,_loc,_length,e);
 
     // recursive
     static
     if (__traits (hasMember, e, "_inner"))
-        draw_inners (renderer,e._inner,_loc,_length);
+        draw_inners (renderer,_loc,_length,&e._inner);
 }
 
 // E DRAW
 void
-draw_inner (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+draw_inner (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
 }
 
 void
-draw_inner_bg (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+draw_inner_bg (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
 }
 
 void
-draw_inner_text (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+draw_inner_text (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
 }
 
 void
-draw_inner_image (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+draw_inner_image (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
 }
 
 void
-draw_inner_childs (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+draw_inner_childs (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
 }
 
 void
-draw (SDL_Renderer* renderer, E4* e, Loc loc, Length length) {
+draw (SDL_Renderer* renderer, Loc loc, Length length, E4* e) {
+    //
+}
+void
+draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3* e) {
+    //
+}
+void
+draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3.E2* e) {
+    //
+}
+void
+draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3.E2.E1* e) {
     //
 }
 
 
 //
 void
-draw_content (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
-    if (e.content.image.ptr !is null)
-        draw_image_bg (renderer,e,content_pos,content_size);
+draw_content (SDL_Renderer* renderer, E* e, Loc loc, Loc  length) {
+    //if (e.content.image.ptr !is null)
+    //    draw_image_bg (renderer,e,content_pos,content_size);
     
-    if (e.content.text.s.length && e.content.text.bg.a != 0)
-        draw_text_bg  (renderer,e,content_pos,content_size);
+    //if (e.content.text.s.length && e.content.text.bg.a != 0)
+    //    draw_text_bg  (renderer,e,content_pos,content_size);
 
-    if (e.content.image.ptr !is null)
-        image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
+    //if (e.content.image.ptr !is null)
+    //    image (renderer, e.content.image.ptr, content_pos.x, content_pos.y, content_size.w, content_size.h);
 
-    if (e.content.text.s.length && e.content.text.fg.a != 0)
-        draw_text (renderer,e,content_pos,content_size);
+    //if (e.content.text.s.length && e.content.text.fg.a != 0)
+    //    draw_text (renderer,e,content_pos,content_size);
 }
 
-void
-draw_text_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
-    auto color = e.content.text.bg;
-    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
-}
+//void
+//draw_text_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
+//    auto color = e.content.text.bg;
+//    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+//    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
+//}
 
-void
-draw_image_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
-    auto color = e.content.image.bg;
-    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
-}
+//void
+//draw_image_bg (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
+//    auto color = e.content.image.bg;
+//    SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
+//    fill_rect (renderer, content_pos.x, content_pos.y, content_size.w, content_size.h);
+//}
 
 
-void
-draw_text (SDL_Renderer* renderer, E* e, Loc cp, Loc  cs) {
-    // fill rects
-    //   e.content.text.rects
-    //   rect.pos = pos;
-    // draw rects
-    //   foreach rect rects
-    //   one_char
-    _text (
-        renderer, 
-        e.content.text.rects, 
-        e.content.text.font.ptr, 
-        e.content.text.fg, 
-        cp.x, cp.y, 
-        cs.w, cs.h);
-}
+//void
+//draw_text (SDL_Renderer* renderer, E* e, Loc cp, Loc  cs) {
+//    // fill rects
+//    //   e.content.text.rects
+//    //   rect.pos = pos;
+//    // draw rects
+//    //   foreach rect rects
+//    //   one_char
+//    _text (
+//        renderer, 
+//        e.content.text.rects, 
+//        e.content.text.font.ptr, 
+//        e.content.text.fg, 
+//        cp.x, cp.y, 
+//        cs.w, cs.h);
+//}
 
 
 // size = border + pad + image

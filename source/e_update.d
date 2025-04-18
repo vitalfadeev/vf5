@@ -80,23 +80,6 @@ e_update_loc_way (E* e, E* pre, Path path) {
         _e_update_loc_way_grouped (e,pre,path,e.way);
 }
 
-auto
-to_wrap (Way way) {
-    if (way == E.Way.u) 
-        return -1;
-    else
-    if (way == E.Way.d) 
-        return +1;
-    else
-    if (way == E.Way.l) 
-        return -1;
-    else
-    if (way == E.Way.r) 
-        return +1;
-
-    return 0;
-}
-
 void
 e_update_childs (E* e, Path path) {
     // recursive

@@ -16,16 +16,12 @@ import events;
 import pix : IMAGE_PTR, FONT_PTR, TEXT_PTR;
 
 
-alias E_EVENT_FN  = void function (E* e, Event* ev);
-alias E_UPDATE_FN = void function (E* e, update_UserEvent* ev);
-alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
-alias E_DRAW_FN   = void function (E* e, draw_UserEvent* ev);
-alias E_DUP_FN    = EPtr function (EPtr _this);
+//alias E_EVENT_FN  = void function (E* e, Event* ev);
+//alias E_UPDATE_FN = void function (E* e, update_UserEvent* ev);
+//alias E_SET_FN    = void function (E* e, string field_id, TString[] values);
+//alias E_DRAW_FN   = void function (E* e, draw_UserEvent* ev);
+//alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
-
-alias E_DRAW (E)  = void function (SDL_Renderer* renderer, E* e, Loc loc, Length length);
-
-enum MAX_GROUP = 9;
 
 // form
 //   type none, rect, 3, 4, 5, 6, 7, 8
@@ -642,9 +638,6 @@ set (E* e, string field_id, TString[] values) {
 
 void
 draw (E* e, draw_UserEvent* ev) {
-    // custom draw
-    // ...
-
     // via klasses
     foreach (kls; e.klasses)
         kls.draw (ev,e);

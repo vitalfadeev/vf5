@@ -4809,3 +4809,345 @@ cast(T)a < cast(T) b
 // expansion at 
 .object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
 
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/internal/memory.d(32,18)
+onOutOfMemoryError();
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(445,13)
+enum int data = 0;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(445,13)
+enum int count = 0;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(624,9)
+alias _0LU = Identity!(field[0LU]);alias data = _0LU;alias _1LU = Identity!(field[1LU]);alias count = _1LU;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(624,9)
+alias _0LU = Identity!(field[0LU]);alias _1LU = Identity!(field[1LU]);
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7004,17)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7021,21)
+
+    case '\u0000':..case '\u0008':case '\u000E':..case '\u001F':case '\u007F':..
+    case '\u0084':case '\u0086':..case '\u009F': case '\u0009':..case '\u000C': case '\u0085':
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7030,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7034,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7040,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7044,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7049,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7056,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7060,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7068,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7082,13)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7004,17)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7021,21)
+
+    case '\u0000':..case '\u0008':case '\u000E':..case '\u001F':case '\u007F':..
+    case '\u0084':case '\u0086':..case '\u009F': case '\u0009':..case '\u000C': case '\u0085':
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7030,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7034,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7040,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7044,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7049,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7056,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7060,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7068,21)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/uni/package.d(7082,13)
+
+            static if (getValue)
+                grapheme ~= ch;
+            range.popFront();
+        
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs < rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs < rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs == rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs < rhs
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/typecons.d(517,31)
+lhs < rhs
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(219,13)
+alias a = __a ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(220,13)
+alias b = __b ;
+
+// expansion at /usr/lib/ldc/x86_64-linux-gnu/include/d/std/functional.d(221,20)
+a == b
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+
+// expansion at 
+.object.size_t h = 0;foreach (i, T; typeof(p.tupleof))    static if(is(T* : const(.object.Object)*))         h = h * 33 + typeid(const(.object.Object)).getHash(cast(const void*)&p.tupleof[i]);    else         h = h * 33 + typeid(T).getHash(cast(const void*)&p.tupleof[i]);return h;
+

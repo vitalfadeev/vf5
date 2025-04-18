@@ -31,6 +31,11 @@ Pix {
     _init () {
         init_sdl ();
     }
+
+    void
+    go (Events* events, E* root, Klasses* klasses) {
+        go (&this,events,root,klasses);
+    }
 }
 
 
@@ -234,7 +239,7 @@ draw (draw_UserEvent* ev) {
     // draw
     //   recursive in e
     if (e !is null)
-        e.draw (ev);
+        draw (e,ev);
 
     // rasterize
     SDL_RenderPresent (renderer);
