@@ -157,8 +157,8 @@ Image {
 
 struct
 Text {
-    Loca loca;
-    alias loca this;
+    Loca       loca;
+    alias      loca this;
     Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     Color      bg;
     string     s;            // "abc"
@@ -188,8 +188,9 @@ Text {
 
     struct
     TextRect {
-        Loca loca;
-        alias loca this;
+        Loca     loca;
+        alias    loca this;
+        Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
         string   s;  // chars[a..b]
         TEXT_PTR ptr;
     }
@@ -197,9 +198,9 @@ Text {
 
 struct
 Childs {
-    Loca loca;
+    Loca  loca;
     alias loca this;
-    E[] s;  // no links
+    E[]   s;  // no links
 }
 
 alias E = E4;

@@ -15,58 +15,16 @@ import klass;
 import events;
 import types;
 
-alias PIX_EVENT_FN  = void function (Pix* pix, Event* ev);
-alias PIX_DRAW_FN   = void function (Pix* pix, draw_UserEvent* ev);
-alias PIX_GO_FN     = int  function (Pix* pix, Events* events, E* root, Klasses* klasses);
-
 alias IMAGE_PTR = SDL_Surface*;
 alias FONT_PTR  = TTF_Font*;
 alias TEXT_PTR  = SDL_Texture*;
 
 struct 
 Pix {
-    Fn fn;
     E* focused;
 
     this (string[] args) {
         this._init ();
-    }
-
-    struct
-    Fn {
-        PIX_EVENT_FN  event  = &.event;
-        PIX_DRAW_FN   draw   = &.draw;
-        PIX_GO_FN     go     = &.go;
-    }
-
-    int
-    event (Event* ev) {
-        if (fn.event !is null)
-            return fn.event (&this,ev);
-        else
-            return 0;
-    }
-
-    void
-    draw (Event* ev) {
-        draw_UserEvent draw_ev;
-        draw_ev.root     = ev.root;
-        draw_ev.window   = ev.window;
-        draw_ev.renderer = ev.renderer;
-        draw (&draw_ev);
-    }
-    void
-    draw (draw_UserEvent* ev) {
-        if (fn.draw !is null)
-            fn.draw (&this,ev);
-    }
-
-    int
-    go (Events* events, E* root, Klasses* klasses) {
-        if (fn.go !is null)
-            return fn.go (&this,events,root,klasses);
-        else
-            return 0;
     }
 
     void
@@ -76,7 +34,7 @@ Pix {
 }
 
 
-int 
+void
 go (Pix* pix, Events* events, E* root, Klasses* klasses) {
     // Window, Renderer, Custom Window
     auto sdl_window = new_sdl_window (__FILE_FULL_PATH__);
@@ -93,10 +51,8 @@ go (Pix* pix, Events* events, E* root, Klasses* klasses) {
     // Event Loop
     writefln ("\n======== PIX start event loop ========");
     foreach (Event* ev; events)
-        pix.event (ev);
+        event (pix,ev);
     writefln ("\n======== PIX   end event loop ========");
-
-    return 0;
 }
 
 
@@ -146,11 +102,11 @@ event (Pix* pix, Event* ev) {
     switch (ev.type) {
         case SDL_WINDOWEVENT:
             switch (ev.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED      : pix.draw (ev); break; // event.window.windowID
+                case SDL_WINDOWEVENT_EXPOSED      : draw (ev); break; // event.window.windowID
                 case SDL_WINDOWEVENT_SHOWN        : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_HIDDEN       : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_MOVED        : break;  // event.window.windowID event.window.data1 event.window.data2 (x y)
-                case SDL_WINDOWEVENT_RESIZED      : update (root); pix.draw (ev);  break; // event.window.windowID event.window.data1 event.window.data2 (width height)
+                case SDL_WINDOWEVENT_RESIZED      : update_draw (ev); break; // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_SIZE_CHANGED : break;  // event.window.windowID event.window.data1 event.window.data2 (width height)
                 case SDL_WINDOWEVENT_MINIMIZED    : break;  // event.window.windowID
                 case SDL_WINDOWEVENT_MAXIMIZED    : break;  // event.window.windowID
@@ -183,14 +139,9 @@ event (Pix* pix, Event* ev) {
         }
         case SDL_USEREVENT       :
             switch (ev.user.code) {
-                case USER_EVENT.update : 
-                    auto update_ev = &ev._user.update;
-                    update_ev.root   = ev.root; 
-                    update_ev.window = ev.window; 
-                    update (update_ev); 
-                    break;
-                case USER_EVENT.draw   : pix.update_draw (ev); break;
-                case USER_EVENT.redraw : pix.update_draw (ev); break;
+                case USER_EVENT.update : update      (ev,&ev._user.update); break;
+                case USER_EVENT.draw   : update_draw (ev,&ev._user.draw); break;
+                case USER_EVENT.redraw : update_draw (ev,&ev._user.redraw); break;
                 case USER_EVENT.click  : 
                     focus (pix,ev);
                     send_to_focused (pix,ev); 
@@ -203,27 +154,56 @@ event (Pix* pix, Event* ev) {
     }
 }
 
-//void
-//update (E* root) {
-//    Path pathl;
-//    update_UserEvent ev;
-//    root.update (&ev); 
-//    root.e_update_size_pos (null,path,ev);
-//}
+void
+update (Event* ev) {
+    update_UserEvent update_ev;
+    update (ev,&update_ev); 
+}
+void
+update (Event* ev, update_UserEvent* update_ev) {
+    update_ev.root   = ev.root; 
+    update_ev.window = ev.window; 
+    update (update_ev); 
+}
 void
 update (update_UserEvent* ev) {
-    ev.root.update (ev); 
+    update (ev.root,ev); 
     e_update_size_pos (ev.root,null,ev);
 }
 
 void
-update_draw (Pix* pix, Event* ev) {
-    .update (ev.root);
-    .draw (pix,ev);
-}
-
+update_draw (Event* ev) {
+    update (ev);
+    draw_UserEvent draw_ev;
+    update_draw (ev,&draw_ev);
+} 
 void
-draw (Pix* pix, draw_UserEvent* ev) {
+update_draw (Event* ev,draw_UserEvent* draw_ev) {
+    update (ev);
+    draw_ev.root     = ev.root;
+    draw_ev.window   = ev.window;
+    draw_ev.renderer = ev.renderer;
+    draw (draw_ev);
+} 
+void
+update_draw (Event* ev,redraw_UserEvent* draw_ev) {
+    update (ev);
+    draw_ev.root     = ev.root;
+    draw_ev.window   = ev.window;
+    draw_ev.renderer = ev.renderer;
+    draw (draw_ev);
+} 
+
+//void
+//draw (Pix* pix, Event* ev) {
+//    draw_UserEvent draw_ev;
+//    draw_ev.root     = ev.root;
+//    draw_ev.window   = ev.window;
+//    draw_ev.renderer = ev.renderer;
+//    draw (pix,&draw_ev);
+//}
+void
+draw (draw_UserEvent* ev) {
     auto renderer = ev.renderer;
     auto root     = ev.root;
     auto e        = ev.root;
