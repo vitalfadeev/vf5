@@ -204,7 +204,9 @@ draw_inners (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     // content
     auto _loc    = loc + e.loc;
     auto _length = e.length;
-    draw_inner (renderer,e,_loc,_length);
+    //draw_inner (renderer,e,_loc,_length);
+    if (e.draw != null)
+        e.draw (renderer,e,_loc,_length);
 
     // recursive
     static
@@ -212,12 +214,39 @@ draw_inners (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
         draw_inners (renderer,e._inner,_loc,_length);
 }
 
+// E DRAW
 void
 draw_inner (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
     fill (renderer,loc,length,e.color);
 }
 
+void
+draw_inner_bg (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+    fill (renderer,loc,length,e.color);
+}
 
+void
+draw_inner_text (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+    fill (renderer,loc,length,e.color);
+}
+
+void
+draw_inner_image (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+    fill (renderer,loc,length,e.color);
+}
+
+void
+draw_inner_childs (E) (SDL_Renderer* renderer, E* e, Loc loc, Length length) {
+    fill (renderer,loc,length,e.color);
+}
+
+void
+draw (SDL_Renderer* renderer, E4* e, Loc loc, Length length) {
+    //
+}
+
+
+//
 void
 draw_content (SDL_Renderer* renderer, E* e, Loc content_pos, Loc  content_size) {
     if (e.content.image.ptr !is null)

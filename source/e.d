@@ -23,6 +23,8 @@ alias E_DRAW_FN   = void function (E* e, draw_UserEvent* ev);
 alias E_DUP_FN    = EPtr function (EPtr _this);
 alias EPtr = E*;
 
+alias E_DRAW (E)  = void function (SDL_Renderer* renderer, E* e, Loc loc, Length length);
+
 enum MAX_GROUP = 9;
 
 // form
@@ -51,18 +53,16 @@ enum MAX_GROUP = 9;
 //     E_ text
 struct
 E4 {  // margin
-    Loca   loca;
-    alias  loca this;
-    //
+    Loca      loca;
+    alias     loca this;
     Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    Way       way;
+    E3       _inner;       // bordder,aura,content,childs,text,image
     //
-    Klass*[]  klasses;      // box green rounded
-    On[]      on;           // [click: audacious --play-pause]
-    Fn        fn;           // event,update,draw,set
-    Flags     flags;        // hidden,deleted
+    Klass*[]  klasses;     // box green rounded
+    Flags     flags;       // hidden,deleted
+    Way       way;         // r l u d
+    On[]      on;          // [click: audacious --play-pause]
     Generator generator;   //
-    E3       _inner;        // bordder,aura,content,childs,text,image
     //
     DefLoc    def_loc;     //
     DefLength def_length;  // 
@@ -74,30 +74,27 @@ E4 {  // margin
 
     struct
     E3 {  // border
-        Loca   loca;
-        alias loca this;
-        Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-        Fn    fn;
-        E2   _inner;
+        Loca      loca;
+        alias     loca this;
+        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+        E2       _inner;
 
         //
         struct
         E2 {  // aura
-            Loca   loca;
-            alias loca this;
-            Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-            Fn    fn;
-            E1   _inner;
+            Loca      loca;
+            alias     loca this;
+            Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+            E1       _inner;
 
             struct
             E1 {  // core  // content
-                Loca   loca;
-                alias loca this;
-                Color  color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-                Fn     fn;  // &image_draw, &text_draw, &childs_draw
-                // void _inner;
+                Loca       loca;
+                alias      loca this;
+                Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+                //void      _inner;  // no inner
 
-                Type type;
+                Type       type;
                 union {
                     Image  image;
                     Text   text;
@@ -125,40 +122,10 @@ E4 {  // margin
     auto ref deleted () { return flags.deleted; }
 
     struct
-    Fn {
-        E_EVENT_FN  event  = &.event;
-        E_UPDATE_FN update = &.update;
-        E_SET_FN    set    = &.set;
-        E_DRAW_FN   draw   = &.draw;
-        E_DUP_FN    dup    = &._dup;        
-    }
-
-    struct
     On {
         string    event;  // click
         TString[] action; // audacious --play-pause
     }
-
-    void 
-    event (Event* ev) { 
-        if (fn.event !is null) fn.event (&this,ev); 
-    }
-
-    void 
-    update (update_UserEvent* ev) { 
-        if (fn.update !is null) fn.update (&this,ev); 
-    }
-
-    void 
-    set (string field_id, TString[] values) {
-        if (fn.set !is null) fn.set (&this,field_id,values); 
-    }
-
-    void 
-    draw (draw_UserEvent* ev) {
-        if (fn.draw !is null) fn.draw (&this,ev);
-    }
-
 }
 
 
@@ -660,7 +627,7 @@ update (E* e, update_UserEvent* ev) {
             + e.content.loc;
 
         foreach (_e; WalkChilds (e))
-            _e.update (ev);
+            update (_e,ev);
 
         ev.locs.length--;
         ev.path.length--;
@@ -692,7 +659,7 @@ draw (E* e, draw_UserEvent* ev) {
             + e.content.loc;
 
         foreach (_e; WalkChilds (e))
-            _e.draw (ev);
+            draw (_e,ev);
 
         ev.locs.length--;
         ev.path.length--;
