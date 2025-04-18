@@ -31,7 +31,7 @@ import e_generator : Generator;
 
 
 void
-e_update_size_pos (E* e, E* pre, Path path, update_UserEvent* ev) {
+e_update_length_loc (E* e, E* pre, Path* path, update_UserEvent* ev) {
     // size
     // step
     //   childs
