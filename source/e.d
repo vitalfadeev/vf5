@@ -47,6 +47,23 @@ alias EPtr = E*;
 //   E_ aura
 //    E_ bg
 //     E_ text
+//
+// borders
+// e
+//  e borders
+//
+// borders.aura.content.text = abc
+// e
+//  e borders
+//   e aura
+//    e content
+//     type = text
+//     text = abc
+//
+// e 
+//   struct e.borders.aura.content
+//   struct e4.e3.e2.e1
+
 struct
 E4 {  // margin
     Loca      loca;
@@ -92,9 +109,9 @@ E4 {  // margin
 
                 Type       type;
                 union {
-                    Image  image;
-                    Text   text;
-                    Childs childs;
+                    ImageContent  image;
+                    TextContent   text;
+                    ChildsContent childs;
                 }
 
                 enum
@@ -126,60 +143,61 @@ E4 {  // margin
 
 
 struct
-Loca {
-    Loc loc;   
-    Loc length;
-}
-
-struct
-Image {
-    Loca loca;
-    alias loca this;
-    string    src;       // "abc"
+ImageContent {
+    Loca      loca;
+    alias     loca this;
     Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     Color     bg;
-    SizeType  size_w_type;
-    SizeType  size_h_type;
     IMAGE_PTR ptr;
+    // def
+    DefLength def_length;  //
+    string    def_src;     // "abc.png"
 
-    enum
-    SizeType {
-        fixed,
-        image,
-        text,
-        content,
+    // image length
+    //   parent   //
+    //   content  // orig
+    //   stab     // 100 100
+    //   flex     // 50%
+
+    void
+    load () {
+        load_e_image (e);
+    }
+
+    void
+    update_length () {
+        if (ptr !is null) {
+            length[IL.X] = ptr.img_surface.w;
+            length[IL.Y] = ptr.img_surface.h;
+        }
+    }
+
+    void
+    draw () {
+        e_klass_draws.image (renderer,ptr,x,y,w,h);
     }
 }
 
 struct
-Text {
+TextContent {
     Loca       loca;
     alias      loca this;
     Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     Color      bg;
-    string     s;            // "abc"
-    Font       font;
-    //PosType    pos_type;
-    SizeType   size_w_type;
-    SizeType   size_h_type;
+    FONT_PTR   ptr;
     TextRect[] rects;
+    // def
+    DefLength  def_length;  //
+    DefFont    def_font;    //
+    string     s;           // "abc"
 
     struct 
-    Font {
+    DefFont {
         string    file;    // "abc"
         string    family;  // "abc"
         ubyte     size;    // 0..256
         bool      bold;    // 0/1
         bool      italic;  // 0/1
-        FONT_PTR  ptr;     // ...
-    }
-
-    enum
-    SizeType {
-        fixed,
-        image,
-        text,
-        content,
     }
 
     struct
@@ -187,16 +205,75 @@ Text {
         Loca     loca;
         alias    loca this;
         Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-        string   s;  // chars[a..b]
         TEXT_PTR ptr;
+    }
+
+    void
+    load () {
+        load_e_text (e);
+    }
+
+    void
+    update_length () {
+        Loc    _loc;
+        Length _length;
+
+        foreach (ref rect; rects) {
+            static
+            foreach (il; IL) {
+                if (rect.loc[il] < _loc[il])
+                    _loc[il] = rect.loc[il];
+
+                if (rect.loc[il] + rect.length[il] > _length[il])
+                    _length[il] = rect.loc[il] + rect.length[il];
+            }
+        }
+
+        loc    = _loc;
+        length = _length;
+    }
+
+    void
+    draw () {
+        e_klass_draws._text (renderer,rects,font_ptr,color,loc,length);
     }
 }
 
 struct
-Childs {
+ChildsContent {
     Loca  loca;
     alias loca this;
     E[]   s;  // no links
+
+    void
+    load () {
+        load_e_text (e);
+    }
+
+    void
+    update_length () {
+        Loc    _loc;
+        Length _length;
+
+        foreach (_e; s) {
+            static
+            foreach (il; IL) {
+                if (_e.loc[il] < _loc[il])
+                    _loc[il] = _e.loc[il];
+
+                if (_e.loc[il] + _e.length[il] > _length[il])
+                    _length[il] = _e.loc[il] + _e.length[il];
+            }
+        }
+
+        loc    = _loc;
+        length = _length;
+    }
+
+    void
+    draw () {
+        e_klass_draws.childs (renderer,s,loc,length);
+    }
 }
 
 alias E = E4;
@@ -687,7 +764,7 @@ event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
 bool
 loc_in (Loc loc, Loc area_loc, Length area_length) {
     static
-    foreach (i; 0..NLOC)
+    foreach (i; 0..NIL)
         if ((area_loc.s[i] <= loc.s[i]) && (loc.s[i] <= area_loc.s[i] + area_length.s[i]))
             return true;
 

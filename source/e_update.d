@@ -12,6 +12,7 @@ import std.process : executeShell;
 import std.stdio : writeln;
 import std.stdio : writefln;
 import std.stdio : write;
+import std.range : back;
 import bindbc.sdl;
 import etree;
 import e;
@@ -31,7 +32,7 @@ import e_generator : Generator;
 
 
 void
-e_update_length_loc (E* e, E* pre, Path* path, update_UserEvent* ev) {
+e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
     // size
     // step
     //   childs
@@ -39,7 +40,7 @@ e_update_length_loc (E* e, E* pre, Path* path, update_UserEvent* ev) {
     //   move childs
 
     // size
-    e_update_length (e);
+    e_update_length (e,pre,ev);
     // if max skip step & cchilds
     //if (e.size_w_type == E.SizeType.max)
     //if (e.size_h_type == E.SizeType.max)
@@ -285,159 +286,96 @@ e_update_total_sizes (GCursor) (E* e, GCursor* gcursor) {
 //       image
 //       content
 void
-e_update_length (E* e) {
+e_update_length (E* e, E* pre, update_UserEvent* ev) {
+    e_update_length (e,pre,ev,IL.X);
+    e_update_length (e,pre,ev,IL.Y);
+    
+
+    //final
+    //switch (e.size_w_type) {
+    //    case E.SizeType.fixed   : e_update_size_w_fixed   (e); break;
+    //    case E.SizeType.content : e_update_size_w_content (e); break;
+    //    case E.SizeType.parent  : e_update_size_w_parent  (e); break;
+    //    case E.SizeType.window  : e_update_size_w_window  (e); break;
+    //    case E.SizeType.max     : e_update_size_w_max     (e); break;
+    //}
+
+    //final
+    //switch (e.size_h_type) {
+    //    case E.SizeType.fixed   : e_update_size_h_fixed   (e); break;
+    //    case E.SizeType.content : e_update_size_h_content (e); break;
+    //    case E.SizeType.parent  : e_update_size_h_parent  (e); break;
+    //    case E.SizeType.window  : e_update_size_h_window  (e); break;
+    //    case E.SizeType.max     : e_update_size_h_max     (e); break;
+    //}
+}
+
+void
+e_update_length (E* e, E* pre, update_UserEvent* ev, IL il) {
     final
-    switch (e.size_w_type) {
-        case E.SizeType.fixed   : e_update_size_w_fixed   (e); break;
-        case E.SizeType.content : e_update_size_w_content (e); break;
-        case E.SizeType.parent  : e_update_size_w_parent  (e); break;
-        case E.SizeType.window  : e_update_size_w_window  (e); break;
-        case E.SizeType.max     : e_update_size_w_max     (e); break;
-    }
-
-    final
-    switch (e.size_h_type) {
-        case E.SizeType.fixed   : e_update_size_h_fixed   (e); break;
-        case E.SizeType.content : e_update_size_h_content (e); break;
-        case E.SizeType.parent  : e_update_size_h_parent  (e); break;
-        case E.SizeType.window  : e_update_size_h_window  (e); break;
-        case E.SizeType.max     : e_update_size_h_max     (e); break;
+    switch (e.def_length.type[il]) {
+        case DefLength.Type.parent  : e_update_length_parent  (e,pre,ev,il); break;
+        case DefLength.Type.stab    : e_update_length_stab    (e,pre,ev,il); break;
+        case DefLength.Type.flex    : e_update_length_flex    (e,pre,ev,il); break;
+        case DefLength.Type.content : e_update_length_content (e,pre,ev,il); break;
+        case DefLength.Type.window  : e_update_length_window  (e,pre,ev,il); break;
+        case DefLength.Type.max     : e_update_length_max     (e,pre,ev,il); break;
     }
 }
 
 void
-e_update_size_w_fixed (E* e) {
-    _e_update_size_w (
-        e, 
-        e.size.w, 
-        e.size.w - e.aura.size.w - e.aura.size.w
-    );
-}
-
-void
-e_update_size_w_content (E* e) {
-    e_update_content_size_w (e);  // update content.size.w
-    _e_update_size_w (
-        e, 
-        e.content.size.w + e.aura.size.w + e.aura.size.w, 
-        e.content.size.w
-    );
-}
-
-void
-e_update_size_w_parent (E* e) {
-    if (e.parent !is null)
-        _e_update_size_w (
-            e, 
-            e.parent.content.size.w, 
-            e.parent.content.size.w - e.aura.size.w - e.aura.size.w
-        );
+e_update_length_parent (E* e, E* pre, update_UserEvent* ev, IL il) {
+    if (!ev.path.empty)
+        e.length[il] = ev.path.back.content.length[il];
     else
-        e_update_size_w_window (e);
+        e_update_length_window (e,il);
 }
 
 void
-e_update_size_w_window (E* e) {
-    auto window = e.find_window ();
-    if (window !is null)
-        _e_update_size_w (
-            e, 
-            window.size.w, 
-            window.size.w - e.aura.size.w - e.aura.size.w
-        );
+e_update_length_stab (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e.length[il] = e.def_length.stab[il];
+}
+
+void
+e_update_length_flex (E* e, E* pre, update_UserEvent* ev, IL il) {
+    auto length   = e.def_length.flex.length;
+    auto capacity = e.def_length.flex.capacity;
+
+    if (!ev.path.empty)
+        e.length[il] = ev.path.back.content.length[il] * length / capacity;
     else
-        _e_update_size_w (
-            e, 
-            DEFAULT_WINDOW_W, 
-            DEFAULT_WINDOW_W - e.aura.size.w - e.aura.size.w
-        );
+        e_update_length_window (e,pre,ev,il);
 }
 
 void
-e_update_size_w_max (E* e) {
+e_update_length_content (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e_update_content_length (e,pre,ev,il);  // update content.size.w
+    e.length[il] = e.content.length[il];
+}
+
+void
+e_update_length_window (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e.length[il]  = ev.window.length[il];
+}
+
+void
+e_update_length_max (E* e, E* pre, update_UserEvent* ev, IL il) {
     // update max after all, in update_size_fix ()
 }
 
+// e update content
+void
+e_update_content_length (E* e, E* pre, update_UserEvent* ev, IL il) {
+    final
+    switch (e.content.type) {
+        case Type.Image  : e_update_content_length_image  (e,pre,ev,il); break;
+        case Type.Text   : e_update_content_length_text   (e,pre,ev,il); break;
+        case Type.Childs : e_update_content_length_childs (e,pre,ev,il); break;
+    }
+    
 
-void
-e_update_size_h_fixed (E* e) {
-    _e_update_size_h (
-        e, 
-        e.size.h, 
-        e.size.h - e.aura.size.h - e.aura.size.h
-    );
-}
 
-void
-e_update_size_h_content (E* e) {
-    _e_update_size_h (
-        e, 
-        e.content.size.h + e.aura.size.h + e.aura.size.h, 
-        e.content.size.h
-    );
-}
 
-void
-e_update_size_h_parent (E* e) {
-    if (e.parent !is null)
-        _e_update_size_h (
-            e, 
-            e.parent.content.size.h, 
-            e.parent.content.size.h - e.aura.size.h - e.aura.size.h
-        );
-    else
-        e_update_size_h_window (e);
-}
-
-void
-e_update_size_h_window (E* e) {
-    auto window = e.find_window ();
-    if (window !is null)
-        _e_update_size_h (
-            e, 
-            window.size.h, 
-            window.size.h - e.aura.size.h - e.aura.size.h
-        );
-    else
-        _e_update_size_h (
-            e, 
-            DEFAULT_WINDOW_H, 
-            DEFAULT_WINDOW_H - e.aura.size.h - e.aura.size.h
-        );
-}
-
-void
-e_update_size_h_max (E* e) {
-    // update max after all, in update_size_fix ()
-}
-
-// ////////////////////////////////////////////////
-void
-_e_update_size_w (E* e, W ew, W cw) {
-    e.size.w         = (ew > 0) ? ew : 0;
-    e.content.size.w = (cw > 0) ? cw : 0;
-}
-void
-_e_update_size_h (E* e, W eh, W ch) {
-    e.size.h         = (eh > 0) ? eh : 0;
-    e.content.size.h = (ch > 0) ? ch : 0;
-}
-void
-_e_update_loc (E* e, X x, Y y) {
-    _e_update_loc (e, Loc (x,y));
-}
-void
-_e_update_loc (E* e, Loc loc) {
-    e.loc = loc;
-}
-// ////////////////////////////////////////////////
-auto
-find_window (E* e) {
-    for (auto _e=e; _e !is null; _e = _e.parent)
-        if (_e.window !is null)
-            return _e.window;
-    return null;
-}
 
 
 
@@ -841,8 +779,7 @@ load_e_text (E* e) {
 
         e.content.text.rects ~= E.Content.Text.TextRect (
             Loc (_x,_y), 
-            Loc (w.to!W,h.to!H), 
-            c.to!string
+            Loc (w.to!W,h.to!H)
         );
 
         _x += w;
@@ -881,20 +818,6 @@ dump_size (E* e, int level=0) {
 
 
 
-void
-e_update_content_size_w (E* e) {
-    final
-    switch (e.content.size_h_type) {
-        case E.Content.SizeType.e      : e_update_content_size_w_e      (e); break;
-        case E.Content.SizeType.fixed  : e_update_content_size_w_fixed  (e); break;
-        case E.Content.SizeType.childs : e_update_content_size_w_childs (e); break;
-        case E.Content.SizeType.image  : e_update_content_size_w_image  (e); break;
-        case E.Content.SizeType.text   : e_update_content_size_w_text   (e); break;
-        case E.Content.SizeType.max_   : e_update_content_size_w_max    (e); break;
-        case E.Content.SizeType.childs_image_text : 
-                                         e_update_content_size_w_childs_image_text (e); break;
-    }
-}
 
 void
 _update_content_size_w (E* e, W w) {

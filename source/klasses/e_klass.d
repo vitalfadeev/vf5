@@ -121,6 +121,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         //
         case "way"               : set_way                (e,values); break;
         //
+        case "e.borders"         : set_borders            (e,values); break;
         case "borders"           : set_borders            (e,values); break;
         case "borders.loc"       : set_borders_loc        (e,values); break;
         case "borders.len"       : set_borders_ken        (e,values); break;

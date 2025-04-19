@@ -10,23 +10,17 @@ const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
 
-enum 
-LOC {  // location
-    X,
-    Y
-};
-enum NLOC = LOC.max+1;  // N locations: 1 = X, 2 = XY, 3 = XYZ
-alias Loc    = _Loc!NLOC;  // 2 coords: x,y
-alias Length = Loc;        // 2 coords: x,y
-
 alias L = int;  // length
-alias X = L;
-alias Y = L;
-alias W = L;
-alias H = L;
-alias R = L; // radius
 
-alias Deep = int;
+enum 
+IL {  // location
+    X = 0,
+    Y = 1,
+};
+enum NIL = IL.max+1;     // N locations: 1 = X, 2 = XY, 3 = XYZ
+alias Loc    = _Loc!NIL;  // 2 coords: x,y
+alias Length = Loc;      // 2 coords: x,y
+alias Deep   = int;
 
 struct
 _Loc (uint N) {  // SIMD vector
@@ -86,6 +80,13 @@ _Loc (uint N) {  // SIMD vector
         return typeof (this) (_s);
     }
 }
+
+struct
+Loca {
+    Loc loc;   
+    Loc length;
+}
+
 
 struct
 Form (uint N) {
@@ -162,7 +163,7 @@ _Way (uint N) {
     ubyte[N] v;    // x y z, x y x, y x x, x x x
         Loc  length; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
 }
-alias Way = _Way!NLOC;
+alias Way = _Way!NIL;
 
 struct
 _DefLoc (uint N) {
@@ -224,7 +225,7 @@ _DefLoc (uint N) {
         }
     }
 }
-alias DefLoc = _DefLoc!NLOC;
+alias DefLoc = _DefLoc!NIL;
 
 enum
 LocType : ubyte {
@@ -236,10 +237,20 @@ LocType : ubyte {
 
 struct
 _DefLength (uint N) {
-    LengthType[N] type;
+    Type[N]     type;
     union {
         Loc     stab;
         FlexLoc flex;
+    }
+
+    enum 
+    Type {
+        parent, // default
+        stab,
+        flex,
+        content,
+        window,
+        max_,
     }
 
     void
@@ -255,7 +266,7 @@ _DefLength (uint N) {
         }
     }
 }
-alias DefLength = _DefLength!NLOC;
+alias DefLength = _DefLength!NIL;
 
 
 struct
@@ -278,15 +289,6 @@ Window {
     }
 }
 
-enum 
-LengthType {
-    parent, // default
-    stab,
-    flex,
-    content,
-    window,
-    max_,
-}
 
 //alias Limit = Pos;
 
