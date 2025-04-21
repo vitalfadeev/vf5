@@ -84,9 +84,19 @@ alias EPtr = E*;
 
 struct 
 E {
-    Aura[4] aura;
-    Core    core;
-    alias   core this;
+    union {
+        Aura[4]  aura;  // 0-margin, 1-border, 2-aura, 3-content
+        struct {
+            Aura margin;
+            Aura border;
+            Aura aura;
+            union {
+                Aura  content;
+                Core  core;
+                alias core this;
+            }
+        }
+    }
 
     struct
     Aura {
@@ -100,18 +110,18 @@ E {
 
     struct
     Core {
-        Klass*[]  klasses;     // box green rounded
-        Flags     flags;       // hidden,deleted
-        Way       way;         // r l u d
-        On[]      on;          // [click: audacious --play-pause]
-        Generator generator;   //
-
-        Type      type;
         union {
             ImageContent  image;
             TextContent   text;
             ChildsContent childs;
         }
+
+        Type      type;        // image,text,childs
+        Klass*[]  klasses;     // box green rounded
+        Flags     flags;       // hidden,deleted
+        Way       way;         // r l u d
+        On[]      on;          // [click: audacious --play-pause]
+        Generator generator;   //
 
         enum
         Type {
@@ -235,11 +245,13 @@ ImageContent {
     Loca      loca;
     alias     loca this;
     Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    //
+    DefLoc    def_loc;     //
+    DefLength def_length;  // 
+    //
     Color     bg;
-    IMAGE_PTR ptr;
-    // def
-    DefLength def_length;  //
     string    def_src;     // "abc.png"
+    IMAGE_PTR ptr;
 
     // image length
     //   parent   //
@@ -271,14 +283,17 @@ ImageContent {
 
 struct
 TextContent {
-    Loca       loca;
-    alias      loca this;
-    Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    Loca      loca;
+    alias     loca this;
+    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    //
+    DefLoc    def_loc;     //
+    DefLength def_length;  // 
+    //
     Color      bg;
     FONT_PTR   ptr;
     TextRect[] rects;
     // def
-    DefLength  def_length;  //
     DefFont    def_font;    //
     string     s;           // "abc"
 
@@ -329,8 +344,13 @@ TextContent {
 
 struct
 ChildsContent {
-    Loca  loca;
-    alias loca this;
+    Loca      loca;
+    alias     loca this;
+    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+    //
+    DefLoc    def_loc;     //
+    DefLength def_length;  // 
+    //
     E[]   s;  // no links
 
     void

@@ -282,28 +282,30 @@ e_update_total_sizes (GCursor) (E* e, GCursor* gcursor) {
 //       content
 void
 e_update_length (E* e, E* pre, update_UserEvent* ev) {
-    auto parent = ev.patch.back.empty ? null : ev.patch.back;
-    e_update_length (e,pre,ev,il,parent.deepest_inner);
+    auto parent_loca = ev.patch.back.empty ? null : &ev.patch.back.loca;
+    e_update_length (e,pre,ev,il,parent_loca);
 }
 void
-e_update_length (E,PARENT) (E* e, E* pre, update_UserEvent* ev, PARENT* parent) {
+e_update_length (E* e, E* pre, update_UserEvent* ev, Loca* parent_loca) {
     static
     foreach (il; EnumMembers!IL)
-        e_update_length (e,pre,ev,il,parent);
+        e_update_length (e,pre,ev,il,parent_loca);
 
-    // recursive in deep of struct E
+    // recursive in deep of aura
     static
-    if (__traits (hasMember,e,"__inner"))
-        e_update_length (e,pre,ev,&e._inner);
+    foreach (pre,aura; WalkAura (e)) {
+        auto parent_loca = (pre is null) ? null : &pre.loca;
+        e_update_length (aura,pre,ev,parent_loca);
+    }
 }
 
 void
-e_update_length (E,PARENT) (E* e, E* pre, update_UserEvent* ev, IL il, PARENT* parent) {
+e_update_length (E* e, E* pre, update_UserEvent* ev, IL il, Loca* parent_loca) {
     final
     switch (e.def_length.type[il]) {
-        case DefLength.Type.parent  : e_update_length_parent  (e,pre,ev,il,parent); break;
+        case DefLength.Type.parent  : e_update_length_parent  (e,pre,ev,il,parent_loca); break;
         case DefLength.Type.stab    : e_update_length_stab    (e,pre,ev,il); break;
-        case DefLength.Type.flex    : e_update_length_flex    (e,pre,ev,il,parent); break;
+        case DefLength.Type.flex    : e_update_length_flex    (e,pre,ev,il,parent_loca); break;
         case DefLength.Type.content : e_update_length_content (e,pre,ev,il); break;
         case DefLength.Type.window  : e_update_length_window  (e,pre,ev,il); break;
         case DefLength.Type.max     : e_update_length_max     (e,pre,ev,il); break;
@@ -311,9 +313,9 @@ e_update_length (E,PARENT) (E* e, E* pre, update_UserEvent* ev, IL il, PARENT* p
 }
 
 void
-e_update_length_parent (E,PARENT) (E* e, E* pre, update_UserEvent* ev, IL il, PARENT* parent) {
+e_update_length_parent (E* e, E* pre, update_UserEvent* ev, IL il, Loca* parent_loca) {
     if (parent !is null)
-        e.length[il] = parent.length[il];
+        e.length[il] = parent_loca.length[il];
     else
         e_update_length_window (e,pre,ev,il);
 }
@@ -325,7 +327,7 @@ e_update_length_stab (E) (E* e, E* pre, update_UserEvent* ev, IL il) {
 
 
 void
-e_update_length_flex (E,PARENT) (E* e, E* pre, update_UserEvent* ev, IL il, PARENT* parent) {
+e_update_length_flex (E* e, E* pre, update_UserEvent* ev, IL il, Loca* parent_loca) {
     if (parent !is null) 
         e.length[il] = e.def_length.flex.of (parent.length[il], il);
     else
