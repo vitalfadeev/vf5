@@ -85,18 +85,25 @@ alias EPtr = E*;
 struct 
 E {
     union {
-        Aura[4]  aura;  // 0-margin, 1-border, 2-aura, 3-content
         struct {
-            Aura margin;
-            Aura border;
-            Aura aura;
-            union {
-                Aura  content;
-                Core  core;
-                alias core this;
-            }
+            Aura  margin;
+            Aura  border;
+            Aura  aura;
+            Aura  content;
+            Core  core;
+            alias core this;
         }
+        Aura[4]   aura;  // 0-margin, 1-border, 2-aura, 3-content
     }
+
+    auto ref  loca ()       { return content.loca; }
+    auto ref  loc ()        { return content.loca.loc; }
+    auto ref  length ()     { return content.loca.length; }
+    auto ref  color ()      { return content.color; }
+    auto ref  def_loc ()    { return content.def_loc; }
+    auto ref  def_length () { return content.def_length; }
+    auto ref  hidden ()     { return core.flags.hidden; }
+    auto ref  deleted ()    { return core.flags.deleted; }
 
     struct
     Aura {
@@ -110,13 +117,13 @@ E {
 
     struct
     Core {
+        Type      type;        // image,text,childs
         union {
             ImageContent  image;
             TextContent   text;
             ChildsContent childs;
         }
 
-        Type      type;        // image,text,childs
         Klass*[]  klasses;     // box green rounded
         Flags     flags;       // hidden,deleted
         Way       way;         // r l u d
@@ -137,9 +144,6 @@ E {
             bool deleted;
         }
 
-        auto ref hidden ()  { return flags.hidden; }
-        auto ref deleted () { return flags.deleted; }
-
         struct
         On {
             string    event;  // click
@@ -149,106 +153,8 @@ E {
 }
 
 
-//struct
-//E4 {  // margin
-//    Loca      loca;
-//    alias     loca this;
-//    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-//    E3       _inner;       // bordder,aura,content,childs,text,image
-//    //
-//    Klass*[]  klasses;     // box green rounded
-//    Flags     flags;       // hidden,deleted
-//    Way       way;         // r l u d
-//    On[]      on;          // [click: audacious --play-pause]
-//    Generator generator;   //
-//    //
-//    DefLoc    def_loc;     //
-//    DefLength def_length;  // 
-
-//    auto ref margin  () { return this; }
-//    auto ref border  () { return _inner; }
-//    auto ref aura    () { return _inner._inner; }
-//    auto ref content () { return _inner._inner._inner; }
-//    auto ref image   () { return _inner._inner._inner.image; }
-//    auto ref text    () { return _inner._inner._inner.text; }
-//    auto ref childs  () { return _inner._inner._inner.childs; }
-//    auto ref deepest_inner () { return _inner._inner._inner; }
-
-//    struct
-//    E3 {  // border
-//        Loca      loca;
-//        alias     loca this;
-//        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-//        E2       _inner;
-//        //
-//        DefLoc    def_loc;     //
-//        DefLength def_length;  // 
-
-//        //
-//        struct
-//        E2 {  // aura
-//            Loca      loca;
-//            alias     loca this;
-//            Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-//            E1       _inner;
-//            //
-//            DefLoc    def_loc;     //
-//            DefLength def_length;  // 
-
-//            struct
-//            E1 {  // core  // content
-//                Loca       loca;
-//                alias      loca this;
-//                Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-//                //void      _inner;  // no inner
-//                //
-//                DefLoc    def_loc;     //
-//                DefLength def_length;  // 
-
-//                Type       type;
-//                union {
-//                    ImageContent  image;
-//                    TextContent   text;
-//                    ChildsContent childs;
-//                }
-
-//                enum
-//                Type {
-//                    _,
-//                    image,
-//                    text,
-//                    childs,
-//                }
-//            }
-//        }
-//    }
-
-//    struct
-//    Flags {
-//        bool hidden;
-//        bool deleted;
-//    }
-
-//    auto ref hidden ()  { return flags.hidden; }
-//    auto ref deleted () { return flags.deleted; }
-
-//    struct
-//    On {
-//        string    event;  // click
-//        TString[] action; // audacious --play-pause
-//    }
-//}
-
-
 struct
 ImageContent {
-    Loca      loca;
-    alias     loca this;
-    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    //
-    DefLoc    def_loc;     //
-    DefLength def_length;  // 
-    //
     Color     bg;
     string    def_src;     // "abc.png"
     IMAGE_PTR ptr;
@@ -264,15 +170,16 @@ ImageContent {
         load_e_image (e);
     }
 
-    void
-    update_length (IL il) {
+    L
+    length (IL il) {
         if (ptr !is null) {
             switch (il) {
-                case IL.X: length[IL.X] = ptr.img_surface.w; break;
-                case IL.Y: length[IL.Y] = ptr.img_surface.h; break;
+                case IL.X: return ptr.img_surface.w; break;
+                case IL.Y: return ptr.img_surface.h; break;
                 default:
             }
         }
+        return 0;
     }
 
     void
@@ -283,13 +190,6 @@ ImageContent {
 
 struct
 TextContent {
-    Loca      loca;
-    alias     loca this;
-    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    //
-    DefLoc    def_loc;     //
-    DefLength def_length;  // 
-    //
     Color      bg;
     FONT_PTR   ptr;
     TextRect[] rects;
@@ -319,8 +219,8 @@ TextContent {
         load_e_text (e);
     }
 
-    void
-    update_length (IL il) {
+    L
+    length (IL il) {
         L l;
         L len;
 
@@ -332,8 +232,7 @@ TextContent {
                 len = rect.loc[il] + rect.length[il];
         }
 
-        loc[il]    = l;
-        length[il] = len;
+        return len;
     }
 
     void
@@ -344,13 +243,6 @@ TextContent {
 
 struct
 ChildsContent {
-    Loca      loca;
-    alias     loca this;
-    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    //
-    DefLoc    def_loc;     //
-    DefLength def_length;  // 
-    //
     E[]   s;  // no links
 
     void
@@ -358,8 +250,8 @@ ChildsContent {
         load_e_text (e);
     }
 
-    void
-    update_length (IL il) {
+    L
+    length (IL il) {
         L l;
         L len;
 
@@ -371,8 +263,7 @@ ChildsContent {
                 len = _e.loc[il] + _e.length[il];
         }
 
-        loc[il]    = l;
-        length[il] = len;
+        return len;
     }
 
     void
@@ -380,8 +271,6 @@ ChildsContent {
         e_klass_draws.childs (renderer,s,loc,length);
     }
 }
-
-alias E = E4;
 
 
 /*
