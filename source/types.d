@@ -151,6 +151,14 @@ struct
 _FlexLoc {
     Loc length;    // 0 50 100
     Loc capacity;  // 100
+
+    auto
+    of (L l, IL il) {
+        return 
+            (capacity[il]) ?
+                l * length[il] / capacity[il] : 
+                0;
+    }
 }
 alias FlexLoc = _FlexLoc;
 
@@ -167,10 +175,17 @@ alias Way = _Way!NIL;
 
 struct
 _DefLoc (uint N) {
-    LocType[N] loc_type;  // fixed | balance
+    Type[N]     type;  // fixed | balance
     union {
         Loc     stab;  // stable   // 10,10
         FlexLoc flex;  // flexable // 1/100,50/100
+    }
+
+    enum
+    Type : ubyte {
+        _,
+        stab,  // 1,1
+        flex,  // 1/100 50/100
     }
 
     void
@@ -226,13 +241,6 @@ _DefLoc (uint N) {
     }
 }
 alias DefLoc = _DefLoc!NIL;
-
-enum
-LocType : ubyte {
-    _,
-    stab,  // 1,1
-    flex,  // 1/100 50/100
-}
 
 
 struct

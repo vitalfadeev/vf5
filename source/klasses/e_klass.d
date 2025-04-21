@@ -401,32 +401,32 @@ _set_loc (uint LOC_I, E* e, string value) {
     auto _loc = &e.def_loc;
 
     switch (value) {
-        case "lu"    : e.def_loc.set (LocType.flex, -1,1, -1,1); break;
-        case "cu"    : e.def_loc.set (LocType.flex,  0,1, -1,1); break;
-        case "ru"    : e.def_loc.set (LocType.flex,  1,1, -1,1); break;
-        case "rc"    : e.def_loc.set (LocType.flex,  1,1,  0,1); break;
-        case "rd"    : e.def_loc.set (LocType.flex,  1,1,  1,1); break;
-        case "cd"    : e.def_loc.set (LocType.flex,  0,1,  1,1); break;
-        case "ld"    : e.def_loc.set (LocType.flex, -1,1,  1,1); break;
-        case "lc"    : e.def_loc.set (LocType.flex,  1,1,  0,1); break;
-        case "cc"    : e.def_loc.set (LocType.flex,  0,1,  0,1); break;
-        case "d"     : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
-        case "dn"    : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
-        case "r"     : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
-        case "right" : e.def_loc.set (LOC_I, LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (LOC_I, LocType.flex,  0,1); break;
-        case "l"     : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
-        case "left"  : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
-        case "u"     : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
-        case "up"    : e.def_loc.set (LOC_I, LocType.flex, -1,1); break;
-        case "_"     : e.def_loc.set (LOC_I, LocType._); break;
-        case "."     : e.def_loc.set (LOC_I, LocType._); break;
+        case "lu"    : e.def_loc.set (DefLock.LocType.flex, -1,1, -1,1); break;
+        case "cu"    : e.def_loc.set (DefLock.LocType.flex,  0,1, -1,1); break;
+        case "ru"    : e.def_loc.set (DefLock.LocType.flex,  1,1, -1,1); break;
+        case "rc"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  0,1); break;
+        case "rd"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  1,1); break;
+        case "cd"    : e.def_loc.set (DefLock.LocType.flex,  0,1,  1,1); break;
+        case "ld"    : e.def_loc.set (DefLock.LocType.flex, -1,1,  1,1); break;
+        case "lc"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  0,1); break;
+        case "cc"    : e.def_loc.set (DefLock.LocType.flex,  0,1,  0,1); break;
+        case "d"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
+        case "dn"    : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
+        case "c"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
+        case "center": e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
+        case "r"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
+        case "right" : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
+        case "c"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
+        case "center": e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
+        case "l"     : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
+        case "left"  : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
+        case "u"     : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
+        case "up"    : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
+        case "_"     : e.def_loc.set (LOC_I, DefLock.LocType._); break;
+        case "."     : e.def_loc.set (LOC_I, DefLock.LocType._); break;
         default      :
             if (value.isNumeric ()) // 50
-                e.def_loc.set (LOC_I, LocType.stab, value.to!L);
+                e.def_loc.set (LOC_I, DefLock.LocType.stab, value.to!L);
             else
                 throw new Exception (format!"unsupported loc (%s): %s" (LOC_I, value));
     }    

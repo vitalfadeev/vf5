@@ -14,6 +14,7 @@ import types;
 import tstring;
 import events;
 import pix : IMAGE_PTR, FONT_PTR, TEXT_PTR;
+import std.traits : EnumMembers;
 
 
 //alias E_EVENT_FN  = void function (E* e, Event* ev);
@@ -50,96 +51,183 @@ alias EPtr = E*;
 //
 // borders
 // e
-//  e borders
+//  borders
 //
 // borders.aura.content.text = abc
 // e
-//  e borders
-//   e aura
-//    e content
+//  borders
+//   aura
+//    content
 //     type = text
 //     text = abc
 //
-// e 
-//   struct e.borders.aura.content
-//   struct e4.e3.e2.e1
+// struct e.borders.aura.content
+// struct e4.e3.e2.e1
+// struct e
 
-struct
-E4 {  // margin
-    Loca      loca;
-    alias     loca this;
-    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-    E3       _inner;       // bordder,aura,content,childs,text,image
-    //
-    Klass*[]  klasses;     // box green rounded
-    Flags     flags;       // hidden,deleted
-    Way       way;         // r l u d
-    On[]      on;          // [click: audacious --play-pause]
-    Generator generator;   //
-    //
-    DefLoc    def_loc;     //
-    DefLength def_length;  // 
+//struct 
+//E_ {
+//    E4 e4;  // margin
+//    E3 e3;  // border
+//    E2 e2;  // aura
+//    E1 e1;  // content
+//    // ...
+//}
+//struct 
+//E__ {
+//    E1 e1;  // content
+//    E2 e2;  // aura
+//    E3 e3;  // border
+//    E4 e4;  // margin
+//}
+//E[4] E___;
 
-    auto ref margin  () { return this; }
-    auto ref border  () { return _inner; }
-    auto ref aura    () { return _inner._inner; }
-    auto ref content () { return _inner._inner._inner; }
+struct 
+E {
+    Aura[4] aura;
+    Core    core;
+    alias   core this;
 
     struct
-    E3 {  // border
+    Aura {
         Loca      loca;
         alias     loca this;
         Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-        E2       _inner;
-
         //
+        DefLoc    def_loc;     //
+        DefLength def_length;  // 
+    }
+
+    struct
+    Core {
+        Klass*[]  klasses;     // box green rounded
+        Flags     flags;       // hidden,deleted
+        Way       way;         // r l u d
+        On[]      on;          // [click: audacious --play-pause]
+        Generator generator;   //
+
+        Type      type;
+        union {
+            ImageContent  image;
+            TextContent   text;
+            ChildsContent childs;
+        }
+
+        enum
+        Type {
+            _,
+            image,
+            text,
+            childs,
+        }
+
         struct
-        E2 {  // aura
-            Loca      loca;
-            alias     loca this;
-            Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-            E1       _inner;
+        Flags {
+            bool hidden;
+            bool deleted;
+        }
 
-            struct
-            E1 {  // core  // content
-                Loca       loca;
-                alias      loca this;
-                Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-                //void      _inner;  // no inner
+        auto ref hidden ()  { return flags.hidden; }
+        auto ref deleted () { return flags.deleted; }
 
-                Type       type;
-                union {
-                    ImageContent  image;
-                    TextContent   text;
-                    ChildsContent childs;
-                }
-
-                enum
-                Type {
-                    _,
-                    image,
-                    text,
-                    childs,
-                }
-            }
+        struct
+        On {
+            string    event;  // click
+            TString[] action; // audacious --play-pause
         }
     }
-
-    struct
-    Flags {
-        bool hidden;
-        bool deleted;
-    }
-
-    auto ref hidden ()  { return flags.hidden; }
-    auto ref deleted () { return flags.deleted; }
-
-    struct
-    On {
-        string    event;  // click
-        TString[] action; // audacious --play-pause
-    }
 }
+
+
+//struct
+//E4 {  // margin
+//    Loca      loca;
+//    alias     loca this;
+//    Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+//    E3       _inner;       // bordder,aura,content,childs,text,image
+//    //
+//    Klass*[]  klasses;     // box green rounded
+//    Flags     flags;       // hidden,deleted
+//    Way       way;         // r l u d
+//    On[]      on;          // [click: audacious --play-pause]
+//    Generator generator;   //
+//    //
+//    DefLoc    def_loc;     //
+//    DefLength def_length;  // 
+
+//    auto ref margin  () { return this; }
+//    auto ref border  () { return _inner; }
+//    auto ref aura    () { return _inner._inner; }
+//    auto ref content () { return _inner._inner._inner; }
+//    auto ref image   () { return _inner._inner._inner.image; }
+//    auto ref text    () { return _inner._inner._inner.text; }
+//    auto ref childs  () { return _inner._inner._inner.childs; }
+//    auto ref deepest_inner () { return _inner._inner._inner; }
+
+//    struct
+//    E3 {  // border
+//        Loca      loca;
+//        alias     loca this;
+//        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+//        E2       _inner;
+//        //
+//        DefLoc    def_loc;     //
+//        DefLength def_length;  // 
+
+//        //
+//        struct
+//        E2 {  // aura
+//            Loca      loca;
+//            alias     loca this;
+//            Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+//            E1       _inner;
+//            //
+//            DefLoc    def_loc;     //
+//            DefLength def_length;  // 
+
+//            struct
+//            E1 {  // core  // content
+//                Loca       loca;
+//                alias      loca this;
+//                Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+//                //void      _inner;  // no inner
+//                //
+//                DefLoc    def_loc;     //
+//                DefLength def_length;  // 
+
+//                Type       type;
+//                union {
+//                    ImageContent  image;
+//                    TextContent   text;
+//                    ChildsContent childs;
+//                }
+
+//                enum
+//                Type {
+//                    _,
+//                    image,
+//                    text,
+//                    childs,
+//                }
+//            }
+//        }
+//    }
+
+//    struct
+//    Flags {
+//        bool hidden;
+//        bool deleted;
+//    }
+
+//    auto ref hidden ()  { return flags.hidden; }
+//    auto ref deleted () { return flags.deleted; }
+
+//    struct
+//    On {
+//        string    event;  // click
+//        TString[] action; // audacious --play-pause
+//    }
+//}
 
 
 struct
@@ -165,10 +253,13 @@ ImageContent {
     }
 
     void
-    update_length () {
+    update_length (IL il) {
         if (ptr !is null) {
-            length[IL.X] = ptr.img_surface.w;
-            length[IL.Y] = ptr.img_surface.h;
+            switch (il) {
+                case IL.X: length[IL.X] = ptr.img_surface.w; break;
+                case IL.Y: length[IL.Y] = ptr.img_surface.h; break;
+                default:
+            }
         }
     }
 
@@ -214,23 +305,20 @@ TextContent {
     }
 
     void
-    update_length () {
-        Loc    _loc;
-        Length _length;
+    update_length (IL il) {
+        L l;
+        L len;
 
         foreach (ref rect; rects) {
-            static
-            foreach (il; IL) {
-                if (rect.loc[il] < _loc[il])
-                    _loc[il] = rect.loc[il];
+            if (rect.loc[il] < l)
+                l = rect.loc[il];
 
-                if (rect.loc[il] + rect.length[il] > _length[il])
-                    _length[il] = rect.loc[il] + rect.length[il];
-            }
+            if (rect.loc[il] + rect.length[il] > len)
+                len = rect.loc[il] + rect.length[il];
         }
 
-        loc    = _loc;
-        length = _length;
+        loc[il]    = l;
+        length[il] = len;
     }
 
     void
@@ -251,23 +339,20 @@ ChildsContent {
     }
 
     void
-    update_length () {
-        Loc    _loc;
-        Length _length;
+    update_length (IL il) {
+        L l;
+        L len;
 
         foreach (_e; s) {
-            static
-            foreach (il; IL) {
-                if (_e.loc[il] < _loc[il])
-                    _loc[il] = _e.loc[il];
+            if (_e.loc[il] < l)
+                l = _e.loc[il];
 
-                if (_e.loc[il] + _e.length[il] > _length[il])
-                    _length[il] = _e.loc[il] + _e.length[il];
-            }
+            if (_e.loc[il] + _e.length[il] > len)
+                len = _e.loc[il] + _e.length[il];
         }
 
-        loc    = _loc;
-        length = _length;
+        loc[il]    = l;
+        length[il] = len;
     }
 
     void
