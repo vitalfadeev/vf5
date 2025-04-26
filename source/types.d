@@ -253,10 +253,10 @@ _DefLength (uint N) {
 
     enum 
     Type {
-        parent, // default
+        pare, // default
         stab,
         flex,
-        content,
+        core,
         window,
         max_,
     }

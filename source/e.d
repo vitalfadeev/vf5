@@ -82,56 +82,88 @@ alias EPtr = E*;
 //}
 //E[4] E___;
 
+// parent
+//   aura
+//   core
+//     childs
+//       e[]
+// child
+//   flex length = parent.length * percent
+
+// for child -> core.length  = outer - aura
+// for loc   -> outer.length = core  + aura
+//
+// for child -> inner.length = outer - aura
+// for loc   -> outer.length = inner + aura
+
 struct 
 E {
     union {
+        Aura[3]  aura;
         struct {
-            Aura  margin;
-            Aura  border;
-            Aura  aura;
-            Aura  content;
-            Core  core;
-            alias core this;
+            Aura margin;     // outer
+            Aura border;     //
+            Aura padding;    //
+            Core core;       // inner
         }
-        Aura[4]   aura;  // 0-margin, 1-border, 2-aura, 3-content
     }
 
-    auto ref  loca ()       { return content.loca; }
-    auto ref  loc ()        { return content.loca.loc; }
-    auto ref  length ()     { return content.loca.length; }
-    auto ref  color ()      { return content.color; }
-    auto ref  def_loc ()    { return content.def_loc; }
-    auto ref  def_length () { return content.def_length; }
-    auto ref  hidden ()     { return core.flags.hidden; }
-    auto ref  deleted ()    { return core.flags.deleted; }
+    Klasses      klasses;    // box green rounded
+    Flags        flags;      // hidden,deleted
+    Way          way;        // r l u d
+    Ones         ones;       // [click: audacious --play-pause]
+    Generator    generator;  //
+
+    alias        outer = margin;
+    alias        inner = core;
+
+    auto ref     hidden ()  { return flags.hidden; }
+    auto ref     deleted () { return flags.deleted; }
 
     struct
     Aura {
-        Loca      loca;
-        alias     loca this;
-        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+        size_t    type = 0;
         //
-        DefLoc    def_loc;     //
-        DefLength def_length;  // 
+        Loc       loc;
+        Length    length;
+        //
+        DefLoc    def_loc;
+        DefLength def_length;
+        //
+        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     }
 
     struct
     Core {
-        Type      type;        // image,text,childs
         union {
-            ImageContent  image;
-            TextContent   text;
-            ChildsContent childs;
+            struct {
+                Type      type = Type._;
+                //
+                Loc       loc;
+                Length    length;
+                //
+                DefLoc    def_loc;
+                DefLength def_length;
+            }
+            //
+            ImageCore     image;
+            TextCore      text;
+            ChildsCore    childs;
         }
 
-        Klass*[]  klasses;     // box green rounded
-        Flags     flags;       // hidden,deleted
-        Way       way;         // r l u d
-        On[]      on;          // [click: audacious --play-pause]
-        Generator generator;   //
+        L
+        _length (IL il) {
+            final
+            switch (type) {
+                case Type._      : return 0;
+                case Type.image  : return image._length  (il);
+                case Type.text   : return text._length   (il);
+                case Type.childs : return childs._length (il);
+            }
+        }
 
         enum
-        Type {
+        Type : size_t {
             _,
             image,
             text,
@@ -149,15 +181,40 @@ E {
             string    event;  // click
             TString[] action; // audacious --play-pause
         }
+
+        struct
+        Ones {
+            On[] s;
+            alias s this;
+        }
     }
+}
+
+mixin template 
+Core_Aura_Header (Type) {
+    Type      type;
+    //
+    Loc       loc;
+    Length    length;
+    //
+    DefLoc    def_loc;
+    DefLength def_length;    
 }
 
 
 struct
-ImageContent {
-    Color     bg;
-    string    def_src;     // "abc.png"
-    IMAGE_PTR ptr;
+ImageCore {
+    Type          type = E.Core.Type.image;
+    //
+    Loc           loc;
+    Length        length;
+    //
+    DefLoc        def_loc;
+    DefLength     def_length;
+    //
+    Color         bg;
+    string        def_src;     // "abc.png"
+    IMAGE_PTR     ptr;
 
     // image length
     //   parent   //
@@ -171,7 +228,7 @@ ImageContent {
     }
 
     L
-    length (IL il) {
+    _length (IL il) {
         if (ptr !is null) {
             switch (il) {
                 case IL.X: return ptr.img_surface.w; break;
@@ -189,7 +246,15 @@ ImageContent {
 }
 
 struct
-TextContent {
+TextCore {
+    Type          type = E.Core.Type.text;
+    //
+    Loc           loc;
+    Length        length;
+    //
+    DefLoc        def_loc;
+    DefLength     def_length;
+    //
     Color      bg;
     FONT_PTR   ptr;
     TextRect[] rects;
@@ -220,7 +285,7 @@ TextContent {
     }
 
     L
-    length (IL il) {
+    _length (IL il) {
         L l;
         L len;
 
@@ -242,7 +307,15 @@ TextContent {
 }
 
 struct
-ChildsContent {
+ChildsCore {
+    Type          type = E.Core.Type.childs;
+    //
+    Loc           loc;
+    Length        length;
+    //
+    DefLoc        def_loc;
+    DefLength     def_length;
+    //
     E[]   s;  // no links
 
     void
@@ -251,7 +324,7 @@ ChildsContent {
     }
 
     L
-    length (IL il) {
+    _length (IL il) {
         L l;
         L len;
 
