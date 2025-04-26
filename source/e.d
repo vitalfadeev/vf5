@@ -219,7 +219,7 @@ ImageCore {
     // image length
     //   parent   //
     //   content  // orig
-    //   stab     // 100 100
+    //   stat     // 100 100
     //   flex     // 50%
 
     void

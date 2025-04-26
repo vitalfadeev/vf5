@@ -160,7 +160,7 @@ _FlexLoc {
                 0;
     }
 }
-alias FlexLoc = _FlexLoc;
+alias Balance = _FlexLoc;
 
 // Way
 // 1: -x +x
@@ -175,22 +175,22 @@ alias Way = _Way!NIL;
 
 struct
 _DefLoc (uint N) {
-    Type[N]     type;  // fixed | balance
+    Type[N]     type;     // fixed | balance
     union {
-        Loc     stab;  // stable   // 10,10
-        FlexLoc flex;  // flexable // 1/100,50/100
+        Loc     stat;     // static   // 10,10
+        Balance balance;  // flexable // 1/100,50/100
     }
 
     enum
     Type : ubyte {
         _,
-        stab,  // 1,1
-        flex,  // 1/100 50/100
+        stat,     // 1,1
+        balance,  // 1/100 50/100
     }
 
     void
     set (LocType loc_type, L x_length, L x_capacity, L y_length, L y_capacity) {
-        if (loc_type == LocType.flex) {
+        if (loc_type == Type.balance) {
             this.loc_type[0]      = loc_type;
             this.loc_type[1]      = loc_type;
             this.flex.length[0]   = x_length;
@@ -218,8 +218,8 @@ _DefLoc (uint N) {
     void
     set (uint LOC_I, LocType loc_type, L l) {
         this.loc_type[LOC_I] = loc_type;
-        if (loc_type == LocType.stab) {
-            this.stab[LOC_I] = l;
+        if (loc_type == LocType.stat) {
+            this.stat[LOC_I] = l;
         }
     }
 
@@ -230,7 +230,7 @@ _DefLoc (uint N) {
             if (loc_type[i] == b.loc_type[i]) {
                 final
                 switch (loc_type[i]) {
-                    case LocType.stab : return (this.stab == b.stab);
+                    case LocType.stat : return (this.stat == b.stat);
                     case LocType.flex : return (this.flex == b.flex);
                 }
             }
@@ -247,14 +247,14 @@ struct
 _DefLength (uint N) {
     Type[N]     type;
     union {
-        Loc     stab;
+        Loc     stat;
         FlexLoc flex;
     }
 
     enum 
     Type {
         pare, // default
-        stab,
+        stat,
         flex,
         core,
         window,
@@ -269,8 +269,8 @@ _DefLength (uint N) {
     void
     set (uint LOC_I, LengthType type, L l) {
         this.type[LOC_I] = type;
-        if (loc_type == LocType.stab) {
-            this.stab[LOC_I] = l;
+        if (loc_type == LocType.stat) {
+            this.stat[LOC_I] = l;
         }
     }
 }

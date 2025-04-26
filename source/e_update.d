@@ -52,35 +52,41 @@ e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
 
 void
 e_update_loc (E* e, E* pre, Path path) {
-    // by group
-    //  r
-    //  l
-    //  c
-
-    // to way
-    //   < > ^ v
-    e_update_loc_way (e,pre,path);
-    //final
-    //switch (e.pos_type_x) {
-    //    case E.PosType._       : break;
-    //    case E.PosType.fixed   : break;
-    //    case E.PosType.way     : e_update_pos_step_way (e,pre,deep); break;
-    //    case E.PosType.balance : break;
-    //    case E.PosType.grid    : break;
-    //    case E.PosType.r       : break;
-    //    case E.PosType.l       : break;
-    //    case E.PosType.u       : break;
-    //    case E.PosType.d       : break;
-    //    case E.PosType.c       : break;
-    //}
+    final
+    switch (e.def_loc.type) {
+        case DefLoc.Type._       : break;
+        case DefLoc.Type.stat    : e_update_loc_stat    (e,pre,path); break;
+        case DefLoc.Type.balance : e_update_loc_balance (e,pre,path);break;
+    }
+    
     version (debug_update)
     writefln ("%s way: %s, pos: %s, size: %s, e: %s", replicate(" ", deep*2), e.way, e.pos, e.size, *e);
 }
 
 void
-e_update_loc_way (E* e, E* pre, Path path) {
+e_update_loc_stat (E* e, E* pre, Path path) {
+    e.loc = e.def_loc.stat;
+    
     if (pre !is null)
-        _e_update_loc_way_grouped (e,pre,path,e.way);
+    if (e.def_loc == pre.def_loc)
+        e_update_loc_way (e,pre,path);
+}
+
+void
+e_update_loc_balance (E* e, E* pre, Path path) {
+    auto able     = path.back.length;
+    auto length   = e.def_loc.balance.length;
+    auto capacity = e.def_loc.balance.balance;
+    e.loc = able * length / capacity;
+
+    if (pre !is null)
+    if (e.def_loc == pre.def_loc)
+        e_update_loc_way (e,pre,path);
+}
+
+void
+e_update_loc_way (E* e, E* pre, Path path) {
+    _e_update_loc_way_grouped (e,pre,path,e.way);
 }
 
 void
@@ -297,7 +303,7 @@ e_update_length (E* e, E* pre, update_UserEvent* ev, IL il, E* pare) {
     final
     switch (e.def_length.type[il]) {
         case DefLength.Type.pare   : e_update_length_outer  (e,pre,ev,il,pare); break;
-        case DefLength.Type.stab   : e_update_length_stab   (e,pre,ev,il); break;
+        case DefLength.Type.stat   : e_update_length_stat   (e,pre,ev,il); break;
         case DefLength.Type.flex   : e_update_length_flex   (e,pre,ev,il,pare); break;
         case DefLength.Type.core   : e_update_length_core   (e,pre,ev,il); break;
         case DefLength.Type.window : e_update_length_window (e,pre,ev,il); break;
@@ -314,8 +320,8 @@ e_update_length_pare (E* e, E* pre, update_UserEvent* ev, IL il, E* pare) {
 }
 
 void
-e_update_length_stab (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.length[il] = e.def_length.stab[il];
+e_update_length_stat (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e.length[il] = e.def_length.stat[il];
 }
 
 
@@ -350,7 +356,7 @@ e_update_core_length (E* e, E* pre, update_UserEvent* ev, IL il) {
     final
     switch (def_length.type) {
         case DefLength.Type.pare : break;
-        case DefLength.Type.stab   : e_update_core_length_stab  (e,pre,ev,il); break;
+        case DefLength.Type.stat   : e_update_core_length_stat  (e,pre,ev,il); break;
         case DefLength.Type.flex   : e_update_core_length_flex  (e,pre,ev,il); break;
         case DefLength.Type.core   : e_update_core_length_core  (e,pre,ev,il); break;
         case DefLength.Type.window : break;
@@ -359,8 +365,8 @@ e_update_core_length (E* e, E* pre, update_UserEvent* ev, IL il) {
 }
 
 void
-e_update_core_length_stab (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.core.length[il] = e.core.def_length.stab[il];
+e_update_core_length_stat (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e.core.length[il] = e.core.def_length.stat[il];
 }
 
 void
