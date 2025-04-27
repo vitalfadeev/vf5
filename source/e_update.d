@@ -75,9 +75,19 @@ e_update_loc_stat (E* e, E* pre, Path path) {
 void
 e_update_loc_balance (E* e, E* pre, Path path) {
     auto able     = path.back.length;
+    auto e_length = e.length;
     auto length   = e.def_loc.balance.length;
     auto capacity = e.def_loc.balance.balance;
     e.loc = able * length / capacity;
+
+    if (length < capacity / 2)  // left
+        e.loc = (able - e_length) * length / capacity;
+    else
+    if (length = capacity / 2)  // center
+        e.loc = (able - e_length) * length / capacity;
+    else
+    if (length > capacity / 2)  // right
+        e.loc = (able - e_length) * length / capacity;
 
     if (pre !is null)
     if (e.def_loc == pre.def_loc)
