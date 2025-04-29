@@ -46,17 +46,46 @@ e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
     // if max skip step & cchilds
     //if (e.size_w_type == E.SizeType.max)
     //if (e.size_h_type == E.SizeType.max)
-    e_update_loc (e,pre,path);
-    e_update_childs (e,path);
+    e_update_loc (e,pre,ev);
+    e_update_childs (e,ev);
 }
 
+//void
+//e_update_loc (E* e, E* pre, update_UserEvent* ev) {
+    //static
+    //foreach (il; EnumMembers!IL)
+    //    e_update_loc (e,pre,ev,il);
+//}
 void
-e_update_loc (E* e, E* pre, Path path) {
+e_update_loc (E* e, E* pre, update_UserEvent* ev) {
+    // STAT
+    //   to stat.loc
+    // BALANCE
+    // 1st e
+    //   to 0
+    // 2nd e
+    //   step to way
+    // Lst e
+    //   update group
+    //     calc group length
+    //     calc group offset
+    //     each e to e.loc + offset
+    // BALANCE GROUP
+    // 1st group e
+    //   to 0
+    // 2nd group e
+    //   step to way
+    // Lst group e
+    //   update group
+    //     calc group length
+    //     calc group offset
+    //     update each e loc to + offset
+
     final
     switch (e.def_loc.type) {
         case DefLoc.Type._       : break;
-        case DefLoc.Type.stat    : e_update_loc_stat    (e,pre,path); break;
-        case DefLoc.Type.balance : e_update_loc_balance (e,pre,path);break;
+        case DefLoc.Type.stat    : e_update_loc_stat    (e,pre,ev); break;
+        case DefLoc.Type.balance : e_update_loc_balance (e,pre,ev); break;
     }
     
     version (debug_update)
@@ -64,43 +93,75 @@ e_update_loc (E* e, E* pre, Path path) {
 }
 
 void
-e_update_loc_stat (E* e, E* pre, Path path) {
+e_update_loc_stat (E* e, E* pre, update_UserEvent* ev) {
     e.loc = e.def_loc.stat;
-    
-    if (pre !is null)
-    if (e.def_loc == pre.def_loc)
-        e_update_loc_way (e,pre,path);
 }
 
 void
-e_update_loc_balance (E* e, E* pre, Path path) {
-    auto able     = path.back.length;
+e_update_loc_balance (E* e, E* pre, update_UserEvent* ev) {
+    auto able     = ev.path.back.length;
     auto e_length = e.length;
     auto length   = e.def_loc.balance.length;
     auto capacity = e.def_loc.balance.balance;
-    e.loc = able * length / capacity;
+    bool fst_in_group = (pre !is null) || (e.def_loc != pre.def_loc);
 
-    if (length < capacity / 2)  // left
-        e.loc = (able - e_length) * length / capacity;
-    else
-    if (length = capacity / 2)  // center
-        e.loc = (able - e_length) * length / capacity;
-    else
-    if (length > capacity / 2)  // right
-        e.loc = (able - e_length) * length / capacity;
+    e.loc = (able - e_length) * length / capacity;
 
-    if (pre !is null)
-    if (e.def_loc == pre.def_loc)
-        e_update_loc_way (e,pre,path);
+    if (fst_in_group)
+        e.loc = e.loc.init;
+    else
+        e_update_loc_balance_way (e,pre,ev);
 }
 
 void
-e_update_loc_way (E* e, E* pre, Path path) {
-    _e_update_loc_way_grouped (e,pre,path,e.way);
+e_update_loc_balance_way (E* e, E* pre, update_UserEvent* ev) {
+    _e_update_loc_balance_way (e,pre,ev);
 }
 
 void
-e_update_childs (E* e, Path path) {
+_e_update_loc_balance_way (E* e, E* pre, update_UserEvent* ev) {
+    // reset loc if group != prev.group
+    auto pra        = ev.path.back;
+    auto limit      = pra.content.loc + pra.content.length;
+
+    e.loc = _e_update_loc_way (pre.loc,pre.length,limit,e.way);
+}
+
+Loc
+_e_update_loc_way (Loc pre_loc, Loc pre_length, Loc limit, Way way) {
+    auto loc = pre_loc;
+
+    auto il1 = way.v[0];
+    auto il2 = way.v[1];
+
+    auto way_length_1 = way.length[il1];
+    auto way_length_2 = way.length[il2];
+
+    if (way_length_1 != 0) {
+        // step x
+        loc[il1] += pre_length[il1];
+
+        // check xy limits
+        if (loc[il1] <= limit[il1]) {  // OK
+            //
+        }
+        else {  // reset x, step y
+            if (way_length_2 != 0) {
+                loc[il1]  = loc[il1].init;
+                loc[il2] += way_length_2;
+            } 
+            else {
+                // stay at last x,y
+            }
+        }
+    }
+
+    return loc;
+}
+
+
+void
+e_update_childs (E* e, update_UserEvent* ev) {
     // recursive
     if (e.has_childs) {
         // pre
@@ -180,45 +241,6 @@ e_update_childs (E* e, Path path) {
             }
         }
     }
-}
-
-void
-_e_update_loc_way_grouped (E* e, E* pre, Path path, Way way) {
-    // reset loc if group != prev.group
-    bool same_group = (pre.loc_def == e.loc_def);
-    auto loc    = same_group ? pre.loc    : Loc ();
-    auto length = same_group ? pre.length : Loc ();
-    auto limit  = path[$-1].content.loc + path[$-1].content.length;
-
-    e.loc = _e_update_loc_way (loc,length,limit,way);
-}
-
-Loc
-_e_update_loc_way (Loc pre_loc, Loc length, Loc limit, Way way) {
-    auto loc = pre_loc;
-
-    //
-    auto L1 = way[0];
-    auto L2 = way[1];
-
-    // step x
-    loc[L1] += length[L1];
-
-    // check xy limits
-    if (loc[L1] <= limit[L1]) {  // OK
-        //
-    }
-    else {  // reset x, step y
-        if (length[L2] != 0) {
-            loc[L1]  = loc[L1].init;
-            loc[L2] += length[L2];
-        } 
-        else {
-            // stay at last x,y
-        }
-    }
-
-    return loc;
 }
 
 void
