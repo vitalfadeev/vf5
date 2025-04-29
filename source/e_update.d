@@ -48,6 +48,8 @@ e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
     //if (e.size_h_type == E.SizeType.max)
     e_update_loc (e,pre,ev);
     e_update_childs (e,ev);
+    // go to the next e
+    e_update_length_loc__go_to_the_next_e (e); // using ev.path. try dn, try right, try up
 }
 
 //void
