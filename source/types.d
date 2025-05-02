@@ -13,7 +13,7 @@ const DEFAULT_FONT_SIZE = 12;
 alias L = int;  // length
 
 enum 
-IL {  // location
+IL {  // location index
     X = 0,
     Y = 1,
 };
@@ -148,19 +148,19 @@ has (Form4 a, Form1 b) {
 }
 
 struct 
-_FlexLoc {
-    Loc length;    // 0 50 100
-    Loc capacity;  // 100
+_Balance {
+    L length;    // 0 50 100
+    L capacity;  // 100
 
     auto
-    of (L l, IL il) {
+    of (L l) {
         return 
-            (capacity[il]) ?
-                l * length[il] / capacity[il] : 
+            (capacity) ?
+                l * length / capacity : 
                 0;
     }
 }
-alias Balance = _FlexLoc;
+alias Balance = _Balance;
 
 // Way
 // 1: -x +x
@@ -175,10 +175,15 @@ alias Way = _Way!NIL;
 
 struct
 _DefLoc (uint N) {
-    Type[N]     type;     // fixed | balance
-    union {
-        Loc     stat;     // static   // 10,10
-        Balance balance;  // flexable // 1/100,50/100
+    _Loc[N] loc;
+
+    struct
+    _Loc {        
+        Type        type;     // fixed | balance
+        union {
+            L       stat;     // static   // 10,10
+            Balance balance;  // balance  // 1/100,50/100
+        }
     }
 
     enum
@@ -189,53 +194,52 @@ _DefLoc (uint N) {
     }
 
     void
-    set (LocType loc_type, L x_length, L x_capacity, L y_length, L y_capacity) {
-        if (loc_type == Type.balance) {
-            this.loc_type[0]      = loc_type;
-            this.loc_type[1]      = loc_type;
-            this.flex.length[0]   = x_length;
-            this.flex.length[1]   = y_length;
-            this.flex.capacity[0] = x_capacity;
-            this.flex.capacity[1] = y_capacity;
+    set (Type type, L x_length, L x_capacity, L y_length, L y_capacity) {
+        if (type == Type.balance) {
+            this.type[0]             = type;
+            this.type[1]             = type;
+            this.balance.length[0]   = x_length;
+            this.balance.length[1]   = y_length;
+            this.balance.capacity[0] = x_capacity;
+            this.balance.capacity[1] = y_capacity;
         }
     }
 
     // X, LocType.flex,  0,1
     void
-    set (uint LOC_I, LocType loc_type, L length, L capacity) {
-        this.loc_type[LOC_I] = loc_type;
-        if (loc_type == LocType.flex) {
-            this.flex.length[LOC_I]   = length;
-            this.flex.capacity[LOC_I] = capacity;
+    set (IL il, Type type, L length, L capacity) {
+        this.loc[il].type = type;
+        if (type == Type.balance) {
+            this.loc[il].balance.length   = length;
+            this.loc[il].balance.capacity = capacity;
         }
     }
 
     void
-    set (uint LOC_I, LocType loc_type) {
-        this.loc_type[LOC_I] = loc_type;
+    set (IL il, Type type) {
+        this.type[il] = type;
     }
 
     void
-    set (uint LOC_I, LocType loc_type, L l) {
-        this.loc_type[LOC_I] = loc_type;
-        if (loc_type == LocType.stat) {
-            this.stat[LOC_I] = l;
-        }
+    set (IL il, Type type, L l) {
+        this.loc[il].type = type;
+        if (type == Type.stat)
+            this.loc[il].stat = l;
     }
 
     bool
     opEqual (typeof(this) b) {
         static
         foreach (i; 0..N) {
-            if (loc_type[i] == b.loc_type[i]) {
+            if (loc[i].type == b.loc[i].type) {
                 final
-                switch (loc_type[i]) {
-                    case LocType.stat : return (this.stat == b.stat);
-                    case LocType.flex : return (this.flex == b.flex);
+                switch (lov[i].type) {
+                    case Type.stat    : return (this.stat    == b.stat);
+                    case Type.balance : return (this.balance == b.balance);
                 }
             }
             else {
-                assert (0, "defferent loc types");
+                assert (0, "deferent loc types");
             }
         }
     }
@@ -245,33 +249,37 @@ alias DefLoc = _DefLoc!NIL;
 
 struct
 _DefLength (uint N) {
-    Type[N]     type;
-    union {
-        Loc     stat;
-        FlexLoc flex;
+    _Length[N] len;
+
+    struct
+    _Length {
+        Type        type;
+        union {
+            L       stat;
+            Balance balance;
+        }
     }
 
     enum 
     Type {
-        pare, // default
+        pra,   // default
         stat,
-        flex,
+        balance,
         core,
         window,
         max_,
     }
 
     void
-    set (uint LOC_I, LengthType type) {
-        this.type[LOC_I] = type;
+    set (IL il, Type type) {
+        this.len[il].type = type;
     }
 
     void
-    set (uint LOC_I, LengthType type, L l) {
-        this.type[LOC_I] = type;
-        if (loc_type == LocType.stat) {
-            this.stat[LOC_I] = l;
-        }
+    set (IL il, Type type, L l) {
+        this.len[il].type = type;
+        if (type == Type.stat)
+            this.len[il].stat = l;
     }
 }
 alias DefLength = _DefLength!NIL;

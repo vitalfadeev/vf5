@@ -33,10 +33,11 @@ root
 
 rect
   len          64 64
-  aura         16
-  aura.color   #008
+  way          r
+//  aura         16
+//  aura.color   #008
   borders      2 solid #ccc
-  text.fg      #ccc
+  text.color   #ccc
   text.font    /home/vf/src/vf5/img/PTSansCaption-Regular.ttf 16
 
 group-left

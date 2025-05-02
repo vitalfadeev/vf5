@@ -19,12 +19,12 @@ draw (SDL_Renderer* renderer, Loc loc, Path* path, E* e) {
 }
 
 void
-line (Loc loc, Loc pos2, W wid) {
+line (Loc loc, Loc loc2, L large) {
     // hickLineColor (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color)
 }
 
 void
-arc (Loc loc, Loc pos2, W wid) {
+arc (Loc loc, Loc loc2, L large) {
     // aaArcColor (SDL_Renderer * renderer, float cx, float cy, float rx, float ry, float start, float end, float thick, Uint32 color);
     // thickArcColor (SDL_Renderer * renderer, Sint16 x, Sint16 y, Sint16 rad, Sint16 start, Sint16 end, Uint32 color, Uint8 thick);
 
@@ -77,7 +77,7 @@ draw_rect (SDL_Renderer* renderer, int x, int y, int w, int h, int bold) {
 }
 
 void
-image (SDL_Renderer* renderer, IMAGE_PTR ptr, X x, Y y, W w, H h) {
+image (SDL_Renderer* renderer, IMAGE_PTR ptr, L x, L y, L w, L h) {
     SDL_Surface* surface = ptr;
     SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
 
@@ -92,7 +92,7 @@ image (SDL_Renderer* renderer, IMAGE_PTR ptr, X x, Y y, W w, H h) {
 
 
 void
-_text (SDL_Renderer* renderer, Text.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Loc length) {
+_text (SDL_Renderer* renderer, TextCore.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Length length) {
     // clip w h
     // from text.rects
     foreach (ref rec; rects)
@@ -180,7 +180,7 @@ color_decor (Color color, Color_tcb tcb) {
 
 
 void
-draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, W t, W r, W b, W l) {
+draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, L t, L r, L b, L l) {
     // 1 2 3
     // 8   4
     // 7 6 5
@@ -239,23 +239,6 @@ draw_inner_image (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
 void
 draw_inner_childs (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
     fill (renderer,loc,length,e.color);
-}
-
-void
-draw (SDL_Renderer* renderer, Loc loc, Length length, E4* e) {
-    //
-}
-void
-draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3* e) {
-    //
-}
-void
-draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3.E2* e) {
-    //
-}
-void
-draw (SDL_Renderer* renderer, Loc loc, Length length, E4.E3.E2.E1* e) {
-    //
 }
 
 

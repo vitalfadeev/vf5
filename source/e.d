@@ -169,42 +169,46 @@ E {
             text,
             childs,
         }
+    }
 
-        struct
-        Flags {
-            bool hidden;
-            bool deleted;
-        }
+    struct
+    Flags {
+        bool hidden;
+        bool deleted;
+    }
 
-        struct
-        On {
-            string    event;  // click
-            TString[] action; // audacious --play-pause
-        }
+    struct
+    On {
+        string    event;  // click
+        TString[] action; // audacious --play-pause
+    }
 
-        struct
-        Ones {
-            On[] s;
-            alias s this;
-        }
+    struct
+    Ones {
+        On[] s;
+        alias s this;
+    }
+
+    this (Length length) {  // E (Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H))
+        this.core.length = length;
     }
 }
 
 mixin template 
 Core_Aura_Header (Type) {
-    Type      type;
+    E.Core.Type   type;
     //
-    Loc       loc;
-    Length    length;
+    Loc           loc;
+    Length        length;
     //
-    DefLoc    def_loc;
-    DefLength def_length;    
+    DefLoc        def_loc;
+    DefLength     def_length;    
 }
 
 
 struct
 ImageCore {
-    Type          type = E.Core.Type.image;
+    E.Core.Type   type = E.Core.Type.image;
     //
     Loc           loc;
     Length        length;
@@ -212,6 +216,7 @@ ImageCore {
     DefLoc        def_loc;
     DefLength     def_length;
     //
+    Color         color;
     Color         bg;
     string        def_src;     // "abc.png"
     IMAGE_PTR     ptr;
@@ -247,7 +252,7 @@ ImageCore {
 
 struct
 TextCore {
-    Type          type = E.Core.Type.text;
+    size_t        type = E.Core.Type.text;
     //
     Loc           loc;
     Length        length;
@@ -255,12 +260,13 @@ TextCore {
     DefLoc        def_loc;
     DefLength     def_length;
     //
-    Color      bg;
-    FONT_PTR   ptr;
-    TextRect[] rects;
+    Color         color;
+    Color         bg;
+    FONT_PTR      ptr;
+    TextRect[]    rects;
     // def
-    DefFont    def_font;    //
-    string     s;           // "abc"
+    DefFont       def_font;    //
+    string        s;           // "abc"
 
     struct 
     DefFont {
@@ -308,7 +314,7 @@ TextCore {
 
 struct
 ChildsCore {
-    Type          type = E.Core.Type.childs;
+    E.Core.Type   type = E.Core.Type.childs;
     //
     Loc           loc;
     Length        length;
@@ -316,11 +322,11 @@ ChildsCore {
     DefLoc        def_loc;
     DefLength     def_length;
     //
-    E[]   s;  // no links
+    E[]           s;  // no links
 
     void
     load () {
-        load_e_text (e);
+        //load_e_childs (e);
     }
 
     L

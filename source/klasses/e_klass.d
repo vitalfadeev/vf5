@@ -10,7 +10,7 @@ import e : E;
 import e_update : 
     go_on_event, apply_e_klasses, apply_e_fields,
     load_e_image, load_e_font, load_e_colors, load_e_text,
-    e_update_size_pos, load_e_childs,
+    load_e_childs,
     doc_get_klass_field_value;
 import e_klass_draw;
 import e_generator : Generator;
@@ -115,57 +115,58 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         //case "loc.balance.x"     : set_loc_balance_x      (e,values); break;
         //case "loc.balance.y"     : set_loc_balance_y      (e,values); break;
         //case "organize.childs"   : set_organize_childs    (e,values); break;
+        case "len"               : set_length             (e,values); break;
         case "length"            : set_length             (e,values); break;
         case "length.x"          : set_length_x           (e,values); break;
         case "length.y"          : set_length_y           (e,values); break;
         //
         case "way"               : set_way                (e,values); break;
         //
-        case "e.borders"         : set_borders            (e,values); break;
-        case "borders"           : set_borders            (e,values); break;
-        case "borders.loc"       : set_borders_loc        (e,values); break;
-        case "borders.len"       : set_borders_ken        (e,values); break;
-        case "borders.color"     : set_borders_color      (e,values); break;
+        //case "e.borders"         : set_borders            (e,values); break;
+        //case "borders"           : set_borders            (e,values); break;
+        //case "borders.loc"       : set_borders_loc        (e,values); break;
+        //case "borders.len"       : set_borders_ken        (e,values); break;
+        //case "borders.color"     : set_borders_color      (e,values); break;
         //
-        case "aura"              : set_aura               (e,values); break;
-        case "aura.loc"          : set_aura_loc           (e,values); break;
-        case "aura.len"          : set_aura_len           (e,values); break;
-        case "aura.color"        : set_aura_color         (e,values); break;
+        //case "aura"              : set_aura               (e,values); break;
+        //case "aura.loc"          : set_aura_loc           (e,values); break;
+        //case "aura.len"          : set_aura_len           (e,values); break;
+        //case "aura.color"        : set_aura_color         (e,values); break;
         //
-        case "content"           : set_content            (e,values); break;
-        case "content.loc"       : set_content_loc        (e,values); break;
-        case "content.len"       : set_content_len        (e,values); break;
-        case "content.color"     : set_aura_color         (e,values); break;
-        case "content.size.w"    : set_content_size_w     (e,values); break;
-        case "content.size.h"    : set_content_size_h     (e,values); break;
-        case "content.size"      : set_content_size       (e,values); break;
-        case "content.size.type" : set_content_siztype    (e,values); break;
-        case "bg"                : set_bg                 (e,values); break;
-        case "content.color"     : set_bg                 (e,values); break;
-        //
-        case "content.image"     : set_content_image      (e,values); break;
-        case "content.text"      : set_content_text       (e,values); break;
-        //
+        //case "content"           : set_content            (e,values); break;
+        //case "content.loc"       : set_content_loc        (e,values); break;
+        //case "content.len"       : set_content_len        (e,values); break;
+        //case "content.color"     : set_aura_color         (e,values); break;
+        //case "content.size.w"    : set_content_size_w     (e,values); break;
+        //case "content.size.h"    : set_content_size_h     (e,values); break;
+        //case "content.size"      : set_content_size       (e,values); break;
+        //case "content.size.type" : set_content_siztype    (e,values); break;
+        //case "bg"                : set_bg                 (e,values); break;
+        //case "content.color"     : set_bg                 (e,values); break;
+        // core
+        //case "content.image"     : set_content_image      (e,values); break;
+        //case "content.text"      : set_content_text       (e,values); break;
+        // image
         case "image"             : set_content_image      (e,values); break;
-        //
-        case "text"              : set_content_text       (e,values); break;
-        case "text.color"        : set_text_fg            (e,values); break;
-        case "text.fg"           : set_text_fg            (e,values); break;
+        // text
+        case "text"              : set_text               (e,values); break;
+        case "text.color"        : set_text_color         (e,values); break;
+        case "text.fg"           : set_text_color         (e,values); break;
         case "text.bg"           : set_text_bg            (e,values); break;
-        case "text.pos.type"     : set_text_pos_type      (e,values); break;
-        case "text.font"         : set_content_text_font  (e,values); break;
-        case "text.font.family"  : set_content_text_font_family (e,values); break;
-        case "text.font.size"    : set_content_text_font_size   (e,values); break;
-        case "text.font.file"    : set_content_text_font_file   (e,values); break;
+        //case "text.pos.type"     : set_text_pos_type      (e,values); break;
+        case "text.font"         : set_text_font          (e,values); break;
+        case "text.font.family"  : set_text_font_family   (e,values); break;
+        case "text.font.size"    : set_text_font_size     (e,values); break;
+        case "text.font.file"    : set_text_font_file     (e,values); break;
         //
-        case "generator"         : set_generator          (e,values); break;
-        case "generator.template": set_generator_template (e,values); break;
-        case "generator.fields"  : set_generator_fields   (e,values); break;
-        case "template"          : set_generator_template (e,values); break;
+        //case "generator"         : set_generator          (e,values); break;
+        //case "generator.template": set_generator_template (e,values); break;
+        //case "generator.fields"  : set_generator_fields   (e,values); break;
+        //case "template"          : set_generator_template (e,values); break;
         //
         case "hidden"            : set_hidden             (e,values); break;
         //
-        case "popup"             : set_popup              (e,values); break;
+        //case "popup"             : set_popup              (e,values); break;
         //
         case "on"                : set_on                 (e,values); break;
         //
@@ -447,35 +448,32 @@ set_length (E* e, TString[] values) {
 
 void
 set_length_x (E* e, TString[] values) {
-    enum X = 0;
-    enum Y = 1;
     if (values.length) {
-        _set_length (X,e,values[0].s);
+        _set_length (IL.X,e,values[0].s);
     }
 }
 
 void
 set_length_y (E* e, TString[] values) {
-    enum X = 0;
-    enum Y = 1;
     if (values.length) {
-        _set_length (Y,e,values[0].s);
+        _set_length (IL.Y,e,values[0].s);
     }
 }
 
 void
-_set_length (uint LOC_I, E* e, string value) {
+_set_length (IL il, E* e, string value) {
     switch (value) {
-        case "stab"    : e.def_length.set (LOC_I, LengthType.stab);  break;
-        case "content" : e.def_length.set (LOC_I, LengthType.content); break;
-        case "parent"  : e.def_length.set (LOC_I, LengthType.parent);  break;
-        case "window"  : e.def_length.set (LOC_I, LengthType.window);  break;
-        case "max"     : e.def_length.set (LOC_I, LengthType.max_);  break;
-        default : 
+        case "pra"     : e.def_length.set (il, DefLength.Type.pra);    break;
+        case "stat"    : e.def_length.set (il, DefLength.Type.stat);   break;
+        case "balance" : e.def_length.set (il, DefLength.Type.balance);   break;
+        case "core"    : e.def_length.set (il, DefLength.Type.core);   break;
+        case "window"  : e.def_length.set (il, DefLength.Type.window); break;
+        case "max"     : e.def_length.set (il, DefLength.Type.max_);   break;
+        default        : 
             if (value.isNumeric ())
-                e.def_length.set (LOC_I, LengthType.fixed, value.to!L);
+                e.def_length.set (il, DefLength.Type.stat, value.to!L);
             else
-                throw new Exception (format!"unsupported length (%s): %s" (LOC_I, value));
+                throw new Exception (format!"unsupported length (%s): %s" (il, value));
     }
 }
 
@@ -597,18 +595,18 @@ set_content_image (E* e, TString[] values) {
 
 
 void
-set_content_text (E* e, TString[] values) {
+set_text (E* e, TString[] values) {
     if (values.length) {
-        e.content.text.s = values.join (" ");
+        e.core.text.s = values.join (" ");
     }
 }
 
 void
-set_text_fg (E* e, TString[] values) {
+set_text_color (E* e, TString[] values) {
     if (values.length) {
         Color c;
-        if (doc_parse_color (e, values, &c))
-            e.content.text.fg = c;
+        if (doc_parse_color (e,values,&c))
+            e.core.text.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }
@@ -619,21 +617,21 @@ set_text_bg (E* e, TString[] values) {
     if (values.length) {
         Color c;
         if (doc_parse_color (e, values, &c))
-            e.content.text.bg = c;
+            e.core.text.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
     }
 }
 
-void
-set_text_pos_type (E* e, TString[] values) {
-    if (values.length) {
-        switch (values[0].s) {
-            case "_"       : e.content.text.pos_type = E.PosType._; break;
-            default        : e.content.text.pos_type = E.PosType._;
-        }
-    }
-}
+//void
+//set_text_pos_type (E* e, TString[] values) {
+//    if (values.length) {
+//        switch (values[0].s) {
+//            case "_"       : e.content.text.pos_type = E.PosType._; break;
+//            default        : e.content.text.pos_type = E.PosType._;
+//        }
+//    }
+//}
 
 void
 set_content_size_w (E* e, TString[] values) {
@@ -710,47 +708,47 @@ set_content_siztype (E* e, TString[] values) {
 }
 
 void
-set_content_text_font (E* e, TString[] values) {
+set_text_font (E* e, TString[] values) {
     if (values.length >= 2) {
-        set_content_text_font_file (e,values[0..1]);
-        set_content_text_font_size (e,values[1..2]);
+        set_text_font_file (e,values[0..1]);
+        set_text_font_size (e,values[1..2]);
     }
     if (values.length >= 1) {
-        set_content_text_font_file (e,values[0..1]);
+        set_text_font_file (e,values[0..1]);
     }
 }
 
 void
-set_content_text_font_file (E* e, TString[] values) {
+set_text_font_file (E* e, TString[] values) {
     if (values.length) {
-        e.content.text.font.file = values[0].s;
+        e.core.text.def_font.file = values[0].s;
     }
 }
 
 void
-set_content_text_font_family (E* e, TString[] values) {
+set_text_font_family (E* e, TString[] values) {
     if (values.length) {
-        e.content.text.font.family = values[0].s;
+        e.core.text.def_font.family = values[0].s;
     }
 }
 
 void
-set_content_text_font_size (E* e, TString[] values) {
+set_text_font_size (E* e, TString[] values) {
     if (values.length) {
-        e.content.text.font.size = values[0].s.to!ubyte;
+        e.core.text.def_font.size = values[0].s.to!ubyte;
     }
 }
 
-void
-set_bg (E* e, TString[] values) {
-    if (values.length) {
-        Color c;
-        if (doc_parse_color (e,values, &c))
-            e.content.color = c;
-        else
-            throw new Exception ("unsupported color: " ~ values.to!string);
-    }
-}
+//void
+//set_bg (E* e, TString[] values) {
+//    if (values.length) {
+//        Color c;
+//        if (doc_parse_color (e,values, &c))
+//            e.content.color = c;
+//        else
+//            throw new Exception ("unsupported color: " ~ values.to!string);
+//    }
+//}
 
 void
 set_generator (E* e, TString[] values) {

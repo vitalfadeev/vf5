@@ -43,13 +43,11 @@ e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
 
     // size
     e_update_length (e,pre,ev);
-    // if max skip step & cchilds
+    // if max skip step & childs
     //if (e.size_w_type == E.SizeType.max)
     //if (e.size_h_type == E.SizeType.max)
     e_update_loc (e,pre,ev);
-    e_update_childs (e,ev);
-    // go to the next e
-    e_update_length_loc__go_to_the_next_e (e); // using ev.path. try dn, try right, try up
+    e_update_childs (e,pre,ev);
 }
 
 //void
@@ -163,85 +161,37 @@ _e_update_loc_way (Loc pre_loc, Loc pre_length, Loc limit, Way way) {
 
 
 void
-e_update_childs (E* e, update_UserEvent* ev) {
+e_update_childs (E* e, E* pre, update_UserEvent* ev) {
     // recursive
     if (e.has_childs) {
-        // pre
-        auto able = e.content.size;
-        // ...for move groups to left,center
-//assert (0, "used_by_type_w used_by_type_h -> ...[by w,h] used_by_type_wh");
-        COORD[ORDS][E.PosType.max+1] used_by_type;
-        COORD[ORDS][E.PosType.max+1] offset_by_type;
-        // ...for detect max size
-        int  nw;
-        int  nh;
-        Loc  used;
-        writefln ("able: %s, e: %s", able, *e);
+        // go to the next e
+        e_update_length_loc__go_to_the_next_e (e,pre,ev); // using ev.path. try dn, try right, try up
+    }
+}
 
-        // update childs size & pos
-        foreach (_pre,_e; WalkChilds (e)) {
-            e_update_size_pos (_e,_pre,path~=_e);
+void
+e_update_length_loc__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
+    // try dn
+    if (e.core.childs.length > 0) {
+        auto next = &e.core.childs[0];
+        ev.path ~= e;
+        // ... next
+        ev.path.popBack ();
+        return;
+    }
 
-            writefln ("  pos: %s, size: %s, _e: %s", _e.pos, _e.size, *_e);
-
-            auto m = _e.pos + _e.size;
-            used_by_type[_e.pos_type[ORD.X]][ORD.X] = max (used_by_type[_e.pos_type[ORD.X]][ORD.X], m.x);
-            used_by_type[_e.pos_type[ORD.Y]][ORD.Y] = max (used_by_type[_e.pos_type[ORD.Y]][ORD.Y], m.y);
-            used = max (used,m);
-
-            if (_e.size_type[ORD.X] == E.SizeType.max_)
-                nw++;
-            if (_e.size_type[ORD.Y] == E.SizeType.max_)
-                nh++;
+    // try right
+    {
+        auto pra = ev.path.back;
+        foreach (next; pra.core.childs.s.find (e)) {
+            // ... next
         }
+        return;
+    }
 
-        // loc post. move group
-        //   left   - ok
-        //   right  - each + (able.width - group.width)
-        //   center - each + ((able.width - group.width) / 2)
-        // size
-        //   detect max
-        offset_by_type[E.PosType.balance][ORD.X] = (able.w - used_by_type[E.PosType.balance][ORD.X]) / 2;;
-        writefln ("");
-        writefln ("2: able: %s, e: %s", able, *e);
-        foreach (_pre,_e; WalkChilds (e)) {
-            // update loc right , center
-            auto loc = _e.pos;
-
-            writefln ("-:   pos: %s, size: %s, _e: %s", loc, _e.size, *_e);
-
-            auto offset = offset_by_type[_e.pos_type[ORD.X]];
-            loc += offset;
-
-            if (offset != Loc (0,0))
-                _e_update_pos (_e,pos);
-            writefln ("+:   pos: %s, size: %s, _e: %s", loc, _e.size, *_e);
-
-            // update size max
-            if (nw > 0) {
-                auto one_max_size_w = (able.w - used.w) / nw;
-                _e_update_size_w (
-                    _e, 
-                    one_max_size_w, 
-                    one_max_size_w - _e.aura.size.w - _e.aura.size.w
-                );
-            }
-
-            if (nh > 0) {
-                auto one_max_size_h = (able.h - used.h) / nh;
-                _e_update_size_h (
-                    _e, 
-                    one_max_size_h, 
-                    one_max_size_h - _e.aura.size.h - _e.aura.size.h
-                );
-            }
-
-            // if max then reupdate childs loc & size 
-            if (nw > 0 || nh > 0) {
-                e_update_pos_step (_e,_pre,deep);
-                e_update_childs (_e,deep);
-            }
-        }
+    // try up
+    {
+        ev.path.popBack ();
     }
 }
 
@@ -428,26 +378,6 @@ void
 e_update_core_length_ (Core) (E* e, E* pre, update_UserEvent* ev, IL il, Core* core) {
     e.core.length[il] = core._length (il);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void
-_update_content_size_w (E* e, W w) {
-    e.content.size.w = (w > 0) ? w : 0;
-}
-
 
 //
 void
