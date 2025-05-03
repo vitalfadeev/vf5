@@ -309,7 +309,7 @@ TextCore {
 
     void
     draw (SDL_Renderer* renderer) {
-        e_klass_draw.draw_text (renderer,rects,ptr,color,loc,len);
+        e_klass_draw.draw_text (renderer,s,rects,ptr,color,loc,len);
     }
 }
 

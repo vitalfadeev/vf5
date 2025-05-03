@@ -80,12 +80,13 @@ e_update_loc (E* e, E* pre, update_UserEvent* ev) {
     //     update each e loc to + offset
 
     static
-    foreach (il; EnumMembers!IL)
-        e.loc = e.def_loc.s[il].of (
+    foreach (il; EnumMembers!IL) {
+        e.outer.loc = e.outer.def_loc.s[il].of (
             (ev.path.empty) ?               // is root ?
                 ev.window.len[il] :         //   window
                 ev.path.back.inner.len[il]  //   pare
         );
+    }
 
     if ((pre is null) || (e.def_loc != pre.def_loc))  // fst_in_group
         e.loc = e.loc.init;

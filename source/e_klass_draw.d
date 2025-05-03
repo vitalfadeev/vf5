@@ -43,14 +43,14 @@ draw_image (SDL_Renderer* renderer, IMAGE_PTR ptr, Loc loc, Len len) {
 }
 
 void
-draw_text (SDL_Renderer* renderer, TextCore.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Len len) {
+draw_text (SDL_Renderer* renderer, string s, TextCore.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Len len) {
     // clip w h
     // from text.rects
-    foreach (ref rec; rects)
-        if (rec.s.length) {
-            auto char_loc = rec.loc + loc;
-            one_string (renderer, rec.s, font, color, char_loc, rec.len);
-        }
+    foreach (i, wchar wc; s) {
+        auto rec = &rects[i];
+        auto char_loc = rec.loc + loc;
+        one_string (renderer, wc, font, color, char_loc, rec.len);
+    }
 }
 
 void
@@ -117,27 +117,34 @@ draw_rect (SDL_Renderer* renderer, int x, int y, int w, int h, int bold) {
 
 
 Loc
-get_text_size (string s, FONT_PTR font, Color color) {
+get_text_size (wchar wc, FONT_PTR font, Color color) {
     Loc loc;
-    auto ret = TTF_SizeUTF8 (font, s.toStringz, &loc[0], &loc[1]);
+    wchar[2] ws;
+    ws[0] = wc;
+    ws[1] = '\0';
+    auto ret = TTF_SizeUNICODE (font, cast (const(ushort)*) (ws.ptr), &loc[0], &loc[1]);
     return loc;
 }
 
 
 void
-one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color, Loc loc, Loc length) {
-    auto image = _one_string (renderer,s,font,color);
+one_string (SDL_Renderer* renderer, wchar wc, FONT_PTR font, Color color, Loc loc, Loc length) {
+    auto image = _one_string (renderer,wc,font,color);
     _render_texture (renderer,image,loc,length);
 }
 
 SDL_Texture*
-_one_string (SDL_Renderer* renderer, string s, FONT_PTR font, Color color) {
+_one_string (SDL_Renderer* renderer, wchar wc, FONT_PTR font, Color color) {
     // e.text.s = s
     // each c; s
     //   e.rects = Rect (c)
     // one_char (e.rects[0].s)
 
-    SDL_Surface* surf = TTF_RenderUTF8_Blended (font, s.toStringz, color);
+    wchar[2] ws;
+    ws[0] = wc;
+    ws[1] = '\0';
+
+    SDL_Surface* surf = TTF_RenderUNICODE_Blended (font, cast (const(ushort)*) (ws.ptr), color);
     if (surf is null)
         throw new TTFException ("TTF_RenderText");
 
@@ -162,13 +169,6 @@ _render_texture (SDL_Renderer* renderer, SDL_Texture* tex, Loc loc, Loc length) 
 void 
 _render_texture (SDL_Renderer* renderer, SDL_Texture* tex, SDL_Rect dst) {
     SDL_RenderCopy (renderer, tex, null, &dst);
-}
-
-// e.pos  = border + pad + content
-// e.size = border + pad + content
-Loc
-e_loc (E* e) {
-    return e.loc;
 }
 
 void
