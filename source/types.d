@@ -10,21 +10,19 @@ const DEFAULT_FONT_FILE = "/home/vf/src/vf5/img/PTSansCaption-Regular.ttf";
 const DEFAULT_FONT_SIZE = 12;
 
 
-alias L = int;  // length
+alias L    = int;  // length
+alias Deep = int;
 
 enum 
-IL {  // location index
+IL {  // index of location
     X = 0,
     Y = 1,
 };
-enum NIL = IL.max+1;     // N locations: 1 = X, 2 = XY, 3 = XYZ
-alias Loc    = _Loc!NIL;  // 2 coords: x,y
-alias Length = Loc;      // 2 coords: x,y
-alias Deep   = int;
+enum NL = IL.max+1;  // N locations: 1 = X, 2 = XY, 3 = XYZ
 
 struct
-_Loc (uint N) {  // SIMD vector
-    L[N] s;
+_Loc (uint N) {  
+    L[N] s;  // SIMD vector
 
     this (L[N] s) {
         this.s = s;
@@ -80,11 +78,13 @@ _Loc (uint N) {  // SIMD vector
         return typeof (this) (_s);
     }
 }
+alias Loc = _Loc!NL;
+alias Len = _Loc!NL;
 
 struct
-Loca {
-    Loc loc;   
-    Loc length;
+LocLen {
+    Loc loc;
+    Len len;
 }
 
 
@@ -148,19 +148,18 @@ has (Form4 a, Form1 b) {
 }
 
 struct 
-_Balance {
-    L length;    // 0 50 100
-    L capacity;  // 100
+LC {
+    L len;      // length   : 0 50 100
+    L cap = 1;  // capacity : 100
 
     auto
     of (L l) {
         return 
-            (capacity) ?
-                l * length / capacity : 
+            (cap) ?
+                l * len / cap : 
                 0;
     }
 }
-alias Balance = _Balance;
 
 // Way
 // 1: -x +x
@@ -168,121 +167,86 @@ alias Balance = _Balance;
 // 3: -x +x  -y +y  -z +z
 struct
 _Way (uint N) {
-    ubyte[N] v;    // x y z, x y x, y x x, x x x
-        Loc  length; // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
-}
-alias Way = _Way!NIL;
-
-struct
-_DefLoc (uint N) {
-    _Loc[N] loc;
+    S[N] s;
 
     struct
-    _Loc {        
-        Type        type;     // fixed | balance
-        union {
-            L       stat;     // static   // 10,10
-            Balance balance;  // balance  // 1/100,50/100
-        }
-    }
-
-    enum
-    Type : ubyte {
-        _,
-        stat,     // 1,1
-        balance,  // 1/100 50/100
+    S {
+        IL v;  // x y z, x y x, y x x, x x x
+        L  l;  // 1 16 16, 1 16 0, 1 16 0, 1 0 0, -1 0 0
     }
 
     void
-    set (Type type, L x_length, L x_capacity, L y_length, L y_capacity) {
-        if (type == Type.balance) {
-            this.type[0]             = type;
-            this.type[1]             = type;
-            this.balance.length[0]   = x_length;
-            this.balance.length[1]   = y_length;
-            this.balance.capacity[0] = x_capacity;
-            this.balance.capacity[1] = y_capacity;
-        }
+    set (IL il, IL v, L l) {
+        auto _s = s[il];
+        _s.v = v;
+        _s.l = l;
+    }
+}
+alias Way = _Way!NL;
+
+struct
+_DefLoc (uint N) {
+    LC[N] s;
+
+    void
+    set (L x_len, L x_cap, L y_len, L y_cap) {
+        this.s[0].len = x_len;
+        this.s[0].cap = x_cap;
+        this.s[1].len = y_len;
+        this.s[1].cap = y_cap;
     }
 
     // X, LocType.flex,  0,1
     void
-    set (IL il, Type type, L length, L capacity) {
-        this.loc[il].type = type;
-        if (type == Type.balance) {
-            this.loc[il].balance.length   = length;
-            this.loc[il].balance.capacity = capacity;
-        }
-    }
-
-    void
-    set (IL il, Type type) {
-        this.type[il] = type;
-    }
-
-    void
-    set (IL il, Type type, L l) {
-        this.loc[il].type = type;
-        if (type == Type.stat)
-            this.loc[il].stat = l;
+    set (IL il, L len, L cap=1) {
+        auto _s = s[il];
+        _s.len = len;
+        _s.cap = cap;
     }
 
     bool
     opEqual (typeof(this) b) {
-        static
-        foreach (i; 0..N) {
-            if (loc[i].type == b.loc[i].type) {
-                final
-                switch (lov[i].type) {
-                    case Type.stat    : return (this.stat    == b.stat);
-                    case Type.balance : return (this.balance == b.balance);
-                }
-            }
-            else {
-                assert (0, "deferent loc types");
-            }
-        }
+        return (s == b.s);
     }
 }
-alias DefLoc = _DefLoc!NIL;
+alias DefLoc = _DefLoc!NL;
 
 
 struct
-_DefLength (uint N) {
-    _Length[N] len;
+_DefLen (uint N) {
+    S[N] s;
 
     struct
-    _Length {
-        Type        type;
-        union {
-            L       stat;
-            Balance balance;
-        }
-    }
-
-    enum 
-    Type {
-        pra,   // default
-        stat,
-        balance,
-        core,
-        window,
-        max_,
+    S {
+        LC   lc;
+        bool bycore;  // 0 - by pare, 1 - by core
+        bool max;     // 0 - ...    , 1 - max of able
     }
 
     void
-    set (IL il, Type type) {
-        this.len[il].type = type;
+    set (IL il, L len, L cap=1) {
+        auto _s = s[il];
+        _s.lc.len = len;
+        _s.lc.cap = cap;
+        _s.max    = false;
     }
 
     void
-    set (IL il, Type type, L l) {
-        this.len[il].type = type;
-        if (type == Type.stat)
-            this.len[il].stat = l;
+    set_max (IL il) {
+        s[il].max = true;
+    }
+
+    void
+    set_bypare (IL il) {
+        s[il].bycore = false;
+    }
+
+    void
+    set_bycore (IL il) {
+        s[il].bycore = true;
     }
 }
-alias DefLength = _DefLength!NIL;
+alias DefLen = _DefLen!NL;
 
 
 struct
@@ -298,147 +262,9 @@ Window {
     }
 
     Loc
-    length () {
+    len () {
         Loc loc;
         SDL_GetWindowSize (_super, &loc[0], &loc[1]);
         return loc;
     }
 }
-
-
-//alias Limit = Pos;
-
-/*
-struct 
-Pos {
-    union {
-        struct {
-            X x;         // 0..16385
-            Y y;         // 0..16385
-        }
-        COORD[ORD] v;
-    }
-
-    Pos
-    opBinary (string op : "+") (Loc  size) {
-        return Loc (x+size.w, y+size.h);
-    }
-
-    Pos
-    opBinary (string op : "-") (Loc  size) {
-        return Loc (x-size.w, y-size.h);
-    }
-
-    Pos
-    opBinary (string op : "+") (Loc b) {
-        return Loc ((x+b.x).to!W, (y+b.y).to!H);
-    }
-
-    Pos
-    opBinary (string op : "-") (Loc b) {
-        return Loc ((x-b.x).to!W, (y-b.y).to!H);
-    }
-
-    void
-    opOpAssign (string op : "+") (Loc b) {
-        x += b.x;
-        y += b.y;
-    }
-
-    int
-    opCmp (Loc b) {
-        if (x.v == b.v)
-            return 0;
-        else
-        if (x.v > b.v)
-            return 1;
-        else
-            return -1;
-    }
-
-
-    void
-    opOpAssign (string op : "-") (Loc b) {
-        x -= b.x;
-        y -= b.y;
-    }
-
-    void*
-    toVoidPtr () {
-        struct
-        VoidPtr {
-            union {
-                Loc   pos;
-                void* ptr;
-            }
-        }
-        return VoidPtr (this).ptr;
-    }
-
-    static
-    Pos
-    from_VoidPtr (void* ptr) {
-        struct
-        VoidPtr {
-            union {
-                void* ptr;
-                Loc   pos;
-            }
-        }
-        return VoidPtr (ptr).pos;
-    }
-}
-*/
-
-/*
-struct
-Loc  {
-    union {
-        struct {
-            W w;         // 0..16385 
-            H h;         // 0..16385
-        };
-        COORD[ORDS] v;
-    }
-    alias x = w;
-    alias y = h;
-
-    Size
-    opBinary (string op : "+") (Loc  b) {
-        return Loc ((w+b.w).to!W, (h+b.h).to!H);
-    }
-
-    Size
-    opBinary (string op : "-") (Loc  b) {
-        return Loc ((w-b.w).to!W, (h-b.h).to!H);
-    }
-
-    Size
-    opBinary (string op : "/") (int b) {
-        return Loc ((w/b).to!W, (h/b).to!H);
-    }
-
-    void
-    opOpAssign (string op : "+") (Loc  b) {
-        w += b.w;
-        h += b.h;
-    }
-
-    void
-    opOpAssign (string op : "-") (Loc  b) {
-        w -= b.w;
-        h -= b.h;
-    }
-}
-*/
-
-/*
-bool
-pos_in_rect (Loc loc, Loc rect_pos, Loc  rect_size) {
-    if (rect_pos.x <= pos.x && rect_pos.x + rect_size.w > pos.x)
-    if (rect_pos.y <= pos.y && rect_pos.y + rect_size.h > pos.y)
-        return true;
-
-    return false;
-}
-*/

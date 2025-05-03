@@ -167,6 +167,37 @@ Klasses {  // index of all klasses
         return false;
     }
 
+    bool
+    has (Klass* kls) {
+        foreach (_kls; s)
+            if (_kls == kls)
+                return true;
+
+        return false;
+    }
+
+    void
+    remove (Klass* kls) {
+        import std.algorithm.searching : countUntil;
+        import std.algorithm : remove;
+
+        auto i = s.countUntil (kls);
+        if (i != -1)
+            s = s.remove (i);
+    }
+
+    void
+    event (E* e, Event* ev) {
+        foreach (kls; s)
+            kls.event (ev,e);
+    }
+
+    void
+    update (E* e, update_UserEvent* ev) {
+        foreach (kls; s)
+            kls.update (ev,e);
+    }
+
     void
     dump () {
         foreach (kls; s)

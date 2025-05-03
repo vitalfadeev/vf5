@@ -11,7 +11,7 @@ import field : Field;
 
 auto 
 has_childs (E* e)  {
-    return  e.content.childs.s.length > 0;
+    return  e.core.childs.s.length > 0;
 }
 
 void

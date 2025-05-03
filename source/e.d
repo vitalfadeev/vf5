@@ -10,6 +10,7 @@ import klass : Klasses;
 import field : Field;
 import e_update : TemplateArg;
 import e_generator : Generator;
+import e_klass_draw;
 import types;
 import tstring;
 import events;
@@ -111,7 +112,7 @@ E {
     Klasses      klasses;    // box green rounded
     Flags        flags;      // hidden,deleted
     Way          way;        // r l u d
-    Ones         ones;       // [click: audacious --play-pause]
+    Ons          ons;        // [click: audacious --play-pause]
     Generator    generator;  //
 
     alias        outer = margin;
@@ -125,10 +126,10 @@ E {
         size_t    type = 0;
         //
         Loc       loc;
-        Length    length;
+        Len       len;
         //
         DefLoc    def_loc;
-        DefLength def_length;
+        DefLen    def_len;
         //
         Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     }
@@ -140,10 +141,10 @@ E {
                 Type      type = Type._;
                 //
                 Loc       loc;
-                Length    length;
+                Len       len;
                 //
                 DefLoc    def_loc;
-                DefLength def_length;
+                DefLen    def_len;
             }
             //
             ImageCore     image;
@@ -184,13 +185,13 @@ E {
     }
 
     struct
-    Ones {
+    Ons {
         On[] s;
         alias s this;
     }
 
-    this (Length length) {  // E (Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H))
-        this.core.length = length;
+    this (Len len) {  // E (Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H))
+        this.core.len = len;
     }
 }
 
@@ -199,10 +200,10 @@ Core_Aura_Header (Type) {
     E.Core.Type   type;
     //
     Loc           loc;
-    Length        length;
+    Len           len;
     //
     DefLoc        def_loc;
-    DefLength     def_length;    
+    DefLen        def_len;    
 }
 
 
@@ -211,10 +212,10 @@ ImageCore {
     E.Core.Type   type = E.Core.Type.image;
     //
     Loc           loc;
-    Length        length;
+    Len           len;
     //
     DefLoc        def_loc;
-    DefLength     def_length;
+    DefLen        def_len;
     //
     Color         color;
     Color         bg;
@@ -229,15 +230,15 @@ ImageCore {
 
     void
     load () {
-        load_e_image (e);
+        // load_e_image (e);
     }
 
     L
     _length (IL il) {
         if (ptr !is null) {
             switch (il) {
-                case IL.X: return ptr.img_surface.w; break;
-                case IL.Y: return ptr.img_surface.h; break;
+                case IL.X: return ptr.w;
+                case IL.Y: return ptr.h;
                 default:
             }
         }
@@ -245,8 +246,8 @@ ImageCore {
     }
 
     void
-    draw () {
-        e_klass_draws.image (renderer,ptr,x,y,w,h);
+    draw (SDL_Renderer* renderer) {
+        e_klass_draw.draw_image (renderer,ptr,loc,len);
     }
 }
 
@@ -255,10 +256,10 @@ TextCore {
     size_t        type = E.Core.Type.text;
     //
     Loc           loc;
-    Length        length;
+    Len           len;
     //
     DefLoc        def_loc;
-    DefLength     def_length;
+    DefLen        def_len;
     //
     Color         color;
     Color         bg;
@@ -279,15 +280,15 @@ TextCore {
 
     struct
     TextRect {
-        Loca     loca;
-        alias    loca this;
+        Loc      loc;
+        Len      len;
         Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
         TEXT_PTR ptr;
     }
 
     void
     load () {
-        load_e_text (e);
+        //load_e_text (e);
     }
 
     L
@@ -299,16 +300,16 @@ TextCore {
             if (rect.loc[il] < l)
                 l = rect.loc[il];
 
-            if (rect.loc[il] + rect.length[il] > len)
-                len = rect.loc[il] + rect.length[il];
+            if (rect.loc[il] + rect.len[il] > len)
+                len = rect.loc[il] + rect.len[il];
         }
 
         return len;
     }
 
     void
-    draw () {
-        e_klass_draws._text (renderer,rects,font_ptr,color,loc,length);
+    draw (SDL_Renderer* renderer) {
+        e_klass_draw.draw_text (renderer,rects,ptr,color,loc,len);
     }
 }
 
@@ -317,10 +318,10 @@ ChildsCore {
     E.Core.Type   type = E.Core.Type.childs;
     //
     Loc           loc;
-    Length        length;
+    Len           len;
     //
     DefLoc        def_loc;
-    DefLength     def_length;
+    DefLen        def_len;
     //
     E[]           s;  // no links
 
@@ -331,23 +332,26 @@ ChildsCore {
 
     L
     _length (IL il) {
-        L l;
+        L loc;
         L len;
 
         foreach (_e; s) {
-            if (_e.loc[il] < l)
-                l = _e.loc[il];
+            auto _loc = _e.outer.loc[il];
+            auto _len = _e.outer.len[il];
 
-            if (_e.loc[il] + _e.length[il] > len)
-                len = _e.loc[il] + _e.length[il];
+            if (_loc < loc)
+                loc = _loc;
+
+            if (_loc + _len > len)
+                len = _loc + _len;
         }
 
         return len;
     }
 
     void
-    draw () {
-        e_klass_draws.childs (renderer,s,loc,length);
+    draw (SDL_Renderer* renderer, Loc loc, Len len) {
+        e_klass_draw.draw_childs (renderer,s,loc,len);
     }
 }
 
@@ -676,7 +680,7 @@ add_klass (E* e, Klasses* klasses, string name) {
 void
 add_klass (E* e, Klass* kls) {
     import std.algorithm.searching : canFind;
-    if (!e.klasses.canFind (kls))
+    if (!e.klasses.has (kls))
         e.klasses ~= kls;
 }
 
@@ -689,7 +693,7 @@ has_klass (E* e, Klasses* klasses, string name) {
 bool
 has_klass (E* e, Klass* kls) {
     import std.algorithm.searching : canFind;
-    return e.klasses.canFind (kls);
+    return e.klasses.has (kls);
 }
 
 void
@@ -709,12 +713,7 @@ remove_klass (E* e, Klasses* klasses, string name) {
 }
 void
 remove_klass (E* e, Klass* kls) {
-    import std.algorithm.searching : countUntil;
-    import std.algorithm : remove;
-
-    auto i = e.klasses.countUntil (kls);
-    if (i != -1)
-        e.klasses = e.klasses.remove (i);
+    e.klasses.remove (kls);
 }
 
 E*
@@ -743,8 +742,7 @@ event (E* e, Event* ev) {
         writefln ("E(%s).event: %s", e.e_klasses_to_string, *ev);
 
     // via klasses
-    foreach (Klass* kls; e.klasses)
-        kls.event (ev,e);
+    e.klasses.event (e,ev);
 
     // to up
     if (!ev.path.empty) {
@@ -760,8 +758,7 @@ update (E* e, update_UserEvent* ev) {
     // ...
 
     // via klasses
-    foreach (kls; e.klasses)
-        kls.update (ev,e);
+    e.klasses.update (e,ev);
 
     // to childs
     if (e.has_childs) {
@@ -819,26 +816,26 @@ _dup (EPtr _this) {
 bool
 event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
     Loc _loc = Loc (ev.mouseX, ev.mouseY);
-    return loc_in (_loc, e.loc, e.length);
+    return loc_in (_loc, e.loc, e.len);
 }
 
 bool
 event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
     Loc _loc = Loc (ev.x, ev.y);
-    return loc_in (_loc, e.loc, e.length);
+    return loc_in (_loc, e.loc, e.len);
 }
 
 bool
 event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
     Loc _loc = ev.up_loc;
-    return loc_in (_loc, e.loc, e.length);
+    return loc_in (_loc, e.loc, e.len);
 }
 
 bool
-loc_in (Loc loc, Loc area_loc, Length area_length) {
+loc_in (Loc loc, Loc area_loc, Len area_len) {
     static
     foreach (i; 0..NIL)
-        if ((area_loc.s[i] <= loc.s[i]) && (loc.s[i] <= area_loc.s[i] + area_length.s[i]))
+        if ((area_loc.s[i] <= loc.s[i]) && (loc.s[i] <= area_loc.s[i] + area_len.s[i]))
             return true;
 
     return false;

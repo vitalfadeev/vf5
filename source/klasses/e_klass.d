@@ -147,7 +147,7 @@ set (Klass* kls, E* e, string field_id, TString[] values) {
         //case "content.image"     : set_content_image      (e,values); break;
         //case "content.text"      : set_content_text       (e,values); break;
         // image
-        case "image"             : set_content_image      (e,values); break;
+        //case "image"             : set_content_image      (e,values); break;
         // text
         case "text"              : set_text               (e,values); break;
         case "text.color"        : set_text_color         (e,values); break;
@@ -180,7 +180,8 @@ void
 draw (Klass* kls, draw_UserEvent* ev, E* e) {
     version (debug_event)
     writefln ("KLASS(%s).draw, E(%s), event %s", kls.name, e.e_klasses_to_string, *ev);
-    e_klass_draw.draw (ev.renderer,ev.locs.back,&ev.path,e);
+    auto pare  = ev.path.back;
+    e_klass_draw.draw_e (ev.renderer,e,pare.inner.loc,pare.inner.len);
 }
 
 //
@@ -197,18 +198,6 @@ set_loc (E* e, TString[] values) {
     }
 }
 
-bool
-is_percent (Balance) (string s, Balance* percent) {
-    auto perc_pos = s.indexOf ("%");
-    if (perc_pos != -1) {
-        if (s[0..perc_pos].isNumeric ()) {
-            *percent = s[0..perc_pos].to!Balance;
-            return true;
-        }
-    }
-
-    return false;
-}
 
 bool
 is_numeric (string s, int* num) {
@@ -220,18 +209,18 @@ is_numeric (string s, int* num) {
     return false;
 }
 
-void
-set_loc_balance (E* e, TString[] values) {
-    if (values.length >= 2) {
-        set_loc_balance_x (e,values[0..1]);
-        set_loc_balance_y (e,values[1..$]);
-    }
-    else
-    if (values.length >= 1) {
-        set_loc_balance_x (e,values);
-        set_loc_balance_y (e,values);
-    }
-}
+//void
+//set_loc_balance (E* e, TString[] values) {
+//    if (values.length >= 2) {
+//        set_loc_balance_x (e,values[0..1]);
+//        set_loc_balance_y (e,values[1..$]);
+//    }
+//    else
+//    if (values.length >= 1) {
+//        set_loc_balance_x (e,values);
+//        set_loc_balance_y (e,values);
+//    }
+//}
 
 //void
 //set_loc_balance_x (E* e, TString[] values) {
@@ -248,7 +237,7 @@ set_loc_balance (E* e, TString[] values) {
 //}
 
 bool
-_parse_balance (string s, ref L length, ref L capacity) {
+_parse_lc (string s, ref L length, ref L capacity) {
     // +50/100
     // 0
     // +1/2
@@ -356,78 +345,80 @@ void
 set_way (E* e, TString[] values) {
     if (values.length >= 1) {
         switch (values[0].s) {
-            case "r": e.way = E.Way.r; break;
-            case "l": e.way = E.Way.l; break;
-            case "t": e.way = E.Way.u; break;
-            case "u": e.way = E.Way.u; break;
-            case "b": e.way = E.Way.d; break;
-            case "d": e.way = E.Way.d; break;
-            case "_": e.way = E.Way._; break;
-            case ".": e.way = E.Way._; break;
-            default:
+            case "r"  : e.way.set (0, IL.X,  1); e.way.set (1,0,0); break;
+            case "l"  : e.way.set (0, IL.X, -1); e.way.set (1,0,0); break;
+            case "u"  : e.way.set (0, IL.Y, -1); e.way.set (1,0,0); break;
+            case "d"  : e.way.set (0, IL.Y,  1); e.way.set (1,0,0); break;
+            case "rd" : e.way.set (0, IL.X,  1); e.way.set (1, IL.Y,  1); e.way.set (2,0,0); break;
+            case "ru" : e.way.set (0, IL.X,  1); e.way.set (1, IL.Y, -1); e.way.set (2,0,0); break;
+            case "ld" : e.way.set (0, IL.X, -1); e.way.set (1, IL.Y,  1); e.way.set (2,0,0); break;
+            case "lu" : e.way.set (0, IL.X, -1); e.way.set (1, IL.Y, -1); e.way.set (2,0,0); break;
+            case "dr" : e.way.set (0, IL.Y,  1); e.way.set (1, IL.X,  1); e.way.set (2,0,0); break;
+            case "dl" : e.way.set (0, IL.Y,  1); e.way.set (1, IL.X, -1); e.way.set (2,0,0); break;
+            case "ur" : e.way.set (0, IL.Y, -1); e.way.set (1, IL.X,  1); e.way.set (2,0,0); break;
+            case "ul" : e.way.set (0, IL.Y, -1); e.way.set (1, IL.X, -1); e.way.set (2,0,0); break;
+            case "_"  : e.way.set (0,0,0); break;
+            case "."  : e.way.set (0,0,0); break;
+            default   :
         }
     }
 }
 
-void
-set_organize_childs (E* e, TString[] values) {
-    if (values.length >= 1) {
-        switch (values[0].s) {
-            case "max": e.organize_childs = E.OrganizeChilds.max_; break;
-            default:
-        }
-    }
-}
+//void
+//set_organize_childs (E* e, TString[] values) {
+//    if (values.length >= 1) {
+//        switch (values[0].s) {
+//            case "max": e.organize_childs = E.OrganizeChilds.max_; break;
+//            default:
+//        }
+//    }
+//}
 
 void
 set_loc_x (E* e, TString[] values) {
-    enum X = 0;
-    enum Y = 1;
     if (values.length) {
-        _set_loc (X,e,values[0].s);
+        _set_loc (IL.X,e,values[0].s);
     }
 }
 
 void
 set_loc_y (E* e, TString[] values) {
-    enum X = 0;
-    enum Y = 1;
     if (values.length) {
-        _set_loc (Y,e,values[0].s);
+        _set_loc (IL.Y,e,values[0].s);
     }
 }
 
 void
-_set_loc (uint LOC_I, E* e, string value) {
+_set_loc (IL il, E* e, string value) {
     auto _loc = &e.def_loc;
 
     switch (value) {
-        case "lu"    : e.def_loc.set (DefLock.LocType.flex, -1,1, -1,1); break;
-        case "cu"    : e.def_loc.set (DefLock.LocType.flex,  0,1, -1,1); break;
-        case "ru"    : e.def_loc.set (DefLock.LocType.flex,  1,1, -1,1); break;
-        case "rc"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  0,1); break;
-        case "rd"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  1,1); break;
-        case "cd"    : e.def_loc.set (DefLock.LocType.flex,  0,1,  1,1); break;
-        case "ld"    : e.def_loc.set (DefLock.LocType.flex, -1,1,  1,1); break;
-        case "lc"    : e.def_loc.set (DefLock.LocType.flex,  1,1,  0,1); break;
-        case "cc"    : e.def_loc.set (DefLock.LocType.flex,  0,1,  0,1); break;
-        case "d"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
-        case "dn"    : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
-        case "r"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
-        case "right" : e.def_loc.set (LOC_I, DefLock.LocType.flex,  1,1); break;
-        case "c"     : e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
-        case "center": e.def_loc.set (LOC_I, DefLock.LocType.flex,  0,1); break;
-        case "l"     : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
-        case "left"  : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
-        case "u"     : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
-        case "up"    : e.def_loc.set (LOC_I, DefLock.LocType.flex, -1,1); break;
-        case "_"     : e.def_loc.set (LOC_I, DefLock.LocType._); break;
-        case "."     : e.def_loc.set (LOC_I, DefLock.LocType._); break;
+        case "lu"    : e.def_loc.set (0,2, 0,2); break;
+        case "cu"    : e.def_loc.set (1,2, 0,2); break;
+        case "ru"    : e.def_loc.set (2,2, 0,2); break;
+        case "rc"    : e.def_loc.set (2,2, 1,2); break;
+        case "rd"    : e.def_loc.set (2,2, 2,2); break;
+        case "cd"    : e.def_loc.set (1,2, 2,2); break;
+        case "ld"    : e.def_loc.set (0,2, 2,2); break;
+        case "lc"    : e.def_loc.set (2,2, 1,2); break;
+        case "cc"    : e.def_loc.set (1,2, 1,2); break;
+        case "d"     : e.def_loc.set (il, 2,2); break;
+        case "dn"    : e.def_loc.set (il, 2,2); break;
+        case "c"     : e.def_loc.set (il, 1,2); break;
+        case "center": e.def_loc.set (il, 1,2); break;
+        case "r"     : e.def_loc.set (il, 2,2); break;
+        case "right" : e.def_loc.set (il, 2,2); break;
+        case "c"     : e.def_loc.set (il, 1,2); break;
+        case "center": e.def_loc.set (il, 1,2); break;
+        case "l"     : e.def_loc.set (il, 0,2); break;
+        case "left"  : e.def_loc.set (il, 0,2); break;
+        case "u"     : e.def_loc.set (il, 0,2); break;
+        case "up"    : e.def_loc.set (il, 0,2); break;
+        case "_"     : e.def_loc.set (il, 0); break;
+        case "."     : e.def_loc.set (il, 0); break;
         default      :
             if (value.isNumeric ()) // 50
-                e.def_loc.set (LOC_I, DefLock.LocType.stab, value.to!L);
+                e.def_loc.set (il, DefLock.LocType.stab, value.to!L);
             else
                 throw new Exception (format!"unsupported loc (%s): %s" (LOC_I, value));
     }    
@@ -463,15 +454,12 @@ set_length_y (E* e, TString[] values) {
 void
 _set_length (IL il, E* e, string value) {
     switch (value) {
-        case "pra"     : e.def_length.set (il, DefLength.Type.pra);    break;
-        case "stat"    : e.def_length.set (il, DefLength.Type.stat);   break;
-        case "balance" : e.def_length.set (il, DefLength.Type.balance);   break;
-        case "core"    : e.def_length.set (il, DefLength.Type.core);   break;
-        case "window"  : e.def_length.set (il, DefLength.Type.window); break;
-        case "max"     : e.def_length.set (il, DefLength.Type.max_);   break;
+        case "pare"    : e.def_length.set_bypare (il); break;
+        case "core"    : e.def_length.set_bycore (il); break;
+        case "max"     : e.def_length.set_max (il); break;
         default        : 
             if (value.isNumeric ())
-                e.def_length.set (il, DefLength.Type.stat, value.to!L);
+                e.def_length.set (il, value.to!L);
             else
                 throw new Exception (format!"unsupported length (%s): %s" (il, value));
     }
@@ -485,84 +473,84 @@ set_hidden (E* e, TString[] values) {
     }
 }
 
-void
-set_popup (E* e, TString[] values) {
-    // e.popup = "popup-file";
-}
+//void
+//set_popup (E* e, TString[] values) {
+//    // e.popup = "popup-file";
+//}
 
-void
-set_aura_borders (E* e, TString[] values) {
-    if (values.length >= 1) {
-        set_border (e, &e.border, values[0..$]);
-    }
-}
+//void
+//set_aura_borders (E* e, TString[] values) {
+//    if (values.length >= 1) {
+//        set_border (e, &e.border, values[0..$]);
+//    }
+//}
 
 
-void
-set_aura_borders_color (E* e, TString[] values) {
-    if (values.length >= 1) {
-        set_border_color (e, &e.aura.border, values);
-    }
-}
+//void
+//set_aura_borders_color (E* e, TString[] values) {
+//    if (values.length >= 1) {
+//        set_border_color (e, &e.aura.border, values);
+//    }
+//}
 
-void
-set_aura (E* e, TString[] values) {
-    if (values.length >= 2) {
-        if (values[0].s.isNumeric)
-            e.aura.size.w = values[0].s.to!X;
+//void
+//set_aura (E* e, TString[] values) {
+//    if (values.length >= 2) {
+//        if (values[0].s.isNumeric)
+//            e.aura.size.w = values[0].s.to!X;
 
-        if (values[1].s.isNumeric)
-            e.aura.size.h = values[1].s.to!Y;
-    }
-    else
-    if (values.length == 1) {
-        if (values[0].s.isNumeric) {
-            e.aura.size.w = values[0].s.to!X;
-            e.aura.size.h = values[0].s.to!Y;
-        }
-    }
-}
+//        if (values[1].s.isNumeric)
+//            e.aura.size.h = values[1].s.to!Y;
+//    }
+//    else
+//    if (values.length == 1) {
+//        if (values[0].s.isNumeric) {
+//            e.aura.size.w = values[0].s.to!X;
+//            e.aura.size.h = values[0].s.to!Y;
+//        }
+//    }
+//}
 
-void
-set_aura_color (E* e, TString[] values) {
-    if (values.length) {
-        Color c = e.aura.color;
-        if (doc_parse_color (e, values, &c))
-            e.aura.color = c;
-        else
-            throw new Exception ("unsupported color: " ~ values.to!string);
-    }
-}
+//void
+//set_aura_color (E* e, TString[] values) {
+//    if (values.length) {
+//        Color c = e.aura.color;
+//        if (_parse_color (e, values, &c))
+//            e.aura.color = c;
+//        else
+//            throw new Exception ("unsupported color: " ~ values.to!string);
+//    }
+//}
 
-void
-set_border (Border) (E* e, Border* border, TString[] values) {    
-    if (values.length >= 2) {
-        set_border_w     (e, border, values[0..1]);
-        set_border_color (e, border, values[2..3]);
-    }
-}
+//void
+//set_border (Border) (E* e, Border* border, TString[] values) {    
+//    if (values.length >= 2) {
+//        set_border_w     (e, border, values[0..1]);
+//        set_border_color (e, border, values[2..3]);
+//    }
+//}
 
-void
-set_border_w (Border) (E* e, Border* border, TString[] values) {
-    if (values.length) {
-        if (values[0].s.isNumeric)
-            border.length = values[0].s.to!L;
-    }
-}
+//void
+//set_border_w (Border) (E* e, Border* border, TString[] values) {
+//    if (values.length) {
+//        if (values[0].s.isNumeric)
+//            border.length = values[0].s.to!L;
+//    }
+//}
 
-void
-set_border_color (Border) (E* e, Border* border, TString[] values) {
-    if (values.length) {
-        Color c;
-        if (doc_parse_color (e, values, &c))
-            border.color = c;
-        else
-            throw new Exception ("unsupported color: " ~ values.to!string);
-    }
-}
+//void
+//set_border_color (Border) (E* e, Border* border, TString[] values) {
+//    if (values.length) {
+//        Color c;
+//        if (_parse_color (e, values, &c))
+//            border.color = c;
+//        else
+//            throw new Exception ("unsupported color: " ~ values.to!string);
+//    }
+//}
 
 bool
-doc_parse_color (E* root, TString[] tss, Color* color) {
+_parse_color (E* root, TString[] tss, Color* color) {
     import std.string : startsWith;
 
     if (tss[0].s.startsWith ("#"))
@@ -586,12 +574,12 @@ doc_parse_color (E* root, TString[] tss, Color* color) {
     return false;
 }
 
-void
-set_content_image (E* e, TString[] values) {
-    if (values.length) {
-        e.content.image.src = values[0].s;
-    }
-}
+//void
+//set_content_image (E* e, TString[] values) {
+//    if (values.length) {
+//        e.content.image.src = values[0].s;
+//    }
+//}
 
 
 void
@@ -605,7 +593,7 @@ void
 set_text_color (E* e, TString[] values) {
     if (values.length) {
         Color c;
-        if (doc_parse_color (e,values,&c))
+        if (_parse_color (e,values,&c))
             e.core.text.color = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -616,7 +604,7 @@ void
 set_text_bg (E* e, TString[] values) {
     if (values.length) {
         Color c;
-        if (doc_parse_color (e, values, &c))
+        if (_parse_color (e, values, &c))
             e.core.text.bg = c;
         else
             throw new Exception ("unsupported color: " ~ values.to!string);
@@ -633,79 +621,79 @@ set_text_bg (E* e, TString[] values) {
 //    }
 //}
 
-void
-set_content_size_w (E* e, TString[] values) {
-    if (values.length) {
-        switch (values[0].s) {
-            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
-            case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
-            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
-            case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
-            case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
-            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
-            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
-            default: {
-                if (isNumeric (values[0].s)) {
-                    e.content.size.w      = values[0].s.to!W;
-                    e.content.size_w_type = E.Content.SizeType.fixed;
-                }
-                else
-                    e.content.size_w_type = E.Content.SizeType.max;
-            }
-        }
-    }
-}
+//void
+//set_content_size_w (E* e, TString[] values) {
+//    if (values.length) {
+//        switch (values[0].s) {
+//            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
+//            case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
+//            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
+//            case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
+//            case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
+//            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
+//            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
+//            default: {
+//                if (isNumeric (values[0].s)) {
+//                    e.content.size.w      = values[0].s.to!W;
+//                    e.content.size_w_type = E.Content.SizeType.fixed;
+//                }
+//                else
+//                    e.content.size_w_type = E.Content.SizeType.max;
+//            }
+//        }
+//    }
+//}
 
-void
-set_content_size_h (E* e, TString[] values) {
-    if (values.length) {
-        switch (values[0].s) {
-            case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
-            case "fixed"  : e.content.size_h_type = E.Content.SizeType.fixed; break;
-            case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
-            case "image"  : e.content.size_h_type = E.Content.SizeType.image; break;
-            case "text"   : e.content.size_h_type = E.Content.SizeType.text; break;
-            case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
-            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
-            default:
-            if (isNumeric (values[0].s)) {
-                e.content.size.h      = values[0].s.to!H;
-                e.content.size_h_type = E.Content.SizeType.fixed;
-            }
-            else
-                e.content.size_h_type = E.Content.SizeType.max;
-        }
-    }
-}
+//void
+//set_content_size_h (E* e, TString[] values) {
+//    if (values.length) {
+//        switch (values[0].s) {
+//            case "e"      : e.content.size_h_type = E.Content.SizeType.e; break;
+//            case "fixed"  : e.content.size_h_type = E.Content.SizeType.fixed; break;
+//            case "childs" : e.content.size_h_type = E.Content.SizeType.childs; break;
+//            case "image"  : e.content.size_h_type = E.Content.SizeType.image; break;
+//            case "text"   : e.content.size_h_type = E.Content.SizeType.text; break;
+//            case "max"    : e.content.size_h_type = E.Content.SizeType.max; break;
+//            case "childs_image_text" : e.content.size_w_type = E.Content.SizeType.childs_image_text; break;
+//            default:
+//            if (isNumeric (values[0].s)) {
+//                e.content.size.h      = values[0].s.to!H;
+//                e.content.size_h_type = E.Content.SizeType.fixed;
+//            }
+//            else
+//                e.content.size_h_type = E.Content.SizeType.max;
+//        }
+//    }
+//}
 
-void
-set_content_size (E* e, TString[] values) {
-    if (values.length >= 2) {
-        set_content_size_w (e, values[0..1]);
-        set_content_size_h (e, values[1..2]);
-    }
-    else
-    if (values.length == 1) {
-        set_content_size_w (e, values);
-        set_content_size_h (e, values);
-    }
-}
+//void
+//set_content_size (E* e, TString[] values) {
+//    if (values.length >= 2) {
+//        set_content_size_w (e, values[0..1]);
+//        set_content_size_h (e, values[1..2]);
+//    }
+//    else
+//    if (values.length == 1) {
+//        set_content_size_w (e, values);
+//        set_content_size_h (e, values);
+//    }
+//}
 
-void
-set_content_siztype (E* e, TString[] values) {
-    if (values.length) {
-        switch (values[0].s) {
-            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
-            case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
-            case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
-            case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
-            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
-            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
-            default:
-                e.content.size_w_type = E.Content.SizeType.e;
-        }
-    }
-}
+//void
+//set_content_siztype (E* e, TString[] values) {
+//    if (values.length) {
+//        switch (values[0].s) {
+//            case "e"      : e.content.size_w_type = E.Content.SizeType.e; break;
+//            case "fixed"  : e.content.size_w_type = E.Content.SizeType.fixed; break;
+//            case "image"  : e.content.size_w_type = E.Content.SizeType.image; break;
+//            case "text"   : e.content.size_w_type = E.Content.SizeType.text; break;
+//            case "childs" : e.content.size_w_type = E.Content.SizeType.childs; break;
+//            case "max"    : e.content.size_w_type = E.Content.SizeType.max; break;
+//            default:
+//                e.content.size_w_type = E.Content.SizeType.e;
+//        }
+//    }
+//}
 
 void
 set_text_font (E* e, TString[] values) {
@@ -743,130 +731,130 @@ set_text_font_size (E* e, TString[] values) {
 //set_bg (E* e, TString[] values) {
 //    if (values.length) {
 //        Color c;
-//        if (doc_parse_color (e,values, &c))
+//        if (_parse_color (e,values, &c))
 //            e.content.color = c;
 //        else
 //            throw new Exception ("unsupported color: " ~ values.to!string);
 //    }
 //}
 
-void
-set_generator (E* e, TString[] values) {
-    if (values.length >= 1) {
-        Generator.Type type;
+//void
+//set_generator (E* e, TString[] values) {
+//    if (values.length >= 1) {
+//        Generator.Type type;
 
-        switch (values[0].s) {
-            case "none"  : type = Generator.Type.none;  break;
-            case "cmd"   : type = Generator.Type.cmd;   break;
-            case "fs"    : type = Generator.Type.fs;    break;
-            case "klass" : type = Generator.Type.klass; break;
-            default      : type = Generator.Type.none;   break;
-        }
-        e.generator.type = type;
+//        switch (values[0].s) {
+//            case "none"  : type = Generator.Type.none;  break;
+//            case "cmd"   : type = Generator.Type.cmd;   break;
+//            case "fs"    : type = Generator.Type.fs;    break;
+//            case "klass" : type = Generator.Type.klass; break;
+//            default      : type = Generator.Type.none;   break;
+//        }
+//        e.generator.type = type;
 
-        //
-        parse_generator_args (e,type,values);
-    }
-}
+//        //
+//        parse_generator_args (e,type,values);
+//    }
+//}
 
-void
-parse_generator_args (E* e, Generator.Type type, TString[] values) {
-    final
-    switch (type) {
-        case Generator.Type.none  : break;
-        case Generator.Type.cmd   : parse_generator_args_cmd   (e,values); break;
-        case Generator.Type.fs    : parse_generator_args_fs    (e,values); break;
-        case Generator.Type.klass : parse_generator_args_klass (e,values); break;
-    }
-}
+//void
+//parse_generator_args (E* e, Generator.Type type, TString[] values) {
+//    final
+//    switch (type) {
+//        case Generator.Type.none  : break;
+//        case Generator.Type.cmd   : parse_generator_args_cmd   (e,values); break;
+//        case Generator.Type.fs    : parse_generator_args_fs    (e,values); break;
+//        case Generator.Type.klass : parse_generator_args_klass (e,values); break;
+//    }
+//}
 
-void
-parse_generator_args_cmd (E* e, TString[] values) {
-    e.generator.cmd.command = values[1];
+//void
+//parse_generator_args_cmd (E* e, TString[] values) {
+//    e.generator.cmd.command = values[1];
     
-    for (size_t i=2; i < values.length; i++) {
-        switch (values[i].s) {
-            case "delimiter" : 
-                i++; 
-                if (i < values.length) {
-                    e.generator.cmd.delimiter = values[i];
-                }
-                break;
-            case "require_delimiter" : 
-                e.generator.cmd.require_delimiter = true;
-                break;
-            case "skip":
-                i++; 
-                if (i < values.length) {
-                    if (values[i].s.isNumeric)
-                        e.generator.cmd.skip = values[i].s.to!size_t; 
-                }
-                break;
-            case "fields":
-                i++; 
-                if (i < values.length) {
-                    set_generator_fields (e,values[i..i+1]);
-                }
-                break;
-            default:
-        }
-    }
-}
+//    for (size_t i=2; i < values.length; i++) {
+//        switch (values[i].s) {
+//            case "delimiter" : 
+//                i++; 
+//                if (i < values.length) {
+//                    e.generator.cmd.delimiter = values[i];
+//                }
+//                break;
+//            case "require_delimiter" : 
+//                e.generator.cmd.require_delimiter = true;
+//                break;
+//            case "skip":
+//                i++; 
+//                if (i < values.length) {
+//                    if (values[i].s.isNumeric)
+//                        e.generator.cmd.skip = values[i].s.to!size_t; 
+//                }
+//                break;
+//            case "fields":
+//                i++; 
+//                if (i < values.length) {
+//                    set_generator_fields (e,values[i..i+1]);
+//                }
+//                break;
+//            default:
+//        }
+//    }
+//}
 
-void
-parse_generator_args_fs (E* e, TString[] values) {
-    e.generator.fs.path = values[1];
+//void
+//parse_generator_args_fs (E* e, TString[] values) {
+//    e.generator.fs.path = values[1];
 
-    for (size_t i=2; i < values.length; i++) {
-        switch (values[i].s) {
-            case "fields":
-                i++; 
-                if (i < values.length) {
-                    set_generator_fields (e,values[i..i+1]);
-                }
-                break;
-            default:
-        }
-    }
-}
+//    for (size_t i=2; i < values.length; i++) {
+//        switch (values[i].s) {
+//            case "fields":
+//                i++; 
+//                if (i < values.length) {
+//                    set_generator_fields (e,values[i..i+1]);
+//                }
+//                break;
+//            default:
+//        }
+//    }
+//}
 
-void
-parse_generator_args_klass (E* e, TString[] values) {
-    e.generator.klass.klass = values[1];
+//void
+//parse_generator_args_klass (E* e, TString[] values) {
+//    e.generator.klass.klass = values[1];
 
-    for (size_t i=2; i < values.length; i++) {
-        switch (values[i].s) {
-            case "fields":
-                i++; 
-                if (i < values.length) {
-                    set_generator_fields (e,values[i..i+1]);
-                }
-                break;
-            default:
-        }
-    }
-}
+//    for (size_t i=2; i < values.length; i++) {
+//        switch (values[i].s) {
+//            case "fields":
+//                i++; 
+//                if (i < values.length) {
+//                    set_generator_fields (e,values[i..i+1]);
+//                }
+//                break;
+//            default:
+//        }
+//    }
+//}
 
-void
-set_generator_template (E* e, TString[] values) {
-    if (values.length) {
-        e.generator._template = values[0].s;
-    }
-}
+//void
+//set_generator_template (E* e, TString[] values) {
+//    if (values.length) {
+//        e.generator._template = values[0].s;
+//    }
+//}
 
-void
-set_generator_fields (E* e, TString[] values) {
-    if (values.length) {
-        e.generator.fields = values[0].s.split (",");
-    }
-}
+//void
+//set_generator_fields (E* e, TString[] values) {
+//    if (values.length) {
+//        e.generator.fields = values[0].s.split (",");
+//    }
+//}
 
-void
-set_content (E* e, TString[] values) {
-    if (values.length) {
-        //
-    }
-}
+//void
+//set_content (E* e, TString[] values) {
+//    if (values.length) {
+//        //
+//    }
+//}
 
 void
 set_on (E* e, TString[] values) {
@@ -877,7 +865,7 @@ set_on (E* e, TString[] values) {
         }
         else
         if (values.length >= 2) {
-            e.on ~= E.On (event,values[1..$]);
+            e.ons ~= E.On (event,values[1..$]);
         }
     }
 }

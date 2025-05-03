@@ -13,11 +13,56 @@ import etree : Path;
 
 
 void
-draw (SDL_Renderer* renderer, Loc loc, Path* path, E* e) {
-    auto length = (*path).back.length;
-    draw_inners (renderer,loc,length,e);
+draw_e (SDL_Renderer* renderer, E* e, Loc loc, Len len) {
+    draw_aura (renderer,e,loc,len);
+    draw_core (renderer,e,loc,len);
 }
 
+void
+draw_aura (SDL_Renderer* renderer, E* e, Loc loc, Len len) {
+    //
+}
+
+void
+draw_core (SDL_Renderer* renderer, E* e, Loc loc, Len len) {
+    fill (renderer,loc,len);
+}
+
+void
+draw_image (SDL_Renderer* renderer, IMAGE_PTR ptr, Loc loc, Len len) {
+    SDL_Surface* surface = ptr;
+    SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
+
+    //
+    SDL_Rect dstrect = SDL_Rect (loc[IL.X], loc[IL.Y], len[IL.X], len[IL.Y]);
+    SDL_RenderCopy (renderer, texture, null, &dstrect);
+    //SDL_RenderCopy (renderer, texture, null, null);
+
+    //
+    SDL_DestroyTexture (texture);
+}
+
+void
+draw_text (SDL_Renderer* renderer, TextCore.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Len len) {
+    // clip w h
+    // from text.rects
+    foreach (ref rec; rects)
+        if (rec.s.length) {
+            auto char_loc = rec.loc + loc;
+            one_string (renderer, rec.s, font, color, char_loc, rec.len);
+        }
+}
+
+void
+draw_childs (SDL_Renderer* renderer, E[] s, Loc loc, Len len) {
+    // clip w h
+    // from text.rects
+    foreach (ref _e; s)
+        draw_e (renderer,&_e,loc,len);
+}
+
+
+//
 void
 line (Loc loc, Loc loc2, L large) {
     // hickLineColor (SDL_Renderer *renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 width, Uint32 color)
@@ -49,20 +94,14 @@ fill_rect (SDL_Renderer* renderer, int x, int y, int w, int h) {
 }
 
 void
-fill (SDL_Renderer* renderer, Loc loc, Length length) {
-    enum X = 0;
-    enum Y = 1;
-    SDL_Rect rect;  // rect = {loc,length} = Loca
-    rect.x = loc[X];
-    rect.y = loc[Y];
-    rect.w = length[X];
-    rect.h = length[Y];
+fill (SDL_Renderer* renderer, Loc loc, Len len) {
+    SDL_Rect rect = SDL_Rect (loc[IL.X], loc[IL.Y], len[IL.X], len[IL.Y]);
     SDL_RenderFillRect (renderer,&rect);
 }
 void
-fill (SDL_Renderer* renderer, Loc loc, Length length, Color color) {
+fill (SDL_Renderer* renderer, Loc loc, Len len, Color color) {
     SDL_SetRenderDrawColor (renderer, color.r, color.g, color.b, color.a);
-    fill (renderer,loc,length);
+    fill (renderer,loc,len);
 }
 
 void
@@ -76,31 +115,6 @@ draw_rect (SDL_Renderer* renderer, int x, int y, int w, int h, int bold) {
     SDL_RenderDrawRect (renderer, &rect);
 }
 
-void
-image (SDL_Renderer* renderer, IMAGE_PTR ptr, L x, L y, L w, L h) {
-    SDL_Surface* surface = ptr;
-    SDL_Texture* texture = SDL_CreateTextureFromSurface (renderer, surface);
-
-    //
-    SDL_Rect dstrect = SDL_Rect (x, y, w, h);
-    SDL_RenderCopy (renderer, texture, null, &dstrect);
-    //SDL_RenderCopy (renderer, texture, null, null);
-
-    //
-    SDL_DestroyTexture (texture);
-}
-
-
-void
-_text (SDL_Renderer* renderer, TextCore.TextRect[] rects, FONT_PTR font, Color color, Loc loc, Length length) {
-    // clip w h
-    // from text.rects
-    foreach (ref rec; rects)
-        if (rec.s.length) {
-            auto char_loc = rec.loc + loc;
-            one_string (renderer, rec.s, font, color, char_loc, rec.length);
-        }
-}
 
 Loc
 get_text_size (string s, FONT_PTR font, Color color) {
@@ -194,52 +208,6 @@ draw8 (SDL_Renderer* renderer, int x, int y, int w, int h, L t, L r, L b, L l) {
     fill_rect (renderer, x,     y+t,   l,     h-t-b); // 8
 }
 
-void
-draw_inners (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    // all relative from parent content 'loc'
-    // e.draw
-    //   e.margin.draw
-    //   e.border.draw
-    //   e.aura.draw
-    //   e.content.draw
-
-    // content
-    auto _loc    = loc + e.loc;
-    auto _length = e.length;
-    //draw_inner (renderer,_loc,_length,e);
-    draw (renderer,_loc,_length,e);
-
-    // recursive
-    static
-    if (__traits (hasMember, e, "_inner"))
-        draw_inners (renderer,_loc,_length,&e._inner);
-}
-
-// E DRAW
-void
-draw_inner (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    fill (renderer,loc,length,e.color);
-}
-
-void
-draw_inner_bg (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    fill (renderer,loc,length,e.color);
-}
-
-void
-draw_inner_text (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    fill (renderer,loc,length,e.color);
-}
-
-void
-draw_inner_image (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    fill (renderer,loc,length,e.color);
-}
-
-void
-draw_inner_childs (E) (SDL_Renderer* renderer, Loc loc, Length length, E* e) {
-    fill (renderer,loc,length,e.color);
-}
 
 
 //

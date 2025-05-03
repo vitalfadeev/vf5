@@ -42,7 +42,7 @@ main (string[] args) {
 struct
 TreeFile {
     string  name;
-    E       root = E (Length (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H));
+    E       root = E (Len (DEFAULT_WINDOW_W,DEFAULT_WINDOW_H));
     Klasses klasses;
 
     this (string name) {
