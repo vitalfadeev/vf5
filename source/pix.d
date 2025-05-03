@@ -173,7 +173,7 @@ update (Event* ev, update_UserEvent* update_ev) {
 void
 update (update_UserEvent* ev) {
     update (ev.root,ev); 
-    e_update_length_loc (ev.root,null,ev);
+    e_update_len_loc (ev.root,null,ev);
 }
 
 void

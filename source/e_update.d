@@ -34,7 +34,7 @@ import std.traits : EnumMembers;
 
 
 void
-e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
+e_update_len_loc (E* e, E* pre, update_UserEvent* ev) {
     // size
     // step
     //   childs
@@ -154,44 +154,18 @@ e_update_childs (E* e, E* pre, update_UserEvent* ev) {
             + e.padding.loc
             + e.core.loc;
 
-        foreach (_e; WalkChilds (e)) {
-            // ... (_e,ev);
+        foreach (_pre,_e; WalkChilds (e)) {
+            e_update_len_loc (_e,_pre,ev);
         }
 
         ev.locs.length--;
         ev.path.length--;
-    }
-
-
-////
-    if (e.has_childs) {
-        // go to the next e
-        e_update_length_loc__go_to_the_next_e (e,pre,ev); // using ev.path. try dn, try right, try up
     }
 }
 
 void
 e_update_length_loc__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
     // try dn
-    if (e.has_childs) {
-        ev.path ~= e;
-        ev.locs ~= 
-            ev.locs.back
-            + e.margin.loc
-            + e.border.loc
-            + e.padding.loc
-            + e.core.loc;
-
-        foreach (_e; WalkChilds (e)) {
-            // ... (_e,ev);
-        }
-
-        ev.locs.length--;
-        ev.path.length--;
-    }
-
-
-////
     if (e.has_childs) {
         auto next = &e.core.childs[0];
         ev.path ~= e;
