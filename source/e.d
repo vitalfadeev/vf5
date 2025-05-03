@@ -763,11 +763,11 @@ update (E* e, update_UserEvent* ev) {
             ev.locs.back
             + e.margin.loc
             + e.border.loc
-            + e.aura.loc
-            + e.content.loc;
+            + e.padding.loc
+            + e.core.loc;
 
         foreach (_e; WalkChilds (e))
-            update (_e,ev);
+            .update (_e,ev);
 
         ev.locs.length--;
         ev.path.length--;

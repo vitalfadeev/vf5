@@ -146,6 +146,25 @@ void
 e_update_childs (E* e, E* pre, update_UserEvent* ev) {
     // recursive
     if (e.has_childs) {
+        ev.path ~= e;
+        ev.locs ~= 
+            ev.locs.back
+            + e.margin.loc
+            + e.border.loc
+            + e.padding.loc
+            + e.core.loc;
+
+        foreach (_e; WalkChilds (e)) {
+            // ... (_e,ev);
+        }
+
+        ev.locs.length--;
+        ev.path.length--;
+    }
+
+
+////
+    if (e.has_childs) {
         // go to the next e
         e_update_length_loc__go_to_the_next_e (e,pre,ev); // using ev.path. try dn, try right, try up
     }
@@ -154,7 +173,26 @@ e_update_childs (E* e, E* pre, update_UserEvent* ev) {
 void
 e_update_length_loc__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
     // try dn
-    if (e.core.childs.length > 0) {
+    if (e.has_childs) {
+        ev.path ~= e;
+        ev.locs ~= 
+            ev.locs.back
+            + e.margin.loc
+            + e.border.loc
+            + e.padding.loc
+            + e.core.loc;
+
+        foreach (_e; WalkChilds (e)) {
+            // ... (_e,ev);
+        }
+
+        ev.locs.length--;
+        ev.path.length--;
+    }
+
+
+////
+    if (e.has_childs) {
         auto next = &e.core.childs[0];
         ev.path ~= e;
         // ... next
