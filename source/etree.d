@@ -7,6 +7,7 @@ import tstring;
 import e     : E;
 import klass : Klass;
 import field : Field;
+import events : update_UserEvent;
 
 
 auto 
@@ -234,4 +235,32 @@ dump_tree (E* e, int deep=0) {
     // recursive
     foreach (_e; e.childs)
         dump_tree (_e,deep+1);
+}
+
+
+
+void
+__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
+    // try dn
+    if (e.has_childs) {
+        auto next = &e.core.childs[0];
+        ev.path ~= e;
+        // ... next
+        ev.path.popBack ();
+        return;
+    }
+
+    // try right
+    {
+        auto pra = ev.path.back;
+        foreach (next; pra.core.childs.s.find (e)) {
+            // ... next
+        }
+        return;
+    }
+
+    // try up
+    {
+        ev.path.popBack ();
+    }
 }

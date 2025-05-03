@@ -782,7 +782,7 @@ set (E* e, string field_id, TString[] values) {
 void
 draw (E* e, draw_UserEvent* ev) {
     // via klasses
-    foreach (kls; e.klasses)
+    foreach (kls; e.klasses.s)
         kls.draw (ev,e);
 
     // to childs
@@ -792,8 +792,8 @@ draw (E* e, draw_UserEvent* ev) {
             ev.locs.back
             + e.margin.loc
             + e.border.loc
-            + e.aura.loc
-            + e.content.loc;
+            + e.padding.loc
+            + e.core.loc;
 
         foreach (_e; WalkChilds (e))
             draw (_e,ev);
@@ -812,26 +812,26 @@ _dup (EPtr _this) {
 bool
 event_for_me (Klass* kls, SDL_MouseWheelEvent* ev, E* e) {
     Loc _loc = Loc (ev.mouseX, ev.mouseY);
-    return loc_in (_loc, e.loc, e.len);
+    return loc_in (_loc, e.outer.loc, e.outer.len);
 }
 
 bool
 event_for_me (Klass* kls, SDL_MouseButtonEvent* ev, E* e) {
     Loc _loc = Loc (ev.x, ev.y);
-    return loc_in (_loc, e.loc, e.len);
+    return loc_in (_loc, e.outer.loc, e.outer.len);
 }
 
 bool
 event_for_me (Klass* kls, click_UserEvent* ev, E* e) {
     Loc _loc = ev.up_loc;
-    return loc_in (_loc, e.loc, e.len);
+    return loc_in (_loc, e.outer.loc, e.outer.len);
 }
 
 bool
 loc_in (Loc loc, Loc area_loc, Len area_len) {
     static
-    foreach (i; 0..NIL)
-        if ((area_loc.s[i] <= loc.s[i]) && (loc.s[i] <= area_loc.s[i] + area_len.s[i]))
+    foreach (il; EnumMembers!IL)
+        if ((area_loc.s[il] <= loc.s[il]) && (loc.s[il] <= area_loc.s[il] + area_len.s[il]))
             return true;
 
     return false;

@@ -164,32 +164,6 @@ e_update_childs (E* e, E* pre, update_UserEvent* ev) {
 }
 
 void
-e_update_length_loc__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
-    // try dn
-    if (e.has_childs) {
-        auto next = &e.core.childs[0];
-        ev.path ~= e;
-        // ... next
-        ev.path.popBack ();
-        return;
-    }
-
-    // try right
-    {
-        auto pra = ev.path.back;
-        foreach (next; pra.core.childs.s.find (e)) {
-            // ... next
-        }
-        return;
-    }
-
-    // try up
-    {
-        ev.path.popBack ();
-    }
-}
-
-void
 e_update_len_max (E* e, E* pre, update_UserEvent* ev) {
     // childs size
     Len    len;
