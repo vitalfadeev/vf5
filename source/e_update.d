@@ -79,61 +79,45 @@ e_update_loc (E* e, E* pre, update_UserEvent* ev) {
     //     calc group offset
     //     update each e loc to + offset
 
-    final
-    switch (e.def_loc.type) {
-        case DefLoc.Type._       : break;
-        case DefLoc.Type.stat    : e_update_loc_stat    (e,pre,ev); break;
-        case DefLoc.Type.balance : e_update_loc_balance (e,pre,ev); break;
-    }
+    static
+    foreach (il; EnumMembers!IL)
+        e.loc = e.def_loc.s[il].of (
+            (ev.path.empty) ?               // is root ?
+                ev.window.len[il] :         //   window
+                ev.path.back.inner.len[il]  //   pare
+        );
+
+    if ((pre is null) || (e.def_loc != pre.def_loc))  // fst_in_group
+        e.loc = e.loc.init;
+    else
+        e_update_loc_way (e,pre,ev);
     
     version (debug_update)
     writefln ("%s way: %s, pos: %s, size: %s, e: %s", replicate(" ", deep*2), e.way, e.pos, e.size, *e);
 }
 
 void
-e_update_loc_stat (E* e, E* pre, update_UserEvent* ev) {
-    e.loc = e.def_loc.stat;
-}
-
-void
-e_update_loc_balance (E* e, E* pre, update_UserEvent* ev) {
-    auto able     = ev.path.back.length;
-    auto e_length = e.length;
-    auto length   = e.def_loc.balance.length;
-    auto capacity = e.def_loc.balance.balance;
-    bool fst_in_group = (pre !is null) || (e.def_loc != pre.def_loc);
-
-    e.loc = (able - e_length) * length / capacity;
-
-    if (fst_in_group)
-        e.loc = e.loc.init;
-    else
-        e_update_loc_balance_way (e,pre,ev);
-}
-
-void
-e_update_loc_balance_way (E* e, E* pre, update_UserEvent* ev) {
-    _e_update_loc_balance_way (e,pre,ev);
-}
-
-void
-_e_update_loc_balance_way (E* e, E* pre, update_UserEvent* ev) {
+e_update_loc_way (E* e, E* pre, update_UserEvent* ev) {
     // reset loc if group != prev.group
-    auto pra        = ev.path.back;
-    auto limit      = pra.content.loc + pra.content.length;
+    auto limit = 
+        (ev.path.empty) ?
+            ev.window.len :
+            ev.path.back.outer.limit;
 
-    e.loc = _e_update_loc_way (pre.loc,pre.length,limit,e.way);
+    e.loc = _e_update_loc_way (pre.loc,pre.len,limit,e.way);
 }
 
 Loc
-_e_update_loc_way (Loc pre_loc, Loc pre_length, Loc limit, Way way) {
+_e_update_loc_way (Loc pre_loc, Len pre_len, Loc limit, Way way) {
     auto loc = pre_loc;
 
-    auto il1 = way.v[0];
-    auto il2 = way.v[1];
+    auto _s0 = way.s[0];
+    auto il1          = _s0.v;
+    auto way_length_1 = _s0.l;
 
-    auto way_length_1 = way.length[il1];
-    auto way_length_2 = way.length[il2];
+    auto _s1 = way.s[1];
+    auto il2          = _s1.v;
+    auto way_length_2 = _s1.l;
 
     if (way_length_1 != 0) {
         // step x

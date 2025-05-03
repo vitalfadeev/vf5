@@ -152,14 +152,19 @@ E {
             ChildsCore    childs;
         }
 
+        Loc
+        limit () {
+            return loc + len;
+        }
+
         void
         update_len () {
             final
             switch (type) {
-                case Type._      : return 0;
-                case Type.image  : return image.update_len  ();
-                case Type.text   : return text.update_len   ();
-                case Type.childs : return childs.update_len ();
+                case Type._      : break;
+                case Type.image  : image.update_len  (); break;
+                case Type.text   : text.update_len   (); break;
+                case Type.childs : childs.update_len (); break;
             }
         }
 
