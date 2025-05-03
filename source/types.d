@@ -190,10 +190,10 @@ _DefLoc (uint N) {
 
     void
     set (L x_len, L x_cap, L y_len, L y_cap) {
-        this.s[0].len = x_len;
-        this.s[0].cap = x_cap;
-        this.s[1].len = y_len;
-        this.s[1].cap = y_cap;
+        this.s[IL.X].len = x_len;
+        this.s[IL.X].cap = x_cap;
+        this.s[IL.Y].len = y_len;
+        this.s[IL.Y].cap = y_cap;
     }
 
     // X, LocType.flex,  0,1
@@ -233,7 +233,10 @@ _DefLen (uint N) {
 
     void
     set_max (IL il) {
-        s[il].max = true;
+        auto _s = s[il];
+        _s.max = true;
+        _s.lc.len = 1;
+        _s.lc.cap = 1;
     }
 
     void
@@ -257,14 +260,14 @@ Window {
     Loc
     loc () {
         Loc loc;
-        SDL_GetWindowPos  (_super, &loc[0], &loc[1]);
+        SDL_GetWindowPos  (_super, &loc[IL.X], &loc[IL.Y]);
         return loc;
     }
 
-    Loc
+    Len
     len () {
-        Loc loc;
-        SDL_GetWindowSize (_super, &loc[0], &loc[1]);
-        return loc;
+        Len len;
+        SDL_GetWindowSize (_super, &len[IL.X], &len[IL.Y]);
+        return len;
     }
 }

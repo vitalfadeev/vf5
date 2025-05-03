@@ -42,12 +42,10 @@ e_update_length_loc (E* e, E* pre, update_UserEvent* ev) {
     //   move childs
 
     // size
-    e_update_length (e,pre,ev);
-    // if max skip step & childs
-    //if (e.size_w_type == E.SizeType.max)
-    //if (e.size_h_type == E.SizeType.max)
+    e_update_len (e,pre,ev);
     e_update_loc (e,pre,ev);
     e_update_childs (e,pre,ev);
+    e_update_len_max (e,pre,ev);
 }
 
 //void
@@ -196,187 +194,76 @@ e_update_length_loc__go_to_the_next_e (E* e, E* pre, update_UserEvent* ev) {
 }
 
 void
-e_update_balance_childs (E* e) {
+e_update_len_max (E* e, E* pre, update_UserEvent* ev) {
     // childs size
-    Loc  childs_size;
+    Len    len;
+    size_t cnt;
+
     foreach (_e; WalkChilds (e)) {
-        childs_size.w = max (childs_size.w, _e.pos.x + _e.size.w);
-        childs_size.h = max (childs_size.h, _e.pos.y + _e.size.h);
+        static
+        foreach (il; EnumMembers!IL) {
+            childs_len[il] += _e.len[il];
+
+            if (_e.def_len.s[il].max)
+                cnt++;
+        }
     }
 
-    auto able = e.content.size - childs_size;
+    auto able = (e.inner.len - childs_len);
+    auto one  = able / cnt;
 
-    // offset
-    auto offset = 
-        Loc (
-            _flex (able.w, e.pos_balance_x),
-            _flex (able.h, e.pos_balance_y)
-        );
-
-    // mvoe childs
-    foreach (_e; WalkChilds (e))
-        _e_update_pos (_e, _e.pos + offset);
-}
-
-
-
-void
-_e_update_move_childs (E* e, Loc offset) {
-    _e_update_pos (e, e.pos + offset);
-}
-
-
-
-
-
-auto
-all_non_max_w (E* e) {
-    W _all_non_max_w;
-    foreach (_e; WalkChilds (e))
-        if (_e.size_w_type != E.SizeType.max_)
-            _all_non_max_w += _e.size.w;    
-
-    return _all_non_max_w;
+    // update len
+    foreach (_e; WalkChilds (e)) {
+        static
+        foreach (il; EnumMembers!IL)
+            if (_e.def_len.s[il].max)
+                _e.len[il] = one[il];
+    }
 }
 
 void
-e_update_total_sizes (GCursor) (E* e, GCursor* gcursor) {
-    gcursor.w_by_type [e.size_w_type] += e.size.w;
-    gcursor.h_by_type [e.size_h_type] += e.size.h;
-    gcursor.count_by_w_size_type [e.size_w_type]++;
-    gcursor.count_by_h_size_type [e.size_h_type]++;
-}
-
-// e.size       <--
-//   fixed         |
-//   content       |
-//   parent        |
-//   content.size -   <--
-//     e                 |
-//     fixed             |
-//     image             |
-//     text              |
-//     childs            |
-//     max               |
-//     childs.size    ---
-//       ...             |   [e..]
-//     image.size     ---
-//       fixed           |
-//       image           |
-//       text            |
-//       content         |
-//     text.size      ---
-//       fixed
-//       text
-//       image
-//       content
-void
-e_update_length (E* e, E* pre, update_UserEvent* ev) {
-    auto pare = ev.path.empty ? null : ev.path.back;
-    e_update_length (e,pre,ev,il,pare);
-}
-void
-e_update_length (E* e, E* pre, update_UserEvent* ev, E* pare) {
+e_update_len (E* e, E* pre, update_UserEvent* ev) {
     static
     foreach (il; EnumMembers!IL)
-        e_update_length (e,pre,ev,il,pare);
+        e_update_len (e,pre,ev,il);
 }
 
 void
-e_update_length (E* e, E* pre, update_UserEvent* ev, IL il, E* pare) {
-    final
-    switch (e.def_length.type[il]) {
-        case DefLength.Type.pare   : e_update_length_outer  (e,pre,ev,il,pare); break;
-        case DefLength.Type.stat   : e_update_length_stat   (e,pre,ev,il); break;
-        case DefLength.Type.flex   : e_update_length_flex   (e,pre,ev,il,pare); break;
-        case DefLength.Type.core   : e_update_length_core   (e,pre,ev,il); break;
-        case DefLength.Type.window : e_update_length_window (e,pre,ev,il); break;
-        case DefLength.Type.max    : e_update_length_max    (e,pre,ev,il); break;
-    }
-}
-
-void
-e_update_length_pare (E* e, E* pre, update_UserEvent* ev, IL il, E* pare) {
-    if (pare !is null)
-        e.length[il] = pare.core.length[il];
+e_update_len (E* e, E* pre, update_UserEvent* ev, IL il) {
+    // by pare
+    // by core
+    if (e.def_len.s[il].bycore == 0)  // by pare
+        e_update_len_bypare (e,pre,ev,il);
     else
-        e_update_length_window (e,pre,ev,il);
+        e_update_len_bycore (e,pre,ev,il);
 }
 
 void
-e_update_length_stat (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.length[il] = e.def_length.stat[il];
-}
-
-
-void
-e_update_length_flex (E* e, E* pre, update_UserEvent* ev, IL il, E* pare) {
-    if (pare !is null) 
-        e.length[il] = e.def_length.flex.of (pare.core.length[il]);
-    else
-        e_update_length_window (e,pre,ev,il);
-}
-
-void
-e_update_length_core (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e_update_core_length (e,pre,ev,il);  // update content.size.w
-    e.length[il] = e.core.length[il];
-}
-
-void
-e_update_length_window (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.length[il]  = ev.window.length[il];
-}
-
-void
-e_update_length_max (E* e, E* pre, update_UserEvent* ev, IL il) {
-    // update max after all, in update_size_fix ()
-}
-
-
-// e update content
-void
-e_update_core_length (E* e, E* pre, update_UserEvent* ev, IL il) {
-    final
-    switch (def_length.type) {
-        case DefLength.Type.pare : break;
-        case DefLength.Type.stat   : e_update_core_length_stat  (e,pre,ev,il); break;
-        case DefLength.Type.flex   : e_update_core_length_flex  (e,pre,ev,il); break;
-        case DefLength.Type.core   : e_update_core_length_core  (e,pre,ev,il); break;
-        case DefLength.Type.window : break;
-        case DefLength.Type.max_   : break;
+e_update_len_bypare (E* e, E* pre, update_UserEvent* ev, IL il) {
+    if (e.def_len.s[il].max) { // max len of able
+        e.len[il] = 0;
+        // after all pare.childs
+        //    sum total len 
+        //    able len = pare len - total len 
+        //    count max e
+        //    able len / count max e
+        //    each max e 
+        //      len = able len / count max e
+    }
+    else {
+        e.len[il] = 
+            e.def_len.s[il].lc.of (
+                (ev.path.empty) ?               // is root ?
+                    ev.window.len[il] :         //   window
+                    ev.path.back.inner.len[il]  //   pare
+            );
     }
 }
 
 void
-e_update_core_length_stat (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.core.length[il] = e.core.def_length.stat[il];
-}
-
-void
-e_update_core_length_flex (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.core.length[il] = e.core.def_length.length (e.core.length[il],il);
-}
-
-void
-e_update_core_length_core (E* e, E* pre, update_UserEvent* ev, IL il) {
-    final
-    switch (e.core.type) {
-        case E.Core.Type._      : e_update_core_length__ (e,pre,ev,il); break;
-        case E.Core.Type.Image  : e_update_core_length_  (e,pre,ev,il, &e.inner.image); break;
-        case E.Core.Type.Text   : e_update_core_length_  (e,pre,ev,il, &e.inner.text); break;
-        case E.Core.Type.Childs : e_update_core_length_  (e,pre,ev,il, &e.inner.childs); break;
-    }
-}
-
-void
-e_update_core_length__ (E* e, E* pre, update_UserEvent* ev, IL il) {
-    e.core.length[il] = e.core.length[il].init;
-}
-
-void
-e_update_core_length_ (Core) (E* e, E* pre, update_UserEvent* ev, IL il, Core* core) {
-    e.core.length[il] = core._length (il);
+e_update_len_bycore (E* e, E* pre, update_UserEvent* ev, IL il) {
+    e.core.update_len ();
+    e.len[il] = e.def_len.s[il].lc.of (e.core.len[il]);
 }
 
 //

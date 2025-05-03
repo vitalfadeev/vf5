@@ -152,14 +152,14 @@ E {
             ChildsCore    childs;
         }
 
-        L
-        _length (IL il) {
+        void
+        update_len () {
             final
             switch (type) {
                 case Type._      : return 0;
-                case Type.image  : return image._length  (il);
-                case Type.text   : return text._length   (il);
-                case Type.childs : return childs._length (il);
+                case Type.image  : return image.update_len  ();
+                case Type.text   : return text.update_len   ();
+                case Type.childs : return childs.update_len ();
             }
         }
 
@@ -233,16 +233,12 @@ ImageCore {
         // load_e_image (e);
     }
 
-    L
-    _length (IL il) {
-        if (ptr !is null) {
-            switch (il) {
-                case IL.X: return ptr.w;
-                case IL.Y: return ptr.h;
-                default:
-            }
-        }
-        return 0;
+    void
+    update_len () {
+        if (ptr is null)
+            len = Len.init;
+        else
+            len = Len (ptr.w, ptr.h);
     }
 
     void
@@ -291,20 +287,19 @@ TextCore {
         //load_e_text (e);
     }
 
-    L
-    _length (IL il) {
-        L l;
-        L len;
+    void
+    update_len () {
+        Len _len;
 
         foreach (ref rect; rects) {
-            if (rect.loc[il] < l)
-                l = rect.loc[il];
-
-            if (rect.loc[il] + rect.len[il] > len)
-                len = rect.loc[il] + rect.len[il];
+            static
+            foreach (il; EnumMembers!IL) {
+                if (rect.loc[il] + rect.len[il] > _len[il])
+                    _len[il] = rect.loc[il] + rect.len[il];
+            }
         }
 
-        return len;
+        this.len = _len;
     }
 
     void
@@ -330,23 +325,19 @@ ChildsCore {
         //load_e_childs (e);
     }
 
-    L
-    _length (IL il) {
-        L loc;
-        L len;
+    void
+    update_len () {
+        Len _len;
 
         foreach (_e; s) {
-            auto _loc = _e.outer.loc[il];
-            auto _len = _e.outer.len[il];
-
-            if (_loc < loc)
-                loc = _loc;
-
-            if (_loc + _len > len)
-                len = _loc + _len;
+            static
+            foreach (il; EnumMembers!IL) {
+                if (_e.outer.loc[il] + _e.outer.len[il] > len[il])
+                    len[il] = _e.outer.loc[il] + _e.outer.len[il];
+            }
         }
 
-        return len;
+        this.len = _len;
     }
 
     void
