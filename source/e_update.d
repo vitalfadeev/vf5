@@ -42,9 +42,9 @@ e_update_len_loc (E* e, E* pre, update_UserEvent* ev) {
     //   move childs
 
     // size
-    e_update_len (e,pre,ev);
-    e_update_loc (e,pre,ev);
-    e_update_childs (e,pre,ev);
+    e_update_len     (e,pre,ev);
+    e_update_loc     (e,pre,ev);
+    e_update_childs  (e,pre,ev);
     e_update_len_max (e,pre,ev);
 }
 
@@ -81,15 +81,15 @@ e_update_loc (E* e, E* pre, update_UserEvent* ev) {
 
     static
     foreach (il; EnumMembers!IL) {
-        e.outer.loc = e.outer.def_loc.s[il].of (
+        e.outer.loc[il] = e.outer.def_loc.s[il].of (
             (ev.path.empty) ?               // is root ?
                 ev.window.len[il] :         //   window
                 ev.path.back.inner.len[il]  //   pare
         );
     }
 
-    if ((pre is null) || (e.def_loc != pre.def_loc))  // fst_in_group
-        e.loc = e.loc.init;
+    if ((pre is null) || (e.outer.def_loc != pre.outer.def_loc))  // fst_in_group
+        e.outer.loc = e.outer.loc.init;
     else
         e_update_loc_way (e,pre,ev);
     
@@ -105,7 +105,7 @@ e_update_loc_way (E* e, E* pre, update_UserEvent* ev) {
             ev.window.len :
             ev.path.back.outer.limit;
 
-    e.loc = _e_update_loc_way (pre.loc,pre.len,limit,e.way);
+    e.outer.loc = _e_update_loc_way (pre.outer.loc,pre.len,limit,e.way);
 }
 
 Loc
@@ -173,9 +173,9 @@ e_update_len_max (E* e, E* pre, update_UserEvent* ev) {
     foreach (_e; WalkChilds (e)) {
         static
         foreach (il; EnumMembers!IL) {
-            childs_len[il] += _e.len[il];
+            childs_len[il] += _e.outer.len[il];
 
-            if (_e.def_len.s[il].max)
+            if (_e.outer.def_len.s[il].max)
                 cnt++;
         }
     }
@@ -187,8 +187,8 @@ e_update_len_max (E* e, E* pre, update_UserEvent* ev) {
     foreach (_e; WalkChilds (e)) {
         static
         foreach (il; EnumMembers!IL)
-            if (_e.def_len.s[il].max)
-                _e.len[il] = one[il];
+            if (_e.outer.def_len.s[il].max)
+                _e.set_len (il,one[il]);
     }
 }
 
@@ -212,7 +212,7 @@ e_update_len (E* e, E* pre, update_UserEvent* ev, IL il) {
 void
 e_update_len_bypare (E* e, E* pre, update_UserEvent* ev, IL il) {
     if (e.def_len.s[il].max) { // max len of able
-        e.len[il] = 0;
+        e.set_len (il,0);
         // after all pare.childs
         //    sum total len 
         //    able len = pare len - total len 
@@ -222,19 +222,21 @@ e_update_len_bypare (E* e, E* pre, update_UserEvent* ev, IL il) {
         //      len = able len / count max e
     }
     else {
-        e.len[il] = 
+        e.set_len (
+            il,
             e.def_len.s[il].lc.of (
                 (ev.path.empty) ?               // is root ?
                     ev.window.len[il] :         //   window
                     ev.path.back.inner.len[il]  //   pare
-            );
+            )
+        );
     }
 }
 
 void
 e_update_len_bycore (E* e, E* pre, update_UserEvent* ev, IL il) {
     e.core.update_len ();
-    e.len[il] = e.def_len.s[il].lc.of (e.core.len[il]);
+    e.set_len (il, e.def_len.s[il].lc.of (e.core.len[il]));
 }
 
 //

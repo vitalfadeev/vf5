@@ -100,38 +100,58 @@ alias EPtr = E*;
 struct 
 E {
     union {
-        Aura[3]  aura;
+        Aura[3]    aura;
         struct {
-            Aura margin;     // outer
-            Aura border;     //
-            Aura padding;    //
-            Core core;       // inner
+            Aura   margin;     // outer
+            Aura   border;     //
+            Aura   padding;    //
+            Core   core;       // inner
+        }
+        struct {
+            size_t type;
+            Loc    loc;
+            Len    len;
+            DefLoc def_loc;
+            DefLen def_len;
         }
     }
 
-    Klasses      klasses;    // box green rounded
-    Flags        flags;      // hidden,deleted
-    Way          way;        // r l u d
-    Ons          ons;        // [click: audacious --play-pause]
-    Generator    generator;  //
+    Klasses        klasses;    // box green rounded
+    Flags          flags;      // hidden,deleted
+    Way            way;        // r l u d
+    Ons            ons;        // [click: audacious --play-pause]
+    Generator      generator;  //
 
-    alias        outer = margin;
-    alias        inner = core;
+    alias          outer = margin;
+    alias          inner = core;
 
-    auto ref     hidden ()  { return flags.hidden; }
-    auto ref     deleted () { return flags.deleted; }
+    auto ref       hidden ()  { return flags.hidden; }
+    auto ref       deleted () { return flags.deleted; }
+
+    void 
+    set_len (Len len) {
+        margin.len  = len;
+        border.len  = len;
+        padding.len = len;
+        core.len    = len;
+    }
+    void 
+    set_len (IL il, Len len) {
+        margin.len[il]  = len[il];
+        border.len[il]  = len[il];
+        padding.len[il] = len[il];
+        core.len[il]    = len[il];
+    }
 
     struct
     Aura {
-        size_t    type = 0;
+        size_t     type = 0;
+        Loc        loc;
+        Len        len;
+        DefLoc     def_loc;
+        DefLen     def_len;
         //
-        Loc       loc;
-        Len       len;
-        //
-        DefLoc    def_loc;
-        DefLen    def_len;
-        //
-        Color     color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+        Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
     }
 
     struct
@@ -139,14 +159,11 @@ E {
         union {
             struct {
                 Type      type = Type._;
-                //
                 Loc       loc;
                 Len       len;
-                //
                 DefLoc    def_loc;
                 DefLen    def_len;
             }
-            //
             ImageCore     image;
             TextCore      text;
             ChildsCore    childs;
@@ -200,32 +217,28 @@ E {
     }
 }
 
-mixin template 
+struct
 Core_Aura_Header (Type) {
-    E.Core.Type   type;
-    //
-    Loc           loc;
-    Len           len;
-    //
-    DefLoc        def_loc;
-    DefLen        def_len;    
+    Type           type;
+    Loc            loc;
+    Len            len;
+    DefLoc         def_loc;
+    DefLen         def_len;    
 }
 
 
 struct
 ImageCore {
-    E.Core.Type   type = E.Core.Type.image;
+    E.Core.Type    type = E.Core.Type.image;
+    Loc            loc;
+    Len            len;
+    DefLoc         def_loc;
+    DefLen         def_len;
     //
-    Loc           loc;
-    Len           len;
-    //
-    DefLoc        def_loc;
-    DefLen        def_len;
-    //
-    Color         color;
-    Color         bg;
-    string        def_src;     // "abc.png"
-    IMAGE_PTR     ptr;
+    Color          color;
+    Color          bg;
+    string         def_src;     // "abc.png"
+    IMAGE_PTR      ptr;
 
     // image length
     //   parent   //
@@ -254,37 +267,35 @@ ImageCore {
 
 struct
 TextCore {
-    size_t        type = E.Core.Type.text;
+    size_t         type = E.Core.Type.text;
+    Loc            loc;
+    Len            len;
+    DefLoc         def_loc;
+    DefLen         def_len;
     //
-    Loc           loc;
-    Len           len;
-    //
-    DefLoc        def_loc;
-    DefLen        def_len;
-    //
-    Color         color;
-    Color         bg;
-    FONT_PTR      ptr;
-    TextRect[]    rects;
+    Color          color;
+    Color          bg;
+    FONT_PTR       ptr;
+    TextRect[]     rects;
     // def
-    DefFont       def_font;    //
-    string        s;           // "abc"
+    DefFont        def_font;    //
+    string         s;           // "abc"
 
     struct 
     DefFont {
-        string    file;    // "abc"
-        string    family;  // "abc"
-        ubyte     size;    // 0..256
-        bool      bold;    // 0/1
-        bool      italic;  // 0/1
+        string     file;    // "abc"
+        string     family;  // "abc"
+        ubyte      size;    // 0..256
+        bool       bold;    // 0/1
+        bool       italic;  // 0/1
     }
 
     struct
     TextRect {
-        Loc      loc;
-        Len      len;
-        Color    color = Color (0xFF, 0xFF, 0xFF, 0xFF);
-        TEXT_PTR ptr;
+        Loc        loc;
+        Len        len;
+        Color      color = Color (0xFF, 0xFF, 0xFF, 0xFF);
+        TEXT_PTR   ptr;
     }
 
     void
@@ -315,15 +326,13 @@ TextCore {
 
 struct
 ChildsCore {
-    E.Core.Type   type = E.Core.Type.childs;
+    E.Core.Type    type = E.Core.Type.childs;
+    Loc            loc;
+    Len            len;
+    DefLoc         def_loc;
+    DefLen         def_len;
     //
-    Loc           loc;
-    Len           len;
-    //
-    DefLoc        def_loc;
-    DefLen        def_len;
-    //
-    E[]           s;  // no links
+    E[]            s;  // no links
 
     void
     load () {
